@@ -4,7 +4,65 @@
 
 }
 .navbar{
-    background-color: aqua;
+        .navbar{
+        background-color: #ddd;
+        padding:none;
+        text-align: right;
+    }
+    .navbar ul{
+        list-style: none;
+  display: flex;
+  justify-content: flex-end;
+  gap: 20px;
+    }
+    .navbar ul li a{
+        color: #000;
+        font-size: 7px;
+        font-weight: bold;
+        text-decoration:none ;
+        
+    }
+    .topnavbar{
+        background-color: #f0f0f0;
+        padding: 10px 40px;
+        font-size: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 60px;
+
+    }
+
+    nav ul{
+        list-style: none;
+        display: flex;
+        gap: 9px;
+    }
+    nav ul li a{
+        text-decoration: none;
+        color: #000;
+        font-weight: bold;
+        
+
+    }
+    overlay {
+  text-align: center;
+  padding: 20px 0;
+  z-index: 5;
+}
+
+.overlay h3 {
+  font-size: 30px;
+  font-weight: bold;
+  text-align: center;
+  margin: 0;
+}
+
+.overlay p {
+  font-size: 15px;
+  margin-top: 5px;
+  text-align: center;
+}
 }
 .cofbody{
     background-color: burlywood;
