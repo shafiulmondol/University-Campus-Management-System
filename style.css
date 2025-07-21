@@ -4,80 +4,36 @@ body{
 
 }
 .navbar{
-   background-color: beige;
+    background-color:rgba(96, 28, 198,0.7);
     display: flex;
      justify-content: flex-end;  
 }
 .navbar a button {
-    background-color: #ddd;
+     background-color:rgba(96, 28, 198,0.7);
     padding: 10px 20px;   
     border: none;
     font-style: normal;       
     font-size: 30px;
-    color: rgb(223, 94, 94);
-
+    color:white;
+    box-shadow: 0 18px rgba(190, 156, 241, 0.2);
 }
 .navbar a{
      text-decoration: none;
 }
-
-    /* .navbar ul{
-        list-style: none;
-  display: flex;
-  justify-content: flex-end;
-  gap: 20px;
-    }
-    .navbar ul li a{
-        color: #000;
-        font-size: 7px;
-        font-weight: bold;
-        text-decoration:none ;
-        
-    }
-    .topnavbar{
-        background-color: #f0f0f0;
-        padding: 10px 40px;
-        font-size: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 60px;
-
-    }
-
-    nav ul{
-        list-style: none;
-        display: flex;
-        gap: 9px;
-    }
-    nav ul li a{
-        text-decoration: none;
-        color: #000;
-        font-weight: bold;
-        
-
-    }
-    overlay {
-  text-align: center;
-  padding: 20px 0;
-  z-index: 5;
+.navbar a button:hover{
+     cursor: pointer; 
+     background-color: bisque;
+     color: black;
 }
 
-.overlay h3 {
-  font-size: 30px;
-  font-weight: bold;
-  text-align: center;
-  margin: 0;
+.logo img {
+    width: 50px;
+    height: 50px;
 }
 
-.overlay p {
-  font-size: 15px;
-  margin-top: 5px;
-  text-align: center;
-}
 .cofbody{
     background-color: burlywood;
 }
 .cofcpaze{
     background-color: chartreuse;
-} */
+}
