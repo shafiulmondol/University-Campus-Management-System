@@ -1,15 +1,27 @@
-.body{
+body{
     margin: 0;
     padding: 0;
 
 }
 .navbar{
-        .navbar{
-        background-color: #ddd;
-        padding:none;
-        text-align: right;
-    }
-    .navbar ul{
+   background-color: beige;
+    display: flex;
+     justify-content: flex-end;  
+}
+.navbar a button {
+    background-color: #ddd;
+    padding: 10px 20px;   
+    border: none;
+    font-style: normal;       
+    font-size: 30px;
+    color: rgb(223, 94, 94);
+
+}
+.navbar a{
+     text-decoration: none;
+}
+
+    /* .navbar ul{
         list-style: none;
   display: flex;
   justify-content: flex-end;
@@ -63,10 +75,9 @@
   margin-top: 5px;
   text-align: center;
 }
-}
 .cofbody{
     background-color: burlywood;
 }
 .cofcpaze{
     background-color: chartreuse;
-}
+} */
