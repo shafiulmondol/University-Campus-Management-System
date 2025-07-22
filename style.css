@@ -1,73 +1,121 @@
-body{
+body {
     margin: 0;
     padding: 0;
+    font-family: sans-serif;
+}
 
+.navbar1 {
+    background-color: rgba(96, 28, 198, 0.7);
 }
-.navbar1{
-     background-color:rgba(96, 28, 198,0.7);
-}
-.navbar{
-   
+
+.navbar {
     display: flex;
-     justify-content: space-between;  
+    justify-content: space-between;
+    flex-wrap: wrap; /* Allows items to wrap on smaller screens */
+    align-items: center;
+    padding: 10px;
 }
-.right a button {
-    justify-content: flex-end; 
-     background-color:rgba(96, 28, 198,0.7);
-    padding: 10px 20px;   
-    border: none;
-    font-style: normal;       
-    font-size: 30px;
-    color:white;
-    box-shadow: 0 18px rgba(190, 156, 241, 0.2);
-}
-.right{
-    margin-top: 10px;
-}
-.right a,.navbar2 a{
-     text-decoration: none;
-}
-.right a button:hover, .navbar2 a button:hover{
-     cursor: pointer; 
-     background-color: bisque;
-     color: black;
-}
-.logo{
-     display: flex;
-     justify-content: flex-start;
 
+.right {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
 }
-.logo h1{
-    font-size: 40px;
-    margin-top: 0;
+
+.right a,
+.navbar2 a {
+    text-decoration: none;
+}
+
+.right a button,
+.navbar2 a button {
+    background-color: rgba(96, 28, 198, 0.7);
+    padding: 10px 20px;
+    border: none;
+    font-style: normal;
+    font-size: 1.2rem;
+    color: white;
+    box-shadow: 0 4px rgba(190, 156, 241, 0.2);
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.right a button:hover,
+.navbar2 a button:hover {
+    cursor: pointer;
+    background-color: bisque;
+    color: black;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo h1 {
+    font-size: 2rem;
+    margin: 0;
 }
 
 .logo img {
-   
-    width: 100px;
+    width: 80px;
     height: auto;
 }
-.navbar2{
-      display: flex;
+
+.navbar2 {
+    display: flex;
     flex: 1;
-     justify-content: space-around; 
-}
-.navbar2 a button{
-  
-    
-     background-color:rgba(96, 28, 198,0.7);
-    padding: 10px 20px;   
-    border: none;
-    font-style: normal;       
-    font-size: 30px;
-    color:white;
-    box-shadow: 0 18px rgba(190, 156, 241, 0.2);
-
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px 0;
 }
 
-.cofbody{
+.cofbody {
     background-color: burlywood;
 }
-.cofcpaze{
+
+.cofcpaze {
     background-color: chartreuse;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .logo h1 {
+        font-size: 1.5rem;
+    }
+
+    .right a button,
+    .navbar2 a button {
+        font-size: 1rem;
+        padding: 8px 16px;
+    }
+
+    .logo img {
+        width: 60px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .navbar2 {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .right {
+        justify-content: center;
+    }
+
+    .right a button,
+    .navbar2 a button {
+        width: 100%;
+        font-size: 1rem;
+    }
 }
