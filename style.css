@@ -3,12 +3,16 @@ body{
     padding: 0;
 
 }
-.navbar{
-    background-color:rgba(96, 28, 198,0.7);
-    display: flex;
-     justify-content: flex-end;  
+.navbar1{
+     background-color:rgba(96, 28, 198,0.7);
 }
-.navbar a button {
+.navbar{
+   
+    display: flex;
+     justify-content: space-between;  
+}
+.right a button {
+    justify-content: flex-end; 
      background-color:rgba(96, 28, 198,0.7);
     padding: 10px 20px;   
     border: none;
@@ -17,18 +21,48 @@ body{
     color:white;
     box-shadow: 0 18px rgba(190, 156, 241, 0.2);
 }
-.navbar a{
+.right{
+    margin-top: 10px;
+}
+.right a,.navbar2 a{
      text-decoration: none;
 }
-.navbar a button:hover{
+.right a button:hover, .navbar2 a button:hover{
      cursor: pointer; 
      background-color: bisque;
      color: black;
 }
+.logo{
+     display: flex;
+     justify-content: flex-start;
+
+}
+.logo h1{
+    font-size: 40px;
+    margin-top: 0;
+}
 
 .logo img {
-    width: 50px;
-    height: 50px;
+   
+    width: 100px;
+    height: auto;
+}
+.navbar2{
+      display: flex;
+    flex: 1;
+     justify-content: space-around; 
+}
+.navbar2 a button{
+  
+    
+     background-color:rgba(96, 28, 198,0.7);
+    padding: 10px 20px;   
+    border: none;
+    font-style: normal;       
+    font-size: 30px;
+    color:white;
+    box-shadow: 0 18px rgba(190, 156, 241, 0.2);
+
 }
 
 .cofbody{
