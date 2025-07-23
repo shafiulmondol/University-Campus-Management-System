@@ -19,7 +19,7 @@ $error = "";
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
     $id = intval($_POST['id']);
     $password = $_POST['password'];
-    $stmt = $conn->prepare("SELECT password FROM members WHERE id = ?");
+    $stmt = $conn->prepare("SELECT password FROM student_biodata WHERE id = ?");
     $stmt->bind_param("i", $id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -159,31 +159,78 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
                 <a href="student.php" class="card"><button><span>🔙</span>Back to Dashboard</button></a>
             </div>
         </div>
-        <?php elseif (isset($_GET['result'])): ?>
+        
+    <?php elseif (isset($_GET['result'])): ?>
         <!-- Routine Page with 3 Buttons -->
         <div class="result">
             <div class="container">
-        <h1>View Result</h1>
-        
-        <form method="POST">
-            <input type="number" name="id" placeholder="Enter your ID" required autofocus />
-            <input type="password" name="password" placeholder="Enter your Password" required />
-            <input type="text" name="text" placeholder="Enter Semister" required />
-            <button type="submit" name="login">Login</button>
-        </form>
-        <a href="student.php" type="back" ><button><span>🔙</span>Back to Dashboard</button></a>
-    </div>
+                <h1>View Result</h1>
+                <form method="POST">
+                    <input type="number" name="id" placeholder="Enter your ID" required autofocus />
+                    <input type="password" name="password" placeholder="Enter your Password" required />
+                    <input type="text" name="text" placeholder="Enter Semister" required />
+                    <button type="submit" name="login">Login</button>
+                </form>
+                <a href="student.php" type="back"><button><span>🔙</span>Back to Dashboard</button></a>
+            </div>
         </div>
+        
     <?php elseif (isset($_GET['info'])): ?>
-        <!-- Routine Page with 3 Buttons -->
+        <!-- Info Page -->
         <div class="routine-page">
             <h2>Personal Information</h2>
             <div class="cards">
-                <a href="#" class="card"><button><span>👤</span>View Biodata</button></a>
+                <a href="?biodata=true" class="card"><button><span>👤</span>View Biodata</button></a>
                 <a href="?result=true" class="card"><button><span>👤</span>View Result</button></a>
                 <a href="student.php" class="card"><button><span>🔙</span>Back to Dashboard</button></a>
             </div>
         </div>
+
+    <?php elseif (isset($_GET['biodata'])): ?>
+        <!-- Biodata Page -->
+        <?php
+            $studentId = $_SESSION['id'];
+            $stmt = $conn->prepare("SELECT full_name, date_of_birth, gender, blood_group, nationality, religion, father_name, mother_name, phone, email, present_address, permanent_address, photo FROM student_biodata WHERE id = ?");
+            $stmt->bind_param("i", $studentId);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $biodata = $result->fetch_assoc();
+        ?>
+        <div class="routine-page">
+            <h2>Student Biodata</h2>
+            <?php if ($biodata): ?>
+                <div class="container">
+                    <p><strong>ID:</strong> <?= htmlspecialchars($studentId) ?></p>
+                    <p><strong>Full Name:</strong> <?= htmlspecialchars($biodata['full_name']) ?></p>
+                    <p><strong>Date of Birth:</strong> <?= htmlspecialchars($biodata['date_of_birth']) ?></p>
+                    <p><strong>Gender:</strong> <?= htmlspecialchars($biodata['gender']) ?></p>
+                    <p><strong>Blood Group:</strong> <?= htmlspecialchars($biodata['blood_group']) ?></p>
+                    <p><strong>Nationality:</strong> <?= htmlspecialchars($biodata['nationality']) ?></p>
+                    <p><strong>Religion:</strong> <?= htmlspecialchars($biodata['religion']) ?></p>
+                    <p><strong>Father's Name:</strong> <?= htmlspecialchars($biodata['father_name']) ?></p>
+                    <p><strong>Mother's Name:</strong> <?= htmlspecialchars($biodata['mother_name']) ?></p>
+                    <p><strong>Phone:</strong> <?= htmlspecialchars($biodata['phone']) ?></p>
+                    <p><strong>Email:</strong> <?= htmlspecialchars($biodata['email']) ?></p>
+                    <p><strong>Present Address:</strong> <?= nl2br(htmlspecialchars($biodata['present_address'])) ?></p>
+                    <p><strong>Permanent Address:</strong> <?= nl2br(htmlspecialchars($biodata['permanent_address'])) ?></p>
+                    <?php if (!empty($biodata['photo'])): ?>
+                        <p><strong>Photo:</strong><br>
+                            <img src="uploads/<?= htmlspecialchars($biodata['photo']) ?>" width="150" style="border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.2);" alt="Student Photo" />
+                        </p>
+                    <?php else: ?>
+                        <p><strong>Photo:</strong> No photo uploaded.</p>
+                    <?php endif; ?>
+                    <a href="?info=true" type="back"><button><span>🔙</span>Back</button></a>
+                </div>
+            <?php else: ?>
+                <div class="container">
+                    <p>No biodata found for your ID.</p>
+                    
+                    <a href="?info=true" class="card"><button><span>🔙</span>Back</button></a>
+                </div>
+            <?php endif; ?>
+        </div>
+        
     <?php else: ?>
         <!-- Main Dashboard -->
         <div class="dashboard">
