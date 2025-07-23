@@ -89,7 +89,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
         button[type=submit]:hover {
             background-color: #1c598a;
         }
-        a[type=back]:hover {
+        a[type=back] button:hover {
             background-color: #f31b1bff;
         }
         .error {
@@ -144,7 +144,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
             <input type="password" name="password" placeholder="Enter your Password" required />
             <button type="submit" name="login">Login</button>
         </form>
-        <a href="index.html" type="back" ><button><span>🔙</span>Back to Dashboard</button></a>
+        <a href="index.html" type="back"><button><span>🔙</span>Back to Dashboard</button></a>
     </div>
 
 <?php else: ?>
