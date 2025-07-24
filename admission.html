@@ -3,84 +3,162 @@
 <head>
     <meta charset="UTF-8">
     <title>Student Admission Form</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- CSS -->
     <style>
         body {
-            background-color: white;
-            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
         }
+
         h1 {
             text-align: center;
-            font-size: 30px;
+            color: #333;
+            margin-top: 30px;
         }
+
+        form {
+            background-color: #fff;
+            width: 85%;
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
         table {
-            margin: 0 auto;
-            width: 700px;
-            border-collapse: collapse;
+            width: 100%;
         }
+
         td {
-            padding: 10px;
+            padding: 12px 10px;
+            vertical-align: top;
         }
-    </style>
-    <script>
-        function showOtherBoardInput() {
-            var boardSelect = document.getElementById("board_select");
-            var otherBoardInput = document.getElementById("other_board");
-            if (boardSelect.value === "Other") {
-                otherBoardInput.style.display = "block";
-            } else {
-                otherBoardInput.style.display = "none";
+
+        input[type="text"],
+        input[type="email"],
+        input[type="date"],
+        input[type="file"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        input[type="radio"] {
+            margin-right: 8px;
+        }
+
+        h3 {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 15px;
+        }
+
+        input[type="submit"],
+        input[type="reset"] {
+            padding: 10px 25px;
+            font-size: 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        input[type="submit"] {
+            background-color: #28a745;
+            color: white;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #218838;
+        }
+
+        input[type="reset"] {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        input[type="reset"]:hover {
+            background-color: #c82333;
+        }
+
+        @media screen and (max-width: 768px) {
+            form {
+                width: 95%;
+                padding: 20px;
+            }
+
+            td {
+                display: block;
+                width: 100%;
+            }
+
+            td:first-child {
+                font-weight: bold;
+                margin-top: 10px;
             }
         }
-    </script>
+    </style>
 </head>
 <body>
-    <h1>STUDENT ADMISSION FORM</h1>
-    <form action="submit.php" method="POST" enctype="multipart/form-data">
-        <table cellpadding="10">
 
+    <h1>STUDENT ADMISSION FORM</h1>
+
+    <form action="#" method="POST" enctype="multipart/form-data">
+        <table cellpadding="10">
             <tr>
-                <td>Student name:</td>
+                <td>Student Name:</td>
                 <td>
-                    <input type="text" name="first_name" size="21" placeholder="First Name" required />
-                    -
-                    <input type="text" name="last_name" size="21" placeholder="Last Name" required />
+                    <input type="text" name="first_name" placeholder="First Name" required />
+                    <br><br>
+                    <input type="text" name="last_name" placeholder="Last Name" required />
                 </td>
             </tr>
 
             <tr>
                 <td>Father's Name:</td>
-                <td><input type="text" name="father_name" size="50" required /></td>
+                <td><input type="text" name="father_name" required /></td>
             </tr>
 
             <tr>
                 <td>Mother's Name:</td>
-                <td><input type="text" name="mother_name" size="50" required /></td>
+                <td><input type="text" name="mother_name" required /></td>
             </tr>
 
             <tr>
                 <td>Date of Birth:</td>
-                <td>
-                    <input type="date" name="date_of_birth" required />
-                </td>
+                <td><input type="date" name="dob" required /></td>
             </tr>
 
             <tr>
-                <td>Guardian Phone No. :</td>
-                <td><input type="text" name="guardian_phone" placeholder="+8801XXXXXXXXX" required /></td>
+                <td>Guardian Phone No.:</td>
+                <td><input type="text" name="guardian_phone" required /></td>
             </tr>
 
             <tr>
-                <td>Student Phone No. :</td>
-                <td><input type="text" name="student_phone" placeholder="+8801XXXXXXXXX" required /></td>
+                <td>Student Phone No.:</td>
+                <td><input type="text" name="student_phone" required /></td>
             </tr>
 
             <tr>
                 <td>Email ID:</td>
-                <td><input type="email" name="email" size="50" required /></td>
+                <td><input type="email" name="email" required /></td>
             </tr>
 
             <tr>
-                <td colspan="2" align="center"><h3>Student Education Information</h3></td>
+                <td colspan="2"><h3>Education Information</h3></td>
             </tr>
 
             <tr>
@@ -99,43 +177,32 @@
 
             <tr>
                 <td>Board/University:</td>
-                <td>
-                    <select name="board" id="board_select" onchange="showOtherBoardInput()" required>
-                        <option value="">--Select Board--</option>
-                        <option value="Dhaka">Dhaka Board</option>
-                        <option value="Rajshahi">Rajshahi Board</option>
-                        <option value="Comilla">Comilla Board</option>
-                        <option value="Other">Other</option>
-                    </select>
-                    <br/>
-                    <input type="text" id="other_board" name="other_board" placeholder="Enter other board name" style="display:none; margin-top:5px;" />
-                </td>
+                <td><input type="text" name="board" required /></td>
             </tr>
 
             <tr>
                 <td>Year of Passing:</td>
-                <td><input type="text" name="year_of_passing" size="10" required /></td>
+                <td><input type="text" name="year" required /></td>
             </tr>
 
             <tr>
                 <td>Institution Name:</td>
-                <td><input type="text" name="institution_name" size="50" required /></td>
+                <td><input type="text" name="institution" required /></td>
             </tr>
 
             <tr>
                 <td>Result/Grade:</td>
-                <td><input type="text" name="result" size="20" required /></td>
+                <td><input type="text" name="result" required /></td>
             </tr>
 
             <tr>
                 <td>Subject/Group:</td>
                 <td>
-                    <select name="subject_group" required>
+                    <select name="group" required>
                         <option value="">--Select--</option>
                         <option value="Science">Science</option>
                         <option value="Commerce">Commerce</option>
                         <option value="Arts">Arts</option>
-                        <option value="Other">Other</option>
                     </select>
                 </td>
             </tr>
@@ -143,15 +210,15 @@
             <tr>
                 <td>Gender:</td>
                 <td>
-                    <label><input type="radio" name="gender" value="male" required> Male</label>
-                    <label><input type="radio" name="gender" value="female" required> Female</label>
+                    <input type="radio" name="gender" value="Male" required> Male
+                    <input type="radio" name="gender" value="Female" required> Female
                 </td>
             </tr>
 
             <tr>
                 <td>Blood Group:</td>
                 <td>
-                    <select name="blood_group" required>
+                    <select name="blood" required>
                         <option value="">--Select--</option>
                         <option value="A+">A+</option>
                         <option value="A-">A-</option>
@@ -167,7 +234,7 @@
 
             <tr>
                 <td>Nationality:</td>
-                <td><input type="text" name="nationality" size="50" required /></td>
+                <td><input type="text" name="nationality" required /></td>
             </tr>
 
             <tr>
@@ -176,9 +243,9 @@
                     <select name="religion" required>
                         <option value="">--Select--</option>
                         <option value="Islam">Islam</option>
-                        <option value="Hinduism">Hinduism</option>
-                        <option value="Christianity">Christianity</option>
-                        <option value="Buddhism">Buddhism</option>
+                        <option value="Hindu">Hindu</option>
+                        <option value="Christian">Christian</option>
+                        <option value="Buddhist">Buddhist</option>
                         <option value="Other">Other</option>
                     </select>
                 </td>
@@ -186,12 +253,12 @@
 
             <tr>
                 <td>Present Address:</td>
-                <td><textarea name="present_address" rows="3" cols="45" required></textarea></td>
+                <td><textarea name="present_address" rows="3" required></textarea></td>
             </tr>
 
             <tr>
                 <td>Permanent Address:</td>
-                <td><textarea name="permanent_address" rows="3" cols="45" required></textarea></td>
+                <td><textarea name="permanent_address" rows="3" required></textarea></td>
             </tr>
 
             <tr>
@@ -199,10 +266,10 @@
                 <td>
                     <select name="department" required>
                         <option value="">--Select Department--</option>
-                        <option value="CSE">Computer Science & Engineering (CSE)</option>
-                        <option value="EEE">Electrical & Electronic Engineering (EEE)</option>
-                        <option value="BBA">Business Administration (BBA)</option>
-                        <option value="ENG">English Literature (ENG)</option>
+                        <option value="CSE">CSE</option>
+                        <option value="EEE">EEE</option>
+                        <option value="BBA">BBA</option>
+                        <option value="ENG">English</option>
                     </select>
                 </td>
             </tr>
@@ -225,5 +292,6 @@
             </tr>
         </table>
     </form>
+
 </body>
 </html>
