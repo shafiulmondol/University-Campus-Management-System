@@ -135,7 +135,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
 <?php if (!isset($_SESSION['id'])): ?>
     <!-- Login Page -->
     <div class="container">
-        <h1>SKST University Login</h1>
+        <h1>SKST University Student Login</h1>
         <?php if ($error): ?>
             <div class="error"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
