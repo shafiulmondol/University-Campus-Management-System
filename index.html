@@ -21,13 +21,17 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: #f9f9ff;
     }
+
     .navbar {
+      background-color: #e0e7ff;
+      padding: 10px 20px;
+    }
+
+    .navbar-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      background-color: #e0e7ff;
-      padding: 10px 20px;
     }
 
     .logo {
@@ -37,87 +41,89 @@
     }
 
     .logo img {
-      width: 50px;
-      height: 50px;
+      height: 80px;
     }
 
     .logo h1 {
-      font-size: 24px;
+      font-size: 26px;
       color: #333;
     }
 
-    .right, .navbar2 {
+    .menu-section {
       display: flex;
       flex-wrap: wrap;
-      gap: 15px;
       justify-content: center;
-      margin: 10px 0;
+      gap: 10px;
+      margin-top: 15px;
     }
 
-    .right a, .navbar2 a {
+    .menu-section a {
       text-decoration: none;
     }
 
-    button {
+    .btn {
       background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
       color: white;
       border: none;
-      padding: 15px 25px;
-      font-size: 16px;
-      border-radius: 12px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      padding: 12px 20px;
+      font-size: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       transition: all 0.3s ease;
-      min-width: 140px;
+      min-width: 120px;
       cursor: pointer;
     }
 
-    button:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    .btn:hover {
+      transform: translateY(-3px);
       background: linear-gradient(135deg, #512da8, #1e88e5);
     }
 
-    @media (max-width: 600px) {
-      .right, .navbar2 {
+    @media (max-width: 768px) {
+      .navbar-top {
         flex-direction: column;
         align-items: center;
       }
 
-      button {
+      .btn {
         width: 80%;
+      }
+
+      .menu-section {
+        flex-direction: column;
+        align-items: center;
       }
     }
   </style>
 </head>
 <body>
-
-    <div class="navbar">
+  <div class="navbar">
+    <div class="navbar-top">
       <div class="logo">
-        <img src="picture/logo.gif" alt="SKST logo" style ="height: 100px; width: auto;">
+        <img src="picture/logo.gif" alt="SKST Logo">
         <h1>SKST University</h1>
       </div>
+    </div>
 
-      <div class="right">
-        <a href="student.php"><button>Student</button></a>
-        <a href="student.html"><button>Faculty</button></a>
-        <a href="administration.php"><button>Administration</button></a>
-        <a href="alumni.html"><button>Alumni</button></a>
-        <a href="student.html"><button>Campus Life</button></a>
-        <a href="student.html"><button>IQAC</button></a>
-        <a href="student.html"><button>Notice</button></a>
-      </div>
-      <div class="navbar2">
-      <a href="student.html"><button>News</button></a>
-      <a href="student.html"><button>Ranking</button></a>
-      <a href="student.html"><button>Research</button></a>
-      <a href="student.html"><button>Academics</button></a>
-      <a href="student.html"><button>Scholarships</button></a>
-      <a href="student.html"><button>Admission</button></a>
-      <a href="library.html"><button>Library</button></a>
-      <a href="student.html"><button>About</button></a>
-      <a href="student.html"><button>Volunteer</button></a>
+    <div class="menu-section">
+      <a href="student.php"><button class="btn">Student</button></a>
+      <a href="student.html"><button class="btn">Faculty</button></a>
+      <a href="administration.php"><button class="btn">Administration</button></a>
+      <a href="alumni.html"><button class="btn">Alumni</button></a>
+      <a href="student.html"><button class="btn">Campus Life</button></a>
+      <a href="student.html"><button class="btn">IQAC</button></a>
+      <a href="notice.html"><button class="btn">Notice</button></a>
+      <a href="news.html"><button class="btn">News</button></a>
+      <a href="ranking.html"><button class="btn">Ranking</button></a>
+      <a href="research.html"><button class="btn">Research</button></a>
+      <a href="academics.html"><button class="btn">Academics</button></a>
+      <a href="scholarships.html"><button class="btn">Scholarships</button></a>
+      <a href="admission.html"><button class="btn">Admission</button></a>
+      <a href="library.html"><button class="btn">Library</button></a>
+      <a href="about.html"><button class="btn">About</button></a>
+      <a href="volunteer.html"><button class="btn">Volunteer</button></a>
     </div>
-    </div>
+  </div>
 
     
 
