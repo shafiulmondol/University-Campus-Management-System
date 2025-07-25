@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SKST University</title>
   <link rel="icon" href="picture/SKST.png" type="image/png" />
-  <!-- Font Awesome for home icon -->
+  <!-- Font Awesome (optional) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     * {
@@ -17,6 +17,10 @@
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: #f9f9ff;
+    }
+
+    a {
+      text-decoration: none; /* 🚫 Remove underline from all links */
     }
 
     .navbar {
@@ -44,27 +48,6 @@
     .logo h1 {
       font-size: 26px;
       color: #333;
-    }
-
-    .home-button {
-      background: gray;
-      color: white;
-      border: none;
-      padding: 10px 16px;
-      font-size: 15px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      transition: all 0.3s ease;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      text-decoration: none;
-    }
-
-    .home-button:hover {
-      transform: translateY(-3px);
-      background: linear-gradient(135deg, #18bcae, #f3af02);
     }
 
     .menu-section {
@@ -111,10 +94,45 @@
         flex-direction: column;
         align-items: center;
       }
+    }
 
-      .home-button {
-        margin-top: 10px;
-      }
+    .student-login {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      min-width: 120px;
+    }
+
+    .student-login:hover {
+      transform: translateY(-3px);
+      background: linear-gradient(135deg, #b31217, #e52d27);
+    }
+
+    .home-button {
+      background: gray;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      font-size: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 120px;
+    }
+
+    .home-button:hover {
+      transform: translateY(-3px);
+      background: linear-gradient(135deg, #18bcae, #f3af02);
     }
   </style>
 </head>
@@ -123,13 +141,14 @@
     <div class="navbar-top">
       <div class="logo">
         <img src="picture/logo.gif" alt="SKST Logo">
-        <h1>SKST University || Library</h1>
+        <h1>SKST University || Student</h1>
       </div>
 
-      <!-- Home Button -->
-      <a href="index.html" class="home-button">
-        <i class="fas fa-home"></i> Home
-      </a>
+      <!-- Alumni Login and Home Page Buttons -->
+      <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+        <a href="student.php"><button class="student-login">👉🏻 student Login</button></a>
+        <a href="index.html"><button class="home-button">Home Page</button></a>
+      </div>
     </div>
 
     <div class="menu-section">
@@ -149,6 +168,9 @@
       <a href="volunteer.html"><button class="btn">Volunteer</button></a>
       <a href="about.html"><button class="btn">About US</button></a>
     </div>
+  </div>
+
+
   </div>
 </body>
 </html>
