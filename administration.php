@@ -31,6 +31,21 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
         } else $error = "Incorrect password.";
     } else $error = "ID not found.";
 }
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['facultylogin'])) {
+    $faculty_id = intval($_POST['faculty_id']);
+    $stmt = $conn->prepare("SELECT faculty_id FROM faculty WHERE faculty_id = ?");
+    $stmt->bind_param("i", $faculty_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($row = $result->fetch_assoc()) {
+        $_SESSION['faculty_id'] = $row['faculty_id'];  // ✅ FIXED
+        header("Location: administration.php?facultylogin=true");
+        exit();
+    } else {
+        $error = "Faculty ID not found.";
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -175,54 +190,185 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
                 </div>
             <?php endif; ?>
         </div>
+       
 
-    <?php elseif (isset($_GET['faculty_info'])): ?>
+    <?php elseif (isset($_GET['Faculty_Intro'])): ?>
+        <div class="container">
+        <h1>SKST University Faculty Login</h1>
+        <?php if ($error): ?>
+            <div class="error"><?= htmlspecialchars($error) ?></div>
+        <?php endif; ?>
+        <form method="POST">
+            <input type="number" name="faculty_id" placeholder="Enter Faculty ID" required autofocus />
+            <button type="submit" name="facultylogin">Login</button>
+        </form>
+        <a href="administration.php" type="back"><button><span>🔙</span>Back to Dashboard</button></a>
+    </div>
+   
+        
+    <?php elseif (isset($_GET['faculty_biodata'])): ?>
+        <?php
+        $adminid = $_SESSION['faculty_id'];
+        $stmt = $conn->prepare("SELECT  `faculty_id`, `name`, `email`, `password`, `department`, `address`, `phone`, `room_number`, `salary` FROM faculty WHERE faculty_id = ?");
+        $stmt->bind_param("i", $adminid);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $biodata = $result->fetch_assoc();
+        ?>
+
+        <div class="routine-page">
+            <h2>Faculty Biodata</h2>
+            <?php if ($biodata): ?>
+                <div class="container">
+                    <p><strong>ID:</strong> <?= htmlspecialchars($adminid) ?></p>
+                    <p><strong>Full Name:</strong> <?= htmlspecialchars($biodata['name']) ?></p>
+                    <p><strong>Email:</strong> <?= htmlspecialchars($biodata['email']) ?></p>
+                    <p><strong>Password:</strong> <?= htmlspecialchars($biodata['password']) ?></p>
+                    <p><strong>Department:</strong> <?= htmlspecialchars($biodata['department']) ?></p>
+                    <p><strong>Phone:</strong> <?= htmlspecialchars($biodata['phone']) ?></p>
+                    <p><strong>Address:</strong> <?= htmlspecialchars($biodata['address']) ?></p>
+                    <p><strong>Room Number:</strong> <?= htmlspecialchars($biodata['room_number']) ?></p>
+                    <p><strong>Salary:</strong> <?= htmlspecialchars($biodata['salary']) ?></p>
+                    <a href="?faculty_info=true" type="back"><button><span>🔙</span>Back</button></a>
+                </div>
+            <?php else: ?>
+                <div class="container">
+                    <p>No biodata found for your ID.</p>
+                    <a href="?faculty_info=true" type="back"><button><span>🔙</span>Back</button></a>
+                </div>
+            <?php endif; ?>
+        </div>
+
+    <?php elseif (isset($_GET['facultylogin'])): ?>
         <div class="routine-page">
             <h2>Faculty Information</h2>
             <div class="cards">
                 <a href="?faculty_biodata=true" class="card"><button><span>👤</span>View Biodata</button></a>
                 <a href="?edit_faculty_biodata=true" class="card"><button><span>✏️</span>Edit Biodata</button></a>
-                <a href="?Add_new_faculty=true" class="card"><button><span>✏️</span>Add new</button></a>
+                <a href="administration.php" class="card"><button><span>🔙</span>Back to Dashboard</button></a>
+            </div>
+        </div>
+    <?php elseif (isset($_GET['faculty_info'])): ?>
+        <div class="routine-page">
+            <h2>Faculty Information</h2>
+            <div class="cards">
+                <a href="?Faculty_Intro=true" class="card"><button><span>👤</span>Faculty Intro</button></a>
+                <a href="?add_faculty=true" class="card"><button><span>✏️</span>Add new</button></a>
                 <a href="administration.php" class="card"><button><span>🔙</span>Back to Dashboard</button></a>
             </div>
         </div>
        
+<?php elseif (isset($_GET['add_faculty'])): ?>
+    <?php
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_faculty'])) {
+        $faculty_id = $_POST['faculty_id'];
+        $name = $_POST['name'];
+        $email = $_POST['email'];
+        $password = $_POST['password']; // In real applications, use password_hash()!
+        $department = $_POST['department'];
+        $address = $_POST['address'];
+        $phone = $_POST['phone'];
+        $room_number = $_POST['room_number'];
+        $salary = $_POST['salary'];
 
-    <?php elseif (isset($_GET['edit_faculty_biodata'])): ?>
-        <?php
-        $adminid = $_SESSION['id'];
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
-            $full_name = $_POST['full_name'];
-            $username = $_POST['username'];
-            $password = $_POST['password'];
-            $email = $_POST['email'];
-            $phone = $_POST['phone'];
+        // Check if faculty_id or email already exists
+        $check_stmt = $conn->prepare("SELECT * FROM faculty WHERE faculty_id = ? OR email = ?");
+        $check_stmt->bind_param("ss", $faculty_id, $email);
+        $check_stmt->execute();
+        $check_result = $check_stmt->get_result();
 
-            $stmt = $conn->prepare("UPDATE admin_users SET full_name=?, username=?, password=?, email=?, phone=? WHERE id=?");
-            $stmt->bind_param("sssssi", $full_name, $username, $password, $email, $phone, $adminid);
-            $stmt->execute();
-            echo "<script>alert('Biodata updated successfully.'); window.location='?biodata=true';</script>";
+        if ($check_result->num_rows > 0) {
+            echo "<script>alert('Faculty ID or Email already exists.');</script>";
+        } else {
+            // Insert new faculty
+            $stmt = $conn->prepare("INSERT INTO faculty (faculty_id, name, email, password, department, address, phone, room_number, salary) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("sssssssss", $faculty_id, $name, $email, $password, $department, $address, $phone, $room_number, $salary);
+
+            if ($stmt->execute()) {
+                echo "<script>alert('New faculty added successfully.'); window.location='?add_faculty=true';</script>";
+            } else {
+                echo "<script>alert('Error adding faculty.');</script>";
+            }
         }
+    }
+    ?>
+    <div class="routine-page">
+        <h2>Add New Faculty</h2>
+        <div class="container">
+            <form method="POST">
+                <input type="text" name="faculty_id" placeholder="Faculty ID" required />
+                <input type="text" name="name" placeholder="Name" required />
+                <input type="email" name="email" placeholder="Email" required />
+                <input type="text" name="password" placeholder="Password" required />
+                <input type="text" name="department" placeholder="Department" required />
+                <input type="text" name="address" placeholder="Address" required />
+                <input type="text" name="phone" placeholder="Phone" required />
+                <input type="text" name="room_number" placeholder="Room Number" required />
+                <input type="text" name="salary" placeholder="Salary" required />
+                <button type="submit" name="add_faculty">➕ Add Faculty</button>
+                <a href="?faculty_info=true" type="back"><button type="button">🔙 Back</button></a>
+            </form>
+        </div>
+    </div>
 
-        $stmt = $conn->prepare("SELECT full_name, username, password, email, phone FROM admin_users WHERE id = ?");
-        $stmt->bind_param("i", $adminid);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $data = $result->fetch_assoc();
-        ?>
-        <div class="routine-page">
-            <h2>Edit Biodata</h2>
-            <div class="container">
-                <form method="POST">
-                    <input type="text" name="full_name" value="<?= htmlspecialchars($data['full_name']) ?>" required />
-                    <input type="text" name="username" value="<?= htmlspecialchars($data['username']) ?>" required />
-                    <input type="text" name="password" value="<?= htmlspecialchars($data['password']) ?>" required />
-                    <input type="text" name="email" value="<?= htmlspecialchars($data['email']) ?>" required />
-                    <input type="text" name="phone" value="<?= htmlspecialchars($data['phone']) ?>" required />
-                    <button type="submit" name="update">Update</button>
-                    <a href="?info=true" type="back"><button type="button"><span>🔙</span>Back</button></a>
-                </form>
-            </div>
+<?php elseif (isset($_GET['edit_faculty_biodata'])): ?>
+    <?php
+    $faculty_id = $_SESSION['faculty_id']; // Use the correct faculty_id from session
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
+        // Get posted form values
+        $updated_faculty_id = $_POST['faculty_id'];
+        $name = $_POST['name'];
+        $email = $_POST['email'];
+        $password = $_POST['password'];
+        $department = $_POST['department'];
+        $address = $_POST['address'];
+        $phone = $_POST['phone'];
+        $room_number = $_POST['room_number'];
+        $salary = $_POST['salary'];
+
+        // Prepare UPDATE statement
+        $stmt = $conn->prepare("UPDATE faculty SET faculty_id=?, name=?, email=?, password=?, department=?, address=?, phone=?, room_number=?, salary=? WHERE faculty_id=?");
+
+        $stmt->bind_param("ssssssssss", $updated_faculty_id, $name, $email, $password, $department, $address, $phone, $room_number, $salary, $faculty_id);
+
+        if ($stmt->execute()) {
+            // Update session variable if faculty_id changed
+            $_SESSION['faculty_id'] = $updated_faculty_id;
+
+            echo "<script>alert('Biodata updated successfully.'); window.location='?edit_faculty_biodata=true';</script>";
+            exit();
+        } else {
+            echo "<script>alert('Failed to update biodata.');</script>";
+        }
+    }
+
+    // Fetch current faculty biodata
+    $stmt = $conn->prepare("SELECT faculty_id, name, email, password, department, address, phone, room_number, salary FROM faculty WHERE faculty_id = ?");
+    $stmt->bind_param("s", $faculty_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $data = $result->fetch_assoc();
+    ?>
+    <div class="routine-page">
+        <h2>Edit Biodata</h2>
+        <div class="container">
+            <form method="POST">
+                <input type="text" name="faculty_id" value="<?= htmlspecialchars($data['faculty_id']) ?>" required />
+                <input type="text" name="name" value="<?= htmlspecialchars($data['name']) ?>" required />
+                <input type="text" name="email" value="<?= htmlspecialchars($data['email']) ?>" required />
+                <input type="text" name="password" value="<?= htmlspecialchars($data['password']) ?>" required />
+                <input type="text" name="department" value="<?= htmlspecialchars($data['department']) ?>" required />
+                <input type="text" name="address" value="<?= htmlspecialchars($data['address']) ?>" required />
+                <input type="text" name="phone" value="<?= htmlspecialchars($data['phone']) ?>" required />
+                <input type="text" name="room_number" value="<?= htmlspecialchars($data['room_number']) ?>" required />
+                <input type="text" name="salary" value="<?= htmlspecialchars($data['salary']) ?>" required />
+                <button type="submit" name="update">Update</button>
+                <a href="?faculty_info=true" type="back"><button type="button"><span>🔙</span>Back</button></a>
+            </form>
+        </div>
+    </div>
+
 
     <?php elseif (isset($_GET['info'])): ?>
         <div class="routine-page">
