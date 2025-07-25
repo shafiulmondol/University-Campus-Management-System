@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SKST University</title>
+  <link rel="icon" href="picture/SKST.png" type="image/png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f9f9ff;
+    }
+
+    .navbar {
+      background-color: #e0e7ff;
+      padding: 10px 20px;
+    }
+
+    .navbar-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo img {
+      height: 80px;
+    }
+
+    .logo h1 {
+      font-size: 26px;
+      color: #333;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .home-button {
+      background: gray;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      font-size: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .home-button:hover {
+      transform: translateY(-3px);
+      background: linear-gradient(135deg, #18bcae, #f3af02);
+    }
+
+    .faculty-login {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      min-width: 120px;
+    }
+
+    .alumni-login:hover {
+      transform: translateY(-3px);
+      background: linear-gradient(135deg, #b31217, #e52d27);
+    }
+
+    .menu-section {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      font-size: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      min-width: 120px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      background: linear-gradient(135deg, #512da8, #1e88e5);
+    }
+
+    .page {
+      display: none;
+      padding: 30px;
+    }
+
+    .active {
+      display: block;
+    }
+
+    .faculty-form {
+      position: relative;
+      max-width: 400px;
+      margin: 40px auto;
+      background: white;
+      padding: 25px 25px 25px;
+      border-radius: 8px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+
+    .faculty-form h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #3913a1;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid silver;
+      border-radius: 4px;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      background: #2c8386;
+      color: white;
+      font-size: 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .submit-btn:hover {
+      opacity: 0.8;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      background: transparent;
+      border: none;
+      font-size: 24px;
+      font-weight: bold;
+      color: #3913a1;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    @media (max-width: 768px) {
+      .navbar-top {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .btn, .alumni-login, .home-button {
+        width: 80%;
+      }
+
+      .menu-section {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <div class="navbar">
+    <div class="navbar-top">
+      <div class="logo">
+        <img src="picture/logo.gif" alt="SKST Logo">
+        <h1>SKST University || Faculty</h1>
+      </div>
+
+      <div class="button-group">
+        <button class="faculty-login" onclick="goToPage('faculty')">👉🏻Faculty Login</button>
+        <a class="home-button" href="#" onclick="goToPage('home')"><i class="fas fa-home"></i> Home</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Home Page -->
+  <div id="home" class="page active">
+    <div class="menu-section">
+      <button class="btn">Student</button>
+      <button class="btn">Faculty</button>
+      <button class="btn">Administration</button>
+      <button class="btn">Alumni</button>
+      <button class="btn">Campus Life</button>
+      <button class="btn">IQAC</button>
+      <button class="btn">Notice</button>
+      <button class="btn">News</button>
+      <button class="btn">Ranking</button>
+      <button class="btn">Academics</button>
+      <button class="btn">Scholarships</button>
+      <button class="btn">Admission</button>
+      <button class="btn">Library</button>
+      <button class="btn">Volunteer</button>
+      <button class="btn">About Us</button>
+    </div>
+  </div>
+
+  <!-- Faculty Login Page -->
+  <div id="faculty" class="page">
+    <form class="faculty-form">
+      <button 
+        type="button"
+        onclick="goToPage('home')" 
+        class="close-btn"
+        aria-label="Close faculty login"
+      >×</button>
+
+      <h2>Faculty Login</h2>
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="text" id="email" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" id="password" required>
+      </div>
+      <input type="submit" class="submit-btn" value="Login">
+    </form>
+  </div>
+
+  <!-- JS for page navigation -->
+  <script>
+    function goToPage(pageId) {
+      document.querySelectorAll('.page').forEach(function(page) {
+        page.classList.remove('active');
+      });
+      document.getElementById(pageId).classList.add('active');
+    }
+  </script>
+</body>
+</html>
