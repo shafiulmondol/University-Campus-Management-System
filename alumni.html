@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SKST University</title>
   <link rel="icon" href="picture/SKST.png" type="image/png" />
+  <!-- Font Awesome (optional) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     * {
       box-sizing: border-box;
@@ -15,6 +17,10 @@
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: #f9f9ff;
+    }
+
+    a {
+      text-decoration: none; /* 🚫 Remove underline from all links */
     }
 
     .navbar {
@@ -42,22 +48,6 @@
     .logo h1 {
       font-size: 26px;
       color: #333;
-    }
-
-    .alumni-login {
-      background-color: #28a745;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      font-size: 16px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      transition: all 0.3s ease;
-      cursor: pointer;
-    }
-
-    .alumni-login:hover {
-      background-color: #218838;
     }
 
     .menu-section {
@@ -96,10 +86,6 @@
         align-items: center;
       }
 
-      .alumni-login {
-        margin-top: 10px;
-      }
-
       .btn {
         width: 80%;
       }
@@ -108,9 +94,46 @@
         flex-direction: column;
         align-items: center;
       }
-
     }
 
+    .alumni-login {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      min-width: 120px;
+    }
+
+    .alumni-login:hover {
+      transform: translateY(-3px);
+      background: linear-gradient(135deg, #b31217, #e52d27);
+    }
+
+    .home-button {
+      background: gray;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      font-size: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 120px;
+    }
+
+    .home-button:hover {
+      transform: translateY(-3px);
+      background: linear-gradient(135deg, #18bcae, #f3af02);
+    }
   </style>
 </head>
 <body>
@@ -118,66 +141,57 @@
     <div class="navbar-top">
       <div class="logo">
         <img src="picture/logo.gif" alt="SKST Logo">
-        <h1>SKST University</h1>
+        <h1>SKST University || Alumni</h1>
       </div>
-      <a href="alumni_login.html">
-        <a href="index.html"><button class="alumni-login">Home page</button></a>
-        <button class="alumni-login">👉🏻 Alumni Login</button>
-      </a>
+
+      <!-- Alumni Login and Home Page Buttons -->
+      <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+        <a href="alumni_login.html"><button class="alumni-login">👉🏻 Alumni Login</button></a>
+        <a href="index.html"><button class="home-button">Home Page</button></a>
+      </div>
     </div>
 
     <div class="menu-section">
-<a href="student.php"><button class="btn">Student</button></a>
-<a href="faculty.html"><button class="btn">Faculty</button></a>
-<a href="administration.php"><button class="btn">Administration</button></a>
-<a href="alumni.html"><button class="btn">Alumni</button></a>
-<a href="campus.html"><button class="btn">Campus Life</button></a>
-<a href="iqac.html"><button class="btn">IQAC</button></a>
-<a href="notice.html"><button class="btn">Notice</button></a>
-<a href="news.html"><button class="btn">News</button></a>
-<a href="ranking.html"><button class="btn">Ranking</button></a>
-<a href="academic.html"><button class="btn">Academics</button></a>
-<a href="scholarship.html"><button class="btn">Scholarships</button></a>
-<a href="admission.html"><button class="btn">Admission</button></a>
-<a href="library.html"><button class="btn">Library</button></a>
-<a href="volunteer.html"><button class="btn">Volunteer</button></a>
-<a href="about.html"><button class="btn">About US</button></a>
-     
-   
+      <a href="student.php"><button class="btn">Student</button></a>
+      <a href="faculty.html"><button class="btn">Faculty</button></a>
+      <a href="administration.php"><button class="btn">Administration</button></a>
+      <a href="alumni.html"><button class="btn">Alumni</button></a>
+      <a href="campus.html"><button class="btn">Campus Life</button></a>
+      <a href="iqac.html"><button class="btn">IQAC</button></a>
+      <a href="notice.html"><button class="btn">Notice</button></a>
+      <a href="news.html"><button class="btn">News</button></a>
+      <a href="ranking.html"><button class="btn">Ranking</button></a>
+      <a href="academic.html"><button class="btn">Academics</button></a>
+      <a href="scholarship.html"><button class="btn">Scholarships</button></a>
+      <a href="admission.html"><button class="btn">Admission</button></a>
+      <a href="library.html"><button class="btn">Library</button></a>
+      <a href="volunteer.html"><button class="btn">Volunteer</button></a>
+      <a href="about.html"><button class="btn">About US</button></a>
     </div>
   </div>
 
-<div style="
-    display: flex; 
-    justify-content: center; 
-    margin-top: 15px;
-">
-  <p style="
-    color: white;
-    background-color: rgb(188, 29, 29); 
-    border-radius: 10px; 
-    height: 50px; 
-    line-height: 50px; 
-    padding: 0 15px; 
-    margin: 0;
-    font-weight: bold; 
-    font-family: Arial, sans-serif;
-    font-size: 30px;
-    white-space: nowrap;
-    text-align: center;
-  ">
-    👨🏻‍🎓👩🏻‍🎓“Our Alumni Is Our Mirror”
-  </p>
-</div>
+  <div style="display: flex; justify-content: center; margin-top: 15px;">
+    <p style="
+      color: white;
+      background-color: rgb(188, 29, 29); 
+      border-radius: 10px; 
+      height: 50px; 
+      line-height: 50px; 
+      padding: 0 15px; 
+      margin: 0;
+      font-weight: bold; 
+      font-family: Arial, sans-serif;
+      font-size: 30px;
+      white-space: nowrap;
+      text-align: center;
+    ">
+      👨🏻‍🎓👩🏻‍🎓“Our Alumni Is Our Mirror”
+    </p>
+  </div>
 
-<div style="display: flex; flex-wrap: wrap; 
-justify-content: center; gap: 100px;
-padding: 40px 20px;
-margin: 0 auto; text-align: justify;">
-
+  <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 100px; padding: 40px 20px; margin: 0 auto; text-align: justify;">
     <!-- Objectives Box -->
     <div style="flex: 1 1 400px; max-width: 500px;">
-
       <h2 style="font-size: 24px; margin-bottom: 10px;">Objectives</h2>
       <p style="font-size: 16px; line-height: 1.6;">
         SKST University Alumni Association plays a vital role by assisting the university in developing linkage with industries,
@@ -189,17 +203,12 @@ margin: 0 auto; text-align: justify;">
     <!-- Preamble Box -->
     <div style="flex: 1 1 400px; max-width: 500px;">
       <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 10px;">Preamble</h2>
-
       <p style="font-size: 16px; line-height: 1.6;">
         We, the Alumni of the SKST University, develop mutual interest
         among ourselves, establish mutually beneficial relations between SKST University and its Alumni, and promote the interests
         of SKST University, do hereby form into an Association and adopt this constitution.
       </p>
     </div>
-
-</div>
-
-
-
+  </div>
 </body>
 </html>
