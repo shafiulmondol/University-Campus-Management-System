@@ -1,12 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-     <link rel="icon" href="picture/SKST.png" type="image/png">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SKST University</title>
+  <link rel="icon" href="picture/SKST.png" type="image/png" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f9f9ff;
+    }
+
+    .navbar {
+      background-color: #e0e7ff;
+      padding: 10px 20px;
+    }
+
+    .navbar-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo img {
+      height: 80px;
+    }
+
+    .logo h1 {
+      font-size: 26px;
+      color: #333;
+    }
+
+    .Library-login {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .Library-login:hover {
+      background-color: #218838;
+    }
+
+    .menu-section {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .menu-section a {
+      text-decoration: none;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      font-size: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      min-width: 120px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      background: linear-gradient(135deg, #512da8, #1e88e5);
+    }
+
+    @media (max-width: 768px) {
+      .navbar-top {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .alumni-login {
+        margin-top: 10px;
+      }
+
+      .btn {
+        width: 80%;
+      }
+
+      .menu-section {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
 </head>
 <body>
-    
+  <div class="navbar">
+    <div class="navbar-top">
+      <div class="logo">
+        <img src="picture/logo.gif" alt="SKST Logo">
+        <h1>SKST University</h1>
+      </div>
+      <button class="Library-login">👉🏻Library Login</button>
+    </div>
+
+    <div class="menu-section">
+      <a href="student.php"><button class="btn">Student</button></a>
+      <a href="student.html"><button class="btn">Faculty</button></a>
+      <a href="administration.php"><button class="btn">Administration</button></a>
+      <a href="student.html"><button class="btn">Alumni</button></a>
+      <a href="student.html"><button class="btn">Campus Life</button></a>
+      <a href="student.html"><button class="btn">IQAC</button></a>
+      <a href="student.html"><button class="btn">Notice</button></a>
+      <a href="student.html"><button class="btn">News</button></a>
+      <a href="student.html"><button class="btn">Ranking</button></a>
+      <a href="student.html"><button class="btn">Research</button></a>
+      <a href="student.html"><button class="btn">Academics</button></a>
+      <a href="student.html"><button class="btn">Scholarships</button></a>
+      <a href="student.html"><button class="btn">Admission</button></a>
+      <a href="student.html"><button class="btn">Library</button></a>
+      <a href="student.html"><button class="btn">About</button></a>
+      <a href="student.html"><button class="btn">Volunteer</button></a>
+    </div>
+  </div>
 </body>
 </html>
