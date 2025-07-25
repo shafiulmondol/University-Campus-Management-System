@@ -176,6 +176,54 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
             <?php endif; ?>
         </div>
 
+    <?php elseif (isset($_GET['faculty_info'])): ?>
+        <div class="routine-page">
+            <h2>Faculty Information</h2>
+            <div class="cards">
+                <a href="?faculty_biodata=true" class="card"><button><span>👤</span>View Biodata</button></a>
+                <a href="?edit_faculty_biodata=true" class="card"><button><span>✏️</span>Edit Biodata</button></a>
+                <a href="?Add_new_faculty=true" class="card"><button><span>✏️</span>Add new</button></a>
+                <a href="administration.php" class="card"><button><span>🔙</span>Back to Dashboard</button></a>
+            </div>
+        </div>
+       
+
+    <?php elseif (isset($_GET['edit_faculty_biodata'])): ?>
+        <?php
+        $adminid = $_SESSION['id'];
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
+            $full_name = $_POST['full_name'];
+            $username = $_POST['username'];
+            $password = $_POST['password'];
+            $email = $_POST['email'];
+            $phone = $_POST['phone'];
+
+            $stmt = $conn->prepare("UPDATE admin_users SET full_name=?, username=?, password=?, email=?, phone=? WHERE id=?");
+            $stmt->bind_param("sssssi", $full_name, $username, $password, $email, $phone, $adminid);
+            $stmt->execute();
+            echo "<script>alert('Biodata updated successfully.'); window.location='?biodata=true';</script>";
+        }
+
+        $stmt = $conn->prepare("SELECT full_name, username, password, email, phone FROM admin_users WHERE id = ?");
+        $stmt->bind_param("i", $adminid);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $data = $result->fetch_assoc();
+        ?>
+        <div class="routine-page">
+            <h2>Edit Biodata</h2>
+            <div class="container">
+                <form method="POST">
+                    <input type="text" name="full_name" value="<?= htmlspecialchars($data['full_name']) ?>" required />
+                    <input type="text" name="username" value="<?= htmlspecialchars($data['username']) ?>" required />
+                    <input type="text" name="password" value="<?= htmlspecialchars($data['password']) ?>" required />
+                    <input type="text" name="email" value="<?= htmlspecialchars($data['email']) ?>" required />
+                    <input type="text" name="phone" value="<?= htmlspecialchars($data['phone']) ?>" required />
+                    <button type="submit" name="update">Update</button>
+                    <a href="?info=true" type="back"><button type="button"><span>🔙</span>Back</button></a>
+                </form>
+            </div>
+
     <?php elseif (isset($_GET['info'])): ?>
         <div class="routine-page">
             <h2>Personal Information</h2>

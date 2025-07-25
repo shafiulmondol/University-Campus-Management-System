@@ -19,7 +19,7 @@ $error = "";
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
     $id = intval($_POST['id']);
     $password = $_POST['password'];
-    $stmt = $conn->prepare("SELECT password FROM student_biodata WHERE id = ?");
+    $stmt = $conn->prepare("SELECT password FROM student_registration WHERE id = ?");
     $stmt->bind_param("i", $id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -190,7 +190,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
         <!-- Biodata Page -->
         <?php
             $studentId = $_SESSION['id'];
-            $stmt = $conn->prepare("SELECT full_name, date_of_birth, gender, blood_group, nationality, religion, father_name, mother_name, phone, email, present_address, permanent_address, photo FROM student_biodata WHERE id = ?");
+            $stmt = $conn->prepare("SELECT `first_name`, `last_name`, `father_name`, `mother_name`, `date_of_birth`, `guardian_phone`, `student_phone`, `email`, `last_exam`, `board`, `other_board`, `year_of_passing`, `institution_name`, `result`, `subject_group`, `gender`, `blood_group`, `nationality`, `religion`, `present_address`, `permanent_address`, `department`, `photo_path`, `signature_path`, `submission_date` FROM student_registration WHERE id = ?");
+
             $stmt->bind_param("i", $studentId);
             $stmt->execute();
             $result = $stmt->get_result();
@@ -201,7 +202,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
             <?php if ($biodata): ?>
                 <div class="container">
                     <p><strong>ID:</strong> <?= htmlspecialchars($studentId) ?></p>
-                    <p><strong>Full Name:</strong> <?= htmlspecialchars($biodata['full_name']) ?></p>
+                    <p><strong>Full Name:</strong> <?= htmlspecialchars($biodata['first_name']) ?>
+                <?= htmlspecialchars($biodata['last_name']) ?></p>
                     <p><strong>Date of Birth:</strong> <?= htmlspecialchars($biodata['date_of_birth']) ?></p>
                     <p><strong>Gender:</strong> <?= htmlspecialchars($biodata['gender']) ?></p>
                     <p><strong>Blood Group:</strong> <?= htmlspecialchars($biodata['blood_group']) ?></p>
@@ -209,7 +211,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
                     <p><strong>Religion:</strong> <?= htmlspecialchars($biodata['religion']) ?></p>
                     <p><strong>Father's Name:</strong> <?= htmlspecialchars($biodata['father_name']) ?></p>
                     <p><strong>Mother's Name:</strong> <?= htmlspecialchars($biodata['mother_name']) ?></p>
-                    <p><strong>Phone:</strong> <?= htmlspecialchars($biodata['phone']) ?></p>
+                    <p><strong>Guardian Phone:</strong> <?= htmlspecialchars($biodata['guardian_phone']) ?></p>
+                    <p><strong>Student Phone:</strong> <?= htmlspecialchars($biodata['student_phone']) ?></p>
                     <p><strong>Email:</strong> <?= htmlspecialchars($biodata['email']) ?></p>
                     <p><strong>Present Address:</strong> <?= nl2br(htmlspecialchars($biodata['present_address'])) ?></p>
                     <p><strong>Permanent Address:</strong> <?= nl2br(htmlspecialchars($biodata['permanent_address'])) ?></p>
