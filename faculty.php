@@ -289,8 +289,29 @@ $conn->close();
     transition: background 0.3s ease;
   }
   form.login-form button:hover {
-    background: #005fa3;
+    background: #08ed91ff;
   }
+  button[type=submit] {
+            background-color: #2980b9;
+            color: white;
+            padding: 12px;
+            border: none;
+            width: 100%;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        a[type=back] button {
+            margin-top: 10px;
+            background-color: #005fa3;
+            color: white;
+            padding: 12px;
+            border: none;
+            width: 100%;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
   .error-msg {
     color: #e74c3c;
     font-weight: 700;
@@ -351,7 +372,9 @@ $conn->close();
     <input type="email" name="email" placeholder="Email" required />
     <input type="password" name="password" placeholder="Password" required />
     <button type="submit" name="login">Login</button>
+    <a href="index.html" type="back"><button><span>🔙</span>Back to Dashboard</button></a>
   </form>
+  
 <?php else: ?>
 
 <?php 
@@ -428,6 +451,7 @@ $pageSelected = isset($_GET['profile']) || isset($_GET['courses']) || isset($_GE
             <p><strong>Room Number:</strong> <?= htmlspecialchars($faculty['room_number'] ?? '') ?></p>
             <p><strong>Salary:</strong> <?= htmlspecialchars($faculty['salary'] ?? '') ?></p>
             <p><strong>Last Login:</strong> <?= htmlspecialchars($faculty['last_login'] ?: "First time login") ?></p>
+            <a href="faculty.php" type="back"><button><span>🔙</span>Back to Dashboard</button></a>
           </div>
 
         <?php elseif (isset($_GET['courses'])): ?>
