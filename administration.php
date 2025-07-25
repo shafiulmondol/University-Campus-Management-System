@@ -31,6 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
         } else $error = "Incorrect password.";
     } else $error = "ID not found.";
 }
+//  -- ==================== Connection FACULTY BIODATA ==================== --
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['facultylogin'])) {
     $faculty_id = intval($_POST['faculty_id']);
     $stmt = $conn->prepare("SELECT faculty_id FROM faculty WHERE faculty_id = ?");
@@ -146,7 +147,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['facultylogin'])) {
     </style>
 </head>
 <body>
-
+//  -- ==================== Admin Login ==================== --
 <?php if (!isset($_SESSION['id'])): ?>
     <div class="container">
         <h1>SKST University Admin Login</h1>
@@ -161,7 +162,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['facultylogin'])) {
         <a href="index.html" type="back"><button><span>🔙</span>Back to Dashboard</button></a>
     </div>
 <?php else: ?>
-
+//  -- ==================== Admin Biodata Check ==================== --
     <?php if (isset($_GET['biodata'])): ?>
         <?php
         $adminid = $_SESSION['id'];
@@ -191,7 +192,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['facultylogin'])) {
             <?php endif; ?>
         </div>
        
-
+//  -- ==================== Admin Login Faculty Section ==================== --
     <?php elseif (isset($_GET['Faculty_Intro'])): ?>
         <div class="container">
         <h1>SKST University Faculty Login</h1>
@@ -205,7 +206,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['facultylogin'])) {
         <a href="administration.php" type="back"><button><span>🔙</span>Back to Dashboard</button></a>
     </div>
    
-        
+//  -- ==================== FACULTY BIODATA ==================== --       
     <?php elseif (isset($_GET['faculty_biodata'])): ?>
         <?php
         $adminid = $_SESSION['faculty_id'];
@@ -238,7 +239,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['facultylogin'])) {
                 </div>
             <?php endif; ?>
         </div>
-
+//  -- ==================== FACULTY Dashboard ==================== --
     <?php elseif (isset($_GET['facultylogin'])): ?>
         <div class="routine-page">
             <h2>Faculty Information</h2>
@@ -248,6 +249,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['facultylogin'])) {
                 <a href="administration.php" class="card"><button><span>🔙</span>Back to Dashboard</button></a>
             </div>
         </div>
+//  -- ==================== Individual FACULTY Dashboard ==================== --
     <?php elseif (isset($_GET['faculty_info'])): ?>
         <div class="routine-page">
             <h2>Faculty Information</h2>
@@ -257,7 +259,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['facultylogin'])) {
                 <a href="administration.php" class="card"><button><span>🔙</span>Back to Dashboard</button></a>
             </div>
         </div>
-       
+//  -- ==================== Add FACULTY ==================== --       
 <?php elseif (isset($_GET['add_faculty'])): ?>
     <?php
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_faculty'])) {
@@ -310,7 +312,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['facultylogin'])) {
             </form>
         </div>
     </div>
-
+//  -- ==================== Edit FACULTY Biodata ==================== --
 <?php elseif (isset($_GET['edit_faculty_biodata'])): ?>
     <?php
     $faculty_id = $_SESSION['faculty_id']; // Use the correct faculty_id from session
@@ -369,7 +371,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['facultylogin'])) {
         </div>
     </div>
 
-
+//  -- ==================== Admin Dashboard ==================== --
     <?php elseif (isset($_GET['info'])): ?>
         <div class="routine-page">
             <h2>Personal Information</h2>
@@ -379,7 +381,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['facultylogin'])) {
                 <a href="administration.php" class="card"><button><span>🔙</span>Back to Dashboard</button></a>
             </div>
         </div>
-
+//  -- ==================== Edit Admin Biodata ==================== --
     <?php elseif (isset($_GET['edit_biodata'])): ?>
         <?php
         $adminid = $_SESSION['id'];
