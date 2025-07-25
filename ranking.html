@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SKST University</title>
   <link rel="icon" href="picture/SKST.png" type="image/png" />
+  <!-- Font Awesome for home icon -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     * {
       box-sizing: border-box;
@@ -42,6 +44,27 @@
     .logo h1 {
       font-size: 26px;
       color: #333;
+    }
+
+    .home-button {
+      background: gray;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      font-size: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+
+    .home-button:hover {
+      transform: translateY(-3px);
+      background: linear-gradient(135deg, #18bcae, #f3af02);
     }
 
     .menu-section {
@@ -88,6 +111,10 @@
         flex-direction: column;
         align-items: center;
       }
+
+      .home-button {
+        margin-top: 10px;
+      }
     }
   </style>
 </head>
@@ -96,26 +123,31 @@
     <div class="navbar-top">
       <div class="logo">
         <img src="picture/logo.gif" alt="SKST Logo">
-        <h1>SKST University</h1>
+        <h1>SKST University || Ranking</h1>
       </div>
+
+      <!-- Home Button -->
+      <a href="index.html" class="home-button">
+        <i class="fas fa-home"></i> Home
+      </a>
     </div>
 
     <div class="menu-section">
-<a href="student.php"><button class="btn">Student</button></a>
-<a href="faculty.html"><button class="btn">Faculty</button></a>
-<a href="administration.php"><button class="btn">Administration</button></a>
-<a href="alumni.html"><button class="btn">Alumni</button></a>
-<a href="campus.html"><button class="btn">Campus Life</button></a>
-<a href="iqac.html"><button class="btn">IQAC</button></a>
-<a href="notice.html"><button class="btn">Notice</button></a>
-<a href="news.html"><button class="btn">News</button></a>
-<a href="ranking.html"><button class="btn">Ranking</button></a>
-<a href="academic.html"><button class="btn">Academics</button></a>
-<a href="scholarship.html"><button class="btn">Scholarships</button></a>
-<a href="admission.html"><button class="btn">Admission</button></a>
-<a href="library.html"><button class="btn">Library</button></a>
-<a href="volunteer.html"><button class="btn">Volunteer</button></a>
-<a href="about.html"><button class="btn">About US</button></a>
+      <a href="student.php"><button class="btn">Student</button></a>
+      <a href="faculty.html"><button class="btn">Faculty</button></a>
+      <a href="administration.php"><button class="btn">Administration</button></a>
+      <a href="alumni.html"><button class="btn">Alumni</button></a>
+      <a href="campus.html"><button class="btn">Campus Life</button></a>
+      <a href="iqac.html"><button class="btn">IQAC</button></a>
+      <a href="notice.html"><button class="btn">Notice</button></a>
+      <a href="news.html"><button class="btn">News</button></a>
+      <a href="ranking.html"><button class="btn">Ranking</button></a>
+      <a href="academic.html"><button class="btn">Academics</button></a>
+      <a href="scholarship.html"><button class="btn">Scholarships</button></a>
+      <a href="admission.html"><button class="btn">Admission</button></a>
+      <a href="library.html"><button class="btn">Library</button></a>
+      <a href="volunteer.html"><button class="btn">Volunteer</button></a>
+      <a href="about.html"><button class="btn">About US</button></a>
     </div>
   </div>
 </body>
