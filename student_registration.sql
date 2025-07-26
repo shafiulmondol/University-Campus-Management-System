@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 25, 2025 at 06:54 AM
+-- Generation Time: Jul 26, 2025 at 07:35 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -29,7 +29,6 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `student_registration` (
   `id` int(11) NOT NULL,
-  `password` varchar(200) NOT NULL,
   `first_name` varchar(50) DEFAULT NULL,
   `last_name` varchar(50) DEFAULT NULL,
   `father_name` varchar(100) DEFAULT NULL,
@@ -38,17 +37,17 @@ CREATE TABLE `student_registration` (
   `guardian_phone` varchar(20) DEFAULT NULL,
   `student_phone` varchar(20) DEFAULT NULL,
   `email` varchar(100) DEFAULT NULL,
-  `last_exam` varchar(20) DEFAULT NULL,
+  `last_exam` varchar(30) DEFAULT NULL,
   `board` varchar(50) DEFAULT NULL,
-  `other_board` varchar(50) DEFAULT NULL,
+  `other_board` varchar(100) DEFAULT NULL,
   `year_of_passing` year(4) DEFAULT NULL,
   `institution_name` varchar(100) DEFAULT NULL,
   `result` varchar(20) DEFAULT NULL,
-  `subject_group` varchar(20) DEFAULT NULL,
+  `subject_group` varchar(30) DEFAULT NULL,
   `gender` enum('male','female') DEFAULT NULL,
   `blood_group` enum('A+','A-','B+','B-','O+','O-','AB+','AB-') DEFAULT NULL,
   `nationality` varchar(50) DEFAULT NULL,
-  `religion` varchar(50) DEFAULT NULL,
+  `religion` varchar(30) DEFAULT NULL,
   `present_address` text DEFAULT NULL,
   `permanent_address` text DEFAULT NULL,
   `department` varchar(50) DEFAULT NULL,
@@ -61,9 +60,8 @@ CREATE TABLE `student_registration` (
 -- Dumping data for table `student_registration`
 --
 
-INSERT INTO `student_registration` (`id`, `password`, `first_name`, `last_name`, `father_name`, `mother_name`, `date_of_birth`, `guardian_phone`, `student_phone`, `email`, `last_exam`, `board`, `other_board`, `year_of_passing`, `institution_name`, `result`, `subject_group`, `gender`, `blood_group`, `nationality`, `religion`, `present_address`, `permanent_address`, `department`, `photo_path`, `signature_path`, `submission_date`) VALUES
-(1, '', 'Taymoon Islam ', 'Estia', 'Md.Abdul Mazid Talukder', 'Mina Parvin', '0000-00-00', '01718520912', '01530811222', 'talukdertoimoon@gmail.com', 'HSC', 'Dhaka', 'Dhaka', '2022', 'Uttara Girls High School and College', '5.00', 'science', 'female', 'A+', 'Bangladeshi', 'Islam', 'Uttara,Dhaka', 'Tangail', 'Cse', NULL, NULL, '2025-07-24 14:49:37'),
-(23303106, 'shafiul', 'Md. Shafiul', 'Islam', 'Md asraful Islam', 'Shohida begum', '2003-07-05', '01701535780', '01701535780', '23303106@iubat.edu', 'HSC', 'Dinajpur', '', '2021', 'charmichael collage rangpur', '5.00', 'science', 'male', 'B+', 'Bangladeshi', 'Islam', 'uttata, dhaka', 'uttara dhaka', 'BCSE', 'C:/Users/MD SHAFIUL ISLAM/OneDrive/Pictures/pp.png', NULL, '2025-07-01 04:21:54');
+INSERT INTO `student_registration` (`id`, `first_name`, `last_name`, `father_name`, `mother_name`, `date_of_birth`, `guardian_phone`, `student_phone`, `email`, `last_exam`, `board`, `other_board`, `year_of_passing`, `institution_name`, `result`, `subject_group`, `gender`, `blood_group`, `nationality`, `religion`, `present_address`, `permanent_address`, `department`, `photo_path`, `signature_path`, `submission_date`) VALUES
+(23303116, 'Taymoon Islam ', 'Estia', 'Md.Mazid', 'Mina Islam', '2003-12-14', '01718520912', '01530811222', 'Toimoon@gmail.com', 'HSC', 'Dhaka', NULL, '2022', 'Uttara high school', '5.00', 'science', 'female', 'A+', 'Bangladeshi', 'Islam', 'Uttara', 'Uttara', 'Cse', NULL, NULL, '2025-07-26 17:17:40');
 
 --
 -- Indexes for dumped tables
@@ -83,7 +81,7 @@ ALTER TABLE `student_registration`
 -- AUTO_INCREMENT for table `student_registration`
 --
 ALTER TABLE `student_registration`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23303107;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23303117;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
