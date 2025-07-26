@@ -49,7 +49,7 @@ $sql = "CREATE TABLE IF NOT EXISTS admissions (
 )";
 
 if ($conn->query($sql) === FALSE) {
-    echo "Error creating table: " . $conn->error;
+    die("Error creating table: " . $conn->error);
 }
 
 // Process form submission
@@ -95,24 +95,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         hsc_institute, hsc_group, hsc_passing_year, hsc_result, 
         ssc_institute, ssc_group, ssc_passing_year, ssc_result, 
         parent_income, source_info, payment_type, password
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     
-    $stmt->bind_param("ssssssssssssssssssssssssssss", 
-        $fullname, $email, $mobileNo, $program, $semester, $levelStudy, $gender,
-        $guardian_name, $guardian_number, $nationality, $division, $district, $upzilla,
-        $postOffice, $postCode, $village, $birthDate,
-        $hscInstitute, $hscGroup, $hscPassingYear, $hscResult,
-        $sscInstitute, $sscGroup, $sscPassingYear, $sscResult,
-        $parent_income, $source_info, $payment_type, $password
-    );
-    
-    if ($stmt->execute()) {
-        $success = true;
+    if ($stmt === false) {
+        $error_message = "Prepare failed: " . $conn->error;
     } else {
-        $error_message = "Error: " . $stmt->error;
+        $stmt->bind_param("sssssssssssssssssssssssssssss", 
+            $fullname, $email, $mobileNo, $program, $semester, $levelStudy, $gender,
+            $guardian_name, $guardian_number, $nationality, $division, $district, $upzilla,
+            $postOffice, $postCode, $village, $birthDate,
+            $hscInstitute, $hscGroup, $hscPassingYear, $hscResult,
+            $sscInstitute, $sscGroup, $sscPassingYear, $sscResult,
+            $parent_income, $source_info, $payment_type, $password
+        );
+        
+        if ($stmt->execute()) {
+            $success = true;
+        } else {
+            $error_message = "Error: " . $stmt->error;
+        }
+        $stmt->close();
     }
-    
-    $stmt->close();
 }
 
 $conn->close();
@@ -127,8 +130,8 @@ $conn->close();
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary-color: #8B0000; /* Maroon */
-            --secondary-color: #DAA520; /* Golden */
+            --primary-color: #8B0000;
+            --secondary-color: #DAA520;
             --light-bg: #f8f9fa;
             --form-bg: #ffffff;
         }
@@ -138,15 +141,15 @@ $conn->close();
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             padding: 20px;
             color: #333;
-            display: flex;
         }
         
         .form-container {
             background-color: var(--form-bg);
-            border-radius: 0 0 10px 10px;
+            border-radius: 10px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.1);
             padding: 30px;
-            margin-bottom: 30px;
+            margin: 0 auto 30px;
+            max-width: 1200px;
         }
         
         .form-title {
@@ -189,10 +192,12 @@ $conn->close();
             margin-top: 20px;
             transition: all 0.3s ease;
             display: inline-flex;
+            color: white;
         }
         
         .submit-btn:hover {
-            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
         
         .form-control, .form-select {
@@ -207,10 +212,7 @@ $conn->close();
             box-shadow: 0 0 0 0.25rem rgba(139, 0, 0, 0.25);
         }
         
-
-        
         .thank-you {
-            display: none;
             text-align: center;
             padding: 40px 20px;
         }
@@ -234,16 +236,6 @@ $conn->close();
             margin: 0 auto 30px;
         }
         
-        @media (max-width: 768px) {
-            .form-container {
-                padding: 20px;
-            }
-            
-            .university-name {
-                font-size: 2rem;
-            }
-        }
-        
         .input-group-text {
             background-color: var(--primary-color);
             color: white;
@@ -260,6 +252,7 @@ $conn->close();
             top: 50%;
             transform: translateY(-50%);
             cursor: pointer;
+            z-index: 10;
         }
         
         .error-message {
@@ -276,18 +269,13 @@ $conn->close();
             border-radius: 3px;
             overflow: hidden;
         }
-        
-        .strength-meter {
-            height: 100%;
-            width: 0%;
-            transition: width 0.3s, background-color 0.3s;
-        }
     </style>
 </head>
 <body>
+    <div class="container">
         <div class="form-container">
             <?php if ($success): ?>
-                <div class="thank-you" id="thankYou" style="display: block;">
+                <div class="thank-you" id="thankYou">
                     <i class="fas fa-check-circle"></i>
                     <h3>Thank You for Applying!</h3>
                     <p>Your application has been submitted successfully. Our admission team will review your application and contact you shortly.</p>
@@ -332,30 +320,29 @@ $conn->close();
                                 </select>
                             </div>
                             
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label required">Program</label>
-                            <select class="form-select" name="program" id="program" required>
-                        <option value="" disabled selected>Select a program</option>
-                        <option value="BBA in Accounting">BBA in Accounting</option>
-                        <option value="BBA in Finance">BBA in Finance</option>
-                        <option value="BBA in Human Resource Management">BBA in Human Resource Management</option>
-                        <option value="BBA in Management">BBA in Management</option>
-                        <option value="BBA in Marketing">BBA in Marketing</option>
-                        <option value="BSc in Computer Science and Engineering">BSc in Computer Science and Engineering</option>
-                        <option value="BSc in Civil Engineering">BSc in Civil Engineering</option>
-                        <option value="BSc in Electrical and Electronic Engineering">BSc in Electrical and Electronic Engineering</option>
-                        <option value="BSc in Mechanical Engineering">BSc in Mechanical Engineering</option>
-                        <option value="BSEEE in Electrical and Electronic Engineering">BSEEE in Electrical and Electronic Engineering</option>
-                        <option value="BSAg in Agriculture">BSAg in Agriculture</option>
-                        <option value="BSN in Nursing (Basic)">BSN in Nursing (Basic)</option>
-                        <option value="BSN in Nursing (Post Basic)">BSN in Nursing (Post Basic)</option>
-                        <option value="BATHM in Tourism and Hospitality Management">BATHM in Tourism and Hospitality Management</option>
-                        <option value="BSECO in Economics">BSECO in Economics</option>
-                        <option value="BA in English">BA in English</option>
-                        <option value="LLB (Honours)">LLB (Honours)</option>
-
-                        </select>
-                        </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label required">Program</label>
+                                <select class="form-select" name="program" id="program" required>
+                                    <option value="" disabled selected>Select a program</option>
+                                    <option value="BBA in Accounting">BBA in Accounting</option>
+                                    <option value="BBA in Finance">BBA in Finance</option>
+                                    <option value="BBA in Human Resource Management">BBA in Human Resource Management</option>
+                                    <option value="BBA in Management">BBA in Management</option>
+                                    <option value="BBA in Marketing">BBA in Marketing</option>
+                                    <option value="BSc in Computer Science and Engineering">BSc in Computer Science and Engineering</option>
+                                    <option value="BSc in Civil Engineering">BSc in Civil Engineering</option>
+                                    <option value="BSc in Electrical and Electronic Engineering">BSc in Electrical and Electronic Engineering</option>
+                                    <option value="BSc in Mechanical Engineering">BSc in Mechanical Engineering</option>
+                                    <option value="BSEEE in Electrical and Electronic Engineering">BSEEE in Electrical and Electronic Engineering</option>
+                                    <option value="BSAg in Agriculture">BSAg in Agriculture</option>
+                                    <option value="BSN in Nursing (Basic)">BSN in Nursing (Basic)</option>
+                                    <option value="BSN in Nursing (Post Basic)">BSN in Nursing (Post Basic)</option>
+                                    <option value="BATHM in Tourism and Hospitality Management">BATHM in Tourism and Hospitality Management</option>
+                                    <option value="BSECO in Economics">BSECO in Economics</option>
+                                    <option value="BA in English">BA in English</option>
+                                    <option value="LLB (Honours)">LLB (Honours)</option>
+                                </select>
+                            </div>
                             
                             <div class="col-md-6 mb-3">
                                 <label class="form-label required">Full Name</label>
@@ -577,7 +564,7 @@ $conn->close();
                 </div>
             <?php endif; ?>
         </div>
-        
+    </div>
 
     <script>
         // Form validation function
@@ -643,6 +630,7 @@ $conn->close();
             
             // Check length
             if (password.length >= 4) strength += 25;
+            if (password.length >= 8) strength += 25;
             
             // Check for uppercase
             if (/[A-Z]/.test(password)) strength += 25;
@@ -650,7 +638,9 @@ $conn->close();
             // Check for numbers
             if (/[0-9]/.test(password)) strength += 25;
             
-            // Set color
+            // Set width and color
+            strengthMeter.style.width = strength + '%';
+            
             if (strength < 50) {
                 strengthMeter.style.backgroundColor = '#dc3545';
             } else if (strength < 75) {
@@ -659,11 +649,6 @@ $conn->close();
                 strengthMeter.style.backgroundColor = '#28a745';
             }
         });
-        
-        // Automatically scroll to top after submission
-        <?php if ($success): ?>
-            window.scrollTo(0, 0);
-        <?php endif; ?>
         
         // Set min/max dates for birth date
         const today = new Date();
