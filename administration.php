@@ -72,8 +72,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['studentlogin'])) {
         * { box-sizing: border-box; }
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #74ebd5, #acb6e5);
+            font-family: 'Segoe UI';
+            background: linear-gradient(135deg, #1e2a38, #acb6e5);
             min-height: 100vh;
         }
         .container {
@@ -157,6 +157,43 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['studentlogin'])) {
             font-size: 24px;
             display: block;
             margin-bottom: 10px;
+        }
+/* ===============================new======================= */
+        .sidebar {
+            width: 280px;
+            background-color: #1b2635;
+            color: white;
+            padding: 30px;
+            min-height: 100vh;
+        }
+        .sidebar h2 {
+            text-align: center;
+            color: #00bfff;
+        }
+        .sidebar a {
+            text-decoration: none;
+        }
+        .sidebar button {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            background-color: #00bfff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .sidebar button:hover {
+            transform: scale(1.03);
+            background-color: #0099cc;
+        }
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            background-color: #f4f4f4;
+            min-height: 100vh;
         }
     </style>
 </head>
@@ -254,8 +291,67 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['studentlogin'])) {
             <?php endif; ?>
         </div>
   <!-- -- ==================== FACULTY Dashboard ==================== -- -->
-    <?php elseif (isset($_GET['facultylogin'])): ?>
-        <div class="routine-page">
+   <?php elseif (isset($_GET['facultylogin'])): ?>
+    <div style="
+        margin-top:20px;width: 280px;background: linear-gradient(145deg, #1a273a, #22364d);padding: 30px;color: white;border-radius: 15px;box-shadow: 8px 8px 15px #141c28, -8px -8px 15px #22344c;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    ">
+        <h2 style="text-align: center; color: #00bfff; text-shadow: 1px 1px 3px black;">SKST FACULTY PORTAL</h2>
+        <div style="display: flex; flex-direction: column; gap: 17px; margin-top: 30px;">
+            <!-- View Biodata -->
+            <a href="?faculty_biodata=true" style="text-decoration: none;">
+                <button style="display: flex;align-items: center;width: 100%;padding: 12px;border: none;background-color: <?= isset($_GET['faculty_biodata']) ? '#3498db' : '#2c3e50' ?>;color: white;border-radius: 10px;cursor: pointer;box-shadow: inset -2px -2px 5px rgba(255,255,255,0.1), inset 2px 2px 8px rgba(0,0,0,0.4);
+                transition: all 0.2s ease;
+                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 15px rgba(0,0,0,0.3)';"
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='inset -2px -2px 5px rgba(255,255,255,0.1), inset 2px 2px 8px rgba(0,0,0,0.4)';">
+                    <span style="margin-right: 10px;">👤</span>View Biodata
+                </button>
+            </a>
+
+            <!-- Add Faculty -->
+            <a href="?add_faculty=true" style="text-decoration: none;">
+                <button style="display: flex;align-items: center;width: 100%;
+                padding: 12px;border: none;background-color: <?= isset($_GET['add_faculty']) ? '#3498db' : '#2c3e50' ?>;color: white;border-radius: 10px;cursor: pointer;box-shadow: inset -2px -2px 5px rgba(255,255,255,0.1), inset 2px 2px 8px rgba(0,0,0,0.4);transition: all 0.2s ease;
+                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 15px rgba(0,0,0,0.3)';"
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='inset -2px -2px 5px rgba(255,255,255,0.1), inset 2px 2px 8px rgba(0,0,0,0.4)';">
+                    <span style="margin-right: 10px;">➕</span>Add Faculty
+                </button>
+            </a>
+
+            <!-- Edit Biodata -->
+            <a href="?edit_faculty_biodata=true" style="text-decoration: none;">
+                <button style="display: flex;align-items: center;width: 100%;padding: 12px;border: none;background-color: <?= isset($_GET['edit_faculty_biodata']) ? '#3498db' : '#2c3e50' ?>;color: white;border-radius: 10px;cursor: pointer;box-shadow: inset -2px -2px 5px rgba(255,255,255,0.1), inset 2px 2px 8px rgba(0,0,0,0.4);transition: all 0.2s ease;
+                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 15px rgba(0,0,0,0.3)';"
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='inset -2px -2px 5px rgba(255,255,255,0.1), inset 2px 2px 8px rgba(0,0,0,0.4)';">
+                    <span style="margin-right: 10px;">✏️</span>Edit Biodata
+                </button>
+            </a>
+
+            <!-- Remove Faculty -->
+            <a href="?remove_faculty=true" style="text-decoration: none;">
+                <button style="display: flex;align-items: center;width: 100%;padding: 12px;border: none;background-color: <?= isset($_GET['remove_faculty']) ? '#3498db' : '#2c3e50' ?>; color: white;border-radius: 10px;cursor: pointer;box-shadow: inset -2px -2px 5px rgba(255,255,255,0.1), inset 2px 2px 8px rgba(0,0,0,0.4);
+                transition: all 0.2s ease;
+                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 15px rgba(0,0,0,0.3)';"
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='inset -2px -2px 5px rgba(255,255,255,0.1), inset 2px 2px 8px rgba(0,0,0,0.4)';">
+                    <span style="margin-right: 10px;">🗑️</span>Remove Faculty
+                </button>
+            </a>
+
+            <!-- Back -->
+            <a href="?faculty_info=true" style="text-decoration: none;">
+                <button style=" display: flex; align-items: center; width: 100%; padding: 12px;border: none;background-color: #2c3e50;color: white;border-radius: 10px;cursor: pointer;box-shadow: inset -2px -2px 5px rgba(255,255,255,0.1), inset 2px 2px 8px rgba(0,0,0,0.4);transition: all 0.2s ease;
+                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 15px rgba(0,0,0,0.3)';"
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='inset -2px -2px 5px rgba(255,255,255,0.1), inset 2px 2px 8px rgba(0,0,0,0.4)';">
+                    <span style="margin-right: 10px;">🔙</span>Back
+                </button>
+            </a>
+        </div>
+    </div>
+
+
+
+
+        <!-- <div class="routine-page">
             <h2>Faculty Information</h2>
             <div class="cards">
                 <a href="?faculty_biodata=true" class="card"><button><span>👤</span>View Biodata</button></a>
@@ -263,51 +359,42 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['studentlogin'])) {
                  <a href="?remove_faculty=true" class="card"><button><span>⚠️</span>Remove Faculty</button></a>
                 <a href="administration.php" class="card"><button><span>🔙</span>Back to Dashboard</button></a>
             </div>
-        </div>
-  <!-- -- ==================== Individual FACULTY Dashboard ==================== -- -->
-    <?php elseif (isset($_GET['faculty_info'])): ?>
-        <div class="routine-page">
-            <h2>Faculty Information</h2>
-            <div class="cards">
-                <a href="?Faculty_Intro=true" class="card"><button><span>👤</span>Faculty Intro</button></a>
-                <a href="?add_faculty=true" class="card"><button><span>✏️</span>Add new</button></a>
-                <a href="administration.php" class="card"><button><span>🔙</span>Back to Dashboard</button></a>
-            </div>
-        </div>
-  <!-- -- ==================== Add FACULTY ==================== --        -->
-<?php elseif (isset($_GET['add_faculty'])): ?>
+        </div> -->
+        <div style="display:flex; padding: 40px; background-color: #f4f4f4; border-top-left-radius: 20px; border-bottom-left-radius: 20px;">
     <?php
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_faculty'])) {
-        $faculty_id = $_POST['faculty_id'];
-        $name = $_POST['name'];
-        $email = $_POST['email'];
-        $password = $_POST['password']; // In real applications, use password_hash()!
-        $department = $_POST['department'];
-        $address = $_POST['address'];
-        $phone = $_POST['phone'];
-        $room_number = $_POST['room_number'];
-        $salary = $_POST['salary'];
+    $message = ""; // To hold success or error message
 
-        // Check if faculty_id or email already exists
-        $check_stmt = $conn->prepare("SELECT * FROM faculty WHERE faculty_id = ? OR email = ?");
-        $check_stmt->bind_param("ss", $faculty_id, $email);
-        $check_stmt->execute();
-        $check_result = $check_stmt->get_result();
+    if (isset($_GET['add_faculty'])) {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_faculty'])) {
+            $faculty_id = $_POST['faculty_id'];
+            $name = $_POST['name'];
+            $email = $_POST['email'];
+            $password = $_POST['password']; // Use password_hash in real apps
+            $department = $_POST['department'];
+            $address = $_POST['address'];
+            $phone = $_POST['phone'];
+            $room_number = $_POST['room_number'];
+            $salary = $_POST['salary'];
 
-        if ($check_result->num_rows > 0) {
-            echo "<script>alert('Faculty ID or Email already exists.');</script>";
-        } else {
-            // Insert new faculty
-            $stmt = $conn->prepare("INSERT INTO faculty (faculty_id, name, email, password, department, address, phone, room_number, salary) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("sssssssss", $faculty_id, $name, $email, $password, $department, $address, $phone, $room_number, $salary);
+            // Check if faculty_id or email already exists
+            $check_stmt = $conn->prepare("SELECT * FROM faculty WHERE faculty_id = ? OR email = ?");
+            $check_stmt->bind_param("ss", $faculty_id, $email);
+            $check_stmt->execute();
+            $check_result = $check_stmt->get_result();
 
-            if ($stmt->execute()) {
-                echo "<script>alert('New faculty added successfully.'); window.location='?add_faculty=true';</script>";
+            if ($check_result->num_rows > 0) {
+                $message = "<span style='color: red;'>❌ Faculty ID or Email already exists.</span>";
             } else {
-                echo "<script>alert('Error adding faculty.');</script>";
+                $stmt = $conn->prepare("INSERT INTO faculty (faculty_id, name, email, password, department, address, phone, room_number, salary) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                $stmt->bind_param("sssssssss", $faculty_id, $name, $email, $password, $department, $address, $phone, $room_number, $salary);
+
+                if ($stmt->execute()) {
+                    $message = "<span style='color: green;'>✅ Faculty added successfully.</span>";
+                } else {
+                    $message = "<span style='color: red;'>❌ Error adding faculty.</span>";
+                }
             }
         }
-    }
     ?>
     <div class="routine-page">
         <h2>Add New Faculty</h2>
@@ -322,11 +409,95 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['studentlogin'])) {
                 <input type="text" name="phone" placeholder="Phone" required />
                 <input type="text" name="room_number" placeholder="Room Number" required />
                 <input type="text" name="salary" placeholder="Salary" required />
-                <button type="submit" name="add_faculty">➕ Add Faculty</button>
-                <a href="?faculty_info=true" type="back"><button type="button">🔙 Back</button></a>
+
+                <div style="display: flex; align-items: center; gap: 12px; margin-top: 10px;">
+                    <button type="submit" name="add_faculty">➕ Add Faculty</button>
+                    <?= $message ?>
+                </div>
+
+                <div style="margin-top: 15px;">
+                    <a href="?faculty_info=true"><button type="button">🔙 Back</button></a>
+                </div>
             </form>
         </div>
     </div>
+    <?php } 
+ 
+        elseif (isset($_GET['edit_faculty_biodata'])) {
+            include 'edit_faculty_section.php';
+        } elseif (isset($_GET['remove_faculty'])) {
+            include 'remove_faculty_section.php';
+        } else {
+            echo "<h2>Welcome to the Faculty Dashboard</h2><p>Select an action from the left menu.</p>";
+        }
+        ?>
+    </div>
+</div>
+
+  <!-- -- ==================== Individual FACULTY Dashboard ==================== -- -->
+    <?php elseif (isset($_GET['faculty_info'])): ?>
+        <div class="routine-page">
+            <h2>Faculty Information</h2>
+            <div class="cards">
+                <a href="?Faculty_Intro=true" class="card"><button><span>👤</span>Faculty Intro</button></a>
+                <a href="?add_faculty=true" class="card"><button><span>✏️</span>Add new</button></a>
+                <a href="administration.php" class="card"><button><span>🔙</span>Back to Dashboard</button></a>
+            </div>
+        </div>
+        
+  <!-- -- ==================== Add FACULTY ==================== --        -->
+<?php elseif (isset($_GET['add_faculty'])): ?>
+    <?php
+    // if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_faculty'])) {
+    //     $faculty_id = $_POST['faculty_id'];
+    //     $name = $_POST['name'];
+    //     $email = $_POST['email'];
+    //     $password = $_POST['password']; // In real applications, use password_hash()!
+    //     $department = $_POST['department'];
+    //     $address = $_POST['address'];
+    //     $phone = $_POST['phone'];
+    //     $room_number = $_POST['room_number'];
+    //     $salary = $_POST['salary'];
+
+    //     // Check if faculty_id or email already exists
+    //     $check_stmt = $conn->prepare("SELECT * FROM faculty WHERE faculty_id = ? OR email = ?");
+    //     $check_stmt->bind_param("ss", $faculty_id, $email);
+    //     $check_stmt->execute();
+    //     $check_result = $check_stmt->get_result();
+
+    //     if ($check_result->num_rows > 0) {
+    //         echo "<script>alert('Faculty ID or Email already exists.');</script>";
+    //     } else {
+    //         // Insert new faculty
+    //         $stmt = $conn->prepare("INSERT INTO faculty (faculty_id, name, email, password, department, address, phone, room_number, salary) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    //         $stmt->bind_param("sssssssss", $faculty_id, $name, $email, $password, $department, $address, $phone, $room_number, $salary);
+
+    //         if ($stmt->execute()) {
+    //             echo "<script>alert('New faculty added successfully.'); window.location='?add_faculty=true';</script>";
+    //         } else {
+    //             echo "<script>alert('Error adding faculty.');</script>";
+    //         }
+    //     }
+    // }
+    // ?>
+    // <div class="routine-page">
+    //     <h2>Add New Faculty</h2>
+    //     <div class="container">
+    //         <form method="POST">
+    //             <input type="text" name="faculty_id" placeholder="Faculty ID" required />
+    //             <input type="text" name="name" placeholder="Name" required />
+    //             <input type="email" name="email" placeholder="Email" required />
+    //             <input type="text" name="password" placeholder="Password" required />
+    //             <input type="text" name="department" placeholder="Department" required />
+    //             <input type="text" name="address" placeholder="Address" required />
+    //             <input type="text" name="phone" placeholder="Phone" required />
+    //             <input type="text" name="room_number" placeholder="Room Number" required />
+    //             <input type="text" name="salary" placeholder="Salary" required />
+    //             <button type="submit" name="add_faculty">➕ Add Faculty</button>
+    //             <a href="?faculty_info=true" type="back"><button type="button">🔙 Back</button></a>
+    //         </form>
+    //     </div>
+    // </div>
   <!-- -- ==================== Edit FACULTY Biodata ==================== -- -->
 <?php elseif (isset($_GET['edit_faculty_biodata'])): ?>
     <?php
@@ -515,11 +686,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['studentlogin'])) {
   <!-- -- ==================== Student Dashboard ==================== -- -->
     <?php elseif (isset($_GET['studentlogin'])): ?>
         <div class="routine-page">
-            <h2>Faculty Information</h2>
+            <h2>Student Information</h2>
             <div class="cards">
                 <a href="?student_biodata=true" class="card"><button><span>👤</span>View Biodata</button></a>
                 <a href="?edit_student_biodata=true" class="card"><button><span>✏️</span>Edit Biodata</button></a>
-                 <a href="?remove_student=true" class="card"><button><span>⚠️</span>Remove Faculty</button></a>
+                 <a href="?remove_student=true" class="card"><button><span>⚠️</span>Remove Student</button></a>
                 <a href="administration.php" class="card"><button><span>🔙</span>Back to Dashboard</button></a>
             </div>
         </div>
