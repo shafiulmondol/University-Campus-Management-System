@@ -138,24 +138,7 @@ $conn->close();
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             padding: 20px;
             color: #333;
-        }
-        
-        .header {
-            background: linear-gradient(135deg, var(--primary-color), #6a0a0a);
-            color: white;
-            border-radius: 10px 10px 0 0;
-            padding: 25px 0;
-            text-align: center;
-            margin-bottom: 0;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        
-        .university-name {
-            font-size: 2.5rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+            display: flex;
         }
         
         .form-container {
@@ -193,11 +176,11 @@ $conn->close();
         
         .required::after {
             content: " *";
-            color: #dc3545;
+            color: red;
         }
         
         .submit-btn {
-            background: linear-gradient(135deg, var(--primary-color), #6a0a0a);
+            background: linear-gradient(135deg, var(--primary-color), #5a0c0cff);
             border: none;
             padding: 12px 35px;
             font-size: 1.1rem;
@@ -205,13 +188,11 @@ $conn->close();
             border-radius: 5px;
             margin-top: 20px;
             transition: all 0.3s ease;
-            display: inline-block;
+            display: inline-flex;
         }
         
         .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(139, 0, 0, 0.3);
-            background: linear-gradient(135deg, #6a0a0a, var(--primary-color));
+            color: white;
         }
         
         .form-control, .form-select {
@@ -226,35 +207,7 @@ $conn->close();
             box-shadow: 0 0 0 0.25rem rgba(139, 0, 0, 0.25);
         }
         
-        .bottom-bar {
-            background-color: var(--primary-color);
-            color: white;
-            border-radius: 10px;
-            padding: 25px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            margin-top: 30px;
-        }
-        
-        .bottom-bar img {
-            height: 80px;
-            width: auto;
-            margin-bottom: 15px;
-            background-color: white;
-            padding: 10px;
-            border-radius: 10px;
-        }
-        
-        .bottom-bar p {
-            margin: 8px 0;
-            font-size: 1rem;
-        }
-        
-        .bottom-bar .university-name {
-            font-size: 1.8rem;
-            margin-bottom: 10px;
-            color: var(--secondary-color);
-        }
+
         
         .thank-you {
             display: none;
@@ -332,12 +285,6 @@ $conn->close();
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="university-name">SKST University</div>
-            <p>Admission Application Form</p>
-        </div>
-        
         <div class="form-container">
             <?php if ($success): ?>
                 <div class="thank-you" id="thankYou" style="display: block;">
@@ -385,16 +332,30 @@ $conn->close();
                                 </select>
                             </div>
                             
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label required">Program</label>
-                                <select class="form-select" name="program" id="program" required>
-                                    <option value="">Select Program</option>
-                                    <option value="BSc in Computer Science">BSc in Computer Science</option>
-                                    <option value="BBA">Bachelor of Business Administration</option>
-                                    <option value="MBA">Master of Business Administration</option>
-                                    <option value="BSc in Electrical Engineering">BSc in Electrical Engineering</option>
-                                </select>
-                            </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label required">Program</label>
+                            <select class="form-select" name="program" id="program" required>
+                        <option value="" disabled selected>Select a program</option>
+                        <option value="BBA in Accounting">BBA in Accounting</option>
+                        <option value="BBA in Finance">BBA in Finance</option>
+                        <option value="BBA in Human Resource Management">BBA in Human Resource Management</option>
+                        <option value="BBA in Management">BBA in Management</option>
+                        <option value="BBA in Marketing">BBA in Marketing</option>
+                        <option value="BSc in Computer Science and Engineering">BSc in Computer Science and Engineering</option>
+                        <option value="BSc in Civil Engineering">BSc in Civil Engineering</option>
+                        <option value="BSc in Electrical and Electronic Engineering">BSc in Electrical and Electronic Engineering</option>
+                        <option value="BSc in Mechanical Engineering">BSc in Mechanical Engineering</option>
+                        <option value="BSEEE in Electrical and Electronic Engineering">BSEEE in Electrical and Electronic Engineering</option>
+                        <option value="BSAg in Agriculture">BSAg in Agriculture</option>
+                        <option value="BSN in Nursing (Basic)">BSN in Nursing (Basic)</option>
+                        <option value="BSN in Nursing (Post Basic)">BSN in Nursing (Post Basic)</option>
+                        <option value="BATHM in Tourism and Hospitality Management">BATHM in Tourism and Hospitality Management</option>
+                        <option value="BSECO in Economics">BSECO in Economics</option>
+                        <option value="BA in English">BA in English</option>
+                        <option value="LLB (Honours)">LLB (Honours)</option>
+
+                        </select>
+                        </div>
                             
                             <div class="col-md-6 mb-3">
                                 <label class="form-label required">Full Name</label>
@@ -617,14 +578,6 @@ $conn->close();
             <?php endif; ?>
         </div>
         
-        <div class="bottom-bar">
-            <div class="university-name">SKST University</div>
-            <p>4 Embankment Drive Road, Sector-10, Uttara Model Town, Dhaka-1230.</p>
-            <p>Phone: (88 02) 55091801-5, Mobile: +88 01714 014 933, 01810030041-9, 01325080581-9</p>
-            <p>Fax: (880-2) 5895 2625, Email: info@skst.edu</p>
-            <p>© 2025 SKST University. All Rights Reserved.</p>
-        </div>
-    </div>
 
     <script>
         // Form validation function
@@ -689,19 +642,13 @@ $conn->close();
             let strength = 0;
             
             // Check length
-            if (password.length >= 8) strength += 25;
+            if (password.length >= 4) strength += 25;
             
             // Check for uppercase
             if (/[A-Z]/.test(password)) strength += 25;
             
             // Check for numbers
             if (/[0-9]/.test(password)) strength += 25;
-            
-            // Check for special characters
-            if (/[^A-Za-z0-9]/.test(password)) strength += 25;
-            
-            // Update strength meter
-            strengthMeter.style.width = strength + '%';
             
             // Set color
             if (strength < 50) {
