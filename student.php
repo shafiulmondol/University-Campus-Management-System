@@ -19,13 +19,16 @@ $error = "";
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
     $id = intval($_POST['id']);
     $password = $_POST['password'];
-    $stmt = $conn->prepare("SELECT password FROM student_registration WHERE id = ?");
+    $stmt = $conn->prepare("SELECT first_name, last_name,password FROM student_registration WHERE id = ?");
     $stmt->bind_param("i", $id);
     $stmt->execute();
     $result = $stmt->get_result();
     if ($row = $result->fetch_assoc()) {
         if ($row['password'] === $password) {
             $_SESSION['id'] = $id;
+           $_SESSION['first_name'] = $row['first_name'];
+$_SESSION['last_name'] = $row['last_name'];
+
             header("Location: student.php");
             exit();
         } else $error = "Incorrect password.";
@@ -42,8 +45,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
         * { box-sizing: border-box; }
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #74ebd5, #acb6e5);
+            font-family: 'Segoe UI';
+            background: linear-gradient(135deg, #32465fff, #566fdcff);
             min-height: 100vh;
         }
         .container {
@@ -58,7 +61,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
             color: #2c3e50;
             text-align: center;
         }
-        input[type=number], input[type=password],input[type=text] {
+        input[type=number], input[type=password], input[type=text] {
             width: 100%;
             padding: 12px;
             margin: 10px 0 20px 0;
@@ -100,31 +103,74 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
         .dashboard, .routine-page {
             padding: 40px 20px;
         }
+        .heading{
+            background-color: #00bfff;
+            padding:0;
+            width: 1000px;
+            height: 60px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 9px 10px #1b2c46ff;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            border: 5px solid #1b2c46ff;
+
+        }
+        .heading h2{
+            margin: 0;
+            padding: 0;
+            font-size: 35px;
+            color: #3f043eff;
+        }
+        .notice {
+           background-color: #1b2c46ff;
+            padding:0;
+            width: 800px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 9px 10px rgba(250, 2, 2, 0.8);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .notice h1{
+            color: #00bfff;
+        }
         .cards {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             gap: 25px;
+            
+        }
+        .cards a button{
+            color: #16c3fdff;
+            font-size: 15px;
         }
         .card button {
-            background: white;
-            padding: 25px;
-            width: 220px;
+            background-color: #1b2c46ff;
+            padding: 30px;
+            width: 230px;
             border-radius: 12px;
             text-align: center;
-            transition: transform 0.3s, box-shadow 0.3s;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.5s, box-shadow 0.3s;
+            box-shadow: 0 4px 10px rgba(216, 254, 4, 0.99);
             text-decoration: none;
             color: #2c3e50;
             font-size: 13px;
             font-weight: 500;
         }
         .card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-10px);
             box-shadow: 0 8px 16px rgba(0,0,0,0.2);
         }
+       .cards a :hover{
+        /* background-color: #00bfff; */
+        box-shadow: 0 10px 14px rgba(4, 216, 254, 0.99);
+       }
         .card span {
-            font-size: 24px;
+            font-size: 40px;
             display: block;
             margin-bottom: 10px;
         }
@@ -237,16 +283,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
     <?php else: ?>
         <!-- Main Dashboard -->
         <div class="dashboard">
-            <h2>Welcome Student ID: <?= htmlspecialchars($_SESSION['id']) ?></h2>
+            
             <div class="cards">
+                <div class="heading"><h2>👨‍💼 Welcome <?= htmlspecialchars($_SESSION['first_name'] . ' ' . $_SESSION['last_name']) ?></h2>
+                </div>
                 <a href="?info=true" class="card"><button><span>👤</span>Personal Information</button></a>
                 <a href="#" class="card"><button><span>✅</span>View Courses</button></a>
                 <a href="#" class="card"><button><span>📚</span>Course Offering</button></a>
                 <a href="#" class="card"><button><span>💳</span>Bank History</button></a>
                 <a href="?routine=true" class="card"><button><span>📆</span>Routine</button></a>
                 <a href="?logout=true" class="card" style="background-color:#e74c3c; color:white;"><button><span>🚪</span>Logout</button></a>
+                <div class="notice"><h1 ><i>Note: Please logout after managing the system</i></h1></div>
             </div>
-            <h1 style="color: red;"><i>Note: Please logout after visiting</i></h1>
+            
         </div>
     <?php endif; ?>
 
