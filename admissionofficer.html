@@ -1,121 +1,207 @@
+<?php
+session_start();
+
+$conn = new mysqli("localhost", "root", "", "skst_university");
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Messages holder
+$message = "";
+
+if (isset($_POST['register'])) {
+    $name = trim($_POST['name']);
+    $email = trim($_POST['email']);
+    $password = $_POST['password'];
+    $confirm_password = $_POST['confirm_password'];
+
+    if ($password !== $confirm_password) {
+        $message = "❌ Passwords do not match!";
+    } else {
+        // Check if email exists
+        $check = $conn->prepare("SELECT id FROM student_registration WHERE email = ?");
+        $check->bind_param("s", $email);
+        $check->execute();
+        $check->store_result();
+
+        if ($check->num_rows > 0) {
+            $message = "❌ Email already registered!";
+        } else {
+            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+            $insert = $conn->prepare("INSERT INTO student_registration (name, email, password) VALUES (?, ?, ?)");
+            $insert->bind_param("sss", $name, $email, $hashed_password);
+            if ($insert->execute()) {
+                $message = "✅ Registration successful! You can now login.";
+            } else {
+                $message = "❌ Registration failed: " . $conn->error;
+            }
+            $insert->close();
+        }
+        $check->close();
+    }
+}
+
+if (isset($_POST['login'])) {
+    $email = trim($_POST['email']);
+    $password = $_POST['password'];
+
+    $stmt = $conn->prepare("SELECT id, name, password FROM student_registration WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $stmt->store_result();
+
+    if ($stmt->num_rows === 1) {
+        $stmt->bind_result($id, $name, $hashed_password);
+        $stmt->fetch();
+
+        if (password_verify($password, $hashed_password)) {
+            $_SESSION['user_id'] = $id;
+            $_SESSION['user_name'] = $name;
+            $message = "✅ Login successful! Welcome, $name.";
+        } else {
+            $message = "❌ Incorrect password!";
+        }
+    } else {
+        $message = "❌ No user found with this email!";
+    }
+
+    $stmt->close();
+}
+
+$conn->close();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <title>Login & Register Form</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
+<meta charset="UTF-8" />
+<title>Login & Register Form</title>
+<style>
+    * {
+        margin: 0; padding: 0; box-sizing: border-box;
+        font-family: Arial, sans-serif;
+    }
+    body {
+        height: 100vh;
+        display: flex; justify-content: center; align-items: center;
+        background: linear-gradient(135deg, #74ebd5, #9face6);
+    }
+    .container {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        width: 380px;
+    }
+    .form-box {
+        display: none;
+    }
+    .form-box.active {
+        display: block;
+    }
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #333;
+    }
+    input {
+        width: 100%;
+        padding: 12px;
+        margin: 10px 0;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+    }
+    button {
+        width: 100%;
+        padding: 12px;
+        background-color: #6c5ce7;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+    button:hover {
+        background-color: #5a4bcf;
+    }
+    p {
+        text-align: center;
+        margin-top: 15px;
+        font-size: 14px;
+    }
+    a {
+        color: #6c5ce7;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    a:hover {
+        text-decoration: underline;
+    }
+    .message {
+        text-align: center;
+        margin-bottom: 15px;
+        font-weight: bold;
+        color: #d63031;
+    }
+    .message.success {
+        color: #2dce89;
+    }
+</style>
 
-        body {
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: linear-gradient(135deg, #74ebd5, #9face6);
-        }
-
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            width: 380px;
-        }
-
-        .form-box {
-            display: none;
-        }
-
-        .form-box.active {
-            display: block;
-        }
-
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            font-size: 16px;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: #6c5ce7;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        button:hover {
-            background-color: #5a4bcf;
-        }
-
-        p {
-            text-align: center;
-            margin-top: 15px;
-            font-size: 14px;
-        }
-
-        a {
-            color: #6c5ce7;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-    </style>
-
-    <script>
-        function showForm(formId) {
-            document.getElementById("login-form").classList.remove("active");
-            document.getElementById("register-form").classList.remove("active");
-            document.getElementById(formId).classList.add("active");
-        }
-    </script>
+<script>
+function showForm(formId) {
+    document.getElementById("login-form").classList.remove("active");
+    document.getElementById("register-form").classList.remove("active");
+    document.getElementById(formId).classList.add("active");
+}
+// If PHP sends a message about registration success, automatically switch to login form
+window.onload = function() {
+    const msg = "<?php echo $message; ?>";
+    if (msg.includes("Registration successful")) {
+        showForm('login-form');
+    } else if (msg.includes("Login successful")) {
+        // optionally you can redirect or show something else
+    }
+};
+</script>
 </head>
 <body>
-    <div class="container">
-        <!-- Login Form -->
-        <div class="form-box active" id="login-form">
-            <form action="backend/auth.php" method="POST">
-                <h2>Login</h2>
-                <input type="email" name="email" placeholder="Email" required />
-                <input type="password" name="password" placeholder="Password" required />
-                <button type="submit" name="login">Login</button>
-                <p>Don't have an account? <a onclick="showForm('register-form')">Register</a></p>
-            </form>
-        </div>
 
-        <!-- Register Form -->
-        <div class="form-box" id="register-form">
-            <form action="backend/auth.php" method="POST">
-                <h2>Register</h2>
-                <input type="text" name="name" placeholder="Full Name" required />
-                <input type="email" name="email" placeholder="Email" required />
-                <input type="password" name="password" placeholder="Password" required />
-                <input type="password" name="confirm_password" placeholder="Confirm Password" required />
-                <button type="submit" name="register">Register</button>
-                <p>Already have an account? <a onclick="showForm('login-form')">Login</a></p>
-            </form>
+<div class="container">
+
+    <?php if($message): ?>
+        <div class="message <?php echo (strpos($message, '✅') === 0) ? 'success' : ''; ?>">
+            <?php echo $message; ?>
         </div>
+    <?php endif; ?>
+
+    <!-- Login Form -->
+    <div class="form-box active" id="login-form">
+        <form method="POST" action="">
+            <h2>Login</h2>
+            <input type="email" name="email" placeholder="Email" required />
+            <input type="password" name="password" placeholder="Password" required />
+            <button type="submit" name="login">Login</button>
+            <p>Don't have an account? <a onclick="showForm('register-form')">Register</a></p>
+        </form>
     </div>
+
+    <!-- Register Form -->
+    <div class="form-box" id="register-form">
+        <form method="POST" action="">
+            <h2>Register</h2>
+            <input type="text" name="name" placeholder="Full Name" required />
+            <input type="email" name="email" placeholder="Email" required />
+            <input type="password" name="password" placeholder="Password" required />
+            <input type="password" name="confirm_password" placeholder="Confirm Password" required />
+            <button type="submit" name="register">Register</button>
+            <p>Already have an account? <a onclick="showForm('login-form')">Login</a></p>
+        </form>
+    </div>
+
+</div>
+
 </body>
 </html>

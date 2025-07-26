@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>STUDENT REGISTRATION FORM</title>
+    <style>
+        body {
+            background-color: white;
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            text-align: center;
+            font-size: 30px;
+        }
+        table {
+            margin: 0 auto;
+            width: 700px;
+            border-collapse: collapse;
+        }
+        td {
+            padding: 10px;
+        }
+    </style>
+    <script>
+        function showOtherBoardInput() {
+            var boardSelect = document.getElementById("board_select");
+            var otherBoardInput = document.getElementById("other_board");
+            if (boardSelect.value === "Other") {
+                otherBoardInput.style.display = "block";
+            } else {
+                otherBoardInput.style.display = "none";
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>STUDENT REGISTRATION FORM</h1>
+    <form>
+        <table cellpadding="10">
+            <tr>
+                <td>Student name:</td>
+                <td>
+                    <input type="text" size="21" placeholder="First Name" />
+                    -
+                    <input type="text" size="21" placeholder="Last Name" />
+                </td>
+            </tr>
+
+            <tr>
+                <td>Father's Name:</td>
+                <td><input type="text" size="50" /></td>
+            </tr>
+
+            <tr>
+                <td>Mother's Name:</td>
+                <td><input type="text" size="50" /></td>
+            </tr>
+
+            <tr>
+                <td>Date of Birth:</td>
+                <td>
+                    <input type="text" size="3" placeholder="Day" /> -
+                    <input type="text" size="3" placeholder="Month" /> -
+                    <input type="text" size="5" placeholder="Year" />
+                    <i>(DD-MM-YYYY)</i>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Guardian Phone No. :</td>
+                <td>
+                    <input type="text" size="3" value="+88" readonly /> -
+                    <input type="text" size="42" />
+                </td>
+            </tr>
+
+            <tr>
+                <td>Student Phone No. :</td>
+                <td>
+                    <input type="text" size="3" value="+88" readonly /> -
+                    <input type="text" size="42" />
+                </td>
+            </tr>
+
+            <tr>
+                <td>Email id :</td>
+                <td><input type="text" size="50" /></td>
+            </tr>
+
+            <tr>
+                <td colspan="2" align="center"><h3>Student Education Information</h3></td>
+            </tr>
+
+            <tr>
+                <td>Last Exam Passed:</td>
+                <td>
+                    <select name="last_exam" required>
+                        <option value="">--Select--</option>
+                        <option value="SSC">SSC</option>
+                        <option value="HSC">HSC</option>
+                        <option value="O Level">O Level</option>
+                        <option value="A Level">A Level</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Board/University:</td>
+                <td>
+                    <select name="board_select" id="board_select" onchange="showOtherBoardInput()" required>
+                        <option value="">--Select Board--</option>
+                        <option value="Dhaka">Dhaka Board</option>
+                        <option value="Rajshahi">Rajshahi Board</option>
+                        <option value="Comilla">Comilla Board</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <br />
+                    <input type="text" id="other_board" name="other_board" placeholder="Enter other board name" style="display:none; margin-top:5px;" />
+                </td>
+            </tr>
+
+            <tr>
+                <td>Year of Passing:</td>
+                <td><input type="text" name="year" size="10" required /></td>
+            </tr>
+
+            <tr>
+                <td>Institution Name:</td>
+                <td><input type="text" name="institution" size="50" required /></td>
+            </tr>
+
+            <tr>
+                <td>Result/Grade:</td>
+                <td><input type="text" name="result" size="20" required /></td>
+            </tr>
+
+            <tr>
+                <td>Subject/Group:</td>
+                <td>
+                    <select name="group" required>
+                        <option value="">--Select--</option>
+                        <option value="Science">Science</option>
+                        <option value="Commerce">Commerce</option>
+                        <option value="Arts">Arts</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Gender:</td>
+                <td>
+                    <label><input type="radio" name="gender" value="male" required> Male</label>
+                    <label><input type="radio" name="gender" value="female" required> Female</label>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Blood Group:</td>
+                <td>
+                    <select name="bloodgroup" required>
+                        <option value="">--Select--</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                    </select>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Nationality:</td>
+                <td><input type="text" size="50" placeholder="Enter your nationality" required /></td>
+            </tr>
+
+            <tr>
+                <td>Religion:</td>
+                <td>
+                    <select name="religion" required>
+                        <option value="">--Select--</option>
+                        <option value="Islam">Islam</option>
+                        <option value="Hinduism">Hinduism</option>
+                        <option value="Christianity">Christianity</option>
+                        <option value="Buddhism">Buddhism</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Present Address:</td>
+                <td><textarea rows="3" cols="45" required></textarea></td>
+            </tr>
+
+            <tr>
+                <td>Permanent Address:</td>
+                <td><textarea rows="3" cols="45" required></textarea></td>
+            </tr>
+
+            <tr>
+                <td>Department:</td>
+                <td>
+                    <select name="department" required>
+                        <option value="">--Select Department--</option>
+                        <option value="CSE">Computer Science & Engineering (CSE)</option>
+                        <option value="EEE">Electrical & Electronic Engineering (EEE)</option>
+                        <option value="BBA">Business Administration (BBA)</option>
+                        <option value="ENG">English Literature (ENG)</option>
+                    </select>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Upload Photo:</td>
+                <td><input type="file" accept="image/*" required /></td>
+            </tr>
+
+            <tr>
+                <td>Student Signature:</td>
+                <td><input type="file" accept="image/*" required /></td>
+            </tr>
+
+            <tr>
+                <td colspan="2" align="center">
+                    <input type="submit" value="Submit" />
+                    <input type="reset" value="Reset" />
+                </td>
+            </tr>
+        </table>
+    </form>
+</body>
+</html>
