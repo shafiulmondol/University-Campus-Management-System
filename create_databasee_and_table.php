@@ -11,20 +11,19 @@ if (!$conn) {
 }
 
 // Check if database exists and create if needed
-$result = mysqli_query($conn, "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '$dbname'");
-
-if (mysqli_num_rows($result) == 0) {
-    // Database doesn't exist, create it
-    if (!mysqli_query($conn, "CREATE DATABASE `$dbname`")) {
-        die("Error creating database: " . mysqli_error($conn));
+// 
+//second step and easy
+$dbname="practice2";
+$dbcreate= "CREATE DATABASE IF NOT EXISTS $dbname";
+if(mysqli_query($conn,$dbcreate)){
+    echo "'$dbname' create successfully";
+    $dbconnect=mysqli_connect($host, $username, $password,$dbname);
+    if (!$dbconnect){
+        die("connect error".mysqli_connect_error());
     }
-    echo "Database created successfully.<br>";
 }
-
-// Now connect to the specific database
-$dbconnect = mysqli_connect($host, $username, $password, $dbname);
-if (!$dbconnect) {
-    die("Database connection error: " . mysqli_connect_error());
+else {
+    echo "'$dbname' is already exist";
 }
 
 echo "Successfully connected to database '$dbname'";
