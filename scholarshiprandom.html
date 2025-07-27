@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Scholarship Calculator</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f9f9ff;
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #333;
+    }
+
+    form {
+      background: white;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    input[type="submit"] {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      color: white;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    input[type="submit"]:hover {
+      background: linear-gradient(135deg, #512da8, #1e88e5);
+    }
+
+    @media (max-width: 600px) {
+      form {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h2>🎓 Scholarship Calculator</h2>
+
+  <form action="scholarship.php" method="POST">
+    <label for="name">Name:</label>
+    <input type="text" name="name" id="name" required>
+
+    <label for="gender">Gender (male/female):</label>
+    <input type="text" name="gender" id="gender" required>
+
+    <label for="ssc">SSC GPA:</label>
+    <input type="number" name="ssc" id="ssc" step="0.01" required>
+
+    <label for="hsc">HSC GPA:</label>
+    <input type="number" name="hsc" id="hsc" step="0.01" required>
+
+    <label for="cgpa">Semester CGPA (use -1 for 1st semester):</label>
+    <input type="number" name="cgpa" id="cgpa" step="0.01" required>
+
+    <label for="prev_scholarship">Previous Scholarship (use -1 if 1st time):</label>
+    <input type="number" name="prev_scholarship" id="prev_scholarship" value="-1" required>
+
+    <input type="submit" value="Calculate Scholarship">
+  </form>
+
+</body>
+</html>
