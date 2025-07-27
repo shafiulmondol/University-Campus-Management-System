@@ -52,13 +52,11 @@ if ($conn->query($sql) === FALSE) {
     die("Error creating table: " . $conn->error);
 }
 
-// Initialize variables
+// Process form submission
 $success = false;
-$error_message = '';
-
-// Process form data when submitted
+$error_message = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Collect and sanitize form data
+    // Sanitize inputs
     $fullname = htmlspecialchars($_POST['fullname']);
     $email = htmlspecialchars($_POST['email']);
     $mobileNo = htmlspecialchars($_POST['mobileNo']);
@@ -87,7 +85,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $parent_income = htmlspecialchars($_POST['parent_income']);
     $source_info = htmlspecialchars($_POST['source_info']);
     $payment_type = htmlspecialchars($_POST['payment_type']);
-    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT); // Hash password
 
     // Insert data into database
     $stmt = $conn->prepare("INSERT INTO admissions (
@@ -120,214 +118,128 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-// Close database connection
 $conn->close();
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SKST University - Admission Form</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <title>SKST University Admission</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary-color: #1a3a6c;
-            --secondary-color: #2c5282;
-            --accent-color: #e53e3e;
-            --light-color: #f8f9fa;
-            --dark-color: #212529;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --primary-color: #003f8bb0;
+            --secondary-color: #FFD700;
+            --light-bg: #f8f9fa;
+            --form-bg: #ffffff;
         }
         
         body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            background-color: var(--light-bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             padding: 20px;
-        }
-        
-        .container {
-            width: 100%;
-            max-width: 1200px;
+            color: #333;
         }
         
         .form-container {
-            background-color: white;
+            background-color: var(--form-bg);
             border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            margin: 20px auto;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin: 0 auto 30px;
+            max-width: 1200px;
         }
         
         .form-title {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 20px;
-            font-size: 1.5rem;
-            display: flex;
-            align-items: center;
+            color: maroon;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            font-weight: 700;
+            text-align: center;
         }
         
         .section-title {
-            background-color: var(--secondary-color);
+            background-color: var(--primary-color);
             color: white;
-            padding: 12px 20px;
-            margin-top: 20px;
+            padding: 10px 15px;
             border-radius: 5px;
+            font-weight: 600;
+            margin-bottom: 25px;
             font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-        }
-        
-        form {
-            padding: 20px;
-        }
-        
-        .row {
-            display: flex;
-            flex-wrap: wrap;
-            margin: 0 -10px;
-        }
-        
-        .col-md-4, .col-md-6, .col-md-3 {
-            padding: 0 10px;
-            flex: 1 0 auto;
-        }
-        
-        .col-md-4 { width: 33.333%; }
-        .col-md-6 { width: 50%; }
-        .col-md-3 { width: 25%; }
-        
-        .mb-3, .mb-4 {
-            margin-bottom: 1rem !important;
         }
         
         .form-label {
-            display: block;
+            font-weight: 600;
+            color: #555;
             margin-bottom: 5px;
-            font-weight: 500;
-            color: var(--dark-color);
         }
         
         .required::after {
             content: " *";
-            color: var(--accent-color);
+            color: red;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, var(--primary-color), #5a0c0cff);
+            border: none;
+            padding: 12px 35px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 5px;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            color: white;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
         
         .form-control, .form-select {
-            width: 100%;
-            padding: 10px 15px;
-            border: 1px solid #ced4da;
             border-radius: 5px;
-            font-size: 1rem;
+            padding: 10px;
+            border: 1px solid #ddd;
             transition: border-color 0.3s;
         }
         
         .form-control:focus, .form-select:focus {
             border-color: var(--primary-color);
-            outline: none;
-            box-shadow: 0 0 0 0.2rem rgba(26, 58, 108, 0.25);
-        }
-        
-        .input-group {
-            display: flex;
-        }
-        
-        .input-group-text {
-            background-color: #e9ecef;
-            border: 1px solid #ced4da;
-            padding: 10px 15px;
-            border-radius: 5px 0 0 5px;
-            font-size: 1rem;
-        }
-        
-        .input-group input {
-            border-radius: 0 5px 5px 0;
-        }
-        
-        .btn {
-            display: inline-block;
-            padding: 10px 25px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            text-decoration: none;
-        }
-        
-        .btn:hover {
-            background-color: var(--secondary-color);
-        }
-        
-        .submit-btn {
-            background-color: var(--accent-color);
-            padding: 12px 30px;
-            font-size: 1.1rem;
-        }
-        
-        .submit-btn:hover {
-            background-color: #c53030;
-        }
-        
-        .alert {
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-        
-        .alert-danger {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+            box-shadow: 0 0 0 0.25rem rgba(0, 49, 139, 0.25);
         }
         
         .thank-you {
             text-align: center;
-            padding: 50px 20px;
+            padding: 40px 20px;
         }
         
         .thank-you i {
-            font-size: 5rem;
+            font-size: 4rem;
             color: #28a745;
             margin-bottom: 20px;
         }
         
         .thank-you h3 {
-            font-size: 2rem;
-            margin-bottom: 15px;
             color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 15px;
         }
         
         .thank-you p {
             font-size: 1.2rem;
-            margin-bottom: 30px;
-            color: var(--dark-color);
+            color: #555;
             max-width: 700px;
-            margin-left: auto;
-            margin-right: auto;
+            margin: 0 auto 30px;
         }
         
-        .form-check {
-            margin-top: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .form-check-label {
-            margin-left: 5px;
+        .input-group-text {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
         }
         
         .password-container {
@@ -340,11 +252,11 @@ $conn->close();
             top: 50%;
             transform: translateY(-50%);
             cursor: pointer;
-            color: #6c757d;
+            z-index: 10;
         }
         
         .error-message {
-            color: var(--accent-color);
+            color: #dc3545;
             font-size: 0.875em;
             margin-top: 5px;
         }
@@ -356,22 +268,6 @@ $conn->close();
             margin-top: 5px;
             border-radius: 3px;
             overflow: hidden;
-        }
-        
-        .strength-meter {
-            height: 100%;
-            width: 0%;
-            transition: width 0.3s, background-color 0.3s;
-        }
-        
-        @media (max-width: 768px) {
-            .col-md-4, .col-md-6, .col-md-3 {
-                width: 100%;
-            }
-            
-            .row {
-                margin: 0;
-            }
         }
     </style>
 </head>
@@ -669,7 +565,7 @@ $conn->close();
             <?php endif; ?>
         </div>
     </div>
-    
+
     <script>
         // Form validation function
         function validateForm() {
