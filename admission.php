@@ -323,7 +323,7 @@ $conn->close();
                             <div class="col-md-4 mb-3">
                                 <label class="form-label required">Program</label>
                                 <select class="form-select" name="program" id="program" required>
-                                    <option value="" disabled selected>Select a program</option>
+                                    <option value="">Select a program</option>
                                     <option value="BBA in Accounting">BBA in Accounting</option>
                                     <option value="BBA in Finance">BBA in Finance</option>
                                     <option value="BBA in Human Resource Management">BBA in Human Resource Management</option>
