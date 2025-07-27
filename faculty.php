@@ -16,6 +16,8 @@ if (isset($_GET['logout'])) {
     exit();
 }
 
+
+
 if (!isset($_SESSION['faculty_id']) && $_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
     $email = $_POST['email'];
     $password = $_POST['password'];
