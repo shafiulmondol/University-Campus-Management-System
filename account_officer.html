@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Account Officer Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary: #1a5e63;
+            --secondary: #28a745;
+            --accent: #e74c3c;
+            --light: #f8f9fa;
+            --dark: #2c3e50;
+            --gold: #ffd700;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a5e63, #2c7744);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.97);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
+        }
+        
+        /* Header Styles */
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo-icon {
+            background: var(--gold);
+            color: var(--primary);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .logo-text h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .logo-text span {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        /* Login Page Styles */
+        .login-container {
+            display: flex;
+            min-height: 500px;
+        }
+        
+        .login-left {
+            flex: 1;
+            background: linear-gradient(to bottom right, var(--primary), #2c7744);
+            color: white;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .login-left::before {
+            content: "";
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .login-left::after {
+            content: "";
+            position: absolute;
+            bottom: -80px;
+            left: -80px;
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        .login-left h2 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .login-left p {
+            line-height: 1.6;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .features {
+            margin-top: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .feature i {
+            background: rgba(255, 255, 255, 0.2);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        
+        .login-right {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect fill="rgba(26, 94, 99, 0.05)" x="0" y="0" width="50" height="50"/></svg>');
+            background-size: 30px 30px;
+        }
+        
+        .login-form {
+            max-width: 400px;
+            margin: 0 auto;
+            width: 100%;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .login-form h3 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #14474c;
+        }
+        
+        .login-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        .login-links a {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+        
+        .login-links a:hover {
+            color: var(--secondary);
+            text-decoration: underline;
+        }
+        
+        /* Dashboard Styles */
+        .dashboard {
+            display: none;
+            min-height: 600px;
+        }
+        
+        .dashboard-header {
+            background: var(--primary);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--gold);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            background: var(--light);
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--dark);
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            background: white;
+            border-bottom: 3px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .tab:hover:not(.active) {
+            background: rgba(26, 94, 99, 0.1);
+        }
+        
+        .tab-content {
+            padding: 30px;
+        }
+        
+        .tab-pane {
+            display: none;
+        }
+        
+        .tab-pane.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .welcome-section h2 {
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        .welcome-section p {
+            color: #666;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--primary);
+            transition: transform 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-card h3 {
+            font-size: 14px;
+            color: #777;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .stat-card .currency {
+            font-size: 24px;
+            color: var(--secondary);
+            font-weight: 600;
+        }
+        
+        /* Account Attributes Table */
+        .account-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .account-table th {
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 500;
+        }
+        
+        .account-table td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .account-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .account-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .account-table tr:hover {
+            background-color: #f1f7ff;
+        }
+        
+        .logout-btn {
+            background: var(--accent);
+            padding: 8px 15px;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+            border: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: var(--light);
+            color: #666;
+            font-size: 14px;
+            border-top: 1px solid #eee;
+        }
+        
+        .taka-symbol {
+            color: var(--secondary);
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .login-container {
+                flex-direction: column;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .dashboard-header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .user-info {
+                flex-direction: column;
+            }
+            
+            .nav-tabs {
+                flex-wrap: wrap;
+            }
+            
+            .tab {
+                flex: 1;
+                min-width: 120px;
+                text-align: center;
+                padding: 12px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Screen -->
+        <header>
+            <div class="logo">
+                <div class="logo-icon"><i class="fas fa-university"></i></div>
+                <div class="logo-text">
+                    <h1>SKST University</h1>
+                    <span>Account Officer Portal</span>
+                </div>
+            </div>
+        </header>
+        
+        <div class="login-container" id="loginScreen">
+            <div class="login-left">
+                <h2>Account Officer Dashboard</h2>
+                <p>Manage university finances, student fees, and department budgets with our comprehensive financial management system designed specifically for Bangladeshi universities.</p>
+                
+                <div class="features">
+                    <div class="feature">
+                        <i class="fas fa-check"></i>
+                        <span>Student Fee Management (BDT)</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-check"></i>
+                        <span>Department Budget Allocation</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-check"></i>
+                        <span>Financial Reporting in Taka</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-check"></i>
+                        <span>Transaction History</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-check"></i>
+                        <span>Salary & Expense Management</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="login-right">
+                <form class="login-form" id="loginForm">
+                    <h3><i class="fas fa-lock"></i> Account Officer Login</h3>
+                    
+                    <div class="form-group">
+                        <label for="username"><i class="fas fa-user"></i> Username</label>
+                        <input type="text" id="username" class="form-control" placeholder="Enter your username" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password"><i class="fas fa-key"></i> Password</label>
+                        <input type="password" id="password" class="form-control" placeholder="Enter your password" required>
+                    </div>
+                    
+                    <button type="submit" class="btn"><i class="fas fa-sign-in-alt"></i> Login to Dashboard</button>
+                    
+                    <div class="login-links">
+                        <a href="#"><i class="fas fa-question-circle"></i> Forgot Password?</a>
+                        <a href="#"><i class="fas fa-user-plus"></i> Request Account Access</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Dashboard (Initially Hidden) -->
+        <div class="dashboard" id="dashboard">
+            <div class="dashboard-header">
+                <div class="logo">
+                    <div class="logo-icon"><i class="fas fa-chart-line"></i></div>
+                    <div class="logo-text">
+                        <h1>Account Officer Dashboard</h1>
+                        <span>Financial Management System (BDT)</span>
+                    </div>
+                </div>
+                
+                <div class="user-info">
+                    <div class="user-avatar">AO</div>
+                    <div>
+                        <div>Account Officer</div>
+                        <div>finance@university.edu.bd</div>
+                    </div>
+                    <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                </div>
+            </div>
+            
+            <div class="nav-tabs">
+                <div class="tab active" data-tab="dashboard">Dashboard</div>
+                <div class="tab" data-tab="accounts">Account Management</div>
+                <div class="tab" data-tab="transactions">Transactions</div>
+                <div class="tab" data-tab="reports">Financial Reports</div>
+            </div>
+            
+            <div class="tab-content">
+                <!-- Dashboard Tab -->
+                <div class="tab-pane active" id="dashboardTab">
+                    <div class="welcome-section">
+                        <h2>Welcome, Account Officer</h2>
+                        <p>You have full access to manage all financial aspects of the university. Monitor account balances in Bangladeshi Taka (BDT), process transactions, and generate financial reports.</p>
+                    </div>
+                    
+                    <div class="stats">
+                        <div class="stat-card">
+                            <h3>Total Balance</h3>
+                            <div class="value"><span class="taka-symbol">৳</span> 1,24,58,900</div>
+                            <div class="currency">BDT</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Pending Transactions</h3>
+                            <div class="value">42</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Accounts</h3>
+                            <div class="value">28</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Departments</h3>
+                            <div class="value">14</div>
+                        </div>
+                    </div>
+                    
+                    <h3>Recent Transactions (BDT)</h3>
+                    <table class="account-table">
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Account</th>
+                            <th>Amount</th>
+                        </tr>
+                        <tr>
+                            <td>2023-10-15</td>
+                            <td>Student Fees - Batch 2023</td>
+                            <td>Student Fees Account</td>
+                            <td><span class="taka-symbol">৳</span> 8,52,000</td>
+                        </tr>
+                        <tr>
+                            <td>2023-10-14</td>
+                            <td>Science Dept - Equipment</td>
+                            <td>Departmental Expenses</td>
+                            <td><span class="taka-symbol">৳</span> 1,25,000</td>
+                        </tr>
+                        <tr>
+                            <td>2023-10-12</td>
+                            <td>Faculty Salaries - October</td>
+                            <td>Payroll Account</td>
+                            <td><span class="taka-symbol">৳</span> 32,00,000</td>
+                        </tr>
+                        <tr>
+                            <td>2023-10-10</td>
+                            <td>Research Grant - Project Alpha</td>
+                            <td>Research Account</td>
+                            <td><span class="taka-symbol">৳</span> 4,50,000</td>
+                        </tr>
+                        <tr>
+                            <td>2023-10-08</td>
+                            <td>Library Books Purchase</td>
+                            <td>Library Development</td>
+                            <td><span class="taka-symbol">৳</span> 85,000</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <!-- Account Management Tab -->
+                <div class="tab-pane" id="accountsTab">
+                    <h2>Account Management (BDT)</h2>
+                    <p>Manage all university accounts and their attributes. Create new accounts or modify existing ones.</p>
+                    
+                    <h3>Account Attributes</h3>
+                    <table class="account-table">
+                        <tr>
+                            <th>Attribute</th>
+                            <th>Description</th>
+                            <th>Example Value</th>
+                            <th>Required</th>
+                        </tr>
+                        <tr>
+                            <td>Account ID</td>
+                            <td>Unique identifier for the account</td>
+                            <td>ACC-2023-SF001</td>
+                            <td>Yes</td>
+                        </tr>
+                        <tr>
+                            <td>Account Name</td>
+                            <td>Descriptive name of the account</td>
+                            <td>Student Fees 2023</td>
+                            <td>Yes</td>
+                        </tr>
+                        <tr>
+                            <td>Account Type</td>
+                            <td>Type of account (Fees, Salary, Grant, etc.)</td>
+                            <td>Student Fees</td>
+                            <td>Yes</td>
+                        </tr>
+                        <tr>
+                            <td>Department</td>
+                            <td>Associated department</td>
+                            <td>All Departments</td>
+                            <td>Yes</td>
+                        </tr>
+                        <tr>
+                            <td>Current Balance</td>
+                            <td>Available funds in the account</td>
+                            <td><span class="taka-symbol">৳</span> 12,54,807.75</td>
+                            <td>Yes</td>
+                        </tr>
+                        <tr>
+                            <td>Budget Allocation</td>
+                            <td>Annual budget for the account</td>
+                            <td><span class="taka-symbol">৳</span> 15,00,000.00</td>
+                            <td>Yes</td>
+                        </tr>
+                        <tr>
+                            <td>Fiscal Year</td>
+                            <td>Financial year for the account</td>
+                            <td>2023-2024</td>
+                            <td>Yes</td>
+                        </tr>
+                        <tr>
+                            <td>Account Status</td>
+                            <td>Active, Inactive, or Suspended</td>
+                            <td>Active</td>
+                            <td>Yes</td>
+                        </tr>
+                        <tr>
+                            <td>Created Date</td>
+                            <td>Date when account was created</td>
+                            <td>2023-07-01</td>
+                            <td>Yes</td>
+                        </tr>
+                        <tr>
+                            <td>Last Transaction</td>
+                            <td>Date of last transaction</td>
+                            <td>2023-10-15</td>
+                            <td>No</td>
+                        </tr>
+                        <tr>
+                            <td>Account Manager</td>
+                            <td>Responsible account officer</td>
+                            <td>Jane Smith</td>
+                            <td>Yes</td>
+                        </tr>
+                        <tr>
+                            <td>Contact Email</td>
+                            <td>Contact for account inquiries</td>
+                            <td>fees@university.edu.bd</td>
+                            <td>No</td>
+                        </tr>
+                    </table>
+                    
+                    <div style="margin-top: 30px; text-align: center;">
+                        <button class="btn" style="width: auto; display: inline-block; padding: 12px 30px;"><i class="fas fa-plus-circle"></i> Create New Account</button>
+                    </div>
+                </div>
+                
+                <!-- Transactions Tab -->
+                <div class="tab-pane" id="transactionsTab">
+                    <h2>Transaction Management</h2>
+                    <p>View and manage all financial transactions. Filter by date range, account, or transaction type.</p>
+                    
+                    <div class="filters" style="display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <label>Date Range</label>
+                            <select class="form-control">
+                                <option>Last 7 days</option>
+                                <option>This Month</option>
+                                <option>Last Month</option>
+                                <option>Custom Range</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1; min-width: 200px;">
+                            <label>Account Type</label>
+                            <select class="form-control">
+                                <option>All Accounts</option>
+                                <option>Student Fees</option>
+                                <option>Department Budgets</option>
+                                <option>Payroll</option>
+                                <option>Research Grants</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1; min-width: 200px;">
+                            <label>Transaction Status</label>
+                            <select class="form-control">
+                                <option>All Transactions</option>
+                                <option>Completed</option>
+                                <option>Pending</option>
+                                <option>Rejected</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <table class="account-table">
+                        <tr>
+                            <th>Transaction ID</th>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Account</th>
+                            <th>Amount (BDT)</th>
+                            <th>Status</th>
+                        </tr>
+                        <tr>
+                            <td>TX-2023-00158</td>
+                            <td>2023-10-18</td>
+                            <td>Engineering Dept - Lab Equipment</td>
+                            <td>ENG Department Budget</td>
+                            <td><span class="taka-symbol">৳</span> 87,500</td>
+                            <td><span style="color: var(--secondary);">Completed</span></td>
+                        </tr>
+                        <tr>
+                            <td>TX-2023-00157</td>
+                            <td>2023-10-17</td>
+                            <td>MBA Program Fees Collection</td>
+                            <td>Business School Fees</td>
+                            <td><span class="taka-symbol">৳</span> 2,45,000</td>
+                            <td><span style="color: var(--secondary);">Completed</span></td>
+                        </tr>
+                        <tr>
+                            <td>TX-2023-00156</td>
+                            <td>2023-10-16</td>
+                            <td>Library Journal Subscription</td>
+                            <td>Library Development</td>
+                            <td><span class="taka-symbol">৳</span> 35,000</td>
+                            <td><span style="color: #e67e22;">Pending</span></td>
+                        </tr>
+                        <tr>
+                            <td>TX-2023-00155</td>
+                            <td>2023-10-15</td>
+                            <td>Campus Maintenance</td>
+                            <td>Operations Account</td>
+                            <td><span class="taka-symbol">৳</span> 1,20,000</td>
+                            <td><span style="color: var(--accent);">Rejected</span></td>
+                        </tr>
+                        <tr>
+                            <td>TX-2023-00154</td>
+                            <td>2023-10-14</td>
+                            <td>Research Grant Disbursement</td>
+                            <td>Research Account</td>
+                            <td><span class="taka-symbol">৳</span> 3,50,000</td>
+                            <td><span style="color: var(--secondary);">Completed</span></td>
+                        </tr>
+                    </table>
+                    
+                    <div style="margin-top: 30px; text-align: center;">
+                        <button class="btn" style="width: auto; display: inline-block; padding: 12px 30px; margin-right: 10px;">
+                            <i class="fas fa-file-export"></i> Export to Excel
+                        </button>
+                        <button class="btn" style="width: auto; display: inline-block; padding: 12px 30px; background: var(--secondary);">
+                            <i class="fas fa-plus"></i> Add New Transaction
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Financial Reports Tab -->
+                <div class="tab-pane" id="reportsTab">
+                    <h2>Financial Reports</h2>
+                    <p>Generate detailed financial reports for management and auditing purposes.</p>
+                    
+                    <div class="stats" style="margin-top: 30px;">
+                        <div class="stat-card">
+                            <h3>Annual Revenue</h3>
+                            <div class="value"><span class="taka-symbol">৳</span> 8,75,42,900</div>
+                            <div class="currency">BDT (2022-2023)</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Expenditure</h3>
+                            <div class="value"><span class="taka-symbol">৳</span> 6,92,15,300</div>
+                            <div class="currency">BDT (2022-2023)</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Net Profit</h3>
+                            <div class="value"><span class="taka-symbol">৳</span> 1,83,27,600</div>
+                            <div class="currency">BDT (2022-2023)</div>
+                        </div>
+                    </div>
+                    
+                    <h3 style="margin-top: 40px;">Generate Custom Report</h3>
+                    <div style="background: #f8f9fa; padding: 25px; border-radius: 10px; margin-top: 20px;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                            <div>
+                                <label>Report Type</label>
+                                <select class="form-control">
+                                    <option>Balance Sheet</option>
+                                    <option>Income Statement</option>
+                                    <option>Cash Flow Statement</option>
+                                    <option>Budget vs Actual</option>
+                                    <option>Department-wise Report</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Fiscal Year</label>
+                                <select class="form-control">
+                                    <option>2023-2024</option>
+                                    <option>2022-2023</option>
+                                    <option>2021-2022</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Format</label>
+                                <select class="form-control">
+                                    <option>PDF</option>
+                                    <option>Excel</option>
+                                    <option>HTML</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 25px; text-align: center;">
+                            <button class="btn" style="width: auto; display: inline-block; padding: 12px 30px;">
+                                <i class="fas fa-file-pdf"></i> Generate Report
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <h3 style="margin-top: 40px;">Recent Reports</h3>
+                    <table class="account-table">
+                        <tr>
+                            <th>Report Name</th>
+                            <th>Generated On</th>
+                            <th>Period</th>
+                            <th>Size</th>
+                            <th>Actions</th>
+                        </tr>
+                        <tr>
+                            <td>Q3 Financial Summary 2023</td>
+                            <td>2023-10-15</td>
+                            <td>Jul-Sep 2023</td>
+                            <td>2.4 MB</td>
+                            <td>
+                                <a href="#" style="color: var(--primary); margin-right: 10px;"><i class="fas fa-download"></i></a>
+                                <a href="#" style="color: var(--secondary);"><i class="fas fa-print"></i></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Department Budget Utilization</td>
+                            <td>2023-10-10</td>
+                            <td>Apr-Sep 2023</td>
+                            <td>1.8 MB</td>
+                            <td>
+                                <a href="#" style="color: var(--primary); margin-right: 10px;"><i class="fas fa-download"></i></a>
+                                <a href="#" style="color: var(--secondary);"><i class="fas fa-print"></i></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Student Fee Collection Report</td>
+                            <td>2023-10-05</td>
+                            <td>Sep 2023</td>
+                            <td>1.2 MB</td>
+                            <td>
+                                <a href="#" style="color: var(--primary); margin-right: 10px;"><i class="fas fa-download"></i></a>
+                                <a href="#" style="color: var(--secondary);"><i class="fas fa-print"></i></a>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="footer">
+                University Management System © 2023 | Account Officer Portal v2.1 | All amounts in Bangladeshi Taka (BDT)
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // Simple validation
+            if(username === 'accountofficer' && password === 'university123') {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+            } else {
+                alert('Invalid credentials. Please use username: accountofficer and password: university123');
+            }
+        });
+        
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        });
+        
+        // Tab switching functionality
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs
+                tabs.forEach(t => t.classList.remove('active'));
+                // Add active class to clicked tab
+                this.classList.add('active');
+                
+                // Hide all tab panes
+                document.querySelectorAll('.tab-pane').forEach(pane => {
+                    pane.classList.remove('active');
+                });
+                
+                // Show the corresponding tab pane
+                const tabName = this.getAttribute('data-tab');
+                document.getElementById(tabName + 'Tab').classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
