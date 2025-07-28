@@ -492,39 +492,39 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['studentlogin'])) {
   <!-- -- ==================== Add FACULTY ==================== --        -->
 <?php elseif (isset($_GET['add_faculty'])): ?>
     <?php
-    // if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_faculty'])) {
-    //     $faculty_id = $_POST['faculty_id'];
-    //     $name = $_POST['name'];
-    //     $email = $_POST['email'];
-    //     $password = $_POST['password']; // In real applications, use password_hash()!
-    //     $department = $_POST['department'];
-    //     $address = $_POST['address'];
-    //     $phone = $_POST['phone'];
-    //     $room_number = $_POST['room_number'];
-    //     $salary = $_POST['salary'];
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_faculty'])) {
+        $faculty_id = $_POST['faculty_id'];
+        $name = $_POST['name'];
+        $email = $_POST['email'];
+        $password = $_POST['password']; // In real applications, use password_hash()!
+        $department = $_POST['department'];
+        $address = $_POST['address'];
+        $phone = $_POST['phone'];
+        $room_number = $_POST['room_number'];
+        $salary = $_POST['salary'];
 
-    //     // Check if faculty_id or email already exists
-    //     $check_stmt = $conn->prepare("SELECT * FROM faculty WHERE faculty_id = ? OR email = ?");
-    //     $check_stmt->bind_param("ss", $faculty_id, $email);
-    //     $check_stmt->execute();
-    //     $check_result = $check_stmt->get_result();
+        // Check if faculty_id or email already exists
+        $check_stmt = $conn->prepare("SELECT * FROM faculty WHERE faculty_id = ? OR email = ?");
+        $check_stmt->bind_param("ss", $faculty_id, $email);
+        $check_stmt->execute();
+        $check_result = $check_stmt->get_result();
 
-    //     if ($check_result->num_rows > 0) {
-    //         echo "<script>alert('Faculty ID or Email already exists.');</script>";
-    //     } else {
-    //         // Insert new faculty
-    //         $stmt = $conn->prepare("INSERT INTO faculty (faculty_id, name, email, password, department, address, phone, room_number, salary) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    //         $stmt->bind_param("sssssssss", $faculty_id, $name, $email, $password, $department, $address, $phone, $room_number, $salary);
+        if ($check_result->num_rows > 0) {
+            echo "<script>alert('Faculty ID or Email already exists.');</script>";
+        } else {
+            // Insert new faculty
+            $stmt = $conn->prepare("INSERT INTO faculty (faculty_id, name, email, password, department, address, phone, room_number, salary) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("sssssssss", $faculty_id, $name, $email, $password, $department, $address, $phone, $room_number, $salary);
 
-    //         if ($stmt->execute()) {
-    //             echo "<script>alert('New faculty added successfully.'); window.location='?add_faculty=true';</script>";
-    //         } else {
-    //             echo "<script>alert('Error adding faculty.');</script>";
-    //         }
-    //     }
-    // }
+            if ($stmt->execute()) {
+                echo "<script>alert('New faculty added successfully.'); window.location='?add_faculty=true';</script>";
+            } else {
+                echo "<script>alert('Error adding faculty.');</script>";
+            }
+        }
+    }
      ?>
-     <!-- <div class="routine-page">
+     <div class="routine-page">
          <h2>Add New Faculty</h2>
          <div class="container">
              <form method="POST">
@@ -541,7 +541,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['studentlogin'])) {
                  <a href="?faculty_info=true" type="back"><button type="button">🔙 Back</button></a>
              </form>
          </div>
-     </div> -->
+     </div>
   <!-- -- ==================== Edit FACULTY Biodata ==================== -- -->
 <?php elseif (isset($_GET['edit_faculty_biodata'])): ?>
     <?php

@@ -29,9 +29,10 @@ else {
 echo "Successfully connected to database '$dbname'";
 
 $tablename='student';
-$table="CREATE TABLE $tablename(id int PRIMARY KEY, name varchar(50),password varchar(50),email varchar(100))";
+$table="CREATE TABLE IF NOT EXISTS $tablename(id int PRIMARY KEY, name varchar(50),password varchar(50),email varchar(100))";
 if(mysqli_query($dbconnect,$table)){
     echo "'$tablename' created successfully";
 }
+echo "'$tablename' alreaty exists";
 
 ?>
