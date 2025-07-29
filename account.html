@@ -14,7 +14,7 @@
         }
 
         body {
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            background: linear-gradient(135deg, #0c3d5f, #1d7a8c, #0c3d5f);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -43,7 +43,7 @@
         .logo-icon {
             font-size: 3rem;
             color: #ffd700;
-            background: #1a2a6c;
+            background: #0c3d5f;
             width: 80px;
             height: 80px;
             border-radius: 50%;
@@ -68,14 +68,19 @@
         }
 
         .card {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.97);
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
         }
 
         .card-header {
-            background: linear-gradient(to right, #1a2a6c, #b21f1f);
+            background: linear-gradient(to right, #0c3d5f, #1d7a8c);
             color: white;
             padding: 20px;
             text-align: center;
@@ -107,7 +112,7 @@
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
-            color: #1a2a6c;
+            color: #0c3d5f;
         }
 
         .input-group {
@@ -119,7 +124,7 @@
             left: 15px;
             top: 50%;
             transform: translateY(-50%);
-            color: #b21f1f;
+            color: #1d7a8c;
         }
 
         input, select {
@@ -133,8 +138,8 @@
 
         input:focus, select:focus {
             outline: none;
-            border-color: #1a2a6c;
-            box-shadow: 0 0 0 3px rgba(26, 42, 108, 0.2);
+            border-color: #1d7a8c;
+            box-shadow: 0 0 0 3px rgba(29, 122, 140, 0.2);
         }
 
         .password-container {
@@ -148,6 +153,11 @@
             transform: translateY(-50%);
             cursor: pointer;
             color: #777;
+            transition: color 0.3s;
+        }
+
+        .toggle-password:hover {
+            color: #0c3d5f;
         }
 
         .btn-container {
@@ -157,7 +167,7 @@
         }
 
         .btn {
-            background: linear-gradient(to right, #1a2a6c, #b21f1f);
+            background: linear-gradient(to right, #0c3d5f, #1d7a8c);
             color: white;
             border: none;
             padding: 15px 40px;
@@ -167,6 +177,20 @@
             cursor: pointer;
             transition: all 0.3s;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -60%;
+            width: 20px;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(25deg);
+            transition: all 0.5s;
         }
 
         .btn:hover {
@@ -174,14 +198,22 @@
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
         }
 
+        .btn:hover::after {
+            left: 120%;
+        }
+
         .terms {
             margin-top: 25px;
             text-align: center;
             color: #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
         .terms a {
-            color: #1a2a6c;
+            color: #0c3d5f;
             text-decoration: none;
             font-weight: 600;
         }
@@ -197,7 +229,7 @@
         }
 
         .login-link a {
-            color: #b21f1f;
+            color: #1d7a8c;
             text-decoration: none;
             font-weight: 600;
         }
@@ -235,6 +267,33 @@
             width: 100%;
         }
 
+        .cse-highlight {
+            background: linear-gradient(to right, rgba(12, 61, 95, 0.1), rgba(29, 122, 140, 0.1));
+            color: #0c3d5f;
+            font-weight: 700;
+            border-left: 3px solid #ff6b6b;
+            padding: 8px 15px;
+            margin: 5px 0;
+            border-radius: 0 5px 5px 0;
+        }
+
+        .cse-highlight::before {
+            content: "🔥";
+            margin-right: 8px;
+            color: #ff6b6b;
+        }
+
+        .department-label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .department-label i {
+            margin-right: 10px;
+            color: #1d7a8c;
+        }
+
         @media (max-width: 768px) {
             .form-group {
                 width: 100%;
@@ -242,6 +301,11 @@
             
             .logo-text {
                 font-size: 2rem;
+            }
+            
+            .terms {
+                flex-direction: column;
+                align-items: flex-start;
             }
         }
     </style>
@@ -351,20 +415,21 @@
                     </div>
                     
                     <div class="form-group full-width">
-                        <label for="program">Program/Department</label>
-                        <div class="input-group">
+                        <div class="department-label">
                             <i class="fas fa-book"></i>
-                            <select id="program" required>
-                                <option value="" disabled selected>Select your program/department</option>
-                                <option value="engineering">Engineering</option>
-                                <option value="medicine">Medicine</option>
-                                <option value="business">Business Administration</option>
-                                <option value="law">Law</option>
-                                <option value="arts">Arts & Humanities</option>
-                                <option value="science">Science & Technology</option>
-                                <option value="social">Social Sciences</option>
-                            </select>
+                            <label for="program">Program/Department</label>
                         </div>
+                        <select id="program" required>
+                            <option value="" disabled selected>Select your program/department</option>
+                            <option value="engineering">Engineering</option>
+                            <option value="cse" class="cse-highlight">Computer Science & Engineering (CSE)</option>
+                            <option value="medicine">Medicine</option>
+                            <option value="business">Business Administration</option>
+                            <option value="law">Law</option>
+                            <option value="arts">Arts & Humanities</option>
+                            <option value="science">Science & Technology</option>
+                            <option value="social">Social Sciences</option>
+                        </select>
                     </div>
                     
                     <div class="terms">
@@ -461,10 +526,20 @@
                 return;
             }
             
+            // Get selected department
+            const programSelect = document.getElementById('program');
+            const selectedDepartment = programSelect.options[programSelect.selectedIndex].text;
+            
             // Form validation passed - show success message
-            alert('Account created successfully! Welcome to SKST University.');
+            alert(`Account created successfully! Welcome to SKST University.\nDepartment: ${selectedDepartment}`);
             this.reset();
             document.getElementById('strengthMeter').className = 'strength-meter';
+        });
+        
+        // Highlight the CSE option when the dropdown is opened
+        document.getElementById('program').addEventListener('focus', function() {
+            const cseOption = this.querySelector('option[value="cse"]');
+            cseOption.classList.add('cse-highlight');
         });
     </script>
 </body>
