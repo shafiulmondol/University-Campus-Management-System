@@ -1,167 +1,135 @@
 <?php
-// Database configuration - corrected to your university database
+// Database configuration
 $servername = "localhost";
 $username = "root";
 $password = "";
-$dbname = "skst_university";  // Changed to your database name
-
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
-// Create table if not exists - fixed syntax
-$sql = "CREATE TABLE IF NOT EXISTS scholarship_applications (
-    id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    student_id VARCHAR(30) NOT NULL,
-    full_name VARCHAR(100) NOT NULL,
-    gender VARCHAR(10) NOT NULL,
-    ssc_gpa FLOAT NOT NULL,
-    hsc_gpa FLOAT NOT NULL,
-    cgpa FLOAT NOT NULL,
-    prev_scholarship INT(3) NOT NULL,
-    scholarship_percentage INT(3) NOT NULL,
-    application_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)";
-
-// Execute table creation
-if ($conn->query($sql) === FALSE) {
-    die("Error creating table: " . $conn->error);
-}
+$dbname = "skst_university";
 
 // Initialize variables
-$student_id = $full_name = $gender = $ssc_gpa = $hsc_gpa = $cgpa = $prev_scholarship = '';
+$full_name = '';
+$gender = '';
+$ssc_gpa = '';
+$current_gpa = '';
 $scholarship_percentage = 0;
 $criteria = '';
 $errors = [];
 $result_display = false;
+$highlight_row = '';
+$db_success = false;
+$db_error = '';
+
+// Create database connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    $db_error = "Database connection failed: " . $conn->connect_error;
+} else {
+    // Create table if not exists
+    $sql = "CREATE TABLE IF NOT EXISTS scholarship_records (
+        id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        gender VARCHAR(10) NOT NULL,
+        ssc_gpa DECIMAL(3,2) NOT NULL,
+        current_gpa DECIMAL(3,2) NOT NULL,
+        scholarship_percentage INT(3) NOT NULL,
+        criteria VARCHAR(255) NOT NULL,
+        calculation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )";
+    
+    if (!$conn->query($sql)) {
+        $db_error = "Error creating table: " . $conn->error;
+    }
+}
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Collect and sanitize input data
-    $student_id = htmlspecialchars($_POST['id']);
-    $full_name = htmlspecialchars($_POST['name']);
+    $full_name = htmlspecialchars(trim($_POST['name']));
     $gender = htmlspecialchars($_POST['gender']);
-    $ssc_gpa = floatval($_POST['ssc']);
-    $hsc_gpa = floatval($_POST['hsc']);
-    $cgpa = floatval($_POST['cgpa']);
-    $prev_scholarship = intval($_POST['prev_scholarship']);
+    $ssc_gpa = floatval($_POST['ssc_gpa']);
+    $current_gpa = floatval($_POST['current_gpa']);
     
     // Validate inputs
-    if (empty($student_id)) $errors[] = "Student ID is required";
-    if (empty($full_name)) $errors[] = "Full name is required";
-    if (empty($gender) || !in_array($gender, ['male', 'female'])) $errors[] = "Please select a valid gender";
-    if ($ssc_gpa < 0 || $ssc_gpa > 5) $errors[] = "SSC GPA must be between 0.00 and 5.00";
-    if ($hsc_gpa < 0 || $hsc_gpa > 5) $errors[] = "HSC GPA must be between 0.00 and 5.00";
-    if ($cgpa < -1 || $cgpa > 4) $errors[] = "CGPA must be between 0.00 and 4.00 (or -1 for 1st semester)";
-    if ($prev_scholarship < -1 || $prev_scholarship > 100) $errors[] = "Previous scholarship must be between -1 and 100";
-    if ($cgpa == -1 && $prev_scholarship != -1) $errors[] = "For 1st semester students, previous scholarship must be -1";
+    if (empty($full_name)) {
+        $errors[] = "Please enter your name";
+    }
+    if (empty($gender)) {
+        $errors[] = "Please select your gender";
+    }
+    if ($ssc_gpa < 0 || $ssc_gpa > 5) {
+        $errors[] = "SSC GPA must be between 0.00 and 5.00";
+    }
+    if ($current_gpa < 0 || $current_gpa > 5) {
+        $errors[] = "Current GPA must be between 0.00 and 5.00";
+    }
     
     // Calculate scholarship if no errors
     if (empty($errors)) {
         $result_display = true;
         
-        if ($cgpa == -1) {
-            // First semester student
-            if ($gender == 'male') {
-                if ($ssc_gpa >= 4.5 && $hsc_gpa >= 4.0) {
-                    $scholarship_percentage = 25;
-                    $criteria = "Male student with SSC ≥ 4.5 and HSC ≥ 4.0";
-                } else {
-                    $scholarship_percentage = 0;
-                    $criteria = "Does not meet requirements for first semester male students";
-                }
-            } else {
-                if ($ssc_gpa >= 4.0 && $hsc_gpa >= 3.5) {
-                    $scholarship_percentage = 25;
-                    $criteria = "Female student with SSC ≥ 4.0 and HSC ≥ 3.5";
-                } else {
-                    $scholarship_percentage = 0;
-                    $criteria = "Does not meet requirements for first semester female students";
-                }
-            }
-        } else {
-            // Continuing student
-            if ($prev_scholarship == 25) {
-                if ($cgpa >= 3.5) {
-                    $scholarship_percentage = 25;
-                    $criteria = "Continued 25% scholarship (CGPA ≥ 3.5)";
-                } else {
-                    $scholarship_percentage = 0;
-                    $criteria = "Discontinued scholarship (CGPA < 3.5)";
-                }
-            } else if ($prev_scholarship == 50) {
-                if ($cgpa >= 3.7) {
-                    $scholarship_percentage = 50;
-                    $criteria = "Continued 50% scholarship (CGPA ≥ 3.7)";
-                } else {
-                    $scholarship_percentage = 0;
-                    $criteria = "Discontinued scholarship (CGPA < 3.7)";
-                }
-            } else {
-                // No previous scholarship or first time applying
-                if ($cgpa >= 3.9) {
-                    $scholarship_percentage = 50;
-                    $criteria = "Awarded 50% scholarship (CGPA ≥ 3.9)";
-                } else if ($cgpa >= 3.7) {
-                    $scholarship_percentage = 25;
-                    $criteria = "Awarded 25% scholarship (CGPA ≥ 3.7)";
-                } else {
-                    $scholarship_percentage = 0;
-                    $criteria = "CGPA below minimum requirement (3.7) for new scholarship";
-                }
+        // Special case for 100% scholarship
+        if ($ssc_gpa == 5.00 && $current_gpa == 5.00) {
+            $scholarship_percentage = 100;
+            $criteria = "SSC GPA 5.00 and Current GPA 5.00";
+            $highlight_row = "row-100";
+        } 
+        // Other cases based on current GPA
+        else {
+            if ($current_gpa == 5.00) {
+                $scholarship_percentage = ($gender == 'male') ? 60 : 75;
+                $criteria = "Current GPA 5.00";
+                $highlight_row = "row-75-60";
+            } 
+            else if ($current_gpa >= 4.80 && $current_gpa <= 4.99) {
+                $scholarship_percentage = ($gender == 'male') ? 50 : 65;
+                $criteria = "Current GPA between 4.80 – 4.99";
+                $highlight_row = "row-65-50";
+            } 
+            else if ($current_gpa >= 4.50 && $current_gpa < 4.80) {
+                $scholarship_percentage = ($gender == 'male') ? 25 : 40;
+                $criteria = "Current GPA between 4.50 – 4.79";
+                $highlight_row = "row-40-25";
+            } 
+            else if ($current_gpa >= 4.00 && $current_gpa < 4.50) {
+                $scholarship_percentage = ($gender == 'male') ? 15 : 30;
+                $criteria = "Current GPA between 4.00 – 4.49";
+                $highlight_row = "row-30-15";
+            } 
+            else if ($current_gpa >= 3.50 && $current_gpa < 4.00) {
+                $scholarship_percentage = ($gender == 'male') ? 10 : 25;
+                $criteria = "Current GPA between 3.50 – 3.99";
+                $highlight_row = "row-25-10";
+            } 
+            else {
+                $scholarship_percentage = 0;
+                $criteria = "Below minimum GPA requirement (3.50)";
             }
         }
         
-        // Insert data into database
-        $stmt = $conn->prepare("INSERT INTO scholarship_applications (student_id, full_name, gender, ssc_gpa, hsc_gpa, cgpa, prev_scholarship, scholarship_percentage) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-        if ($stmt) {
-            $stmt->bind_param("sssddiii", $student_id, $full_name, $gender, $ssc_gpa, $hsc_gpa, $cgpa, $prev_scholarship, $scholarship_percentage);
+        // Save to database if connection exists
+        if (empty($db_error)) {
+            $stmt = $conn->prepare("INSERT INTO scholarship_records (name, gender, ssc_gpa, current_gpa, scholarship_percentage, criteria) VALUES (?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("ssddds", $full_name, $gender, $ssc_gpa, $current_gpa, $scholarship_percentage, $criteria);
+            
             if ($stmt->execute()) {
-                // Successfully saved
+                $db_success = true;
             } else {
-                $errors[] = "Error saving application: " . $conn->error;
-                $result_display = false;
+                $db_error = "Error saving record: " . $stmt->error;
             }
             $stmt->close();
-        } else {
-            $errors[] = "Database error: " . $conn->error;
-            $result_display = false;
         }
     }
 }
 
-// Fetch existing applications for display
-$applications = [];
-$search_id = '';
-
-if (isset($_GET['search'])) {
-    $search_id = htmlspecialchars($_GET['search_id']);
-    $search_query = "SELECT * FROM scholarship_applications WHERE student_id LIKE ? ORDER BY application_date DESC";
-    $stmt = $conn->prepare($search_query);
-    $search_param = "%$search_id%";
-    $stmt->bind_param("s", $search_param);
-} else {
-    $search_query = "SELECT * FROM scholarship_applications ORDER BY application_date DESC LIMIT 10";
-    $stmt = $conn->prepare($search_query);
-}
-
-if ($stmt) {
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $applications = $result->fetch_all(MYSQLI_ASSOC);
-    $stmt->close();
-}
+// Close database connection
+$conn->close();
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scholarship Calculator</title>
+    <title>Scholarship Eligibility Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -277,6 +245,7 @@ if ($stmt) {
         
         .section-title {
             font-size: 1.8rem;
+            margin-top: 20px;
             margin-bottom: 25px;
             padding-bottom: 15px;
             border-bottom: 2px solid var(--primary);
@@ -326,8 +295,7 @@ if ($stmt) {
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
         
-        button[type="submit"] {
-            width: 100%;
+        button {
             padding: 16px;
             background: linear-gradient(to right, var(--primary), var(--primary-light));
             border: none;
@@ -337,11 +305,12 @@ if ($stmt) {
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-top: 10px;
             box-shadow: var(--shadow-md);
+            width: 100%;
+            margin-top: 10px;
         }
         
-        button[type="submit"]:hover {
+        button:hover {
             background: linear-gradient(to right, var(--primary-light), var(--primary));
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
@@ -457,51 +426,44 @@ if ($stmt) {
             text-align: left;
         }
         
-        .records-section {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 30px;
-            margin-top: 40px;
-            box-shadow: var(--shadow-lg);
-            border: 1px solid var(--border-color);
+        .scholarship-table {
             width: 100%;
-        }
-        
-        .search-form {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-        }
-        
-        .search-input {
-            flex: 1;
-            min-width: 250px;
-            padding: 14px 18px;
+            border-collapse: collapse;
+            margin-top: 40px;
+            font-size: 1rem;
+            overflow: hidden;
             border-radius: 12px;
-            border: 2px solid var(--border-color);
-            font-size: 1.1rem;
-        }
-        
-        .search-button {
-            padding: 0 30px;
-            background: linear-gradient(to right, var(--secondary), var(--primary));
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: var(--shadow-sm);
-            transition: all 0.2s;
-        }
-        
-        .search-button:hover {
-            transform: translateY(-2px);
             box-shadow: var(--shadow-md);
+            background: white;
         }
         
-
+        .scholarship-table th, 
+        .scholarship-table td {
+            padding: 16px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+        
+        .scholarship-table th {
+            background-color: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .scholarship-table tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        
+        .highlight-row {
+            background-color: #e0f2fe !important;
+            font-weight: 600;
+            animation: highlight 1.5s ease;
+        }
+        
+        @keyframes highlight {
+            0% { background-color: #fde68a; }
+            100% { background-color: #e0f2fe; }
+        }
         
         .footer {
             margin-top: 40px;
@@ -526,7 +488,27 @@ if ($stmt) {
             color: #b91c1c;
         }
         
+        .badge-10 {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+        
+        .badge-15 {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+        
         .badge-25 {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+        
+        .badge-30 {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+        
+        .badge-40 {
             background: #dbeafe;
             color: #1d4ed8;
         }
@@ -536,8 +518,44 @@ if ($stmt) {
             color: #065f46;
         }
         
-        .date-cell {
-            white-space: nowrap;
+        .badge-60 {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .badge-65 {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .badge-75 {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .badge-100 {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .db-status {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: left;
+            font-size: 1rem;
+        }
+        
+        .db-success {
+            background: #ecfdf5;
+            border-left: 4px solid #10b981;
+            color: #065f46;
+        }
+        
+        .db-error {
+            background: #fef2f2;
+            border-left: 4px solid #ef4444;
+            color: #b91c1c;
         }
         
         @media (max-width: 768px) {
@@ -553,16 +571,25 @@ if ($stmt) {
                 font-size: 2.5rem;
             }
             
-
+            .scholarship-table {
+                display: block;
+                overflow-x: auto;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1><span class="emoji">🎓</span> Scholarship Calculator</h1>
-            <p>Calculate your scholarship eligibility based on academic performance</p>
+            <h1><span class="emoji">🎓</span>Scholarship Eligibility Calculator</h1>
+            <p>Determine your scholarship eligibility based on academic performance</p>
         </header>
+        
+        <?php if (!empty($db_error)): ?>
+            <div class="db-status db-error">
+                <strong>Database Error:</strong> <?php echo $db_error; ?>
+            </div>
+        <?php endif; ?>
         
         <div class="calculator-container">
             <div class="form-section">
@@ -570,15 +597,9 @@ if ($stmt) {
                 
                 <form method="POST">
                     <div class="form-group">
-                        <label for="id">Student ID</label>
-                        <input type="text" name="id" id="id" value="<?php echo $student_id; ?>" required>
+                      <label for="name">Name</label>
+                      <input type="text" name="name" id="name" value="<?php echo $full_name; ?>" required>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="name">Full Name</label>
-                        <input type="text" name="name" id="name" value="<?php echo $full_name; ?>" required>
-                    </div>
-                    
                     <div class="form-group">
                         <label for="gender">Gender</label>
                         <select name="gender" id="gender" required>
@@ -589,25 +610,13 @@ if ($stmt) {
                     </div>
                     
                     <div class="form-group">
-                        <label for="ssc">SSC GPA (Scale: 5.00)</label>
-                        <input type="number" name="ssc" id="ssc" min="0" max="5" step="0.01" value="<?php echo $ssc_gpa; ?>" required>
+                        <label for="ssc_gpa">S.S.C GPA (Scale: 5.00)</label>
+                        <input type="number" name="ssc_gpa" id="ssc_gpa" min="0" max="5" step="0.01" value="<?php echo $ssc_gpa; ?>" required>
                     </div>
                     
                     <div class="form-group">
-                        <label for="hsc">HSC GPA (Scale: 5.00)</label>
-                        <input type="number" name="hsc" id="hsc" min="0" max="5" step="0.01" value="<?php echo $hsc_gpa; ?>" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="cgpa">Current Semester CGPA (Scale: 4.00)</label>
-                        <input type="number" name="cgpa" id="cgpa" min="-1" max="4" step="0.01" value="<?php echo $cgpa; ?>" required>
-                        <small>Note: Enter -1 for 1st semester students</small>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="prev_scholarship">Previous Scholarship (%)</label>
-                        <input type="number" name="prev_scholarship" id="prev_scholarship" min="-1" max="100" step="1" required value="<?php echo $prev_scholarship; ?>">
-                        <small>Note: Enter -1 for first-time applicants</small>
+                        <label for="current_gpa">H.S.C GPA (Scale: 5.00)</label>
+                        <input type="number" name="current_gpa" id="current_gpa" min="0" max="5" step="0.01" value="<?php echo $current_gpa; ?>" required>
                     </div>
                     
                     <button type="submit">Calculate Scholarship</button>
@@ -616,11 +625,16 @@ if ($stmt) {
                 <div class="instructions">
                     <h3>How It Works</h3>
                     <ul>
-                        <li>For 1st semester students: Scholarship based on SSC & HSC results</li>
-                        <li>For continuing students: Based on current CGPA and previous scholarship</li>
-                        <li>Scholarship percentages: 0%, 25%, or 50%</li>
+                        <li>Scholarship is determined by your S.S.C GPA and H.S.C GPA</li>
+                        <li>Students with S.S.C GPA 5.00 and H.S.C GPA 5.00 get 100% scholarship</li>
+                        <li>For other students, scholarship is based on H.S.C GPA range</li>
+                        <li>Female students receive higher scholarship rates in each category</li>
                     </ul>
-                    <p>Fill in all fields to see your scholarship eligibility</p>
+                    
+                    <h3>Database Information</h3>
+                    <p><strong>Database Name:</strong> skst_university</p>
+                    <p><strong>Table Name:</strong> scholarship_records</p>
+                    <p>Records are saved after each calculation</p>
                 </div>
             </div>
             
@@ -640,18 +654,25 @@ if ($stmt) {
                     <?php elseif ($result_display): ?>
                         <div class="success">
                             <h3>Scholarship Eligibility:</h3>
-                            <div class="scholarship-result"><?php echo $scholarship_percentage; ?>% Scholarship</div>
+                            <div class="scholarship-result">
+                                <span class="scholarship-badge badge-<?php echo $scholarship_percentage; ?>">
+                                    <?php echo $scholarship_percentage; ?>% Scholarship
+                                </span>
+                            </div>
                             <p>Based on: <?php echo $criteria; ?></p>
+                            
+                            <?php if ($db_success): ?>
+                                <div class="db-status db-success">
+                                    Record saved to database successfully
+                                </div>
+                            <?php endif; ?>
                         </div>
                         <div class="student-info">
                             <h3>Student Details:</h3>
-                            <p><strong>ID:</strong> <?php echo $student_id; ?></p>
                             <p><strong>Name:</strong> <?php echo $full_name; ?></p>
                             <p><strong>Gender:</strong> <?php echo ucfirst($gender); ?></p>
                             <p><strong>SSC GPA:</strong> <?php echo number_format($ssc_gpa, 2); ?></p>
-                            <p><strong>HSC GPA:</strong> <?php echo number_format($hsc_gpa, 2); ?></p>
-                            <p><strong>Current CGPA:</strong> <?php echo $cgpa == -1 ? 'First Semester' : number_format($cgpa, 2); ?></p>
-                            <p><strong>Previous Scholarship:</strong> <?php echo $prev_scholarship == -1 ? 'First-time applicant' : $prev_scholarship . '%'; ?></p>
+                            <p><strong>Current GPA:</strong> <?php echo number_format($current_gpa, 2); ?></p>
                         </div>
                     <?php else: ?>
                         <div class="result-placeholder">
@@ -664,21 +685,68 @@ if ($stmt) {
                 
                 <div class="criteria-info">
                     <h3>Scholarship Criteria</h3>
-                    <p><strong>First Semester:</strong> Male: SSC ≥4.5 & HSC ≥4.0 | Female: SSC ≥4.0 & HSC ≥3.5</p>
-                    <p><strong>Continuing Students:</strong> Maintain CGPA ≥3.5 (25%) or ≥3.7 (50%)</p>
-                    <p><strong>New Applicants:</strong> CGPA ≥3.7 (25%) or ≥3.9 (50%)</p>
+                    <p><strong>100% Scholarship:</strong> S.S.C GPA 5.00 + H.S.C GPA 5.00</p>
+                    <p><strong>Other Scholarships:</strong> Based on H.S.C GPA range (see table below)</p>
                 </div>
             </div>
         </div>
-                    
-        
+
+        <?php /* <div class="scholarship-table-container">
+            <h2 class="section-title">Scholarship Rate Table</h2>
+            <table class="scholarship-table">
+                <thead>
+                    <tr>
+                        <th>Level of Score</th>
+                        <th>Marks (%)</th>
+                        <th>Rate of Scholarship (Male)</th>
+                        <th>Rate of Scholarship (Female)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr id="row-100" <?php echo $highlight_row == 'row-100' ? 'class="highlight-row"' : ''; ?>>
+                        <td>5.00</td>
+                        <td>90% or above</td>
+                        <td>100%*</td>
+                        <td>100%*</td>
+                    </tr>
+                    <tr id="row-75-60" <?php echo $highlight_row == 'row-75-60' ? 'class="highlight-row"' : ''; ?>>
+                        <td>5.00</td>
+                        <td>90% or above</td>
+                        <td>60%</td>
+                        <td>75%</td>
+                    </tr>
+                    <tr id="row-65-50" <?php echo $highlight_row == 'row-65-50' ? 'class="highlight-row"' : ''; ?>>
+                        <td>4.80 – 4.99</td>
+                        <td>80% – below 90%</td>
+                        <td>50% of Tuition Fees</td>
+                        <td>65% of Tuition Fees</td>
+                    </tr>
+                    <tr id="row-40-25" <?php echo $highlight_row == 'row-40-25' ? 'class="highlight-row"' : ''; ?>>
+                        <td>4.50 – 4.79</td>
+                        <td>75% – below 80%</td>
+                        <td>25% of Tuition Fees</td>
+                        <td>40% of Tuition Fees</td>
+                    </tr>
+                    <tr id="row-30-15" <?php echo $highlight_row == 'row-30-15' ? 'class="highlight-row"' : ''; ?>>
+                        <td>4.00 – 4.49</td>
+                        <td>70% – below 75%</td>
+                        <td>15% of Tuition Fees</td>
+                        <td>30% of Tuition Fees</td>
+                    </tr>
+                    <tr id="row-25-10" <?php echo $highlight_row == 'row-25-10' ? 'class="highlight-row"' : ''; ?>>
+                        <td>3.50 – 3.99</td>
+                        <td>60% – below 70%</td>
+                        <td>10% of Tuition Fees</td>
+                        <td>25% of Tuition Fees</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p style="margin-top: 15px; text-align: center; color: var(--text-muted);">*With GPA 5.00 at SSC</p>
+        </div>*/ ?>
+
         <div class="footer">
             <p>Scholarship Calculator System © 2025 | For Educational Purposes</p>
-            <p>Results are calculated based on institutional scholarship policies</p>
         </div>
     </div>
 </body>
 </html>
-<?php
-$conn->close();
-?>

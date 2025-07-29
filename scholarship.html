@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SKST University</title>
   <link rel="icon" href="picture/SKST.png" type="image/png" />
+  <link rel="stylesheet" href="Design/buttom_bar.css">
+
   <!-- Font Awesome for home icon -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
@@ -141,12 +143,13 @@
     <div class="navbar-top">
       <div class="logo">
         <img src="picture/logo.gif" alt="SKST Logo">
+        <link rel="stylesheet" href="design/scholarship_table.css">
         <h1>SKST University || Scholarships</h1>
       </div>
 
       <!-- Scholarship calculator and Home Page Buttons -->
       <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
-        <a href="scholarship_Calculator.html"><button class="scholarship"> 🧮 Scholarship Calculator</button></a>
+        <a href="scholarship2.php"><button class="scholarship"> 🧮 Scholarship Calculator</button></a>
         <a href="scholarship.php"><button class="scholarship"> 🧮 Scholarship</button></a>
         <a href="index.html" class="home-button">
           <i class="fas fa-home"></i> Home
@@ -172,5 +175,73 @@
       <a href="about.html"><button class="btn">About US</button></a>
     </div>
   </div>
+
+<div class="container">
+
+        <div class="scholarship-table-container">
+            <div class="section-title">
+              <h1 style="color:aquamarine">Academic Scholarship Program</h1>
+              <h2>Scholarship Rate Table</h2>
+            </div>
+
+            <table class="scholarship-table">
+                <thead>
+                    <tr>
+                        <th>Level of Score</th>
+                        <th>Marks (%)</th>
+                        <th>Rate of Scholarship (Male)</th>
+                        <th>Rate of Scholarship (Female)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr id="row-100" class="highlight-row">
+                        <td>5.00</td>
+                        <td>90% or above</td>
+                        <td>100%</td>
+                        <td>100%</td>
+                    </tr>
+                    <tr id="row-75-60">
+                        <td>5.00</td>
+                        <td>90% or above</td>
+                        <td>60%</td>
+                        <td>75%</td>
+                    </tr>
+                    <tr id="row-65-50">
+                        <td>4.80 – 4.99</td>
+                        <td>80% – below 90%</td>
+                        <td>50% of Tuition Fees</td>
+                        <td>65% of Tuition Fees</td>
+                    </tr>
+                    <tr id="row-40-25">
+                        <td>4.50 – 4.79</td>
+                        <td>75% – below 80%</td>
+                        <td>25% of Tuition Fees</td>
+                        <td>40% of Tuition Fees</td>
+                    </tr>
+                    <tr id="row-30-15">
+                        <td>4.00 – 4.49</td>
+                        <td>70% – below 75%</td>
+                        <td>15% of Tuition Fees</td>
+                        <td>30% of Tuition Fees</td>
+                    </tr>
+                    <tr id="row-25-10">
+                        <td>3.50 – 3.99</td>
+                        <td>60% – below 70%</td>
+                        <td>10% of Tuition Fees</td>
+                        <td>25% of Tuition Fees</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p class="note">* With GPA 5.00 at SSC level examination</p>
+        </div>
+</div>        
+<div class="buttom_bar">
+<img src="picture/SKST.png" alt="Logo" style="height:80px; width:auto;">
+<p>SKST University</p>
+<p>4 Embankment Drive Road,Sector-10, Uttara Model Town, Dhaka-1230.</p>
+<p>Phone: (88 02) 55091801-5, Mobile : +88 01714 014 933, 01810030041-9, 01325080581-9</p>
+<p>Fax: (880-2) 5895 2625, Email : info@skst.edu</p>
+</div>
+
 </body>
 </html>
