@@ -79,6 +79,24 @@
       text-decoration: none;
     }
 
+        .scholarship {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      min-width: 120px;
+    }
+
+    .scholarship:hover {
+      transform: translateY(-3px);
+      background: linear-gradient(135deg, #b31217, #e52d27);
+    }
+
     .btn {
       background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
       color: white;
@@ -126,11 +144,15 @@
         <h1>SKST University || Scholarships</h1>
       </div>
 
-      <!-- Home Button -->
-      <a href="index.html" class="home-button">
-        <i class="fas fa-home"></i> Home
-      </a>
-    </div>
+      <!-- Scholarship calculator and Home Page Buttons -->
+      <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+        <a href="scholarship_Calculator.html"><button class="scholarship"> 🧮 Scholarship Calculator</button></a>
+        <a href="scholarship.php"><button class="scholarship"> 🧮 Scholarship</button></a>
+        <a href="index.html" class="home-button">
+          <i class="fas fa-home"></i> Home
+        </a>
+      </div>
+  </div>
 
     <div class="menu-section">
       <a href="student.html"><button class="btn">Student</button></a>

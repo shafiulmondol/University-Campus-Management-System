@@ -25,44 +25,57 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
     $result = $stmt->get_result();
     if ($row = $result->fetch_assoc()) {
         if ($row['password'] === $password) {
-           $_SESSION['id'] = $id;
-$_SESSION['name'] = $row['full_name']; // ✅ Add this line
+            $_SESSION['id'] = $id;
+            $_SESSION['name'] = $row['full_name'];
             header("Location: administration.php");
             exit();
         } else $error = "Incorrect password.";
     } else $error = "ID not found.";
 }
-//    -- ==================== Connection FACULTY BIODATA ==================== --
+
+// Faculty Login
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['facultylogin'])) {
     $faculty_id = intval($_POST['faculty_id']);
-    $stmt = $conn->prepare("SELECT faculty_id FROM faculty WHERE faculty_id = ?");
+    $stmt = $conn->prepare("SELECT faculty_id, name FROM faculty WHERE faculty_id = ?");
     $stmt->bind_param("i", $faculty_id);
     $stmt->execute();
     $result = $stmt->get_result();
     if ($row = $result->fetch_assoc()) {
-        $_SESSION['faculty_id'] = $row['faculty_id'];  // ✅ FIXED
-        header("Location: administration.php?facultylogin=true");
+        $_SESSION['faculty_id'] = $row['faculty_id'];
+        $_SESSION['faculty_name'] = $row['name'];
+        // Redirect to originally requested action or default faculty dashboard
+        $redirect = isset($_SESSION['faculty_redirect']) ? $_SESSION['faculty_redirect'] : 'facultylogin=true';
+        unset($_SESSION['faculty_redirect']);
+        header("Location: administration.php?$redirect");
         exit();
     } else {
         $error = "Faculty ID not found.";
     }
 }
-//  -- ==================== Connection Student  BIODATA ==================== --
+
+// Student Login
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['studentlogin'])) {
     $id = intval($_POST['id']);
-    $stmt = $conn->prepare("SELECT id FROM student_registration WHERE id = ?");
+    $stmt = $conn->prepare("SELECT id, first_name FROM student_registration WHERE id = ?");
     $stmt->bind_param("i", $id);
     $stmt->execute();
     $result = $stmt->get_result();
     if ($row = $result->fetch_assoc()) {
-        $_SESSION['id'] = $row['id'];  // ✅ FIXED
+        $_SESSION['student_id'] = $row['id'];
+        $_SESSION['student_name'] = $row['first_name'];
         header("Location: administration.php?studentlogin=true");
         exit();
     } else {
         $error = "Student ID not found.";
     }
 }
+
+// Store requested faculty action if coming from faculty section
+if (isset($_GET['faculty_biodata']) || isset($_GET['edit_faculty_biodata']) || isset($_GET['remove_faculty'])) {
+    $_SESSION['faculty_redirect'] = $_SERVER['QUERY_STRING'];
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -143,7 +156,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['studentlogin'])) {
             font-size: 13px;
             font-weight: 500;
             border: 5px solid #1b2c46ff;
-
         }
         .heading h2{
             margin: 0;
@@ -170,7 +182,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['studentlogin'])) {
             flex-wrap: wrap;
             justify-content: center;
             gap: 25px;
-            
         }
         .cards a button{
             color: #16c3fdff;
@@ -193,8 +204,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['studentlogin'])) {
             transform: translateY(-10px);
             box-shadow: 0 8px 16px rgba(0,0,0,0.2);
         }
-       .cards a :hover{
-        /* background-color: #00bfff; */
+       .cards a :hover {
         box-shadow: 0 10px 14px rgba(4, 216, 254, 0.99);
        }
         .card span {
@@ -202,48 +212,59 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['studentlogin'])) {
             display: block;
             margin-bottom: 10px;
         }
-/* ===============================new======================= */
         .sidebar {
             width: 280px;
-            background-color: #1b2635;
+            background: linear-gradient(145deg, #1a273a, #22364d);
             color: white;
             padding: 30px;
             min-height: 100vh;
+            box-shadow: 8px 8px 15px #141c28, -8px -8px 15px #22344c;
         }
         .sidebar h2 {
             text-align: center;
             color: #00bfff;
+            text-shadow: 1px 1px 3px black;
         }
         .sidebar a {
             text-decoration: none;
         }
         .sidebar button {
+            display: flex;
+            align-items: center;
             width: 100%;
             padding: 12px;
             margin-bottom: 15px;
-            background-color: #00bfff;
-            color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
+            color: white;
+            border-radius: 10px;
             cursor: pointer;
-            transition: transform 0.1s;
+            transition: all 0.2s ease;
+            box-shadow: inset -2px -2px 5px rgba(255,255,255,0.1), 
+                        inset 2px 2px 8px rgba(0,0,0,0.4);
+            background-color: #2c3e50;
         }
         .sidebar button:hover {
-            transform: scale(1.03);
-            background-color: #0099cc;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
         }
         .main-content {
             flex: 1;
-            padding: 40px;
+            padding: 20px;
             background-color: #f4f4f4;
             min-height: 100vh;
+            overflow-y: auto;
+        }
+        .flex-container {
+            display: flex;
+            flex-direction: row;
+            height: 100vh;
         }
     </style>
 </head>
 <body>
-  <!-- -- ==================== Admin Login ==================== -- -->
+
 <?php if (!isset($_SESSION['id'])): ?>
+    <!-- Admin Login Form -->
     <div class="container">
         <h1>SKST University Admin Login</h1>
         <?php if ($error): ?>
@@ -256,12 +277,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['studentlogin'])) {
         </form>
         <a href="index.html" type="back"><button><span>🔙</span>Back to Dashboard</button></a>
     </div>
+
 <?php else: ?>
-  <!-- -- ==================== Admin Biodata Check ==================== -- -->
     <?php if (isset($_GET['biodata'])): ?>
+        <!-- Admin Biodata View -->
         <?php
         $adminid = $_SESSION['id'];
-        $stmt = $conn->prepare("SELECT  full_name, username, password, email, phone FROM admin_users WHERE id = ?");
+        $stmt = $conn->prepare("SELECT full_name, username, password, email, phone FROM admin_users WHERE id = ?");
         $stmt->bind_param("i", $adminid);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -277,428 +299,301 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['studentlogin'])) {
                     <p><strong>Password:</strong> <?= htmlspecialchars($biodata['password']) ?></p>
                     <p><strong>Email:</strong> <?= htmlspecialchars($biodata['email']) ?></p>
                     <p><strong>Phone:</strong> <?= htmlspecialchars($biodata['phone']) ?></p>
-                    <a href="?info=true" type="back"><button><span>🔙</span>Back</button></a>
+                    <a href="administration.php?info=true" type="back"><button><span>🔙</span>Back</button></a>
                 </div>
             <?php else: ?>
                 <div class="container">
                     <p>No biodata found for your ID.</p>
-                    <a href="?info=true" type="back"><button><span>🔙</span>Back</button></a>
+                    <a href="administration.php?info=true" type="back"><button><span>🔙</span>Back</button></a>
                 </div>
             <?php endif; ?>
         </div>
-       
-  <!-- -- ==================== Admin Login Faculty Section ==================== -- -->
-    <?php elseif (isset($_GET['Faculty_Intro'])): ?>
-        <div class="container">
-        <h1>SKST University Faculty Login</h1>
-        <?php if ($error): ?>
-            <div class="error"><?= htmlspecialchars($error) ?></div>
-        <?php endif; ?>
-        <form method="POST">
-            <input type="number" name="faculty_id" placeholder="Enter Faculty ID" required autofocus />
-            <button type="submit" name="facultylogin">Login</button>
-        </form>
-        <a href="administration.php" type="back"><button><span>🔙</span>Back to Dashboard</button></a>
-    </div>
-   
-  <!-- -- ==================== FACULTY BIODATA ==================== --        -->
-    <?php elseif (isset($_GET['faculty_biodata'])): ?>
-        <?php
-        $adminid = $_SESSION['faculty_id'];
-        $stmt = $conn->prepare("SELECT  `faculty_id`, `name`, `email`, `password`, `department`, `address`, `phone`, `room_number`, `salary` FROM faculty WHERE faculty_id = ?");
-        $stmt->bind_param("i", $adminid);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $biodata = $result->fetch_assoc();
-        ?>
-
-        <div class="routine-page">
-            <h2>Faculty Biodata</h2>
-            <?php if ($biodata): ?>
-                <div class="container">
-                    <p><strong>ID:</strong> <?= htmlspecialchars($adminid) ?></p>
-                    <p><strong>Full Name:</strong> <?= htmlspecialchars($biodata['name']) ?></p>
-                    <p><strong>Email:</strong> <?= htmlspecialchars($biodata['email']) ?></p>
-                    <p><strong>Password:</strong> <?= htmlspecialchars($biodata['password']) ?></p>
-                    <p><strong>Department:</strong> <?= htmlspecialchars($biodata['department']) ?></p>
-                    <p><strong>Phone:</strong> <?= htmlspecialchars($biodata['phone']) ?></p>
-                    <p><strong>Address:</strong> <?= htmlspecialchars($biodata['address']) ?></p>
-                    <p><strong>Room Number:</strong> <?= htmlspecialchars($biodata['room_number']) ?></p>
-                    <p><strong>Salary:</strong> <?= htmlspecialchars($biodata['salary']) ?></p>
-                    <a href="?faculty_info=true" type="back"><button><span>🔙</span>Back</button></a>
-                </div>
-            <?php else: ?>
-                <div class="container">
-                    <p>No biodata found for your ID.</p>
-                    <a href="?faculty_info=true" type="back"><button><span>🔙</span>Back</button></a>
-                </div>
-            <?php endif; ?>
-        </div>
-  <!-- -- ==================== FACULTY Dashboard ==================== -- -->
-   <?php elseif (isset($_GET['facultylogin'])): ?>
-    <div style="
-        margin-top:20px;width: 280px;background: linear-gradient(145deg, #1a273a, #22364d);padding: 30px;color: white;border-radius: 15px;box-shadow: 8px 8px 15px #141c28, -8px -8px 15px #22344c;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    ">
-        <h2 style="text-align: center; color: #00bfff; text-shadow: 1px 1px 3px black;">SKST FACULTY PORTAL</h2>
-        <div style="display: flex; flex-direction: column; gap: 17px; margin-top: 30px;">
-            <!-- View Biodata -->
-            <a href="?faculty_biodata=true" style="text-decoration: none;">
-                <button style="display: flex;align-items: center;width: 100%;padding: 12px;border: none;background-color: <?= isset($_GET['faculty_biodata']) ? '#3498db' : '#2c3e50' ?>;color: white;border-radius: 10px;cursor: pointer;box-shadow: inset -2px -2px 5px rgba(255,255,255,0.1), inset 2px 2px 8px rgba(0,0,0,0.4);
-                transition: all 0.2s ease;
-                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 15px rgba(0,0,0,0.3)';"
-                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='inset -2px -2px 5px rgba(255,255,255,0.1), inset 2px 2px 8px rgba(0,0,0,0.4)';">
-                    <span style="margin-right: 10px;">👤</span>View Biodata
-                </button>
-            </a>
-
-            <!-- Add Faculty -->
-            <a href="?add_faculty=true" style="text-decoration: none;">
-                <button style="display: flex;align-items: center;width: 100%;
-                padding: 12px;border: none;background-color: <?= isset($_GET['add_faculty']) ? '#3498db' : '#2c3e50' ?>;color: white;border-radius: 10px;cursor: pointer;box-shadow: inset -2px -2px 5px rgba(255,255,255,0.1), inset 2px 2px 8px rgba(0,0,0,0.4);transition: all 0.2s ease;
-                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 15px rgba(0,0,0,0.3)';"
-                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='inset -2px -2px 5px rgba(255,255,255,0.1), inset 2px 2px 8px rgba(0,0,0,0.4)';">
-                    <span style="margin-right: 10px;">➕</span>Add Faculty
-                </button>
-            </a>
-
-            <!-- Edit Biodata -->
-            <a href="?edit_faculty_biodata=true" style="text-decoration: none;">
-                <button style="display: flex;align-items: center;width: 100%;padding: 12px;border: none;background-color: <?= isset($_GET['edit_faculty_biodata']) ? '#3498db' : '#2c3e50' ?>;color: white;border-radius: 10px;cursor: pointer;box-shadow: inset -2px -2px 5px rgba(255,255,255,0.1), inset 2px 2px 8px rgba(0,0,0,0.4);transition: all 0.2s ease;
-                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 15px rgba(0,0,0,0.3)';"
-                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='inset -2px -2px 5px rgba(255,255,255,0.1), inset 2px 2px 8px rgba(0,0,0,0.4)';">
-                    <span style="margin-right: 10px;">✏️</span>Edit Biodata
-                </button>
-            </a>
-
-            <!-- Remove Faculty -->
-            <a href="?remove_faculty=true" style="text-decoration: none;">
-                <button style="display: flex;align-items: center;width: 100%;padding: 12px;border: none;background-color: <?= isset($_GET['remove_faculty']) ? '#3498db' : '#2c3e50' ?>; color: white;border-radius: 10px;cursor: pointer;box-shadow: inset -2px -2px 5px rgba(255,255,255,0.1), inset 2px 2px 8px rgba(0,0,0,0.4);
-                transition: all 0.2s ease;
-                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 15px rgba(0,0,0,0.3)';"
-                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='inset -2px -2px 5px rgba(255,255,255,0.1), inset 2px 2px 8px rgba(0,0,0,0.4)';">
-                    <span style="margin-right: 10px;">🗑️</span>Remove Faculty
-                </button>
-            </a>
-
-            <!-- Back -->
-            <a href="?faculty_info=true" style="text-decoration: none;">
-                <button style=" display: flex; align-items: center; width: 100%; padding: 12px;border: none;background-color: #2c3e50;color: white;border-radius: 10px;cursor: pointer;box-shadow: inset -2px -2px 5px rgba(255,255,255,0.1), inset 2px 2px 8px rgba(0,0,0,0.4);transition: all 0.2s ease;
-                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 15px rgba(0,0,0,0.3)';"
-                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='inset -2px -2px 5px rgba(255,255,255,0.1), inset 2px 2px 8px rgba(0,0,0,0.4)';">
-                    <span style="margin-right: 10px;">🔙</span>Back
-                </button>
-            </a>
-        </div>
-    </div>
-
-
-
-
-        <!-- <div class="routine-page">
-            <h2>Faculty Information</h2>
-            <div class="cards">
-                <a href="?faculty_biodata=true" class="card"><button><span>👤</span>View Biodata</button></a>
-                <a href="?edit_faculty_biodata=true" class="card"><button><span>✏️</span>Edit Biodata</button></a>
-                 <a href="?remove_faculty=true" class="card"><button><span>⚠️</span>Remove Faculty</button></a>
-                <a href="administration.php" class="card"><button><span>🔙</span>Back to Dashboard</button></a>
-            </div>
-        </div> -->
-        <div style="display:flex; padding: 40px; background-color: #f4f4f4; border-top-left-radius: 20px; border-bottom-left-radius: 20px;">
-    <?php
-    $message = ""; // To hold success or error message
-
-    if (isset($_GET['add_faculty'])) {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_faculty'])) {
-            $faculty_id = $_POST['faculty_id'];
-            $name = $_POST['name'];
-            $email = $_POST['email'];
-            $password = $_POST['password']; // Use password_hash in real apps
-            $department = $_POST['department'];
-            $address = $_POST['address'];
-            $phone = $_POST['phone'];
-            $room_number = $_POST['room_number'];
-            $salary = $_POST['salary'];
-
-            // Check if faculty_id or email already exists
-            $check_stmt = $conn->prepare("SELECT * FROM faculty WHERE faculty_id = ? OR email = ?");
-            $check_stmt->bind_param("ss", $faculty_id, $email);
-            $check_stmt->execute();
-            $check_result = $check_stmt->get_result();
-
-            if ($check_result->num_rows > 0) {
-                $message = "<span style='color: red;'>❌ Faculty ID or Email already exists.</span>";
-            } else {
-                $stmt = $conn->prepare("INSERT INTO faculty (faculty_id, name, email, password, department, address, phone, room_number, salary) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-                $stmt->bind_param("sssssssss", $faculty_id, $name, $email, $password, $department, $address, $phone, $room_number, $salary);
-
-                if ($stmt->execute()) {
-                    $message = "<span style='color: green;'>✅ Faculty added successfully.</span>";
-                } else {
-                    $message = "<span style='color: red;'>❌ Error adding faculty.</span>";
-                }
-            }
-        }
-    ?>
-    <div class="routine-page">
-        <h2>Add New Faculty</h2>
-        <div class="container">
-            <form method="POST">
-                <input type="text" name="faculty_id" placeholder="Faculty ID" required />
-                <input type="text" name="name" placeholder="Name" required />
-                <input type="email" name="email" placeholder="Email" required />
-                <input type="text" name="password" placeholder="Password" required />
-                <input type="text" name="department" placeholder="Department" required />
-                <input type="text" name="address" placeholder="Address" required />
-                <input type="text" name="phone" placeholder="Phone" required />
-                <input type="text" name="room_number" placeholder="Room Number" required />
-                <input type="text" name="salary" placeholder="Salary" required />
-
-                <div style="display: flex; align-items: center; gap: 12px; margin-top: 10px;">
-                    <button type="submit" name="add_faculty">➕ Add Faculty</button>
-                    <?= $message ?>
-                </div>
-
-                <div style="margin-top: 15px;">
-                    <a href="?faculty_info=true"><button type="button">🔙 Back</button></a>
-                </div>
-            </form>
-        </div>
-    </div>
-    <?php } 
- 
-        elseif (isset($_GET['edit_faculty_biodata'])) {
-            include 'edit_faculty_section.php';
-        } elseif (isset($_GET['remove_faculty'])) {
-            include 'remove_faculty_section.php';
-        } else {
-            echo "<h2>Welcome to the Faculty Dashboard</h2><p>Select an action from the left menu.</p>";
-        }
-        ?>
-    </div>
-</div>
-
-  <!-- -- ==================== Individual FACULTY Dashboard ==================== -- -->
+    
     <?php elseif (isset($_GET['faculty_info'])): ?>
-        <div class="routine-page">
-            <h2>Faculty Information</h2>
-            <div class="cards">
-                <a href="?Faculty_Intro=true" class="card"><button><span>👤</span>Faculty Intro</button></a>
-                <a href="?add_faculty=true" class="card"><button><span>✏️</span>Add new</button></a>
-                <a href="administration.php" class="card"><button><span>🔙</span>Back to Dashboard</button></a>
-            </div>
-        </div>
-        
-  <!-- -- ==================== Add FACULTY ==================== --        -->
-<?php elseif (isset($_GET['add_faculty'])): ?>
-    <?php
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_faculty'])) {
-        $faculty_id = $_POST['faculty_id'];
-        $name = $_POST['name'];
-        $email = $_POST['email'];
-        $password = $_POST['password']; // In real applications, use password_hash()!
-        $department = $_POST['department'];
-        $address = $_POST['address'];
-        $phone = $_POST['phone'];
-        $room_number = $_POST['room_number'];
-        $salary = $_POST['salary'];
-
-        // Check if faculty_id or email already exists
-        $check_stmt = $conn->prepare("SELECT * FROM faculty WHERE faculty_id = ? OR email = ?");
-        $check_stmt->bind_param("ss", $faculty_id, $email);
-        $check_stmt->execute();
-        $check_result = $check_stmt->get_result();
-
-        if ($check_result->num_rows > 0) {
-            echo "<script>alert('Faculty ID or Email already exists.');</script>";
-        } else {
-            // Insert new faculty
-            $stmt = $conn->prepare("INSERT INTO faculty (faculty_id, name, email, password, department, address, phone, room_number, salary) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("sssssssss", $faculty_id, $name, $email, $password, $department, $address, $phone, $room_number, $salary);
-
-            if ($stmt->execute()) {
-                echo "<script>alert('New faculty added successfully.'); window.location='?add_faculty=true';</script>";
-            } else {
-                echo "<script>alert('Error adding faculty.');</script>";
-            }
-        }
-    }
-     ?>
-     <div class="routine-page">
-         <h2>Add New Faculty</h2>
-         <div class="container">
-             <form method="POST">
-                 <input type="text" name="faculty_id" placeholder="Faculty ID" required />
-                 <input type="text" name="name" placeholder="Name" required />
-                 <input type="email" name="email" placeholder="Email" required />
-                 <input type="text" name="password" placeholder="Password" required />
-                 <input type="text" name="department" placeholder="Department" required />
-                <input type="text" name="address" placeholder="Address" required />
-                 <input type="text" name="phone" placeholder="Phone" required />
-                 <input type="text" name="room_number" placeholder="Room Number" required />
-                 <input type="text" name="salary" placeholder="Salary" required />
-                 <button type="submit" name="add_faculty">➕ Add Faculty</button>
-                 <a href="?faculty_info=true" type="back"><button type="button">🔙 Back</button></a>
-             </form>
-         </div>
-     </div>
-  <!-- -- ==================== Edit FACULTY Biodata ==================== -- -->
-<?php elseif (isset($_GET['edit_faculty_biodata'])): ?>
-    <?php
-    $faculty_id = $_SESSION['faculty_id']; // Use the correct faculty_id from session
-
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
-        // Get posted form values
-        $updated_faculty_id = $_POST['faculty_id'];
-        $name = $_POST['name'];
-        $email = $_POST['email'];
-        $password = $_POST['password'];
-        $department = $_POST['department'];
-        $address = $_POST['address'];
-        $phone = $_POST['phone'];
-        $room_number = $_POST['room_number'];
-        $salary = $_POST['salary'];
-
-        // Prepare UPDATE statement
-        $stmt = $conn->prepare("UPDATE faculty SET faculty_id=?, name=?, email=?, password=?, department=?, address=?, phone=?, room_number=?, salary=? WHERE faculty_id=?");
-
-        $stmt->bind_param("ssssssssss", $updated_faculty_id, $name, $email, $password, $department, $address, $phone, $room_number, $salary, $faculty_id);
-
-        if ($stmt->execute()) {
-            // Update session variable if faculty_id changed
-            $_SESSION['faculty_id'] = $updated_faculty_id;
-
-            echo "<script>alert('Biodata updated successfully.'); window.location='?edit_faculty_biodata=true';</script>";
-            exit();
-        } else {
-            echo "<script>alert('Failed to update biodata.');</script>";
-        }
-    }
-
-    // Fetch current faculty biodata
-    $stmt = $conn->prepare("SELECT faculty_id, name, email, password, department, address, phone, room_number, salary FROM faculty WHERE faculty_id = ?");
-    $stmt->bind_param("s", $faculty_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $data = $result->fetch_assoc();
-    ?>
-    <div class="routine-page">
-        <h2>Edit Biodata</h2>
+        <!-- Faculty Login Form - Only shown when faculty_info is clicked -->
         <div class="container">
+            <h1>SKST University Faculty Login</h1>
+            <?php if ($error): ?>
+                <div class="error"><?= htmlspecialchars($error) ?></div>
+            <?php endif; ?>
             <form method="POST">
-                <input type="text" name="faculty_id" value="<?= htmlspecialchars($data['faculty_id']) ?>" required />
-                <input type="text" name="name" value="<?= htmlspecialchars($data['name']) ?>" required />
-                <input type="text" name="email" value="<?= htmlspecialchars($data['email']) ?>" required />
-                <input type="text" name="password" value="<?= htmlspecialchars($data['password']) ?>" required />
-                <input type="text" name="department" value="<?= htmlspecialchars($data['department']) ?>" required />
-                <input type="text" name="address" value="<?= htmlspecialchars($data['address']) ?>" required />
-                <input type="text" name="phone" value="<?= htmlspecialchars($data['phone']) ?>" required />
-                <input type="text" name="room_number" value="<?= htmlspecialchars($data['room_number']) ?>" required />
-                <input type="text" name="salary" value="<?= htmlspecialchars($data['salary']) ?>" required />
-                <button type="submit" name="update">Update</button>
-                <a href="?faculty_info=true" type="back"><button type="button"><span>🔙</span>Back</button></a>
+                <input type="number" name="faculty_id" placeholder="Enter Faculty ID" required autofocus />
+                <button type="submit" name="facultylogin">Login</button>
             </form>
+            <a href="administration.php" type="back"><button><span>🔙</span>Back to Dashboard</button></a>
         </div>
-    </div>
-    <!-- -- ==================== Remove FACULTY  ==================== -- -->
-     <?php elseif (isset($_GET['remove_faculty'])): ?>
-    <?php
-    $faculty_id = $_SESSION['faculty_id'];
-
-    // Delete action
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_faculty'])) {
-        $stmt = $conn->prepare("DELETE FROM faculty WHERE faculty_id = ?");
-        $stmt->bind_param("s", $faculty_id);
-        if ($stmt->execute()) {
-            echo "<script>alert('Faculty removed successfully.'); window.location='?faculty_info=true';</script>";
-            exit();
-        } else {
-            echo "<script>alert('Error removing faculty.');</script>";
-        }
-    }
-
-    // Fetch biodata for confirmation
-    $stmt = $conn->prepare("SELECT faculty_id, name, email, password, department, address, phone, room_number, salary FROM faculty WHERE faculty_id = ?");
-    $stmt->bind_param("s", $faculty_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $data = $result->fetch_assoc();
-    ?>
-    <div class="routine-page">
-        <h2>Confirm Remove Faculty</h2>
-        <?php if ($data): ?>
-            <div class="container">
-                <p><strong>ID:</strong> <?= htmlspecialchars($data['faculty_id']) ?></p>
-                <p><strong>Full Name:</strong> <?= htmlspecialchars($data['name']) ?></p>
-                <p><strong>Email:</strong> <?= htmlspecialchars($data['email']) ?></p>
-                <p><strong>Password:</strong> <?= htmlspecialchars($data['password']) ?></p>
-                <p><strong>Department:</strong> <?= htmlspecialchars($data['department']) ?></p>
-                <p><strong>Phone:</strong> <?= htmlspecialchars($data['phone']) ?></p>
-                <p><strong>Address:</strong> <?= htmlspecialchars($data['address']) ?></p>
-                <p><strong>Room Number:</strong> <?= htmlspecialchars($data['room_number']) ?></p>
-                <p><strong>Salary:</strong> <?= htmlspecialchars($data['salary']) ?></p>
-
-                <!-- 🔴 Delete Button Form -->
-                <form method="POST" onsubmit="return confirm('Are you sure you want to delete this faculty?');">
-                    <button type="submit" name="delete_faculty" style="background-color: #e74c3c; color: white;">
-                        🗑️ Delete Faculty
-                    </button>
-                </form>
-                <a href="?faculty_info=true" type="back">
-                    <button type="button"><span>🔙</span>Back</button>
-                </a>
+    
+    <?php elseif (isset($_SESSION['faculty_id']) || isset($_GET['facultylogin'])): ?>
+        <!-- Faculty Dashboard - Shown after successful login -->
+        <div class="flex-container">
+            <!-- Left Sidebar -->
+            <div class="sidebar">
+                <h2>SKST FACULTY PORTAL</h2>
+                <div style="display: flex; flex-direction: column; gap: 17px; margin-top: 30px;">
+                    <a href="?facultylogin=true&faculty_biodata=true">
+                        <button style="background-color: <?= isset($_GET['faculty_biodata']) ? '#3498db' : '#2c3e50' ?>;">
+                            <span style="margin-right: 10px;">👤</span>View Biodata
+                        </button>
+                    </a>
+                    <a href="?facultylogin=true&add_faculty=true">
+                        <button style="background-color: <?= isset($_GET['add_faculty']) ? '#3498db' : '#2c3e50' ?>;">
+                            <span style="margin-right: 10px;">➕</span>Add Faculty
+                        </button>
+                    </a>
+                    <a href="?facultylogin=true&edit_faculty_biodata=true">
+                        <button style="background-color: <?= isset($_GET['edit_faculty_biodata']) ? '#3498db' : '#2c3e50' ?>;">
+                            <span style="margin-right: 10px;">✏️</span>Edit Biodata
+                        </button>
+                    </a>
+                    <a href="?facultylogin=true&remove_faculty=true">
+                        <button style="background-color: <?= isset($_GET['remove_faculty']) ? '#3498db' : '#2c3e50' ?>;">
+                            <span style="margin-right: 10px;">🗑️</span>Remove Faculty
+                        </button>
+                    </a>
+                    <a href="administration.php">
+                        <button>
+                            <span style="margin-right: 10px;">🔙</span>Back to Dashboard
+                        </button>
+                    </a>
+                </div>
             </div>
-        <?php else: ?>
-            <div class="container">
-                <p>No biodata found for deletion.</p>
-                <a href="?faculty_info=true" type="back"><button><span>🔙</span>Back</button></a>
+
+            <!-- Right Content Area -->
+            <div class="main-content">
+                <?php if (isset($_GET['faculty_biodata'])): ?>
+                    <!-- Faculty Biodata Content -->
+                    <?php
+                    $faculty_id = $_SESSION['faculty_id'];
+                    $stmt = $conn->prepare("SELECT faculty_id, name, email, password, department, address, phone, room_number, salary FROM faculty WHERE faculty_id = ?");
+                    $stmt->bind_param("i", $faculty_id);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                    $biodata = $result->fetch_assoc();
+                    ?>
+                    <div class="routine-page">
+                        <h2>Faculty Biodata</h2>
+                        <?php if ($biodata): ?>
+                            <div class="container">
+                                <p><strong>ID:</strong> <?= htmlspecialchars($biodata['faculty_id']) ?></p>
+                                <p><strong>Name:</strong> <?= htmlspecialchars($biodata['name']) ?></p>
+                                <p><strong>Email:</strong> <?= htmlspecialchars($biodata['email']) ?></p>
+                                <p><strong>Password:</strong> <?= htmlspecialchars($biodata['password']) ?></p>
+                                <p><strong>Department:</strong> <?= htmlspecialchars($biodata['department']) ?></p>
+                                <p><strong>Address:</strong> <?= htmlspecialchars($biodata['address']) ?></p>
+                                <p><strong>Phone:</strong> <?= htmlspecialchars($biodata['phone']) ?></p>
+                                <p><strong>Room Number:</strong> <?= htmlspecialchars($biodata['room_number']) ?></p>
+                                <p><strong>Salary:</strong> <?= htmlspecialchars($biodata['salary']) ?></p>
+                                <a href="administration.php?facultylogin=true" type="back"><button><span>🔙</span>Back</button></a>
+                            </div>
+                        <?php else: ?>
+                            <div class="container">
+                                <p>No biodata found for your ID.</p>
+                                <a href="administration.php?facultylogin=true" type="back"><button><span>🔙</span>Back</button></a>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                <?php elseif (isset($_GET['add_faculty'])): ?>
+                    <!-- Add Faculty Content -->
+                    <?php
+                    $message = "";
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_faculty'])) {
+                        $faculty_id = $_POST['faculty_id'];
+                        $name = $_POST['name'];
+                        $email = $_POST['email'];
+                        $password = $_POST['password'];
+                        $department = $_POST['department'];
+                        $address = $_POST['address'];
+                        $phone = $_POST['phone'];
+                        $room_number = $_POST['room_number'];
+                        $salary = $_POST['salary'];
+
+                        $check_stmt = $conn->prepare("SELECT * FROM faculty WHERE faculty_id = ? OR email = ?");
+                        $check_stmt->bind_param("ss", $faculty_id, $email);
+                        $check_stmt->execute();
+                        $check_result = $check_stmt->get_result();
+
+                        if ($check_result->num_rows > 0) {
+                            $message = "<span style='color: red;'>❌ Faculty ID or Email already exists.</span>";
+                        } else {
+                            $stmt = $conn->prepare("INSERT INTO faculty (faculty_id, name, email, password, department, address, phone, room_number, salary) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                            $stmt->bind_param("sssssssss", $faculty_id, $name, $email, $password, $department, $address, $phone, $room_number, $salary);
+
+                            if ($stmt->execute()) {
+                                $message = "<span style='color: green;'>✅ Faculty added successfully.</span>";
+                            } else {
+                                $message = "<span style='color: red;'>❌ Error adding faculty.</span>";
+                            }
+                        }
+                    }
+                    ?>
+                    <div class="routine-page">
+                        <h2>Add New Faculty</h2>
+                        <div class="container">
+                            <form method="POST">
+                                <input type="text" name="faculty_id" placeholder="Faculty ID" required />
+                                <input type="text" name="name" placeholder="Name" required />
+                                <input type="email" name="email" placeholder="Email" required />
+                                <input type="text" name="password" placeholder="Password" required />
+                                <input type="text" name="department" placeholder="Department" required />
+                                <input type="text" name="address" placeholder="Address" required />
+                                <input type="text" name="phone" placeholder="Phone" required />
+                                <input type="text" name="room_number" placeholder="Room Number" required />
+                                <input type="text" name="salary" placeholder="Salary" required />
+                                <div style="display: flex; align-items: center; gap: 12px; margin-top: 10px;">
+                                    <button type="submit" name="add_faculty">➕ Add Faculty</button>
+                                    <?= $message ?>
+                                </div>
+                            </form>
+                            <a href="administration.php?facultylogin=true" type="back"><button><span>🔙</span>Back</button></a>
+                        </div>
+                    </div>
+
+                <?php elseif (isset($_GET['edit_faculty_biodata'])): ?>
+                    <!-- Edit Faculty Biodata -->
+                    <?php
+                    $faculty_id = $_SESSION['faculty_id'];
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
+                        $updated_faculty_id = $_POST['faculty_id'];
+                        $name = $_POST['name'];
+                        $email = $_POST['email'];
+                        $password = $_POST['password'];
+                        $department = $_POST['department'];
+                        $address = $_POST['address'];
+                        $phone = $_POST['phone'];
+                        $room_number = $_POST['room_number'];
+                        $salary = $_POST['salary'];
+
+                        $stmt = $conn->prepare("UPDATE faculty SET faculty_id=?, name=?, email=?, password=?, department=?, address=?, phone=?, room_number=?, salary=? WHERE faculty_id=?");
+                        $stmt->bind_param("ssssssssss", $updated_faculty_id, $name, $email, $password, $department, $address, $phone, $room_number, $salary, $faculty_id);
+
+                        if ($stmt->execute()) {
+                            $_SESSION['faculty_id'] = $updated_faculty_id;
+                            echo "<script>alert('Biodata updated successfully.'); window.location='?facultylogin=true&edit_faculty_biodata=true';</script>";
+                        } else {
+                            echo "<script>alert('Failed to update biodata.');</script>";
+                        }
+                    }
+
+                    $stmt = $conn->prepare("SELECT faculty_id, name, email, password, department, address, phone, room_number, salary FROM faculty WHERE faculty_id = ?");
+                    $stmt->bind_param("s", $faculty_id);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                    $data = $result->fetch_assoc();
+                    ?>
+                    <div class="routine-page">
+                        <h2>Edit Biodata</h2>
+                        <div class="container">
+                            <form method="POST">
+                                <input type="text" name="faculty_id" value="<?= htmlspecialchars($data['faculty_id']) ?>" required />
+                                <input type="text" name="name" value="<?= htmlspecialchars($data['name']) ?>" required />
+                                <input type="text" name="email" value="<?= htmlspecialchars($data['email']) ?>" required />
+                                <input type="text" name="password" value="<?= htmlspecialchars($data['password']) ?>" required />
+                                <input type="text" name="department" value="<?= htmlspecialchars($data['department']) ?>" required />
+                                <input type="text" name="address" value="<?= htmlspecialchars($data['address']) ?>" required />
+                                <input type="text" name="phone" value="<?= htmlspecialchars($data['phone']) ?>" required />
+                                <input type="text" name="room_number" value="<?= htmlspecialchars($data['room_number']) ?>" required />
+                                <input type="text" name="salary" value="<?= htmlspecialchars($data['salary']) ?>" required />
+                                <button type="submit" name="update">Update</button>
+                                <a href="administration.php?facultylogin=true" type="back"><button type="button"><span>🔙</span>Back</button></a>
+                            </form>
+                        </div>
+                    </div>
+
+                <?php elseif (isset($_GET['remove_faculty'])): ?>
+                    <!-- Remove Faculty -->
+                    <?php
+                    $faculty_id = $_SESSION['faculty_id'];
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_faculty'])) {
+                        $stmt = $conn->prepare("DELETE FROM faculty WHERE faculty_id = ?");
+                        $stmt->bind_param("s", $faculty_id);
+                        if ($stmt->execute()) {
+                            session_destroy();
+                            echo "<script>alert('Faculty removed successfully.'); window.location='administration.php';</script>";
+                        } else {
+                            echo "<script>alert('Error removing faculty.');</script>";
+                        }
+                    }
+
+                    $stmt = $conn->prepare("SELECT faculty_id, name FROM faculty WHERE faculty_id = ?");
+                    $stmt->bind_param("s", $faculty_id);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                    $data = $result->fetch_assoc();
+                    ?>
+                    <div class="routine-page">
+                        <h2>Confirm Remove Faculty</h2>
+                        <?php if ($data): ?>
+                            <div class="container">
+                                <p><strong>ID:</strong> <?= htmlspecialchars($data['faculty_id']) ?></p>
+                                <p><strong>Name:</strong> <?= htmlspecialchars($data['name']) ?></p>
+                                <form method="POST" onsubmit="return confirm('Are you sure you want to delete this faculty?');">
+                                    <button type="submit" name="delete_faculty" style="background-color: #e74c3c; color: white;">
+                                        🗑️ Delete Faculty
+                                    </button>
+                                </form>
+                                <a href="administration.php?facultylogin=true" type="back"><button type="button"><span>🔙</span>Back</button></a>
+                            </div>
+                        <?php else: ?>
+                            <div class="container">
+                                <p>No faculty found for deletion.</p>
+                                <a href="administration.php?facultylogin=true" type="back"><button type="button"><span>🔙</span>Back</button></a>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                <?php else: ?>
+                    <!-- Default Faculty Dashboard -->
+                    <div class="routine-page">
+                        <h2>Welcome <?= isset($_SESSION['faculty_name']) ? htmlspecialchars($_SESSION['faculty_name']) : 'Faculty' ?></h2>
+                        <p>Select an action from the left menu.</p>
+                    </div>
+                <?php endif; ?>
             </div>
-        <?php endif; ?>
-    </div>
+        </div>
 
+    <?php elseif (isset($_GET['student_Intro'])): ?>
+        <!-- Student Login Form -->
+        <div class="container">
+            <h1>SKST University Student Login</h1>
+            <?php if ($error): ?>
+                <div class="error"><?= htmlspecialchars($error) ?></div>
+            <?php endif; ?>
+            <form method="POST">
+                <input type="number" name="id" placeholder="Enter Student ID" required autofocus />
+                <button type="submit" name="studentlogin">Login</button>
+            </form>
+            <a href="administration.php" type="back"><button><span>🔙</span>Back to Dashboard</button></a>
+        </div>
 
- <!-- -- ==================== Admin Dashboard ==================== -- -->
-    <?php elseif (isset($_GET['info'])): ?>
+    <?php elseif (isset($_GET['studentlogin'])): ?>
+        <!-- Student Dashboard -->
         <div class="routine-page">
-            <h2>Personal Information</h2>
+            <h2>Student Information</h2>
             <div class="cards">
-                <a href="?biodata=true" class="card"><button><span>👤</span>View Biodata</button></a>
-                <a href="?edit_biodata=true" class="card"><button><span>✏️</span>Edit Biodata</button></a>
+                <a href="?student_biodata=true" class="card"><button><span>👤</span>View Biodata</button></a>
+                <a href="?edit_student_biodata=true" class="card"><button><span>✏️</span>Edit Biodata</button></a>
+                <a href="?remove_student=true" class="card"><button><span>⚠️</span>Remove Student</button></a>
                 <a href="administration.php" class="card"><button><span>🔙</span>Back to Dashboard</button></a>
             </div>
         </div>
-<!-- -- ==================== Admin Login student Section ==================== -- -->
- <?php elseif (isset($_GET['student_Intro'])): ?>
-        <div class="container">
-        <h1>SKST University Student Login</h1>
-        <?php if ($error): ?>
-            <div class="error"><?= htmlspecialchars($error) ?></div>
-        <?php endif; ?>
-        <form method="POST">
-            <input type="number" name="id" placeholder="Enter Student ID" required autofocus />
-            <button type="submit" name="studentlogin">Login</button>
-        </form>
-        <a href="administration.php" type="back"><button><span>🔙</span>Back to Dashboard</button></a>
-    </div>
 
-    <!-- -- ==================== Student BIODATA ==================== --        -->
     <?php elseif (isset($_GET['student_biodata'])): ?>
+        <!-- Student Biodata View -->
         <?php
-        $adminid = $_SESSION['id'];
-        $stmt = $conn->prepare("SELECT  `id`, `password`, `first_name`, `last_name`, `father_name`, `mother_name`, `date_of_birth`, `guardian_phone`, `student_phone`, `email`, `last_exam`, `board`, `other_board`, `year_of_passing`, `institution_name`, `result`, `subject_group`, `gender`, `blood_group`, `nationality`, `religion`, `present_address`, `permanent_address`, `department`, `photo_path`, `signature_path`, `submission_date` FROM student_registration WHERE id = ?");
-        $stmt->bind_param("i", $adminid);
+        $student_id = $_SESSION['student_id'];
+        $stmt = $conn->prepare("SELECT * FROM student_registration WHERE id = ?");
+        $stmt->bind_param("i", $student_id);
         $stmt->execute();
         $result = $stmt->get_result();
         $biodata = $result->fetch_assoc();
         ?>
-
         <div class="routine-page">
             <h2>Student Biodata</h2>
             <?php if ($biodata): ?>
                 <div class="container">
-                    <p><strong>ID:</strong> <?= htmlspecialchars($adminid) ?></p>
-                    <p><strong>Full Name:</strong> <?= htmlspecialchars($biodata['first_name']) ?>
-                <?= htmlspecialchars($biodata['last_name']) ?></p>
+                    <p><strong>ID:</strong> <?= htmlspecialchars($biodata['id']) ?></p>
+                    <p><strong>Name:</strong> <?= htmlspecialchars($biodata['first_name'] . ' ' . $biodata['last_name']) ?></p>
                     <p><strong>Date of Birth:</strong> <?= htmlspecialchars($biodata['date_of_birth']) ?></p>
                     <p><strong>Gender:</strong> <?= htmlspecialchars($biodata['gender']) ?></p>
                     <p><strong>Blood Group:</strong> <?= htmlspecialchars($biodata['blood_group']) ?></p>
@@ -711,35 +606,131 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['studentlogin'])) {
                     <p><strong>Email:</strong> <?= htmlspecialchars($biodata['email']) ?></p>
                     <p><strong>Present Address:</strong> <?= nl2br(htmlspecialchars($biodata['present_address'])) ?></p>
                     <p><strong>Permanent Address:</strong> <?= nl2br(htmlspecialchars($biodata['permanent_address'])) ?></p>
-                    <?php if (!empty($biodata['photo'])): ?>
+                    <p><strong>Department:</strong> <?= htmlspecialchars($biodata['department']) ?></p>
+                    <?php if (!empty($biodata['photo_path'])): ?>
                         <p><strong>Photo:</strong><br>
-                            <img src="uploads/<?= htmlspecialchars($biodata['photo']) ?>" width="150" style="border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.2);" alt="Student Photo" />
+                            <img src="uploads/<?= htmlspecialchars($biodata['photo_path']) ?>" width="150" style="border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.2);" alt="Student Photo" />
                         </p>
-                         <?php else: ?>
+                    <?php else: ?>
                         <p><strong>Photo:</strong> No photo uploaded.</p>
                     <?php endif; ?>
-                    <a href="?info=true" type="back"><button><span>🔙</span>Back</button></a>
+                    <a href="administration.php?studentlogin=true" type="back"><button><span>🔙</span>Back</button></a>
                 </div>
             <?php else: ?>
                 <div class="container">
                     <p>No biodata found for your ID.</p>
-                    <a href="?student_info=true" type="back"><button><span>🔙</span>Back</button></a>
+                    <a href="administration.php?studentlogin=true" type="back"><button><span>🔙</span>Back</button></a>
                 </div>
             <?php endif; ?>
         </div>
-  <!-- -- ==================== Student Dashboard ==================== -- -->
-    <?php elseif (isset($_GET['studentlogin'])): ?>
+
+    <?php elseif (isset($_GET['edit_student_biodata'])): ?>
+        <!-- Edit Student Biodata -->
+        <?php
+        $student_id = $_SESSION['student_id'];
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
+            $first_name = $_POST['first_name'];
+            $last_name = $_POST['last_name'];
+            $father_name = $_POST['father_name'];
+            $mother_name = $_POST['mother_name'];
+            $date_of_birth = $_POST['date_of_birth'];
+            $guardian_phone = $_POST['guardian_phone'];
+            $student_phone = $_POST['student_phone'];
+            $email = $_POST['email'];
+            $present_address = $_POST['present_address'];
+            $permanent_address = $_POST['permanent_address'];
+            $department = $_POST['department'];
+            $blood_group = $_POST['blood_group'];
+            $photo_path = $_POST['photo_path'];
+
+            $stmt = $conn->prepare("UPDATE student_registration SET first_name=?, last_name=?, father_name=?, mother_name=?, date_of_birth=?, guardian_phone=?, student_phone=?, email=?, present_address=?, permanent_address=?, department=?, blood_group=?, photo_path=? WHERE id=?");
+            $stmt->bind_param("sssssssssssssi", $first_name, $last_name, $father_name, $mother_name, $date_of_birth, $guardian_phone, $student_phone, $email, $present_address, $permanent_address, $department, $blood_group, $photo_path, $student_id);
+
+            if ($stmt->execute()) {
+                echo "<script>alert('Biodata updated successfully.'); window.location='?student_biodata=true';</script>";
+            } else {
+                echo "<script>alert('Failed to update biodata.');</script>";
+            }
+        }
+
+        $stmt = $conn->prepare("SELECT * FROM student_registration WHERE id = ?");
+        $stmt->bind_param("i", $student_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $data = $result->fetch_assoc();
+        ?>
         <div class="routine-page">
-            <h2>Student Information</h2>
-            <div class="cards">
-                <a href="?student_biodata=true" class="card"><button><span>👤</span>View Biodata</button></a>
-                <a href="?edit_student_biodata=true" class="card"><button><span>✏️</span>Edit Biodata</button></a>
-                 <a href="?remove_student=true" class="card"><button><span>⚠️</span>Remove Student</button></a>
-                <a href="administration.php" class="card"><button><span>🔙</span>Back to Dashboard</button></a>
+            <h2>Edit Biodata</h2>
+            <div class="container">
+                <form method="POST">
+                    <input type="hidden" name="id" value="<?= htmlspecialchars($student_id) ?>">
+                    <p><strong>First Name:</strong> <input type="text" name="first_name" value="<?= htmlspecialchars($data['first_name']) ?>" required></p>
+                    <p><strong>Last Name:</strong> <input type="text" name="last_name" value="<?= htmlspecialchars($data['last_name']) ?>" required></p>
+                    <p><strong>Father's Name:</strong> <input type="text" name="father_name" value="<?= htmlspecialchars($data['father_name']) ?>" required></p>
+                    <p><strong>Mother's Name:</strong> <input type="text" name="mother_name" value="<?= htmlspecialchars($data['mother_name']) ?>" required></p>
+                    <p><strong>Date of Birth:</strong> <input type="date" name="date_of_birth" value="<?= htmlspecialchars($data['date_of_birth']) ?>" required></p>
+                    <p><strong>Guardian Phone:</strong> <input type="text" name="guardian_phone" value="<?= htmlspecialchars($data['guardian_phone']) ?>" required></p>
+                    <p><strong>Student Phone:</strong> <input type="text" name="student_phone" value="<?= htmlspecialchars($data['student_phone']) ?>" required></p>
+                    <p><strong>Email:</strong> <input type="email" name="email" value="<?= htmlspecialchars($data['email']) ?>" required></p>
+                    <p><strong>Present Address:</strong><br>
+                        <textarea name="present_address" required><?= htmlspecialchars($data['present_address']) ?></textarea>
+                    </p>
+                    <p><strong>Permanent Address:</strong><br>
+                        <textarea name="permanent_address" required><?= htmlspecialchars($data['permanent_address']) ?></textarea>
+                    </p>
+                    <p><strong>Department:</strong> <input type="text" name="department" value="<?= htmlspecialchars($data['department']) ?>" required></p>
+                    <p><strong>Blood Group:</strong> <input type="text" name="blood_group" value="<?= htmlspecialchars($data['blood_group']) ?>" required></p>
+                    <p><strong>Photo Path:</strong> <input type="text" name="photo_path" value="<?= htmlspecialchars($data['photo_path']) ?>"></p>
+                    <button type="submit" name="update">Update</button>
+                    <a href="administration.php?studentlogin=true" type="back"><button type="button"><span>🔙</span>Back</button></a>
+                </form>
             </div>
         </div>
-  <!-- -- ==================== Individual Student Dashboard ==================== -- -->
+
+    <?php elseif (isset($_GET['remove_student'])): ?>
+        <!-- Remove Student -->
+        <?php
+        $student_id = $_SESSION['student_id'];
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_student'])) {
+            $stmt = $conn->prepare("DELETE FROM student_registration WHERE id = ?");
+            $stmt->bind_param("i", $student_id);
+            if ($stmt->execute()) {
+                session_destroy();
+                echo "<script>alert('Student removed successfully.'); window.location='administration.php';</script>";
+            } else {
+                echo "<script>alert('Error removing student.');</script>";
+            }
+        }
+
+        $stmt = $conn->prepare("SELECT id, first_name, last_name FROM student_registration WHERE id = ?");
+        $stmt->bind_param("i", $student_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $data = $result->fetch_assoc();
+        ?>
+        <div class="routine-page">
+            <h2>Confirm Remove Student</h2>
+            <?php if ($data): ?>
+                <div class="container">
+                    <p><strong>ID:</strong> <?= htmlspecialchars($data['id']) ?></p>
+                    <p><strong>Name:</strong> <?= htmlspecialchars($data['first_name']) . ' ' . htmlspecialchars($data['last_name']) ?></p>
+                    <form method="POST" onsubmit="return confirm('Are you sure you want to delete this student?');">
+                        <button type="submit" name="delete_student" style="background-color: #e74c3c; color: white;">
+                            🗑️ Delete Student
+                        </button>
+                    </form>
+                    <a href="administration.php?studentlogin=true" type="back"><button type="button"><span>🔙</span>Back</button></a>
+                </div>
+            <?php else: ?>
+                <div class="container">
+                    <p>No student found for deletion.</p>
+                    <a href="administration.php?studentlogin=true" type="back"><button type="button"><span>🔙</span>Back</button></a>
+                </div>
+            <?php endif; ?>
+        </div>
+
     <?php elseif (isset($_GET['student_info'])): ?>
+        <!-- Student Information Dashboard -->
         <div class="routine-page">
             <h2>Student Information</h2>
             <div class="cards">
@@ -748,273 +739,86 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['studentlogin'])) {
                 <a href="administration.php" class="card"><button><span>🔙</span>Back to Dashboard</button></a>
             </div>
         </div>
-  <!-- -- ==================== Add Student ==================== --        -->
-<?php elseif (isset($_GET['add_student'])): ?>
-    <?php
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_student'])) {
-        $id = $_POST['id'];
-        $password = $_POST['password']; 
-        $first_name = $_POST['first_name'];
-        $last_name = $_POST['last_name'];
-        $father_name = $_POST['father_name'];
-        $mother_name = $_POST['mother_name'];
-        $date_of_birth = $_POST['date_of_birth'];
-        $guardian_phone = $_POST['guardian_phone'];
-        $student_phone = $_POST['student_phone'];
-        $email = $_POST['email'];
-        $last_exam = $_POST['last_exam'];
-        $board = $_POST['board'];
-        $other_board = $_POST['other_board'];
-        $year_of_passing = $_POST['year_of_passing'];
-        $institution_name = $_POST['institution_name'];
-        $result = $_POST['result'];
-        $subject_group = $_POST['subject_group'];
-        $gender = $_POST['gender'];
-        $nationality = $_POST['nationality'];
-        $religion = $_POST['religion'];
-        $present_address = $_POST['present_address'];
-        $permanent_address = $_POST['permanent_address'];
-        $department = $_POST['department'];
-        $blood_group = $_POST['blood_group'];
-        $photo_path = $_POST['photo_path'];
-        $signature_path = $_POST['signature_path'];
-        $submission_date = $_POST['submission_date'];
-        
 
-        // Check if id or email already exists
-        $check_stmt = $conn->prepare("SELECT * FROM student_registration WHERE id = ? OR email = ?");
-        $check_stmt->bind_param("ss", $id, $email);
-        $check_stmt->execute();
-        $check_result = $check_stmt->get_result();
+    <?php elseif (isset($_GET['add_student'])): ?>
+        <!-- Add Student -->
+        <?php
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_student'])) {
+            $id = $_POST['id'];
+            $password = $_POST['password'];
+            $first_name = $_POST['first_name'];
+            $last_name = $_POST['last_name'];
+            $father_name = $_POST['father_name'];
+            $mother_name = $_POST['mother_name'];
+            $date_of_birth = $_POST['date_of_birth'];
+            $guardian_phone = $_POST['guardian_phone'];
+            $student_phone = $_POST['student_phone'];
+            $email = $_POST['email'];
+            $present_address = $_POST['present_address'];
+            $permanent_address = $_POST['permanent_address'];
+            $department = $_POST['department'];
+            $blood_group = $_POST['blood_group'];
+            $photo_path = $_POST['photo_path'];
 
-        if ($check_result->num_rows > 0) {
-            echo "<script>alert('Student ID or Email already exists.');</script>";
-        } else {
-            // Insert new student
-            $stmt = $conn->prepare("INSERT INTO student_registration (id, password, first_name, last_name, father_name, mother_name, date_of_birth, guardian_phone, student_phone, email, last_exam, board, other_board, year_of_passing, institution_name, result, subject_group, gender, blood_group, nationality, religion, present_address, permanent_address, department, photo_path, signature_path, submission_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("sssssssss", $id, $password, $first_name, $last_name, $father_name, $mother_name, $date_of_birth, $guardian_phone,$student_phone, $email, $last_exam, $board, $other_board, $year_of_passing, $institution_name, $result, $subject_group, $gender, $blood_group, $nationality, $religion, $present_address, $permanent_address, $department, $photo_path, $signature_path, $submission_date);
+            $check_stmt = $conn->prepare("SELECT * FROM student_registration WHERE id = ? OR email = ?");
+            $check_stmt->bind_param("is", $id, $email);
+            $check_stmt->execute();
+            $check_result = $check_stmt->get_result();
 
-            if ($stmt->execute()) {
-                echo "<script>alert('New Student added successfully.'); window.location='?add_student=true';</script>";
+            if ($check_result->num_rows > 0) {
+                echo "<script>alert('Student ID or Email already exists.');</script>";
             } else {
-                echo "<script>alert('Error adding student.');</script>";
+                $stmt = $conn->prepare("INSERT INTO student_registration (id, password, first_name, last_name, father_name, mother_name, date_of_birth, guardian_phone, student_phone, email, present_address, permanent_address, department, blood_group, photo_path) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                $stmt->bind_param("issssssssssssss", $id, $password, $first_name, $last_name, $father_name, $mother_name, $date_of_birth, $guardian_phone, $student_phone, $email, $present_address, $permanent_address, $department, $blood_group, $photo_path);
+
+                if ($stmt->execute()) {
+                    echo "<script>alert('New student added successfully.'); window.location='?student_info=true';</script>";
+                } else {
+                    echo "<script>alert('Error adding student.');</script>";
+                }
             }
         }
-    }
-    ?>
-    <div class="routine-page">
-        <h2>Add New Faculty</h2>
-        <div class="container">
-            <form method="POST">
-
-
-                <input type="text" name="id" placeholder="Student ID" required />
-                <input type="password" name="password" placeholder="Password" required />
-                <input type="text" name="first_name" placeholder="First Name" required />
-                <input type="text" name="last_name" placeholder="Last Name" required />
-                <input type="text" name="father_name" placeholder="Father Name" required />
-                <input type="text" name="mother_name" placeholder="Mother Name" required />
-                <input type="time" name="date_of_birth" placeholder=" Date of birth" required />
-                <input type="text" name="guardian_phone" placeholder="guardian Phone" required />
-                <input type="text" name="student_phone" placeholder="Student Phone" required />
-                <input type="email" name="email" placeholder="Email" required />
-                <input type="text" name="last_exam" placeholder="Last Exam" required />
-                <input type="text" name="board" placeholder="Board" required />
-  
-                <input type="text" name="other_board" placeholder="Other Board" required />
-                <input type="text" name="year_of_passing" placeholder="Year of Passing" required />
-                <input type="text" name="institution_name" placeholder="Institution Name" required />
-                <input type="text" name="result" placeholder="Result" required />
-                <input type="text" name="subject_group" placeholder="Subject Group" required />
-                <input type="text" name="gender" placeholder="Gender" required />
-                <input type="text" name="blood_group" placeholder="Blood Group" required />
-
-                <input type="text" name="nationality" placeholder="Nationality" required />
-                <input type="text" name="religion" placeholder="Religion" required />
-                <input type="text" name="present_address" placeholder="Present Address" required />
-                <input type="text" name="permanent_address" placeholder="Permanent Address" required />
-                <input type="text" name="department" placeholder="Department" required />
-                <input type="text" name="photo_path" placeholder="Photo Path" required />
-                <input type="text" name="signature_path" placeholder="Signature Path" required />
-                <input type="time" name="submiddion_date" placeholder="Submission  Date" required />
-                <button type="submit" name="add_student">➕ Add Student</button>
-                <a href="?student_info=true" type="back"><button type="button">🔙 Back</button></a>
-            </form>
-        </div>
-    </div>
-  <!-- -- ==================== Edit Student Biodata ==================== -- -->
-<?php elseif (isset($_GET['edit_student_biodata'])): ?>
-    <?php
-    $id = $_SESSION['id'];
-
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
-        $id = $_POST['id']; // Student ID (hidden input)
-        $password = $_POST['password']; 
-        $first_name = $_POST['first_name'];
-        $last_name = $_POST['last_name'];
-        $father_name = $_POST['father_name'];
-        $mother_name = $_POST['mother_name'];
-        $date_of_birth = $_POST['date_of_birth'];
-        $guardian_phone = $_POST['guardian_phone'];
-        $student_phone = $_POST['student_phone'];
-        $email = $_POST['email'];
-        $last_exam = $_POST['last_exam'];
-        $board = $_POST['board'];
-        $other_board = $_POST['other_board'];
-        $year_of_passing = $_POST['year_of_passing'];
-        $institution_name = $_POST['institution_name'];
-        $result = $_POST['result'];
-        $subject_group = $_POST['subject_group'];
-        $gender = $_POST['gender'];
-        $blood_group = $_POST['blood_group'];
-        $nationality = $_POST['nationality'];
-        $religion = $_POST['religion'];
-        $present_address = $_POST['present_address'];
-        $permanent_address = $_POST['permanent_address'];
-        $department = $_POST['department'];
-        $photo_path = $_POST['photo_path'];
-        $signature_path = $_POST['signature_path'];
-        $submission_date = $_POST['submission_date'];
-
-        $stmt = $conn->prepare("UPDATE student_registration SET password=?, first_name=?, last_name=?, father_name=?, mother_name=?, date_of_birth=?, guardian_phone=?, student_phone=?, email=?, last_exam=?, board=?, other_board=?, year_of_passing=?, institution_name=?, result=?, subject_group=?, gender=?, blood_group=?, nationality=?, religion=?, present_address=?, permanent_address=?, department=?, photo_path=?, signature_path=?, submission_date=? WHERE id=?");
-
-        $stmt->bind_param("sssssssssssssssssssssssssss", $password, $first_name, $last_name, $father_name, $mother_name, $date_of_birth, $guardian_phone, $student_phone, $email, $last_exam, $board, $other_board, $year_of_passing, $institution_name, $result, $subject_group, $gender, $blood_group, $nationality, $religion, $present_address, $permanent_address, $department, $photo_path, $signature_path, $submission_date, $id);
-
-        if ($stmt->execute()) {
-            $_SESSION['id'] = $id;
-            echo "<script>alert('Biodata updated successfully.'); window.location='?edit_student_biodata=true';</script>";
-            exit();
-        } else {
-            echo "<script>alert('Failed to update biodata.');</script>";
-        }
-    }
-
-    $stmt = $conn->prepare("SELECT * FROM student_registration WHERE id = ?");
-    $stmt->bind_param("s", $id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $biodata = $result->fetch_assoc();
-    ?>
-    <div class="routine-page">
-        <h2>Edit Biodata</h2>
-        <div class="container">
-            <form method="POST">
-                <input type="hidden" name="id" value="<?= htmlspecialchars($id) ?>">
-
-                <p><strong>Password:</strong> <input type="text" name="password" value="<?= htmlspecialchars($biodata['password']) ?>"></p>
-                <p><strong>First Name:</strong> <input type="text" name="first_name" value="<?= htmlspecialchars($biodata['first_name']) ?>"></p>
-                <p><strong>Last Name:</strong> <input type="text" name="last_name" value="<?= htmlspecialchars($biodata['last_name']) ?>"></p>
-                <p><strong>Father's Name:</strong> <input type="text" name="father_name" value="<?= htmlspecialchars($biodata['father_name']) ?>"></p>
-                <p><strong>Mother's Name:</strong> <input type="text" name="mother_name" value="<?= htmlspecialchars($biodata['mother_name']) ?>"></p>
-                <p><strong>Date of Birth:</strong> <input type="date" name="date_of_birth" value="<?= htmlspecialchars($biodata['date_of_birth']) ?>"></p>
-                <p><strong>Guardian Phone:</strong> <input type="text" name="guardian_phone" value="<?= htmlspecialchars($biodata['guardian_phone']) ?>"></p>
-                <p><strong>Student Phone:</strong> <input type="text" name="student_phone" value="<?= htmlspecialchars($biodata['student_phone']) ?>"></p>
-                <p><strong>Email:</strong> <input type="email" name="email" value="<?= htmlspecialchars($biodata['email']) ?>"></p>
-                <p><strong>Present Address:</strong><br>
-                    <textarea name="present_address"><?= htmlspecialchars($biodata['present_address']) ?></textarea></p>
-                <p><strong>Permanent Address:</strong><br>
-                    <textarea name="permanent_address"><?= htmlspecialchars($biodata['permanent_address']) ?></textarea></p>
-                <p><strong>Department:</strong> <input type="text" name="department" value="<?= htmlspecialchars($biodata['department']) ?>"></p>
-
-                <p><strong>Photo:</strong>
-                    <?php if (!empty($biodata['photo_path'])): ?>
-                        <br><img src="uploads/<?= htmlspecialchars($biodata['photo_path']) ?>" width="120">
-                    <?php else: ?>
-                        No photo uploaded.
-                    <?php endif; ?>
-                    <input type="text" name="photo_path" value="<?= htmlspecialchars($biodata['photo_path']) ?>">
-                </p>
-
-                <p><strong>Signature:</strong>
-                    <input type="text" name="signature_path" value="<?= htmlspecialchars($biodata['signature_path']) ?>">
-                </p>
-
-                <p><strong>Submission Date:</strong>
-                    <input type="date" name="submission_date" value="<?= htmlspecialchars($biodata['submission_date']) ?>">
-                </p>
-
-                <button type="submit" name="update"><span>💾</span> Update</button>
-                 <a href="?student_info=true" type="back"><button type="button"><span>🔙</span>Back</button></a>
-            </form>
-        </div>
-    </div>
-
-    <!-- -- ==================== Remove Student  ==================== -- -->
-     <?php elseif (isset($_GET['remove_student'])): ?>
-    <?php
-    $id = $_SESSION['id'];
-
-    // Delete action
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_student'])) {
-        $stmt = $conn->prepare("DELETE FROM student_registration WHERE id = ?");
-        $stmt->bind_param("s", $id);
-        if ($stmt->execute()) {
-            echo "<script>alert('Student removed successfully.'); window.location='?student_info=true';</script>";
-            exit();
-        } else {
-            echo "<script>alert('Error removing faculty.');</script>";
-        }
-    }
-
-    $stmt = $conn->prepare("SELECT id, password, first_name, last_name, father_name, mother_name, date_of_birth, guardian_phone, student_phone, email, last_exam, board, other_board, year_of_passing, institution_name, result, subject_group, gender, blood_group, nationality, religion, present_address, permanent_address, department, photo_path, signature_path, submission_date FROM student_registration WHERE id = ?");
-    $stmt->bind_param("s", $id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $data = $result->fetch_assoc();
-    ?>
-    <div class="routine-page">
-        <h2>Confirm Remove Student</h2>
-        <?php if ($data): ?>
+        ?>
+        <div class="routine-page">
+            <h2>Add New Student</h2>
             <div class="container">
-                <p><strong>ID:</strong> <?= htmlspecialchars($studentId) ?></p>
-                    <p><strong>Full Name:</strong> <?= htmlspecialchars($biodata['first_name']) ?>
-                <?= htmlspecialchars($biodata['last_name']) ?></p>
-                    <p><strong>Date of Birth:</strong> <?= htmlspecialchars($biodata['date_of_birth']) ?></p>
-                    <p><strong>Gender:</strong> <?= htmlspecialchars($biodata['gender']) ?></p>
-                    <p><strong>Blood Group:</strong> <?= htmlspecialchars($biodata['blood_group']) ?></p>
-                    <p><strong>Nationality:</strong> <?= htmlspecialchars($biodata['nationality']) ?></p>
-                    <p><strong>Religion:</strong> <?= htmlspecialchars($biodata['religion']) ?></p>
-                    <p><strong>Father's Name:</strong> <?= htmlspecialchars($biodata['father_name']) ?></p>
-                    <p><strong>Mother's Name:</strong> <?= htmlspecialchars($biodata['mother_name']) ?></p>
-                    <p><strong>Guardian Phone:</strong> <?= htmlspecialchars($biodata['guardian_phone']) ?></p>
-                    <p><strong>Student Phone:</strong> <?= htmlspecialchars($biodata['student_phone']) ?></p>
-                    <p><strong>Email:</strong> <?= htmlspecialchars($biodata['email']) ?></p>
-                    <p><strong>Present Address:</strong> <?= nl2br(htmlspecialchars($biodata['present_address'])) ?></p>
-                    <p><strong>Permanent Address:</strong> <?= nl2br(htmlspecialchars($biodata['permanent_address'])) ?></p>
-                    <?php if (!empty($biodata['photo'])): ?>
-                        <p><strong>Photo:</strong><br>
-                            <img src="uploads/<?= htmlspecialchars($biodata['photo']) ?>" width="150" style="border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.2);" alt="Student Photo" />
-                        </p>
-                         <?php else: ?>
-                        <p><strong>Photo:</strong> No photo uploaded.</p>
-                    <?php endif; ?>
-                    <a href="?info=true" type="back"><button><span>🔙</span>Back</button></a>
-                </div>
-                
-                <!-- 🔴 Delete Button Form -->
-                <form method="POST" onsubmit="return confirm('Are you sure you want to delete this student?');">
-                    <button type="submit" name="delete_student" style="background-color: #e74c3c; color: white;">
-                        🗑️ Delete Student
-                    </button>
+                <form method="POST">
+                    <input type="number" name="id" placeholder="Student ID" required />
+                    <input type="password" name="password" placeholder="Password" required />
+                    <input type="text" name="first_name" placeholder="First Name" required />
+                    <input type="text" name="last_name" placeholder="Last Name" required />
+                    <input type="text" name="father_name" placeholder="Father's Name" required />
+                    <input type="text" name="mother_name" placeholder="Mother's Name" required />
+                    <input type="date" name="date_of_birth" placeholder="Date of Birth" required />
+                    <input type="text" name="guardian_phone" placeholder="Guardian Phone" required />
+                    <input type="text" name="student_phone" placeholder="Student Phone" required />
+                    <input type="email" name="email" placeholder="Email" required />
+                    <textarea name="present_address" placeholder="Present Address" required></textarea>
+                    <textarea name="permanent_address" placeholder="Permanent Address" required></textarea>
+                    <input type="text" name="department" placeholder="Department" required />
+                    <input type="text" name="blood_group" placeholder="Blood Group" required />
+                    <input type="text" name="photo_path" placeholder="Photo Path" />
+                    <button type="submit" name="add_student">➕ Add Student</button>
+                    <a href="administration.php?student_info=true" type="back"><button type="button">🔙 Back</button></a>
                 </form>
-                <a href="?student_info=true" type="back">
-                    <button type="button"><span>🔙</span>Back</button>
-                </a>
             </div>
-        <?php else: ?>
-            <div class="container">
-                <p>No biodata found for deletion.</p>
-                <a href="?student_info=true" type="back"><button><span>🔙</span>Back</button></a>
+        </div>
+
+    <?php elseif (isset($_GET['info'])): ?>
+        <!-- Admin Information Dashboard -->
+        <div class="routine-page">
+            <h2>Personal Information</h2>
+            <div class="cards">
+                <a href="?biodata=true" class="card"><button><span>👤</span>View Biodata</button></a>
+                <a href="?edit_biodata=true" class="card"><button><span>✏️</span>Edit Biodata</button></a>
+                <a href="administration.php" class="card"><button><span>🔙</span>Back to Dashboard</button></a>
             </div>
-        <?php endif; ?>
-    </div>
+        </div>
 
-
-  <!-- -- ==================== Edit Admin Biodata ==================== -- -->
     <?php elseif (isset($_GET['edit_biodata'])): ?>
+        <!-- Edit Admin Biodata -->
         <?php
         $adminid = $_SESSION['id'];
-        $_SESSION['name'] = $admin['full_name'];
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
             $full_name = $_POST['full_name'];
             $username = $_POST['username'];
@@ -1044,15 +848,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['studentlogin'])) {
                     <input type="text" name="email" value="<?= htmlspecialchars($data['email']) ?>" required />
                     <input type="text" name="phone" value="<?= htmlspecialchars($data['phone']) ?>" required />
                     <button type="submit" name="update">Update</button>
-                    <a href="?info=true" type="back"><button type="button"><span>🔙</span>Back</button></a>
+                    <a href="administration.php?info=true" type="back"><button type="button"><span>🔙</span>Back</button></a>
                 </form>
             </div>
         </div>
 
     <?php else: ?>
+        <!-- Main Admin Dashboard -->
         <div class="dashboard">
-            
-            
             <div class="cards">
                 <div class="heading"><h2>👨‍💼 Welcome <?= htmlspecialchars($_SESSION['name']) ?></h2></div>
                 <a href="?info=true" class="card"><button><span>👤</span>Personal Information</button></a>
@@ -1062,10 +865,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['studentlogin'])) {
                 <a href="?finance_reports=true" class="card"><button><span>💳</span>Finance Reports</button></a>
                 <a href="?faculty_info=true" class="card"><button><span>👨‍🏫</span>Faculty Info</button></a>
                 <a href="?manage_employees=true" class="card"><button><span>🧑‍💼</span>Manage Employees</button></a>
-                <a href="?logout=true" class="card" "><button><span>🚪</span>Logout</button></a>
-                <div class="notice"><h1 ><i>Note: Please logout after managing the system</i></h1></div>
+                <a href="?logout=true" class="card"><button><span>🚪</span>Logout</button></a>
+                <div class="notice"><h1><i>Note: Please logout after managing the system</i></h1></div>
             </div>
-            </div>
+        </div>
     <?php endif; ?>
 <?php endif; ?>
 </body>
