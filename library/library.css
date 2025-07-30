@@ -1,5 +1,6 @@
 
         .main-container {
+            background: url('../picture/library\ background.avif') no-repeat center center fixed;
             border-radius: 15px;
             display: flex;
             flex: 1;
