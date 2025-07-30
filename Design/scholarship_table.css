@@ -1,0 +1,109 @@
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            text-align: left; /* Ensures text content is left-aligned by default */
+        }
+        
+        .container {
+            max-width: 1200px;
+            display: flex;
+            justify-content: flex-start;
+            flex-direction: column;
+            margin: 30px 0 30px 30px; /* top, right, bottom, left */
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            padding: 20px;
+            box-sizing: border-box;
+            align-self: flex-start; /* Ensure left alignment inside parent */
+        }
+
+        
+        .scholarship-table-container {
+            padding: 20px;
+        }
+        
+        .section-title {
+            text-align: center;
+            color: maroon;
+            margin: 15px 0 25px;
+            font-size: 22px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        table.scholarship-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0 auto;
+        }
+        
+        table.scholarship-table th {
+            background-color: maroon;
+            color: white;
+            font-weight: 600;
+            padding: 12px 15px;
+            text-align: center;
+        }
+        
+        table.scholarship-table td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        table.scholarship-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        table.scholarship-table tr:hover {
+            background-color: #e3f2fd;
+        }
+        
+        .note {
+            text-align: center;
+            font-style: italic;
+            color: #7f8c8d;
+            margin-top: 15px;
+            padding: 10px;
+            font-size: 14px;
+        }
+        
+        .highlight-row {
+            background-color: #e3f2fd !important;
+            font-weight: 600;
+            color: #0d47a1;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+            }
+            
+            table.scholarship-table {
+                font-size: 14px;
+            }
+            
+            table.scholarship-table th,
+            table.scholarship-table td {
+                padding: 8px 5px;
+            }
+        }

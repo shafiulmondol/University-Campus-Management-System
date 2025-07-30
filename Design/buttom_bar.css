@@ -1,4 +1,5 @@
 .buttom_bar{
+  display: flex;
   background-color: #6c5ce7;
   border: solid 1px black;
   border-radius: 5px; 
