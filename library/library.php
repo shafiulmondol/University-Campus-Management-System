@@ -55,7 +55,7 @@
 
       // Create table if not exists (initial setup)
       $create_table = "CREATE TABLE IF NOT EXISTS notice (
-          id INT AUTO_INCREMENT PRIMARY KEY,
+          id INT
           title VARCHAR(255) NOT NULL,
           section VARCHAR(100),
           content TEXT NOT NULL,
