@@ -135,7 +135,6 @@
       // ====================stuf section===================
       
       elseif (isset($_POST['staff'])) { ?>
-      <div>
     <div class="staff-login-container">
     <div class="staff-login-box">
         <div class="login-header">
@@ -197,8 +196,7 @@ $num = mysqli_num_rows($result);
                 }
             }
         
-
-// ==============================stuf end=================
+// ==================stuf end=================
 
         elseif (isset($_POST['about'])) {
           echo "<h2>About the Library</h2>";
