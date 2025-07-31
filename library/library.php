@@ -1,3 +1,4 @@
+@ -0,0 +1,280 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -15,7 +16,9 @@
         <img src="../picture/logo.gif" alt="SKST Logo">
         <h1>SKST University || Library</h1>
       </div>
-@@ -26,84 +135,217 @@
+      <div class="home-button">
+    <a href="../index.html">🏠 Home</a>
+
     </div>
 
     <div class="menu-section">
@@ -31,7 +34,7 @@
       <a href="academic.html"><button class="btn">Academics</button></a>
       <a href="scholarship.html"><button class="btn">Scholarships</button></a>
       <a href="admission.html"><button class="btn">Admission</button></a>
-      <a href="library.html"><button class="btn">Library</button></a>
+      <a href="library.php"><button class="btn">Library</button></a>
       <a href="volunteer.html"><button class="btn">Volunteer</button></a>
       <a href="about.html"><button class="btn">About US</button></a>
     </div>
@@ -86,21 +89,37 @@
           $result = mysqli_query($con, $query);
           
           if (mysqli_num_rows($result) > 0) {
-              echo "<div class='notices-container'>";
-              while ($row = mysqli_fetch_assoc($result)) {
-                  echo "<div class='notice-item'>";
-                  echo "<h3>" . htmlspecialchars($row['title']) . "</h3>";
-                  echo "<p>" . nl2br(htmlspecialchars($row['content'])) . "</p>";
-                  echo "<div class='notice-meta'>";
-                  echo "<span>Section: " . htmlspecialchars($row['section']) . "</span>";
-                  echo "<span>Posted by: " . htmlspecialchars($row['author']) . "</span>";
-                  echo "<span>Date: " . date('F j, Y h:i A', strtotime($row['created_at'])) . "</span>";
-                  echo "</div></div>";
-              }
-              echo "</div>";
-          } else {
-              echo "<p>No notices found.</p>";
-          }
+    echo "<div class='notices-container'>";
+    echo "<h2 class='notices-heading'><i class='fas fa-bullhorn'></i> Latest Notices</h2>";
+    
+    while ($row = mysqli_fetch_assoc($result)) {
+        echo "<div class='notice-card'>";
+        echo "<div class='notice-header'>";
+        echo "<h3 class='notice-title'><i class='fas fa-chevron-circle-right'></i> " . htmlspecialchars($row['title']) . "</h3>";
+        echo "<span class='notice-section'>" . htmlspecialchars($row['section']) . "</span>";
+        echo "</div>";
+        
+        echo "<div class='notice-content'>" . nl2br(htmlspecialchars($row['content'])) . "</div>";
+        
+        echo "<div class='notice-footer'>";
+        echo "<span class='notice-author'><i class='fas fa-user'></i> " . htmlspecialchars($row['author']) . "</span>";
+        echo "<span class='notice-date'><i class='far fa-calendar-alt'></i> " . date('F j, Y h:i A', strtotime($row['created_at'])) . "</span>";
+        echo "</div>";
+        echo "</div>"; // Close notice-card
+    }
+    
+    echo "<div class='back-button-container'>";
+    echo "<a href='library.php' class='back-button'><i class='fas fa-arrow-left'></i> Back to Library</a>";
+    echo "</div>";
+    
+    echo "</div>"; // Close notices-container
+} else {
+    echo "<div class='no-notices'>";
+    echo "<i class='far fa-folder-open'></i>";
+    echo "<p>No notices found at this time</p>";
+    echo "<a href='library.php' class='back-button'><i class='fas fa-arrow-left'></i> Back to Library</a>";
+    echo "</div>";
+}
       } elseif (isset($_POST['borrow'])) {
           echo "<h2>Borrow Technology</h2>";
           echo "<p>This section would contain information about borrowing technology equipment from the library.</p>";
@@ -250,22 +269,21 @@
         </div>
         
         <!-- Right Side Navigation Bar -->
-       <div class="nav-links">
-        <form action="library.php" method="post">
-          <button class="nav-btn" type="submit" name="notice">Library Notice</button>
-          <button class="nav-btn" type="submit" name="borrow">Borrow Tech</button>
-          <button class="nav-btn" type="submit" name="suggest">suggest a Book</button>
-          <button class="nav-btn" type="submit" name="renew">Renew Books</button>
-          <button class="nav-btn" type="submit" name="staff">Staff Portal</button>
-          <button class="nav-btn" type="submit" name="about">About Us</button>
-          <button class="nav-btn" type="submit" name="search">Book Search</button>
-          <button class="nav-btn" type="submit" name="resources">Student Resources</button>
-          <button class="nav-btn" type="submit" name="help">Help Desk</button>
-    
-        </form>
-      </div>
+        <div class="nav-links">
+      <form action="library.php" method="post">
+        <button class="nav-btn" type="submit" name="notice"><i class="fas fa-bullhorn"></i> Library Notice</button>
+        <button class="nav-btn" type="submit" name="borrow"><i class="fas fa-laptop"></i> Borrow Tech</button>
+        <button class="nav-btn" type="submit" name="suggest"><i class="fas fa-book-medical"></i> Suggest a Book</button>
+        <button class="nav-btn" type="submit" name="renew"><i class="fas fa-sync-alt"></i> Renew Books</button>
+        <button class="nav-btn" type="submit" name="staff"><i class="fas fa-user-tie"></i> Staff Portal</button>
+        <button class="nav-btn" type="submit" name="about"><i class="fas fa-info-circle"></i> About Us</button>
+        <button class="nav-btn" type="submit" name="search"><i class="fas fa-search"></i> Book Search</button>
+        <button class="nav-btn" type="submit" name="resources"><i class="fas fa-graduation-cap"></i> Student Resources</button>
+        <button class="nav-btn" type="submit" name="help"><i class="fas fa-question-circle"></i> Help Desk</button>
+      </form>
     </div>
   </div>
+
 
 <div class="buttom_bar">
 <img src="../picture/SKST.png" alt="Logo" style="height:80px; width:auto;">

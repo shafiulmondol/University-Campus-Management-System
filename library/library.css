@@ -1,4 +1,128 @@
 
+        /* Notices Container */
+.notices-container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.notices-heading {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+/* Notice Card */
+.notice-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    padding: 20px;
+    margin-bottom: 25px;
+    border-left: 4px solid #3498db;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.notice-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+
+.notice-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.notice-title {
+    color: #2c3e50;
+    margin: 0;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.notice-section {
+    background: #e8f4fc;
+    color: #3498db;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.notice-content {
+    color: #34495e;
+    line-height: 1.6;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px dashed #ecf0f1;
+}
+
+.notice-footer {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: #7f8c8d;
+}
+
+.notice-author, .notice-date {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Back Button */
+.back-button-container {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.back-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 20px;
+    background: #3498db;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    gap: 8px;
+    font-weight: 500;
+}
+
+.back-button:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(41, 128, 185, 0.3);
+}
+
+/* No Notices */
+.no-notices {
+    text-align: center;
+    padding: 50px 20px;
+    color: #7f8c8d;
+}
+
+.no-notices i {
+    font-size: 50px;
+    margin-bottom: 20px;
+    color: #bdc3c7;
+}
+
+.no-notices p {
+    font-size: 18px;
+    margin-bottom: 30px;
+}
         .main-container {
             background: url('../picture/library\ background.avif') no-repeat center center fixed;
             border-radius: 15px;
@@ -38,33 +162,63 @@
             text-align: center;
         }
 
-        .nav-links {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
+         .nav-links {
+      position: sticky;
+      top: 20px;
+      align-self: flex-start;
+      height: 100vh;
+      overflow-y: auto;
+      padding-right: 10px;
+    }
 
-        .nav-btn {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px 20px;
-            border: none;
-            border-radius: 10px;
-            background: #3498db;
-            color: white;
-            cursor: pointer;
-            font-size: 1rem;
-            text-align: left;
-            transition: all 0.3s ease;
-            width: 100%;
-        }
-
-        .nav-btn:hover {
-            background: #2980b9;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
+       .nav-btn {
+      display: block;
+      width: 100%;
+      padding: 12px 15px;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #4798e8, #213f74);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      text-align: left;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+          .nav-btn:hover {
+      background: linear-gradient(135deg, #4a6491, #2c3e50);
+      transform: translateX(5px);
+    }
+     .nav-btn i {
+      margin-right: 10px;
+    }
+     .main-container {
+      display: flex;
+      gap: 20px;
+    }
+    
+    .content {
+      flex: 1;
+    }
+    @media (max-width: 768px) {
+      .main-container {
+        flex-direction: column;
+      }
+      
+      .nav-links {
+        position: static;
+        height: auto;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      
+      .nav-btn {
+        width: auto;
+        flex: 1 1 150px;
+      }
+    }
 
         .bg-glass {
             background: rgba(255, 255, 255, 0.9);
@@ -356,6 +510,7 @@
     }
 
     .home-button:hover {
+        text-decoration: none;
       transform: translateY(-3px);
       background: linear-gradient(135deg, #18bcae, #f3af02);
     }
