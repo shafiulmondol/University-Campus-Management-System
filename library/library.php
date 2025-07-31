@@ -1,4 +1,4 @@
-@ -0,0 +1,280 @@
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -67,18 +67,17 @@
       // Handle form submissions
       if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           if (isset($_POST['add_notice'])) {
-              $title = mysqli_real_escape_string($con, $_POST['title']);
-              $section = mysqli_real_escape_string($con, $_POST['section']);
-              $content = mysqli_real_escape_string($con, $_POST['content']);
-              $author = mysqli_real_escape_string($con, $_POST['author']);
+              $title = $_POST['title'];
+              $section = $_POST['section'];
+              $content =  $_POST['content'];
+              $author = $_POST['author'];
 
-              $stmt = $con->prepare("INSERT INTO notice (title, section, content, author) VALUES (?, ?, ?, ?)");
-            $stmt->bind_param("ssss", $title, $section, $content, $author);
+              $stmt = mysqli_query($con,"INSERT INTO notice (title, section, content, author) VALUES (?, ?, ?, ?)");
             
-            if ($stmt->execute()) {
+            if ($stmt) {
                 echo "<div class='success-message'>Notice added successfully</div>";
             } else {
-                echo "<div class='error-message'>Error: " . $stmt->error . "</div>";
+                die ("Table not created".mysqli_error($con));
             }
         }
     }?>
@@ -120,7 +119,9 @@
     echo "<a href='library.php' class='back-button'><i class='fas fa-arrow-left'></i> Back to Library</a>";
     echo "</div>";
 }
-      } elseif (isset($_POST['borrow'])) {
+      }
+      
+      elseif (isset($_POST['borrow'])) {
           echo "<h2>Borrow Technology</h2>";
           echo "<p>This section would contain information about borrowing technology equipment from the library.</p>";
       } elseif (isset($_POST['suggest'])) {
@@ -129,10 +130,79 @@
       } elseif (isset($_POST['renew'])) {
           echo "<h2>Renew Books</h2>";
           echo "<p>Information about book renewal policies and procedures.</p>";
-      } elseif (isset($_POST['staff'])) {
-          echo "<h2>Staff Portal</h2>";
-          echo "<p>Login area for library staff members.</p>";
-      } elseif (isset($_POST['about'])) {
+      } 
+      
+      // ====================stuf section===================
+      
+      elseif (isset($_POST['staff'])) { ?>
+      <div>
+    <div class="staff-login-container">
+    <div class="staff-login-box">
+        <div class="login-header">
+            <img src="../picture/logo.gif" alt="SKST Logo" class="login-logo">
+            <h1>Library Staff Login</h1>
+        </div>
+        
+        <div class="login-body">
+            <form action="library.php" method="post" class="login-form">
+                <div class="form-group">
+                    <label for="staffmail">E-mail</label>
+                    <input type="email" id="staffmail" name="staffmail" placeholder="Enter email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="staffpass">Password</label>
+                    <input type="password" id="staffpass" name="staffpass" placeholder="Enter password" required>
+                </div>
+                
+                <button type="submit" name="submit" class="login-button">Login</button>
+            </form>
+        </div>
+    </div>
+</div>
+<?php
+$query="SELECT * FROM stuf";
+$result=mysqli_query($con,$query);
+$num = mysqli_num_rows($result);
+
+             if (isset($_POST['submit'])) {
+                $email = mysqli_real_escape_string($con, $_POST['staffmail']);
+                $password = $_POST['staffpass'];
+                
+                $query = "SELECT * FROM stuf WHERE email = '$email'";
+                $result = mysqli_query($con, $query);
+                
+                if (mysqli_num_rows($result) > 0) {
+                    $row = mysqli_fetch_assoc($result);
+                    if ($password == $row['password']) {
+                        session_start();
+                        $_SESSION['staff_id'] = $row['id'];
+                        echo "<div class='welcome-message'>Welcome, ".$row['first_name']." ".$row['last_name']."!</div>";
+                        ?>
+                        <div class="staff-dashboard">
+                          <h2>Library Staff Dashboard</h2>
+                          <div class="staff-actions">
+                            <form method="post">
+                              <button type="submit" name="addn"><i class="fas fa-bullhorn"></i> Add Library Notice</button>
+                            </form>
+                          </div>
+                        </div>
+                        <?php
+                    } else {
+                        echo "<div class='error-message'>Wrong email or password</div>";
+                    }
+                } else {
+                    echo "<div class='error-message'>Wrong email or password</div>";
+                }
+            }
+        
+?>
+</div>
+<?php
+}
+// ==============================stuf end=================
+
+        elseif (isset($_POST['about'])) {
           echo "<h2>About the Library</h2>";
           echo "<p>Information about library services, hours, and resources.</p>";
       } elseif (isset($_POST['search'])) {
@@ -283,6 +353,7 @@
       </form>
     </div>
   </div>
+ 
 
 
 <div class="buttom_bar">
