@@ -92,7 +92,7 @@
     echo "<div class='notices-container'>";
     echo "<h2 class='notices-heading'><i class='fas fa-bullhorn'></i> Latest Notices</h2>";
     
-    while ($row = mysqli_fetch_assoc($result)) {
+      if($row = mysqli_fetch_assoc($result)){
         echo "<div class='notice-card'>";
         echo "<div class='notice-header'>";
         echo "<h3 class='notice-title'><i class='fas fa-chevron-circle-right'></i> " . htmlspecialchars($row['title']) . "</h3>";
