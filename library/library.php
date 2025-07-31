@@ -365,5 +365,3 @@ $num = mysqli_num_rows($result);
 </div>
 </body>
 </html>
-design remain same remove script and provide me full code
-fixt the problem on my way and provide me full code
