@@ -161,6 +161,7 @@
     </div>
 </div>
 <?php
+      }
 $query="SELECT * FROM stuf";
 $result=mysqli_query($con,$query);
 $num = mysqli_num_rows($result);
@@ -196,10 +197,7 @@ $num = mysqli_num_rows($result);
                 }
             }
         
-?>
-</div>
-<?php
-}
+
 // ==============================stuf end=================
 
         elseif (isset($_POST['about'])) {
