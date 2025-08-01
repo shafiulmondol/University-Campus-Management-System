@@ -6,23 +6,27 @@
   <link rel="icon" href="../picture/SKST.png" type="image/png" />
   <link rel="stylesheet" href="../Design/buttom_bar.css">
   <link rel="stylesheet" href="library.css">
+  
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
   
 </head>
 <body>
-  <div class="navbar">
-    <div class="navbar-top">
-      <div class="logo">
+  <header>
+        <div class="container header-content">
+           <div class="logo">
         <img src="../picture/logo.gif" alt="SKST Logo">
-        <h1>SKST University || Library</h1>
-      </div>
-      <div class="home-button">
+                <h1>SKST University Student</h1>
+            </div>
+            <div class="user-controls">
+                <button class="btn btn-outline"><i class="fas fa-bell"></i></button>
+               <div class="home-button">
     <a href="../index.html">🏠 Home</a>
 
     </div>
-
-    <div class="menu-section">
-         <a href="../student.html"><button class="btn">Student</button></a>
+            </div>
+        </div>
+         <div class="menu-section">
+         <a href="studentf.php"><button class="btn">Student</button></a>
       <a href="../faculty.html"><button class="btn">Faculty</button></a>
       <a href="../administration.html"><button class="btn">Administration</button></a>
       <a href="../alumni.html"><button class="btn">Alumni</button></a>
@@ -34,11 +38,14 @@
       <a href="../academic.html"><button class="btn">Academics</button></a>
       <a href="../scholarship.html"><button class="btn">Scholarships</button></a>
       <a href="../admission.html"><button class="btn">Admission</button></a>
-      <a href="library.php"><button class="btn">Library</button></a>
+      <a href="../library/library.php"><button class="btn">Library</button></a>
       <a href="../volunteer.html"><button class="btn">Volunteer</button></a>
       <a href="../about.html"><button class="btn">About US</button></a>
     </div>
   </div>
+    </header>
+    
+   
     <!-- Main Content Area with Right Navbar -->
     <div class="main-container">
         <!-- Content Section -->

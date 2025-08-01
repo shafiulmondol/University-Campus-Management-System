@@ -4,7 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="library.css">
+    <link rel="stylesheet" href="../library.css">
+    <link rel="stylesheet" href="../student/student.html">
+    <style>
+        :root {
+            --primary: #c1ecee;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+        } 
+        </style>
  </head>
  <body>
     
