@@ -484,7 +484,7 @@
             const password = this.value;
             const strengthMeter = document.getElementById('strengthMeter');
             
-            // Reset classes
+            
             strengthMeter.className = 'strength-meter';
             
             if (password.length === 0) {
@@ -493,19 +493,19 @@
             
             let strength = 0;
             
-            // Length check
+            
             if (password.length >= 8) strength += 25;
             
-            // Contains uppercase
+            
             if (/[A-Z]/.test(password)) strength += 25;
             
-            // Contains lowercase
+            
             if (/[a-z]/.test(password)) strength += 25;
             
-            // Contains number or special char
+            
             if (/[0-9]/.test(password) || /[^A-Za-z0-9]/.test(password)) strength += 25;
             
-            // Update strength meter
+            
             if (strength >= 75) {
                 strengthMeter.classList.add('strength-strong');
             } else if (strength >= 50) {
@@ -526,17 +526,17 @@
                 return;
             }
             
-            // Get selected department
+           
             const programSelect = document.getElementById('program');
             const selectedDepartment = programSelect.options[programSelect.selectedIndex].text;
             
-            // Form validation passed - show success message
+            
             alert(`Account created successfully! Welcome to SKST University.\nDepartment: ${selectedDepartment}`);
             this.reset();
             document.getElementById('strengthMeter').className = 'strength-meter';
         });
         
-        // Highlight the CSE option when the dropdown is opened
+        
         document.getElementById('program').addEventListener('focus', function() {
             const cseOption = this.querySelector('option[value="cse"]');
             cseOption.classList.add('cse-highlight');
