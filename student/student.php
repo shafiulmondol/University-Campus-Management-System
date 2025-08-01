@@ -19,7 +19,7 @@ $error = "";
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
     $id = intval($_POST['id']);
     $password = $_POST['password'];
-    $stmt = $conn->prepare("SELECT first_name, last_name,password FROM student_registration WHERE id = ?");
+    $stmt = $conn->prepare("SELECT * FROM student_registration WHERE id = ?");
     $stmt->bind_param("i", $id);
     $stmt->execute();
     $result = $stmt->get_result();
