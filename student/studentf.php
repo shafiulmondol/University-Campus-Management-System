@@ -1,31 +1,26 @@
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SKST University</title>
   <link rel="icon" href="../picture/SKST.png" type="image/png" />
   <link rel="stylesheet" href="../Design/buttom_bar.css">
-  <link rel="stylesheet" href="library.css">
-  
+  <link rel="stylesheet" href="../library/library.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
   
 </head>
 <body>
-  <header>
-        <div class="container header-content">
-           <div class="logo">
+  <div class="navbar">
+    <div class="navbar-top">
+      <div class="logo">
         <img src="../picture/logo.gif" alt="SKST Logo">
-                <h1>SKST University Student</h1>
-            </div>
-            <div class="user-controls">
-                <button class="btn btn-outline"><i class="fas fa-bell"></i></button>
-               <div class="home-button">
+        <h1>SKST University || Library</h1>
+      </div>
+      <div class="home-button">
     <a href="../index.html">🏠 Home</a>
 
     </div>
-            </div>
-        </div>
-         <div class="menu-section">
+
+    <div class="menu-section">
          <a href="studentf.php"><button class="btn">Student</button></a>
       <a href="../faculty.html"><button class="btn">Faculty</button></a>
       <a href="../administration.html"><button class="btn">Administration</button></a>
@@ -43,9 +38,6 @@
       <a href="../about.html"><button class="btn">About US</button></a>
     </div>
   </div>
-    </header>
-    
-   
     <!-- Main Content Area with Right Navbar -->
     <div class="main-container">
         <!-- Content Section -->
@@ -53,8 +45,7 @@
      
          <div class="bg-glass">
      <?php  if  (isset($_POST['staff'])) {
-         require_once 'notice.php';
-         login_form();
+      
       } 
     
       
@@ -93,7 +84,7 @@
       }
 
        else{ 
-        include "student.html";
+        include "library.html";
        } ?>
 
             </div>
@@ -102,13 +93,14 @@
         <!-- Right Side Navigation Bar -->
         <div class="nav-links">
       <form action="library.php" method="post">
-        <button class="nav-btn" type="submit" name="notice"><i class="fas fa-bullhorn"></i> Student Notice</button>
-        <button class="nav-btn" type="submit" name="borrow"><i class="fas fa-laptop"></i> Personal Information</button>
-        <button class="nav-btn" type="submit" name="suggest"><i class="fas fa-book-medical"></i> View Course</button>
-        <button class="nav-btn" type="submit" name="renew"><i class="fas fa-sync-alt"></i> Course Offering</button>
-        <button class="nav-btn" type="submit" name="staff"><i class="fas fa-user-tie"></i> Bank History</button>
-        <button class="nav-btn" type="submit" name="about"><i class="fas fa-info-circle"></i> Routine</button>
-        <button class="nav-btn" type="submit" name="resources"><i class="fas fa-graduation-cap"></i> Publish Resources</button>
+        <button class="nav-btn" type="submit" name="notice"><i class="fas fa-bullhorn"></i> Library Notice</button>
+        <button class="nav-btn" type="submit" name="borrow"><i class="fas fa-laptop"></i> Borrow Tech</button>
+        <button class="nav-btn" type="submit" name="suggest"><i class="fas fa-book-medical"></i> Suggest a Book</button>
+        <button class="nav-btn" type="submit" name="renew"><i class="fas fa-sync-alt"></i> Renew Books</button>
+        <button class="nav-btn" type="submit" name="staff"><i class="fas fa-user-tie"></i> Staff Portal</button>
+        <button class="nav-btn" type="submit" name="about"><i class="fas fa-info-circle"></i> About Us</button>
+        <button class="nav-btn" type="submit" name="search"><i class="fas fa-search"></i> Book Search</button>
+        <button class="nav-btn" type="submit" name="resources"><i class="fas fa-graduation-cap"></i> Student Resources</button>
         <button class="nav-btn" type="submit" name="help"><i class="fas fa-question-circle"></i> Help Desk</button>
       </form>
     </div>

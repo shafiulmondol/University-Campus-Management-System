@@ -1,35 +1,29 @@
-
+<?php 
+require_once 'notice.php'; ?>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SKST University</title>
   <link rel="icon" href="../picture/SKST.png" type="image/png" />
   <link rel="stylesheet" href="../Design/buttom_bar.css">
-  <link rel="stylesheet" href="../library.css">
-  <link rel="stylesheet" href="../student/student.html">
+  <link rel="stylesheet" href="library.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-
   
 </head>
-
 <body>
-
-  <header>
-        <div class="container header-content">
-           <div class="logo">
+  <div class="navbar">
+    <div class="navbar-top">
+      <div class="logo">
         <img src="../picture/logo.gif" alt="SKST Logo">
-                <h1>SKST University Library</h1>
-            </div>
-            <div class="user-controls">
-                <button class="btn btn-outline"><i class="fas fa-bell"></i></button>
-               <div class="home-button">
+        <h1>SKST University || Library</h1>
+      </div>
+      <div class="home-button">
     <a href="../index.html">🏠 Home</a>
 
     </div>
-            </div>
-        </div>
-         <div class="menu-section">
-         <a href="../student/studentf.html"><button class="btn">Student</button></a>
+
+    <div class="menu-section">
+         <a href="../student/studentf.php"><button class="btn">Student</button></a>
       <a href="../faculty.html"><button class="btn">Faculty</button></a>
       <a href="../administration.html"><button class="btn">Administration</button></a>
       <a href="../alumni.html"><button class="btn">Alumni</button></a>
@@ -41,22 +35,87 @@
       <a href="../academic.html"><button class="btn">Academics</button></a>
       <a href="../scholarship.html"><button class="btn">Scholarships</button></a>
       <a href="../admission.html"><button class="btn">Admission</button></a>
-      <a href="library/library.php"><button class="btn">Library</button></a>
+      <a href="library.php"><button class="btn">Library</button></a>
       <a href="../volunteer.html"><button class="btn">Volunteer</button></a>
       <a href="../about.html"><button class="btn">About US</button></a>
     </div>
   </div>
-    </header>
     <!-- Main Content Area with Right Navbar -->
     <div class="main-container">
         <!-- Content Section -->
        <div class="content">
      
          <div class="bg-glass">
-     <?php  if  (isset($_POST['staff'])) {
-         require_once 'notice.php';
-         echo login_form();
-      } 
+     <?php  if (isset($_POST['staff'])) {
+    // Display staff login form
+    ?>
+    <div class="staff-login-container">
+        <div class="staff-login-box">
+            <div class="login-header">
+                <img src="../picture/logo.gif" alt="SKST Logo" class="login-logo">
+                <h1>Library Staff Login</h1>
+            </div>
+            
+            <div class="login-body">
+                <form method="post" class="login-form">
+                    <div class="form-group">
+                        <label for="staffmail">E-mail</label>
+                        <input type="email" id="staffmail" name="email" placeholder="Enter email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="staffpass">Password</label>
+                        <input type="password" id="staffpass" name="password" placeholder="Enter password" required>
+                    </div>
+                    
+                    <button type="submit" name="submit" class="login-button">Login</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <?php
+} elseif (isset($_POST['submit'])) {
+    // Handle staff login submission
+    if (isset($_POST['email']) && isset($_POST['password'])) {
+        $check = login_condition($_POST['email'], $_POST['password']);
+        if ($check == true) {
+            $_SESSION['staff_logged_in'] = true;
+            echo "<div class='welcome-message'><h2>Welcome, Staff Member!</h2>
+                  <p>You have successfully logged in to the staff portal.</p></div>";
+        } else {
+            echo "<div class='error-message'><p>Invalid email or password. Please try again.</p></div>";
+            // Show login form again
+            ?>
+            <!-- <div class="staff-login-container">
+                <div class="staff-login-box">
+                    <div class="login-header">
+                        <img src="../picture/logo.gif" alt="SKST Logo" class="login-logo">
+                        <h1>Library Staff Login</h1>
+                    </div>
+                    
+                    <div class="login-body">
+                        <form method="post" class="login-form">
+                            <div class="form-group">
+                                <label for="staffmail">E-mail</label>
+                                <input type="email" id="staffmail" name="email" placeholder="Enter email" required value="       echo htmlspecialchars($_POST['email'] ?? ''); ?>">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="staffpass">Password</label>
+                                <input type="password" id="staffpass" name="password" placeholder="Enter password" required>
+                            </div>
+                            
+                            <button type="submit" name="submit" class="login-button">Login</button>
+                        </form>
+                    </div>
+                </div>
+            </div> -->
+            <?php
+        }
+    }
+}
+      
+
     
       
       elseif (isset($_POST['borrow'])) {
