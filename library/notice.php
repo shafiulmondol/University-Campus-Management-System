@@ -101,7 +101,7 @@
             </div>
             
             <div class="login-body">
-                <form action="" method="post" class="login-form">  <!-- Changed action to empty -->
+                <form  method="post" class="login-form">  <!-- Changed action to empty -->
                     <div class="form-group">
                         <label for="staffmail">E-mail</label>
                         <input type="email" id="staffmail" name="staffmail" placeholder="Enter email" required>
