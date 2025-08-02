@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Creation - SKST University</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0c3d5f, #1d7a8c, #0c3d5f);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .logo-icon {
+            font-size: 3rem;
+            color: #ffd700;
+            background: #0c3d5f;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .logo-text {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .tagline {
+            color: #ffd700;
+            font-size: 1.2rem;
+            font-style: italic;
+            letter-spacing: 1px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.97);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            background: linear-gradient(to right, #0c3d5f, #1d7a8c);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 30px;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -15px;
+        }
+
+        .form-group {
+            padding: 0 15px;
+            margin-bottom: 20px;
+            width: 50%;
+        }
+
+        .form-group.full-width {
+            width: 100%;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #0c3d5f;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #1d7a8c;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px 14px 14px 45px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #1d7a8c;
+            box-shadow: 0 0 0 3px rgba(29, 122, 140, 0.2);
+        }
+
+        .password-container {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #777;
+            transition: color 0.3s;
+        }
+
+        .toggle-password:hover {
+            color: #0c3d5f;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(to right, #0c3d5f, #1d7a8c);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -60%;
+            width: 20px;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(25deg);
+            transition: all 0.5s;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:hover::after {
+            left: 120%;
+        }
+
+        .terms {
+            margin-top: 25px;
+            text-align: center;
+            color: #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .terms a {
+            color: #0c3d5f;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .terms a:hover {
+            text-decoration: underline;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #555;
+        }
+
+        .login-link a {
+            color: #1d7a8c;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .password-strength {
+            height: 5px;
+            background: #eee;
+            border-radius: 5px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .strength-meter {
+            height: 100%;
+            width: 0;
+            transition: width 0.3s;
+        }
+
+        .strength-weak {
+            background: #e74c3c;
+            width: 30%;
+        }
+
+        .strength-medium {
+            background: #f39c12;
+            width: 60%;
+        }
+
+        .strength-strong {
+            background: #2ecc71;
+            width: 100%;
+        }
+
+        .cse-highlight {
+            background: linear-gradient(to right, rgba(12, 61, 95, 0.1), rgba(29, 122, 140, 0.1));
+            color: #0c3d5f;
+            font-weight: 700;
+            border-left: 3px solid #ff6b6b;
+            padding: 8px 15px;
+            margin: 5px 0;
+            border-radius: 0 5px 5px 0;
+        }
+
+        .cse-highlight::before {
+            content: "🔥";
+            margin-right: 8px;
+            color: #ff6b6b;
+        }
+
+        .department-label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .department-label i {
+            margin-right: 10px;
+            color: #1d7a8c;
+        }
+
+        .message {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 768px) {
+            .form-group {
+                width: 100%;
+            }
+            
+            .logo-text {
+                font-size: 2rem;
+            }
+            
+            .terms {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <div class="logo-text">SKST UNIVERSITY</div>
+            </div>
+            <div class="tagline">Excellence in Education Since 1965</div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                Create Your Account
+            </div>
+            <div class="card-body">
+                <?php
+                // Database configuration
+                $servername = "localhost";
+                $username = "root";
+                $password = "";
+                $dbname = "skst_university";
+                
+                // Initialize variables
+                $message = '';
+                $messageClass = '';
+                
+                // Create connection
+                try {
+                    $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+                    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                    
+                    // Create users table if it doesn't exist
+                    $sql = "CREATE TABLE IF NOT EXISTS users (
+                        id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                        first_name VARCHAR(50) NOT NULL,
+                        last_name VARCHAR(50) NOT NULL,
+                        email VARCHAR(100) NOT NULL UNIQUE,
+                        student_id VARCHAR(20) NOT NULL UNIQUE,
+                        phone VARCHAR(20) NOT NULL,
+                        role VARCHAR(30) NOT NULL,
+                        password VARCHAR(255) NOT NULL,
+                        department VARCHAR(50) NOT NULL,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )";
+                    
+                    $conn->exec($sql);
+                    
+                    // Process form submission
+                    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                        // Get form data
+                        $first_name = $_POST['firstName'];
+                        $last_name = $_POST['lastName'];
+                        $email = $_POST['email'];
+                        $student_id = $_POST['studentId'];
+                        $phone = $_POST['phone'];
+                        $role = $_POST['role'];
+                        $password = $_POST['password'];
+                        $confirm_password = $_POST['confirmPassword'];
+                        $department = $_POST['program'];
+                        
+                        // Validate passwords match
+                        if ($password !== $confirm_password) {
+                            throw new Exception("Passwords do not match!");
+                        }
+                        
+                        // Validate password strength
+                        if (strlen($password) < 8) {
+                            throw new Exception("Password must be at least 8 characters long!");
+                        }
+                        
+                        // Hash password
+                        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+                        
+                        // Prepare and execute SQL
+                        $stmt = $conn->prepare("INSERT INTO users (first_name, last_name, email, student_id, phone, role, password, department) 
+                                               VALUES (:first_name, :last_name, :email, :student_id, :phone, :role, :password, :department)");
+                        
+                        $stmt->bindParam(':first_name', $first_name);
+                        $stmt->bindParam(':last_name', $last_name);
+                        $stmt->bindParam(':email', $email);
+                        $stmt->bindParam(':student_id', $student_id);
+                        $stmt->bindParam(':phone', $phone);
+                        $stmt->bindParam(':role', $role);
+                        $stmt->bindParam(':password', $hashed_password);
+                        $stmt->bindParam(':department', $department);
+                        
+                        if ($stmt->execute()) {
+                            $message = "Account created successfully! Welcome to SKST University.";
+                            $messageClass = "success";
+                        } else {
+                            throw new Exception("Error creating account. Please try again.");
+                        }
+                    }
+                } catch(PDOException $e) {
+                    $errorMessage = $e->getMessage();
+                    
+                    // Handle duplicate entries
+                    if (strpos($errorMessage, 'Duplicate entry') !== false) {
+                        if (strpos($errorMessage, 'email') !== false) {
+                            $message = "This email address is already registered.";
+                        } elseif (strpos($errorMessage, 'student_id') !== false) {
+                            $message = "This student ID is already registered.";
+                        } else {
+                            $message = "This information is already registered.";
+                        }
+                    } else {
+                        $message = "Database error: " . $errorMessage;
+                    }
+                    
+                    $messageClass = "error";
+                } catch(Exception $e) {
+                    $message = $e->getMessage();
+                    $messageClass = "error";
+                }
+                
+                // Display message if exists
+                if (!empty($message)) {
+                    echo '<div class="message ' . $messageClass . '">' . $message . '</div>';
+                }
+                ?>
+                
+                <form id="accountForm" method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="firstName">First Name</label>
+                            <div class="input-group">
+                                <i class="fas fa-user"></i>
+                                <input type="text" id="firstName" name="firstName" placeholder="Enter your first name" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="lastName">Last Name</label>
+                            <div class="input-group">
+                                <i class="fas fa-user"></i>
+                                <input type="text" id="lastName" name="lastName" placeholder="Enter your last name" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">University Email</label>
+                            <div class="input-group">
+                                <i class="fas fa-envelope"></i>
+                                <input type="email" id="email" name="email" placeholder="name@skst.edu" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="studentId">Student/Faculty ID</label>
+                            <div class="input-group">
+                                <i class="fas fa-id-card"></i>
+                                <input type="text" id="studentId" name="studentId" placeholder="Enter your ID number" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <div class="input-group">
+                                <i class="fas fa-phone"></i>
+                                <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="role">Account Type</label>
+                            <div class="input-group">
+                                <i class="fas fa-user-tag"></i>
+                                <select id="role" name="role" required>
+                                    <option value="" disabled selected>Select your role</option>
+                                    <option value="student">Student</option>
+                                    <option value="faculty">Faculty Member</option>
+                                    <option value="staff">Administrative Staff</option>
+                                    <option value="researcher">Researcher</option>
+                                    <option value="alumni">Alumni</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <div class="input-group">
+                                <i class="fas fa-lock"></i>
+                                <div class="password-container">
+                                    <input type="password" id="password" name="password" placeholder="Create a strong password" required>
+                                    <span class="toggle-password" onclick="togglePassword()">
+                                        <i class="fas fa-eye"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="password-strength">
+                                <div class="strength-meter" id="strengthMeter"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirm Password</label>
+                            <div class="input-group">
+                                <i class="fas fa-lock"></i>
+                                <div class="password-container">
+                                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password" required>
+                                    <span class="toggle-password" onclick="toggleConfirmPassword()">
+                                        <i class="fas fa-eye"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <div class="department-label">
+                            <i class="fas fa-book"></i>
+                            <label for="program">Program/Department</label>
+                        </div>
+                        <select id="program" name="program" required>
+                            <option value="" disabled selected>Select your program/department</option>
+                            <option value="engineering">Engineering</option>
+                            <option value="cse" class="cse-highlight">Computer Science & Engineering (CSE)</option>
+                            <option value="medicine">Medicine</option>
+                            <option value="business">Business Administration</option>
+                            <option value="law">Law</option>
+                            <option value="arts">Arts & Humanities</option>
+                            <option value="science">Science & Technology</option>
+                            <option value="social">Social Sciences</option>
+                        </select>
+                    </div>
+                    
+                    <div class="terms">
+                        <input type="checkbox" id="terms" name="terms" required>
+                        <label for="terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a> of SKST University</label>
+                    </div>
+                    
+                    <div class="btn-container">
+                        <button type="submit" class="btn">Create Account</button>
+                    </div>
+                </form>
+                
+                <div class="login-link">
+                    Already have an account? <a href="#">Sign In</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const icon = document.querySelector('.toggle-password i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+        
+        function toggleConfirmPassword() {
+            const confirmInput = document.getElementById('confirmPassword');
+            const icon = document.querySelectorAll('.toggle-password i')[1];
+            
+            if (confirmInput.type === 'password') {
+                confirmInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                confirmInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+        
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const strengthMeter = document.getElementById('strengthMeter');
+            
+            // Reset classes
+            strengthMeter.className = 'strength-meter';
+            
+            if (password.length === 0) {
+                return;
+            }
+            
+            let strength = 0;
+            
+            // Length check
+            if (password.length >= 8) strength += 25;
+            
+            // Uppercase check
+            if (/[A-Z]/.test(password)) strength += 25;
+            
+            // Lowercase check
+            if (/[a-z]/.test(password)) strength += 25;
+            
+            // Number or special character check
+            if (/[0-9]/.test(password) || /[^A-Za-z0-9]/.test(password)) strength += 25;
+            
+            // Update strength meter
+            if (strength >= 75) {
+                strengthMeter.classList.add('strength-strong');
+            } else if (strength >= 50) {
+                strengthMeter.classList.add('strength-medium');
+            } else {
+                strengthMeter.classList.add('strength-weak');
+            }
+        });
+        
+        document.getElementById('accountForm').addEventListener('submit', function(e) {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                alert('Passwords do not match!');
+                return;
+            }
+            
+            if (password.length < 8) {
+                e.preventDefault();
+                alert('Password must be at least 8 characters long!');
+                return;
+            }
+            
+            const terms = document.getElementById('terms');
+            if (!terms.checked) {
+                e.preventDefault();
+                alert('You must agree to the terms and conditions!');
+                return;
+            }
+        });
+        
+        document.getElementById('program').addEventListener('focus', function() {
+            const cseOption = this.querySelector('option[value="cse"]');
+            cseOption.classList.add('cse-highlight');
+        });
+    </script>
+</body>
+</html>
