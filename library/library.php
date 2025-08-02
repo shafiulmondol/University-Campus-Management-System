@@ -28,7 +28,7 @@ require_once 'notice.php'; ?>
     </div>
 
 
-    <div class="menu-section">
+    <div class="menu-section" style="margin-bottom: 20px;">
          <a href="../student/studentf.php"><button class="btn">Student</button></a>
       <a href="../faculty.html"><button class="btn">Faculty</button></a>
       <a href="../administration.html"><button class="btn">Administration</button></a>
