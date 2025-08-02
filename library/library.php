@@ -7,20 +7,26 @@ require_once 'notice.php'; ?>
   <link rel="icon" href="../picture/SKST.png" type="image/png" />
   <link rel="stylesheet" href="../Design/buttom_bar.css">
   <link rel="stylesheet" href="library.css">
+  <link rel="stylesheet" href="stuf.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-  
+         
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 </head>
 <body>
-  <div class="navbar">
+<div class="navbar">
     <div class="navbar-top">
       <div class="logo">
+        
         <img src="../picture/logo.gif" alt="SKST Logo">
         <h1>SKST University || Library</h1>
       </div>
       <div class="home-button">
     <a href="../index.html">🏠 Home</a>
 
+   
     </div>
+
 
     <div class="menu-section">
          <a href="../student/studentf.php"><button class="btn">Student</button></a>
@@ -47,74 +53,109 @@ require_once 'notice.php'; ?>
      
          <div class="bg-glass">
      <?php  if (isset($_POST['staff'])) {
-    // Display staff login form
-    ?>
-    <div class="staff-login-container">
-        <div class="staff-login-box">
-            <div class="login-header">
+          // Display staff login form
+          ?>
+          <div class="staff-login-container">
+            <div class="staff-login-box">
+              <div class="login-header">
                 <img src="../picture/logo.gif" alt="SKST Logo" class="login-logo">
                 <h1>Library Staff Login</h1>
-            </div>
-            
-            <div class="login-body">
+              </div>
+              
+              <div class="login-body">
                 <form method="post" class="login-form">
-                    <div class="form-group">
+                  <div class="form-group">
+                    <label for="staffmail">E-mail</label>
+                    <input type="email" id="staffmail" name="email" placeholder="Enter email" required>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="staffpass">Password</label>
+                    <input type="password" id="staffpass" name="password" placeholder="Enter password" required>
+                  </div>
+                  
+                  <button type="submit" name="submit" class="login-button">Login</button>
+                </form>
+              </div>
+            </div>
+          </div>
+          <?php
+        } elseif (isset($_POST['submit'])) {
+          // Handle staff login submission
+          if (isset($_POST['email']) && isset($_POST['password'])) {
+            $check = login_condition($_POST['email'], $_POST['password']);
+            if ($check == true) {
+              $_SESSION['staff_logged_in'] = true;
+              ?>
+              <nav class="library-navbars">
+                <a href="#" class="library-logo">
+                  <i class="fas fa-book-open"></i>
+                  <span>Library Dashboard</span>
+                </a>
+                
+                <input type="checkbox" id="nav-toggle" class="nav-toggle">
+                <label for="nav-toggle" class="hamburger">&#9776;</label>
+                
+                <div class="library-nav-link">
+                  <a href="#" class="active">
+                    <i class="fas fa-book"></i>
+                    <span>See Books</span>
+                  </a>
+                 <a href="#" class="active">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Borrow Details</span>
+                  </a>
+                 <a href="#" class="active">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Add Books</span>
+                  </a>
+                 <a href="#" class="active">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Register Student</span>
+                  </a>
+                <a href="#" class="active">
+                    <i class="fas fa-bell"></i>
+                    <span class="badge"></span>
+                  </a>
+                </div>
+              </nav>
+              
+              <div style="padding: 2rem; max-width: 1200px; margin: 0 auto;">
+                <h2>Welcome to Library Management</h2>
+                <p>You are now logged in as library staff. Use the navigation above to manage library resources.</p>
+              </div>
+              <?php
+            } else {
+              echo "<div class='error-message'><p>Invalid email or password. Please try again.</p></div>";
+              ?>
+              <div class="staff-login-container">
+                <div class="staff-login-box">
+                  <div class="login-header">
+                    <img src="../picture/logo.gif" alt="SKST Logo" class="login-logo">
+                    <h1>Library Staff Login</h1>
+                  </div>
+                  
+                  <div class="login-body">
+                    <form method="post" class="login-form">
+                      <div class="form-group">
                         <label for="staffmail">E-mail</label>
-                        <input type="email" id="staffmail" name="email" placeholder="Enter email" required>
-                    </div>
-                    
-                    <div class="form-group">
+                        <input type="email" id="staffmail" name="email" placeholder="Enter email" required value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>">
+                      </div>
+                      
+                      <div class="form-group">
                         <label for="staffpass">Password</label>
                         <input type="password" id="staffpass" name="password" placeholder="Enter password" required>
-                    </div>
-                    
-                    <button type="submit" name="submit" class="login-button">Login</button>
-                </form>
-            </div>
-        </div>
-    </div>
-    <?php
-} elseif (isset($_POST['submit'])) {
-    // Handle staff login submission
-    if (isset($_POST['email']) && isset($_POST['password'])) {
-        $check = login_condition($_POST['email'], $_POST['password']);
-        if ($check == true) {
-            $_SESSION['staff_logged_in'] = true;
-            echo "<div class='welcome-message'><h2>Welcome, Staff Member!</h2>
-                  <p>You have successfully logged in to the staff portal.</p></div>";
-        } else {
-            echo "<div class='error-message'><p>Invalid email or password. Please try again.</p></div>";
-            // Show login form again
-            ?>
-            <!-- <div class="staff-login-container">
-                <div class="staff-login-box">
-                    <div class="login-header">
-                        <img src="../picture/logo.gif" alt="SKST Logo" class="login-logo">
-                        <h1>Library Staff Login</h1>
-                    </div>
-                    
-                    <div class="login-body">
-                        <form method="post" class="login-form">
-                            <div class="form-group">
-                                <label for="staffmail">E-mail</label>
-                                <input type="email" id="staffmail" name="email" placeholder="Enter email" required value="       echo htmlspecialchars($_POST['email'] ?? ''); ?>">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="staffpass">Password</label>
-                                <input type="password" id="staffpass" name="password" placeholder="Enter password" required>
-                            </div>
-                            
-                            <button type="submit" name="submit" class="login-button">Login</button>
-                        </form>
-                    </div>
+                      </div>
+                      
+                      <button type="submit" name="submit" class="login-button">Login</button>
+                    </form>
+                  </div>
                 </div>
-            </div> -->
-            <?php
+              </div>
+              <?php
+            }
+          }
         }
-    }
-}
-      
 
     
       

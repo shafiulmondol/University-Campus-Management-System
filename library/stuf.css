@@ -1,0 +1,215 @@
+
+  :root {
+      --primary: #31734dff;
+      --secondary: #0a523dff;
+      --accent: #487552ff;
+      --light: #ced5dcff;
+      --dark: #87929cff;
+    }
+    
+   
+    
+   
+    
+    
+ 
+    
+    
+    .library-navbars {
+      background: linear-gradient(135deg, var(--accent), #3a86ff);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.8rem 2rem;
+      position: relative;
+      border-radius: 12px;
+      margin: 1rem;
+    }
+    
+     .library-logo {
+      color: white;
+      font-weight: 700;
+      font-size: 1.4rem;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+   
+    .library-logo i {
+      font-size: 1.4rem;
+    }
+    
+   .library-nav-link {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .active {
+      color: white;
+      text-decoration: none;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 500;
+    }
+    
+    .active:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+    }
+    
+    .active i {
+      font-size: 1rem;
+    }
+    
+    .hamburger {
+      display: none;
+      cursor: pointer;
+      color: white;
+      font-size: 1.8rem;
+      z-index: 100;
+    }
+    
+    #nav-toggle {
+      display: none;
+    }
+    
+    /* Main Content Layout */
+    .main-container {
+      display: flex;
+      min-height: calc(100vh - 250px);
+    }
+    
+    .content {
+      flex: 1;
+      padding: 1rem;
+    }
+    
+    .bg-glass {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      margin-bottom: 1rem;
+    }
+    
+    /* Right Navigation */
+    .right-nav {
+      width: 250px;
+      background: white;
+      box-shadow: -4px 0 12px rgba(0, 0, 0, 0.1);
+      padding: 1rem;
+    }
+    
+    .nav-btn {
+      display: block;
+      width: 100%;
+      padding: 0.8rem;
+      margin-bottom: 0.5rem;
+      background-color: var(--light);
+      border: none;
+      border-radius: 8px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+    
+    .nav-btn i {
+      margin-right: 0.5rem;
+      width: 20px;
+      text-align: center;
+    }
+    
+    .nav-btn:hover {
+      background-color: var(--accent);
+      color: white;
+      transform: translateX(5px);
+    }
+    
+    /* Staff Login Styles */
+   
+    
+
+
+    
+
+
+    
+    .error-message {
+      background-color: #ffebee;
+      color: #c62828;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    
+  
+  
+    /* Mobile Styles */
+    @media (max-width: 992px) {
+      .main-container {
+        flex-direction: column;
+      }
+      
+    }
+    
+    @media (max-width: 768px) {
+      .library-navbars {
+        padding: 0.8rem 1rem;
+      }
+      
+      .library-nav-link {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: linear-gradient(135deg, var(--accent), #3a86ff);
+        flex-direction: column;
+        align-items: center;
+        padding: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease, padding 0.4s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border-radius: 0 0 12px 12px;
+        z-index: 99;
+      }
+      
+      #nav-toggle:checked ~ .library-nav-link {
+        max-height: 400px;
+        padding: 1rem 0;
+      }
+      
+      .library-nav-link a {
+        width: 90%;
+        justify-content: center;
+        padding: 0.8rem;
+        margin: 0.2rem 0;
+      }
+      
+      .hamburger {
+        display: block;
+        transition: transform 0.3s ease;
+      }
+      
+      #nav-toggle:checked + .hamburger {
+        transform: rotate(90deg);
+      }
+      
+      .navbar-top {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .home-button {
+        margin-top: 1rem;
+      }
+    }
+  
