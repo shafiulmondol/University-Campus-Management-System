@@ -20,24 +20,29 @@ $createTable = "CREATE TABLE IF NOT EXISTS accountofficer (
     full_name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL,
     avatar_initials VARCHAR(5) NOT NULL,
-    last_login DATETIME
+    last_login DATETIME,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )";
 if (!$mysqli->query($createTable)) {
     die("Error creating table: " . $mysqli->error);
 }
 
-// Create test account if empty
+// Create account officer if empty
 $result = $mysqli->query("SELECT COUNT(*) AS count FROM accountofficer");
 $row = $result->fetch_assoc();
 if ($row['count'] == 0) {
-    $testPassword = password_hash('Test@123', PASSWORD_DEFAULT);
+    $hashedPassword = password_hash('university123', PASSWORD_DEFAULT);
     $insert = $mysqli->prepare("INSERT INTO accountofficer (username, password, full_name, email, avatar_initials) VALUES (?, ?, ?, ?, ?)");
-    $insert->bind_param("sssss", $u = 'test_officer', $testPassword, $f = 'Test Account Officer', $e = 'test@university.edu.bd', $a = 'TA');
+    $username = 'accountofficer';
+    $full_name = 'Account Officer';
+    $email = 'accountofficer@skst.edu';
+    $avatar = 'AO';
+    $insert->bind_param("sssss", $username, $hashedPassword, $full_name, $email, $avatar);
     $insert->execute();
     $insert->close();
 }
 
-// Logout
+// Logout logic
 if (isset($_GET['logout'])) {
     session_unset();
     session_destroy();
@@ -48,7 +53,7 @@ if (isset($_GET['logout'])) {
 // Handle login
 $loginError = '';
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'], $_POST['password'])) {
-    $username = $_POST['username'];
+    $username = $mysqli->real_escape_string($_POST['username']);
     $password = $_POST['password'];
 
     $stmt = $mysqli->prepare("SELECT * FROM accountofficer WHERE username = ?");
@@ -385,7 +390,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'], $_POST['pa
                 <div class="user-avatar"><?= $_SESSION['avatar_initials'] ?? 'AO' ?></div>
                 <div>
                     <div><?= $_SESSION['full_name'] ?? 'Account Officer' ?></div>
-                    <div><?= $_SESSION['email'] ?? 'finance@university.edu.bd' ?></div>
+                    <div><?= $_SESSION['email'] ?? 'accountofficer@skst.edu' ?></div>
                 </div>
                 <a href="?logout=true" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </div>

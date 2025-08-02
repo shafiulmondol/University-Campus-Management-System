@@ -11,7 +11,6 @@ SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
 
-
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
@@ -42,8 +41,10 @@ CREATE TABLE `accountofficer` (
 -- Dumping data for table `accountofficer`
 --
 
-INSERT INTO `accountofficer` (`officer_id`, `username`, `password`, `full_name`, `email`, `avatar_initials`, `last_login`, `created_at`) VALUES
-(233031, 'tanjila@gmail.com', '23303137', 'Tanjila Islam', 'tanjila@gmail.com', 'JD', '2025-07-29 00:00:00', '2025-07-29 16:12:55');
+INSERT INTO `accountofficer` 
+(`officer_id`, `username`, `password`, `full_name`, `email`, `avatar_initials`, `last_login`, `created_at`) 
+VALUES
+(233031, 'accountofficer', 'university123', 'Account Officer', 'accountofficer@skst.edu', 'AO', NULL, NOW());
 
 --
 -- Indexes for dumped tables
