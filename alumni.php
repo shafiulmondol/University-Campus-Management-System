@@ -1089,33 +1089,10 @@ if (isset($_SESSION['alumni_id'])) {
                         </ul>
     
                     <?php elseif (isset($_GET['notice'])): ?>
-                        <h2>University Notices</h2>
-                        <?php
-                        // Reconnect to database
-                        $conn_notices = new mysqli($host, $user, $pass, $db);
-                        if ($conn_notices->connect_error) die("DB Connection failed: " . $conn_notices->connect_error);
-                        
-                        $current_date = date('Y-m-d');
-                        $sql = "SELECT * FROM notices WHERE expiry_date >= ? ORDER BY publish_date DESC";
-                        $stmt = $conn_notices->prepare($sql);
-                        $stmt->bind_param("s", $current_date);
-                        $stmt->execute();
-                        $result = $stmt->get_result();
-
-                        if ($result->num_rows > 0) {
-                            while ($notice = $result->fetch_assoc()) {
-                                echo '<div class="notice-item">';
-                                echo '<h4>' . htmlspecialchars($notice['title']) . '</h4>';
-                                echo '<p>' . htmlspecialchars($notice['content']) . '</p>';
-                                echo '<small>Posted: ' . htmlspecialchars($notice['publish_date']) . '</small>';
-                                echo '</div>';
-                            }
-                        } else {
-                            echo '<p>No notices found.</p>';
-                        }
-                        $stmt->close();
-                        $conn_notices->close();
-                        ?>
+                        <script>
+                            // Redirect to dedicated notices page
+                            window.location.href = 'libaray/notice.php';
+                        </script>
     
                     <?php elseif (isset($_GET['degree'])): ?>
                         <h2>Degree Information</h2>
