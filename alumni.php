@@ -1091,7 +1091,7 @@ if (isset($_SESSION['alumni_id'])) {
                     <?php elseif (isset($_GET['notice'])): ?>
                         <script>
                             // Redirect to dedicated notices page
-                            window.location.href = 'libaray/notice.php';
+                            window.location.href = 'notice.html';
                         </script>
     
                     <?php elseif (isset($_GET['degree'])): ?>
