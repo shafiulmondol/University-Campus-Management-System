@@ -52,7 +52,9 @@
     // }
     function see_notice(){
     global $con;
-          $query = "SELECT * FROM notice ORDER BY created_at DESC";
+          $query ="SELECT * FROM notice 
+WHERE section NOT IN ('Faculty', 'Student', 'Library', 'Staff')
+ORDER BY created_at DESC";
           $result = mysqli_query($con, $query);
           
           if (mysqli_num_rows($result) > 0) {
@@ -76,7 +78,7 @@
     }
     
     echo "<div class='back-button-container'>";
-    echo "<a href='library.php' class='back-button'><i class='fas fa-arrow-left'></i> Back to Library</a>";
+    // echo "<a href='library.php' class='back-button'><i class='fas fa-arrow-left'></i> Back to Library</a>";
     echo "</div>";
     
     echo "</div>"; // Close notices-container
@@ -84,7 +86,7 @@
     echo "<div class='no-notices'>";
     echo "<i class='far fa-folder-open'></i>";
     echo "<p>No notices found at this time</p>";
-    echo "<a href='library.php' class='back-button'><i class='fas fa-arrow-left'></i> Back to Library</a>";
+    // echo "<a href='library.php' class='back-button'><i class='fas fa-arrow-left'></i> Back to Library</a>";
     echo "</div>";
 }
 }

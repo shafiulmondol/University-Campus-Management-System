@@ -34,7 +34,7 @@ if (isset($_POST['logout'])) {
         <h1>SKST University || Library</h1>
       </div>
       <div class="home-button">
-        <a href="../index.html">🏠 Home</a>
+        <a href="../index.php">🏠 Home</a>
       </div>
 
       <div class="menu-section" style="margin-bottom: 20px;">
@@ -64,10 +64,14 @@ if (isset($_POST['logout'])) {
             <nav class="library-navbars">
               <a href="#" class="library-logo">
                 <i class="fas fa-book-open"></i><br>
-                <span>Library <br> Dashboard <a href="#" class="active notification-icon">
-              <i class="fas fa-bell"></i>
-              <span class="badge">3</span>
-            </a></span>
+                <span>Dashboard </span> 
+                <div class="notification-bell">
+  <button type="submit" name="nsubmit" class="bell-btn">
+    🔔
+    <span class="badge">2</span>
+  </button>
+</div>
+
               </a>
               <input type="checkbox" id="nav-toggle" class="nav-toggle">
               <label for="nav-toggle" class="hamburger">&#9776;</label>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SKST Institute of Technology</title>
+
+  <link rel="icon" href="picture/SKST.png" type="image/png">
+  <link rel="stylesheet" href="Design/campus_Image.css">
+  <link rel="stylesheet" href="Design/welcome-message.css">
+  <link rel="stylesheet" href="Design/buttom_bar.css">
+  <link rel="stylesheet" href="library/library.css">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f9f9ff;
+    }
+
+    .navbar {
+      background-color: #e0e7ff;
+      padding: 10px 20px;
+      position: relative;
+    }
+
+    .navbar-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo img {
+      height: 80px;
+    }
+
+    .logo h1 {
+      font-size: 26px;
+      color: #333;
+    }
+
+    .menu-section {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .menu-section a {
+      text-decoration: none;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      font-size: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      min-width: 120px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      background: linear-gradient(135deg, #512da8, #1e88e5);
+    }
+
+    .notification-bell {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+
+    .bell-btn {
+      position: relative;
+      font-size: 1.5em;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 5px;
+    }
+    
+    .badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: red;
+      color: white;
+      border-radius: 50%;
+      padding: 2px 6px;
+      font-size: 0.6em;
+    }
+
+    .background-image {
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .background-image img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .navbar-top {
+        flex-direction: column;
+        align-items: center;
+        padding-bottom: 15px;
+      }
+
+      .btn {
+        width: 80%;
+      }
+
+      .menu-section {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .notification-bell {
+        position: static;
+        margin-top: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <div class="navbar-top">
+      <div class="logo">
+        <img src="picture/logo.gif" alt="SKST Logo">
+        <h1>SKST University || Home</h1>
+      </div>
+      
+      <div class="notification-bell">
+        <form action="index.php" method="post">
+          <button type="submit" name="nsubmit" class="bell-btn">
+            🔔
+            <span class="badge">1</span>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="menu-section">
+      <a href="student/studentf.php"><button class="btn">Student</button></a>
+      <a href="faculty.html"><button class="btn">Faculty</button></a>
+      <a href="administration.html"><button class="btn">Administration</button></a>
+      <a href="alumni.html"><button class="btn">Alumni</button></a>
+      <a href="campus.html"><button class="btn">Campus Life</button></a>
+      <a href="iqac.html"><button class="btn">IQAC</button></a>
+      <!-- <a href="notice.html"><button class="btn">Notice</button></a> -->
+      <a href="news.html"><button class="btn">News</button></a>
+      <a href="ranking.html"><button class="btn">Ranking</button></a>
+      <a href="academic.html"><button class="btn">Academics</button></a>
+      <a href="scholarship.html"><button class="btn">Scholarships</button></a>
+      <a href="admission.html"><button class="btn">Admission</button></a>
+      <a href="library/library.php"><button class="btn">Library</button></a>
+      <a href="volunteer.html"><button class="btn">Volunteer</button></a>
+      <a href="about.html"><button class="btn">About US</button></a>
+      <a href="account_officer.html"><button class="btn">Account Officer</button></a>
+    </div>
+  </div>
+
+  
+
+  <?php  
+  if (isset($_POST['nsubmit'])) {
+    require_once 'library/notice.php';
+    echo see_notice();
+    ?>
+     <div class="buttom_bar">
+      <img src="picture/SKST.png" alt="Logo" style="height:80px; width:auto;">
+      <p>SKST University</p>
+      <p>4 Embankment Drive Road,Sector-10, Uttara Model Town, Dhaka-1230.</p>
+      <p>Phone: (88 02) 55091801-5, Mobile : +88 01714 014 933, 01810030041-9, 01325080581-9</p>
+      <p>Fax: (880-2) 5895 2625, Email : info@skst.edu</p>
+    </div><?php
+  } else {
+    ?>
+    <div class="background-image">
+    <img src="picture/SKST_University.png" alt="Background Image">
+  </div>
+    <div class="welcome-message">
+      <h1>Welcome to SKST University</h1>
+      <h2>Today SKST University</h2>
+    </div>
+
+    <div class="buttom_bar">
+      <img src="picture/SKST.png" alt="Logo" style="height:80px; width:auto;">
+      <p>SKST University</p>
+      <p>4 Embankment Drive Road,Sector-10, Uttara Model Town, Dhaka-1230.</p>
+      <p>Phone: (88 02) 55091801-5, Mobile : +88 01714 014 933, 01810030041-9, 01325080581-9</p>
+      <p>Fax: (880-2) 5895 2625, Email : info@skst.edu</p>
+    </div>
+  <?php } ?>
+</body>
+</html>
