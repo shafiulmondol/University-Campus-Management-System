@@ -53,7 +53,7 @@
     function see_notice(){
     global $con;
           $query ="SELECT * FROM notice 
-WHERE section NOT IN ('Faculty', 'Student', 'Library', 'Staff')
+WHERE section NOT IN ('Faculty', 'Student', 'Library', 'Staff','Alumni')
 ORDER BY created_at DESC";
           $result = mysqli_query($con, $query);
           
