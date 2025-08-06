@@ -90,10 +90,7 @@ if (isset($_POST['logout'])) {
         <div class="content">
           <div class="bg-glass">
             <?php
-            if (isset($_POST['notice'])) {
-              require_once 'notice.php';
-              echo see_notice();
-            } elseif (isset($_POST['borrow'])) {
+           if (isset($_POST['borrow'])) {
               echo "<h2>Borrow Technology</h2>";
               echo "<p>This section would contain information about borrowing technology equipment from the library.</p>";
             } elseif (isset($_POST['suggest'])) {
@@ -188,7 +185,7 @@ if (isset($_POST['logout'])) {
               echo "<p>Information about book renewal policies and procedures.</p>";
             } elseif (isset($_POST['notice'])) { 
               require_once 'notice.php';
-              echo see_notice();
+              echo see_library_notice();
             } elseif (isset($_POST['about'])) {
               echo "<h2>About the Library</h2>";
               echo "<p>Information about library services, hours, and resources.</p>";

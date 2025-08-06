@@ -16,7 +16,7 @@
         <h1>SKST University || Library</h1>
       </div>
       <div class="home-button">
-    <a href="../index.html">🏠 Home</a>
+    <a href="../index.php">🏠 Home</a>
 
     </div>
 
