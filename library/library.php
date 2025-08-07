@@ -24,6 +24,31 @@ if (isset($_POST['logout'])) {
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
+     .submit-btn {
+        background-color: #3498db;
+        color: white;
+        border: none;
+        padding: 14px 28px;
+        font-size: 16px;
+        font-weight: 600;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 10px;
+        width: 100%;
+        max-width: 250px;
+        align-self: center;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .submit-btn:hover {
+        /* background-color: #cad4daff; */
+        transform: translateY(-4px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+     .submit-btn:active {
+        transform: translateY(0);
+    }
   </style>
 </head>
 <body>
@@ -66,11 +91,11 @@ if (isset($_POST['logout'])) {
                 <i class="fas fa-book-open"></i><br>
                 <span>Dashboard </span> 
                 <div class="notification-bell">
-  <button type="submit" name="nsubmit" class="bell-btn">
-    🔔
-    <span class="badge">2</span>
-  </button>
-</div>
+          <button type="submit" name="nsubmit" class="bell-btn">
+           🔔
+             <span class="badge">2</span>
+            </button>
+      </div>
 
               </a>
               <input type="checkbox" id="nav-toggle" class="nav-toggle">
@@ -78,7 +103,7 @@ if (isset($_POST['logout'])) {
             </nav>
           </a>
           <form action="library.php" method="post">
-            <button class="nav-btn" type="submit" name="notice"><i class="fas fa-bullhorn"></i>  📚 See Books</button>
+            <button class="nav-btn" type="submit" name="search"><i class="fas fa-search"></i>  📚 See Books</button>
             <button class="nav-btn" type="submit" name="borrow"><i class="fas fa-laptop"></i> 📄 Borrow Details</button>
             <button class="nav-btn" type="submit" name="suggest"><i class="fas fa-book-medical"></i>   ➕ Add Books</button>
             <button class="nav-btn" type="submit" name="renew"><i class="fas fa-sync-alt"></i> 📝 Register student</button>
@@ -93,10 +118,117 @@ if (isset($_POST['logout'])) {
            if (isset($_POST['borrow'])) {
               echo "<h2>Borrow Technology</h2>";
               echo "<p>This section would contain information about borrowing technology equipment from the library.</p>";
-            } elseif (isset($_POST['suggest'])) {
-              echo "<h2>Suggest a Book</h2>";
-              echo "<p>Form for suggesting new books for the library collection.</p>";
-            } elseif (isset($_POST['renew'])) {
+            }
+           elseif (isset($_POST['search'])) { ?>
+           <div class="book-search-container">
+    <form action="search_results.php" method="get" class="book-search-form">
+        <div class="search-box">
+            <input type="text" name="search_query" placeholder="Search books by title, author, or Book name" 
+                   class="search-input" required>
+            <button type="submit" class="search-button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <span class="sr-only">Search books</span>
+            </button>
+        </div>
+        <div >
+            <input type="submit" name="see_all" placeholder=" See All books">
+        </div>
+        <!-- <div class="search-options">
+            <div class="filter-group">
+                <label for="search_by" class="filter-label">Search in:</label>
+                <select name="search_by" id="search_by" class="filter-select">
+                    <option value="all">All Fields</option>
+                    <option value="all">Book ID</option>
+                    <option value="title">Title</option>
+                    <option value="author">Author</option>
+                    <option value="isbn">ISBN</option>
+                </select>
+            </div>
+        </div> -->
+    </form>
+</div>
+
+
+<?php
+
+            }
+
+             elseif (isset($_POST['suggest'])) { ?>
+              <div class="suggestion-form-container">
+    <h2>Suggest a Book for Our Library</h2>
+    
+    <?php if (isset($suggestion_message)): ?>
+        <div class="message <?php echo $suggestion_message_type; ?>">
+            <?php echo $suggestion_message; ?>
+        </div>
+    <?php endif; ?>
+    
+    <form action="library.php" method="post" class="suggestion-form">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="title">Book Title*</label>
+                <input type="text" id="title" name="title" placeholder="Enter book title" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="author">Author*</label>
+                <input type="text" id="author" name="author" placeholder="Enter author name" required>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="isbn">ISBN</label>
+                <input type="text" id="isbn" name="isbn" placeholder="Enter ISBN (optional)">
+            </div>
+            
+            <div class="form-group">
+                <label for="publication_year">Publication Year</label>
+                <input type="number" id="publication_year" name="publication_year" 
+                       placeholder="YYYY" min="1000" max="<?php echo date('Y'); ?>">
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="category">Category</label>
+                <input type="text" id="category" name="category" placeholder="Fiction, Science, etc.">
+            </div>
+            
+            <div class="form-group">
+                <label for="total_copies">Number of Copies Suggested</label>
+                <input type="number" id="total_copies" name="total_copies" value="1" min="1">
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="shelf_location">Suggested Shelf Location</label>
+            <input type="text" id="shelf_location" name="shelf_location" placeholder="e.g., A12, Fiction Section">
+        </div>
+        
+        <div class="form-group">
+            <label for="suggested_by">Your Name</label>
+            <input type="text" id="suggested_by" name="suggested_by" placeholder="Who is suggesting this book?">
+        </div>
+        
+        <div class="form-group">
+            <label for="suggestion_notes">Why should we add this book?</label>
+            <textarea id="suggestion_notes" name="suggestion_notes" placeholder="Tell us why this would be a good addition to our library"></textarea>
+        </div>
+        
+        <input type="submit" name="suggest_submit" value="Submit Suggestion" class="submit-btn" >
+    </form>
+</div>
+ <?php
+            }
+            elseif (isset($_POST['suggest_submit'])){
+              create_books_table();
+             echo add_book($_POST['title'],$_POST['author'],$_POST['isbn'],$_POST['publication_year'],$_POST['category'],$_POST['total_copies'],$_POST['shelf_location']); 
+            }
+             elseif (isset($_POST['renew'])) {
               echo "<h2>Renew Books</h2>";
               echo "<p>Information about book renewal policies and procedures.</p>";
             } else {
@@ -209,7 +341,7 @@ if (isset($_POST['logout'])) {
         <div class="nav-links">
           <form action="library.php" method="post">
             <button class="nav-btn" type="submit" name="notice"><i class="fas fa-bullhorn"></i> Library Notice</button>
-            <button class="nav-btn" type="submit" name="borrow"><i class="fas fa-laptop"></i> Borrow Tech</button>
+            <button class="nav-btn" type="submit" name="borrow"><i class="fas fa-laptop"></i> Borrow book</button>
             <button class="nav-btn" type="submit" name="suggest"><i class="fas fa-book-medical"></i> Suggest a Book</button>
             <button class="nav-btn" type="submit" name="renew"><i class="fas fa-sync-alt"></i> Renew Books</button>
             <button class="nav-btn" type="submit" name="staff"><i class="fas fa-user-tie"></i> Staff Portal</button>

@@ -33,7 +33,6 @@
       gap: 0.5rem;
       background-color: #3a86ff greenyellow green;
     }
-   
     .library-logo i {
       font-size: 1.4rem;
     }
@@ -266,4 +265,243 @@
         margin-top: 1rem;
       }
     }
-  
+  /* Form Container Styles */
+    .suggestion-form-container {
+        max-width: 800px;
+        margin: 30px auto;
+        padding: 25px;
+        background-color: #f9f9f9;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .suggestion-form-container h2 {
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    /* Form Styles */
+    .suggestion-form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 20px;
+    }
+
+    .form-group {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    label {
+        font-weight: 600;
+        color: #34495e;
+    }
+
+    input, textarea, select {
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 16px;
+        transition: border 0.3s;
+    }
+
+    input:focus, textarea:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+    }
+
+    textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    /* Submit Button Styles */
+    .submit-btn {
+        background-color: #3498db;
+        color: white;
+        border: none;
+        padding: 14px 28px;
+        font-size: 16px;
+        font-weight: 600;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 10px;
+        width: 100%;
+        max-width: 250px;
+        align-self: center;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .submit-btn:hover {
+        background-color: #2980b9;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .submit-btn:active {
+        transform: translateY(0);
+    }
+
+    /* Message Styles */
+    .message {
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .message.success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .message.error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .form-row {
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .submit-btn {
+            max-width: 100%;
+        }
+    }
+
+      /* Main Container */
+    .book-search-container {
+        max-width: 800px;
+        margin: 30px auto;
+        padding: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    /* Search Box */
+    .search-box {
+        position: relative;
+        margin-bottom: 20px;
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 14px 50px 14px 20px;
+        border: 2px solid #e0e0e0;
+        border-radius: 30px;
+        font-size: 16px;
+        outline: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .search-input:focus {
+        border-color: #5c6bc0;
+        box-shadow: 0 2px 12px rgba(92, 107, 192, 0.2);
+    }
+    
+    .search-button {
+        position: absolute;
+        right: 5px;
+        top: 5px;
+        background: #5c6bc0;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .search-button:hover {
+        background: #3949ab;
+    }
+    
+    /* Search Options */
+    .search-options {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+    
+    .filter-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .filter-label {
+        font-size: 14px;
+        color: #555;
+        white-space: nowrap;
+    }
+    
+    .filter-select {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        background-color: white;
+        font-size: 14px;
+        color: #333;
+        cursor: pointer;
+        min-width: 150px;
+    }
+    
+    .filter-select:hover {
+        border-color: #9fa8da;
+    }
+    
+    .filter-select:focus {
+        outline: none;
+        border-color: #5c6bc0;
+    }
+    
+    /* Accessibility */
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border-width: 0;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 600px) {
+        .search-options {
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .filter-group {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .filter-select {
+            width: 100%;
+        }
+    }

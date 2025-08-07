@@ -305,6 +305,48 @@ function login_condition($email,$password) {
         echo "<div class='error-message'>Wrong email or password</div>";
     }
 
+ // This should run only once to create the table, not inside the add_book function
+function create_books_table() {
+    global $con;
+    $sqlbook = '
+    CREATE TABLE IF NOT EXISTS books (
+        book_id INT AUTO_INCREMENT PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        author VARCHAR(255) NOT NULL,
+        isbn VARCHAR(20) UNIQUE NOT NULL,
+        publication_year INT,
+        category VARCHAR(100),
+        total_copies INT NOT NULL DEFAULT 1,
+        available_copies INT NOT NULL DEFAULT 1,
+        shelf_location VARCHAR(50),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )';
+    return mysqli_query($con, $sqlbook);
+}
+
+function add_book($title, $author, $isbn, $publication_year, $category, $total_copies, $shelf_location) {
+    global $con;
+    
+    // Escape all string values to prevent SQL injection
+    $title = mysqli_real_escape_string($con, $title);
+    $author = mysqli_real_escape_string($con, $author);
+    $isbn = mysqli_real_escape_string($con, $isbn);
+    $category = mysqli_real_escape_string($con, $category);
+    $shelf_location = mysqli_real_escape_string($con, $shelf_location);
+    
+    $insertb = "INSERT INTO books (title, author, isbn, publication_year, category, total_copies, available_copies, shelf_location)
+                VALUES ('$title', '$author', '$isbn', $publication_year, '$category', $total_copies, $total_copies, '$shelf_location')";
+    
+    $insertq = mysqli_query($con, $insertb);
+    
+    if (!$insertq) {
+        // Handle error - you might want to log this or return false
+        return false;
+    }
+    echo "Book added successfull";
+    return true;
+}
 ?>
 
 
