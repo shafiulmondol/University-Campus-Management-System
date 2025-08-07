@@ -327,8 +327,36 @@ if (isset($_POST['logout'])) {
               echo "<h2>About the Library</h2>";
               echo "<p>Information about library services, hours, and resources.</p>";
             } elseif (isset($_POST['search'])) {
-              echo "<h2>Book Search</h2>";
-              echo "<p>Search interface for the library catalog.</p>";
+               if (isset($_POST['search'])) { ?>
+    <div class="book-search-container">
+        <form action="search_results.php" method="get" class="book-search-form">
+            <div class="search-box">
+                <input type="text" name="search_query" placeholder="Search books by title, author, or Book name" 
+                       class="search-input" value="<?php echo isset($_GET['search_query']) ? htmlspecialchars($_GET['search_query']) : ''; ?>" required>
+                <button type="submit" class="search-button" name="search_submit">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <span class="sr-only">Search books</span>
+                </button>
+            </div>
+        </form>
+        
+    </div>
+
+    <?php
+    // Show results if search was performed
+    
+    if (isset($_POST['search'])) {
+        // Code to display search results
+        echo "<div class='search-results'>";
+        echo "Showing search results...";
+        // Your code to fetch and display search results would go here
+        echo "</div>";
+    }
+}
+
             } elseif (isset($_POST['resources'])) {
               echo "<h2>Student Resources</h2>";
               echo "<p>Links to academic resources and research tools.</p>";
@@ -346,12 +374,13 @@ if (isset($_POST['logout'])) {
         <div class="nav-links">
           <form action="library.php" method="post">
             <button class="nav-btn" type="submit" name="notice"><i class="fas fa-bullhorn"></i> Library Notice</button>
+            <button class="nav-btn" type="submit" name="search"><i class="fas fa-search"></i> Book Search</button>
             <button class="nav-btn" type="submit" name="borrow"><i class="fas fa-laptop"></i> Borrow book</button>
             <button class="nav-btn" type="submit" name="suggest"><i class="fas fa-book-medical"></i> Suggest a Book</button>
             <button class="nav-btn" type="submit" name="renew"><i class="fas fa-sync-alt"></i> Renew Books</button>
             <button class="nav-btn" type="submit" name="staff"><i class="fas fa-user-tie"></i> Staff Portal</button>
             <button class="nav-btn" type="submit" name="about"><i class="fas fa-info-circle"></i> About Us</button>
-            <button class="nav-btn" type="submit" name="search"><i class="fas fa-search"></i> Book Search</button>
+            
             <button class="nav-btn" type="submit" name="resources"><i class="fas fa-graduation-cap"></i> Student Resources</button>
             <button class="nav-btn" type="submit" name="help"><i class="fas fa-question-circle"></i> Help Desk</button>
           </form>

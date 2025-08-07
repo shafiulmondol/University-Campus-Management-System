@@ -14,10 +14,10 @@ if ($show_all) {
     $sql = "SELECT * FROM books ORDER BY title ASC";
     $stmt = mysqli_prepare($con, $sql);
 } else {
-    $sql = "SELECT * FROM books WHERE title LIKE ? OR author LIKE ? ORDER BY title ASC";
+    $sql = "SELECT * FROM books WHERE book_id LIKE ? OR title LIKE ? OR author LIKE ? ORDER BY book_id";
     $stmt = mysqli_prepare($con, $sql);
     $search_param = "%$search_query%";
-    mysqli_stmt_bind_param($stmt, "ss", $search_param, $search_param);
+    mysqli_stmt_bind_param($stmt, "sss",$search_param, $search_param, $search_param);
 }
 
 // Execute query
