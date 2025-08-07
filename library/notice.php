@@ -5,8 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <link rel="stylesheet" href="library.css">
+    <link rel="stylesheet" href="search_results.php">
     
+    <style>
+    .book-details-container {
+        width: 100%;
+        margin: 20px 0;
+        padding: 20px;
+        background-color: #f5f5f5;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
     
+    .error-message {
+        color: #721c24;
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        padding: 10px 15px;
+        border-radius: 4px;
+        margin: 20px 0;
+    }
+    .back-button {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 8px 15px;
+        background-color: #3498db;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        transition: background-color 0.3s;
+    }
+    
+    .back-button:hover {
+        background-color: #2980b9;
+    }
+    
+    .back-button i {
+        margin-right: 5px;
+    }
+</style>
  </head>
  <body>
     
@@ -78,7 +115,7 @@ ORDER BY created_at DESC";
     }
     
     echo "<div class='back-button-container'>";
-    // echo "<a href='library.php' class='back-button'><i class='fas fa-arrow-left'></i> Back to Library</a>";
+    echo "<a href='javascript:history.back()' class='back-button'><i class='fas fa-arrow-left'></i> Back</a>";
     echo "</div>";
     
     echo "</div>"; // Close notices-container
@@ -86,7 +123,7 @@ ORDER BY created_at DESC";
     echo "<div class='no-notices'>";
     echo "<i class='far fa-folder-open'></i>";
     echo "<p>No notices found at this time</p>";
-    // echo "<a href='library.php' class='back-button'><i class='fas fa-arrow-left'></i> Back to Library</a>";
+    echo "<a href='javascript:history.back()' class='back-button'><i class='fas fa-arrow-left'></i> Back</a>";
     echo "</div>";
 }
 }
@@ -118,7 +155,7 @@ WHERE section='Student' ORDER BY created_at DESC";
     }
     
     echo "<div class='back-button-container'>";
-    // echo "<a href='library.php' class='back-button'><i class='fas fa-arrow-left'></i> Back to Library</a>";
+    echo "<a href='javascript:history.back()' class='back-button'><i class='fas fa-arrow-left'></i> Back</a>";
     echo "</div>";
     
     echo "</div>"; // Close notices-container
@@ -126,7 +163,7 @@ WHERE section='Student' ORDER BY created_at DESC";
     echo "<div class='no-notices'>";
     echo "<i class='far fa-folder-open'></i>";
     echo "<p>No notices found at this time</p>";
-    // echo "<a href='library.php' class='back-button'><i class='fas fa-arrow-left'></i> Back to Library</a>";
+     echo "<a href='javascript:history.back()' class='back-button'><i class='fas fa-arrow-left'></i> Back</a>";
     echo "</div>";
 }
 }
@@ -157,7 +194,7 @@ WHERE section IS 'Faculty' ORDER BY created_at DESC";
     }
     
     echo "<div class='back-button-container'>";
-    // echo "<a href='library.php' class='back-button'><i class='fas fa-arrow-left'></i> Back to Library</a>";
+    echo "<a href='javascript:history.back()' class='back-button'><i class='fas fa-arrow-left'></i> Back</a>";
     echo "</div>";
     
     echo "</div>"; // Close notices-container
@@ -165,7 +202,7 @@ WHERE section IS 'Faculty' ORDER BY created_at DESC";
     echo "<div class='no-notices'>";
     echo "<i class='far fa-folder-open'></i>";
     echo "<p>No notices found at this time</p>";
-    // echo "<a href='library.php' class='back-button'><i class='fas fa-arrow-left'></i> Back to Library</a>";
+    echo "<a href='javascript:history.back()' class='back-button'><i class='fas fa-arrow-left'></i> Back</a>";
     echo "</div>";
 }
 }
@@ -196,7 +233,7 @@ WHERE section ='Alumni' ORDER BY created_at DESC";
     }
     
     echo "<div class='back-button-container'>";
-    // echo "<a href='library.php' class='back-button'><i class='fas fa-arrow-left'></i> Back to Library</a>";
+     echo "<a href='javascript:history.back()' class='back-button'><i class='fas fa-arrow-left'></i> Back</a>";
     echo "</div>";
     
     echo "</div>"; // Close notices-container
@@ -204,7 +241,7 @@ WHERE section ='Alumni' ORDER BY created_at DESC";
     echo "<div class='no-notices'>";
     echo "<i class='far fa-folder-open'></i>";
     echo "<p>No notices found at this time</p>";
-    // echo "<a href='library.php' class='back-button'><i class='fas fa-arrow-left'></i> Back to Library</a>";
+     echo "<a href='javascript:history.back()' class='back-button'><i class='fas fa-arrow-left'></i> Back</a>";
     echo "</div>";
 }
 }
@@ -235,7 +272,7 @@ WHERE section='Library' ORDER BY created_at DESC";
     }
     
     echo "<div class='back-button-container'>";
-    // echo "<a href='library.php' class='back-button'><i class='fas fa-arrow-left'></i> Back to Library</a>";
+    echo "<a href='javascript:history.back()' class='back-button'><i class='fas fa-arrow-left'></i> Back</a>";
     echo "</div>";
     
     echo "</div>"; // Close notices-container
@@ -243,7 +280,7 @@ WHERE section='Library' ORDER BY created_at DESC";
     echo "<div class='no-notices'>";
     echo "<i class='far fa-folder-open'></i>";
     echo "<p>No notices found at this time</p>";
-    // echo "<a href='library.php' class='back-button'><i class='fas fa-arrow-left'></i> Back to Library</a>";
+    echo "<a href='javascript:history.back()' class='back-button'><i class='fas fa-arrow-left'></i> Back</a>";
     echo "</div>";
 }
 }
@@ -274,7 +311,7 @@ WHERE section='Staff' ORDER BY created_at DESC";
     }
     
     echo "<div class='back-button-container'>";
-    // echo "<a href='library.php' class='back-button'><i class='fas fa-arrow-left'></i> Back to Library</a>";
+     echo "<a href='javascript:history.back()' class='back-button'><i class='fas fa-arrow-left'></i> Back</a>";
     echo "</div>";
     
     echo "</div>"; // Close notices-container
@@ -282,7 +319,7 @@ WHERE section='Staff' ORDER BY created_at DESC";
     echo "<div class='no-notices'>";
     echo "<i class='far fa-folder-open'></i>";
     echo "<p>No notices found at this time</p>";
-    // echo "<a href='library.php' class='back-button'><i class='fas fa-arrow-left'></i> Back to Library</a>";
+    echo "<a href='javascript:history.back()' class='back-button'><i class='fas fa-arrow-left'></i> Back</a>";
     echo "</div>";
 }
 }
@@ -346,6 +383,145 @@ function add_book($title, $author, $isbn, $publication_year, $category, $total_c
     }
     echo "Book added successfull";
     return true;
+}
+
+function add_members() {
+    global $con;
+    
+    $usquery = "
+    CREATE TABLE IF NOT EXISTS users (
+        user_id INT AUTO_INCREMENT PRIMARY KEY,
+        library_card_number VARCHAR(20) UNIQUE NOT NULL,
+        user_type VARCHAR(20) NOT NULL,
+        id INT UNIQUE NOT NULL,
+        max_books_allowed INT DEFAULT 5,
+        membership_start_date DATE NOT NULL,
+        membership_end_date DATE,
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX (library_card_number),
+        INDEX (user_type)
+    )";
+    
+    if (!mysqli_query($con, $usquery)) {
+        die("Error creating users table: " . mysqli_error($con));
+    }
+    return true;
+}
+
+
+function id_check($ch_id, $category) {
+    global $con;
+    
+    // Initialize output variable
+    $output = '';
+    
+    // Sanitize inputs
+    $ch_id = mysqli_real_escape_string($con, $ch_id);
+    $category = mysqli_real_escape_string($con, $category);
+    
+    switch($category) {
+        case 'student':
+    $que = "SELECT * FROM student_registration WHERE id = '$ch_id'";
+    $qres = mysqli_query($con, $que);
+    
+    if(mysqli_num_rows($qres) > 0) {
+        while ($book = mysqli_fetch_assoc($qres)) {
+            $output .= '<div class="book-details-container">';
+            $output .= '<div><strong>ID:</strong> '.htmlspecialchars($book['id']).'</div>';
+            $output .= '<div><strong>Name:</strong> '.htmlspecialchars($book['first_name']).' '.htmlspecialchars($book['last_name']).'</div>';
+            $output .= '<div><strong>Email:</strong> '.htmlspecialchars($book['email']).'</div>';
+            $output .= '<div><strong>Category:</strong> '.htmlspecialchars($category).'</div>';
+            $output .= '</div>';
+        }
+        // Use a proper link back to your form
+        $output .= '<a href="library.php?action=renew" class="back-button"><i class="fas fa-arrow-left"></i> Back</a>';
+    } else {
+        $output = '<div class="error-message">No student found with this ID</div>';
+    }
+    break;
+            
+       case 'faculty':
+    $que = "SELECT * FROM faculty WHERE id = '$ch_id'";
+    $qres = mysqli_query($con, $que);
+    
+    if(mysqli_num_rows($qres) > 0) {
+        while ($book = mysqli_fetch_assoc($qres)) {
+            $output .= '<div class="book-details-container">';
+            $output .= '<div><strong>ID:</strong> '.htmlspecialchars($book['id']).'</div>';
+            $output .= '<div><strong>Name:</strong> '.htmlspecialchars($book['first_name']).' '.htmlspecialchars($book['last_name']).'</div>';
+            $output .= '<div><strong>Email:</strong> '.htmlspecialchars($book['email']).'</div>';
+            $output .= '<div><strong>Category:</strong> '.htmlspecialchars($category).'</div>';
+            $output .= '</div>';
+        }
+        // Use a proper link back to your form
+        $output .= '<a href="library.php?action=renew" class="back-button"><i class="fas fa-arrow-left"></i> Back</a>';
+    } else {
+        $output = '<div class="error-message">No student found with this ID</div>';
+    }
+    break;
+            
+        case 'staff':
+            $que = "SELECT * FROM stuf WHERE id = '$ch_id'";
+            $qres = mysqli_query($con, $que);
+            
+            if(mysqli_num_rows($qres) > 0) {
+                while ($book = mysqli_fetch_assoc($qres)) {
+                    $output .= '<div class="book-details-container">';
+                    $output .= '<div><strong>ID:</strong> '.htmlspecialchars($book['id']).'</div>';
+                    $output .= '<div><strong>Name:</strong> '.htmlspecialchars($book['name']).'</div>';
+                    $output .= '<div><strong>Email:</strong> '.htmlspecialchars($book['email']).'</div>';
+                    $output .= '<div><strong>Category:</strong> '.htmlspecialchars($category).'</div>';
+                    $output .= '</div>';
+                }
+            } else {
+                $output = '<div class="error-message">No staff member found with this ID</div>';
+            }
+            break;
+            
+        case 'alumni':
+            $que = "SELECT * FROM alumni WHERE id = '$ch_id'";
+            $qres = mysqli_query($con, $que);
+            
+            if(mysqli_num_rows($qres) > 0) {
+                while ($book = mysqli_fetch_assoc($qres)) {
+                    $output .= '<div class="book-details-container">';
+                    $output .= '<div><strong>ID:</strong> '.htmlspecialchars($book['id']).'</div>';
+                    $output .= '<div><strong>Name:</strong> '.htmlspecialchars($book['name']).'</div>';
+                    $output .= '<div><strong>Email:</strong> '.htmlspecialchars($book['email']).'</div>';
+                    $output .= '<div><strong>Category:</strong> '.htmlspecialchars($category).'</div>';
+                    $output .= '</div>';
+                }
+            } else {
+                $output = '<div class="error-message">No alumni found with this ID</div>';
+            }
+            break;
+            
+        case 'admin':
+            $que = "SELECT * FROM admin_users WHERE id = '$ch_id'";
+            $qres = mysqli_query($con, $que);
+            
+            if(mysqli_num_rows($qres) > 0) {
+                while ($book = mysqli_fetch_assoc($qres)) {
+                    $output .= '<div class="book-details-container">';
+                    $output .= '<div><strong>ID:</strong> '.htmlspecialchars($book['id']).'</div>';
+                    $output .= '<div><strong>Name:</strong> '.htmlspecialchars($book['name']).'</div>';
+                    $output .= '<div><strong>Email:</strong> '.htmlspecialchars($book['email']).'</div>';
+                    $output .= '<div><strong>Category:</strong> '.htmlspecialchars($category).'</div>';
+                    $output .= '</div>';
+                }
+            } else {
+                $output = '<div class="error-message">No admin found with this ID</div>';
+            }
+            break;
+            
+        default:
+            $output = '<div class="error-message">Invalid category selected</div>';
+            break;
+    }
+    
+    return $output;
 }
 ?>
 
