@@ -119,42 +119,47 @@ if (isset($_POST['logout'])) {
               echo "<h2>Borrow Technology</h2>";
               echo "<p>This section would contain information about borrowing technology equipment from the library.</p>";
             }
-           elseif (isset($_POST['search'])) { ?>
-           <div class="book-search-container">
-    <form action="search_results.php" method="get" class="book-search-form">
-        <div class="search-box">
-            <input type="text" name="search_query" placeholder="Search books by title, author, or Book name" 
-                   class="search-input" required>
-            <button type="submit" class="search-button">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-                <span class="sr-only">Search books</span>
-            </button>
-        </div>
-        <div >
-            <input type="submit" name="see_all" placeholder=" See All books">
-        </div>
-        <!-- <div class="search-options">
-            <div class="filter-group">
-                <label for="search_by" class="filter-label">Search in:</label>
-                <select name="search_by" id="search_by" class="filter-select">
-                    <option value="all">All Fields</option>
-                    <option value="all">Book ID</option>
-                    <option value="title">Title</option>
-                    <option value="author">Author</option>
-                    <option value="isbn">ISBN</option>
-                </select>
+           elseif (isset($_POST['search'])) { 
+          if (isset($_POST['search']) || isset($_POST['all'])) { ?>
+    <div class="book-search-container">
+        <form action="search_results.php" method="get" class="book-search-form">
+            <div class="search-box">
+                <input type="text" name="search_query" placeholder="Search books by title, author, or Book name" 
+                       class="search-input" value="<?php echo isset($_GET['search_query']) ? htmlspecialchars($_GET['search_query']) : ''; ?>" required>
+                <button type="submit" class="search-button" name="search_submit">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <span class="sr-only">Search books</span>
+                </button>
             </div>
-        </div> -->
-    </form>
-</div>
+        </form>
+        
+        <form action="search_results.php" method="get">
+            <button type="submit" class="search_all">Show All Books</button>
+        </form>
+    </div>
 
-
-<?php
-
-            }
+    <?php
+    // Show results if search was performed
+    if (isset($_POST['all'])) {
+        // Code to display all books
+        echo "<div class='search-results'>";
+        echo "Showing all books...";
+        // Your code to fetch and display all books would go here
+        echo "</div>";
+    }
+    elseif (isset($_POST['search'])) {
+        // Code to display search results
+        echo "<div class='search-results'>";
+        echo "Showing search results...";
+        // Your code to fetch and display search results would go here
+        echo "</div>";
+    }
+}
+}
+       
 
              elseif (isset($_POST['suggest'])) { ?>
               <div class="suggestion-form-container">
