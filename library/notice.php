@@ -78,6 +78,106 @@
     margin-bottom: 20px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        input:focus, select:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+        }
+        
+        .checkbox-group input {
+            width: auto;
+            margin-right: 10px;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .required:after {
+            content: " *";
+            color: #e74c3c;
+        }
+         body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background-color: #f5f5f5;
+                margin: 0;
+                padding: 20px;
+                color: #333;
+            }
+            
+            .container {
+                max-width: 800px;
+                margin: 0 auto;
+                background-color: white;
+                padding: 30px;
+                border-radius: 8px;
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            }
 </style>
  </head>
  <body>
@@ -85,6 +185,9 @@
  
  
  <?php
+ if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
       // Database connection
       $con = mysqli_connect("localhost", "root", "", "skst_university");
       if (!$con) {
@@ -560,6 +663,84 @@ function id_check($ch_id, $category) {
     
     return $output;
 }
+
+
+if(isset($_POST['submit'])){
+    // Sanitize and validate input
+    $user_type = mysqli_real_escape_string($con, $_POST['user_type']);
+    $library_card_number = mysqli_real_escape_string($con, $_POST['library_card_number']);
+    $id = mysqli_real_escape_string($con, $_POST['id']);
+    $max_books_allowed = intval($_POST['max_books_allowed']);
+    $membership_start_date = mysqli_real_escape_string($con, $_POST['membership_start_date']);
+    $membership_end_date = !empty($_POST['membership_end_date']) ? mysqli_real_escape_string($con, $_POST['membership_end_date']) : NULL;
+    $is_active = isset($_POST['is_active']) ? 1 : 0;
+    
+    // Validate required fields
+    $errors = [];
+    if(empty($user_type)) $errors[] = "User type is required";
+    if(empty($library_card_number)) $errors[] = "Library card number is required";
+    if(empty($id)) $errors[] = "ID is required";
+    if(empty($membership_start_date)) $errors[] = "Membership start date is required";
+    
+    if(!empty($errors)) {
+        $_SESSION['errors'] = $errors;
+        header("Location: library.php?action=add_member&id=".$id);
+        exit();
+    }
+
+    // Prepare the INSERT query
+    $addq = "INSERT INTO users (
+                user_type, 
+                library_card_number, 
+                id, 
+                max_books_allowed, 
+                membership_start_date, 
+                membership_end_date, 
+                is_active,
+                created_at,
+                updated_at
+            ) VALUES (
+                '$user_type',
+                '$library_card_number',
+                '$id',
+                $max_books_allowed,
+                '$membership_start_date',
+                " . ($membership_end_date ? "'$membership_end_date'" : "NULL") . ",
+                $is_active,
+                NOW(),
+                NOW()
+            )";
+    
+    $result = mysqli_query($con, $addq);
+    
+    if($result && mysqli_affected_rows($con) > 0) {
+        // Success - redirect with success message
+        $_SESSION['success'] = "Member added successfully!";
+        header("Location: library.php");
+        exit();
+    } else {
+        // Error handling
+        $_SESSION['errors'] = ["Error adding member: " . mysqli_error($con)];
+        header("Location: library.php?action=add_member&id=".$id);
+        exit();
+    }
+}
+
+// Display success/error messages if they exist
+if(isset($_SESSION['success'])) {
+    echo '<div class="success-message">'.$_SESSION['success'].'</div>';
+    unset($_SESSION['success']);
+}
+
+if(isset($_SESSION['errors'])) {
+    foreach($_SESSION['errors'] as $error) {
+        echo '<div class="error-message">'.$error.'</div>';
+    }
+    unset($_SESSION['errors']);
+}
+
+
+// Your existing member_check function
 function member_check($ch_id, $category) {
     global $con;
     $output = '';
@@ -567,7 +748,6 @@ function member_check($ch_id, $category) {
     $qres = mysqli_query($con, $que);
     
     if (!$qres) {
-        // Handle query error
         $output .= '<div class="error-message">Database error: ' . htmlspecialchars(mysqli_error($con)) . '</div>';
         return $output;
     }
@@ -582,27 +762,104 @@ function member_check($ch_id, $category) {
             $output .= '<div><strong>Library card number:</strong> ' . htmlspecialchars($book['library_card_number'] ?? 'N/A') . '</div>';
             $output .= '<div><strong>User Type:</strong> ' . htmlspecialchars($book['user_type'] ?? 'N/A') . '</div>';
             $output .= '<div><strong>Join Date:</strong> ' . htmlspecialchars($book['created_at'] ?? 'N/A') . '</div>';
-            $output .= '</div>'; // Close member-detail
+            $output .= '</div>';
         }
         
-        $output .= '</div>'; // Close member-details-container
+        $output .= '</div>';
         $output .= '<a href="library.php?action=renew" class="back-button"><i class="fas fa-arrow-left"></i> Back</a>';
     } else {
-        $output .= '<div class="error-message">This '. $category .' is not our member</div>';
+        $output .= '<div class="error-message">This '. htmlspecialchars($category) .' is not our member</div>';
         $output .= '<div class="error-message">Do you want to add this person as a library member?</div>';
         
         $output .= '<div class="button-container">';
-        $output .= '<button id=' . htmlspecialchars($ch_id) . '" class="yes-button"><i class="fas fa-user-plus"></i> Add </button>';
+        $output .= '<a href="library.php?action=add_member&id=' . htmlspecialchars($ch_id) . '" class="yes-button"><i class="fas fa-user-plus"></i> Add</a>';
         $output .= '<a href="library.php?action=renew" class="back-button"><i class="fas fa-arrow-left"></i> Back</a>';
         $output .= '</div>';
     }
     
-    return $output;}
+    return $output;
+}
+
+// Form display logic
+if (isset($_GET['action']) && $_GET['action'] == 'add_member') {
+    $member_id = isset($_GET['id']) ? $_GET['id'] : '';
+    ?>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Library User Registration</title>
+        <style>
+            /* Your CSS styles here */
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Library Member Registration</h1>
+            <form id="userRegistrationForm" action="" method="POST">
+                <input type="hidden" name="id" value="<?php echo htmlspecialchars($member_id); ?>">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="library_card_number" class="required">Library Card Number</label>
+                        <input type="text" id="library_card_number" name="library_card_number" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="user_type" class="required">User Type</label>
+                        <select id="user_type" name="user_type" required>
+                            <option value="">Select User Type</option>
+                            <option value="Student">Student</option>
+                            <option value="Faculty">Faculty</option>
+                            <option value="Staff">Staff</option>
+                            <option value="Researcher">Researcher</option>
+                            <option value="Guest">Guest</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_display">ID Number</label>
+                        <input type="text" id="id_display" value="<?php echo htmlspecialchars($member_id); ?>" disabled>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="max_books_allowed">Maximum Books Allowed</label>
+                        <input type="number" id="max_books_allowed" name="max_books_allowed" min="1" max="20" value="5">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="membership_start_date" class="required">Membership Start Date</label>
+                        <input type="date" id="membership_start_date" name="membership_start_date" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="membership_end_date">Membership End Date</label>
+                        <input type="date" id="membership_end_date" name="membership_end_date">
+                    </div>
+                </div>
+                
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="is_active" name="is_active" checked>
+                    <label for="is_active">Active Membership</label>
+                </div>
+                
+                <button type="submit" name="add">Register Member</button>
+                <a href="library.php?action=renew" class="back-button"><i class="fas fa-arrow-left"></i> Not Now?!</a>
+            </form>
+        </div>
+    </body>
+    </html>
+    <?php
+    exit;
+}
+?>
 
 
-
-
-    
 ?>
 
 
