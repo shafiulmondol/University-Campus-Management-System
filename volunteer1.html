@@ -6,468 +6,467 @@
     <title>Volunteer System | University Campus Management</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/volunteer.css">
     <style>
         :root {
-    --primary: #4361ee;
-    --secondary: #3f37c9;
-    --accent: #4895ef;
-    --light: #f8f9fa;
-    --dark: #212529;
-    --success: #4cc9f0;
-    --warning: #f72585;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Poppins', sans-serif;
-    background-color: #f5f7fa;
-    color: var(--dark);
-    line-height: 1.6;
-}
-
-header {
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    color: white;
-    padding: 1.5rem 0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.header-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.logo {
-    display: flex;
-    align-items: center;
-    font-size: 1.5rem;
-    font-weight: 600;
-}
-
-.logo i {
-    margin-right: 10px;
-    color: var(--accent);
-}
-
-nav a {
-    color: white;
-    text-decoration: none;
-    margin-left: 1.5rem;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-}
-
-nav a:hover, nav a.active {
-    background-color: rgba(255, 255, 255, 0.2);
-}
-
-.hero {
-    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('../images/volunteer-hero.jpg') no-repeat center center/cover;
-    height: 400px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    color: white;
-    position: relative;
-}
-
-.hero-content {
-    position: relative;
-    z-index: 1;
-    max-width: 800px;
-    padding: 0 2rem;
-}
-
-.hero h1 {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-.hero p {
-    font-size: 1.2rem;
-    margin-bottom: 2rem;
-}
-
-.btn {
-    display: inline-block;
-    background-color: var(--accent);
-    color: white;
-    padding: 0.8rem 1.8rem;
-    border-radius: 50px;
-    text-decoration: none;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    border: none;
-    cursor: pointer;
-    font-size: 1rem;
-}
-
-.btn:hover {
-    background-color: var(--secondary);
-    transform: translateY(-3px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-}
-
-.btn-outline {
-    background-color: transparent;
-    border: 2px solid white;
-    margin-left: 1rem;
-}
-
-.btn-outline:hover {
-    background-color: white;
-    color: var(--primary);
-}
-
-.container {
-    max-width: 1200px;
-    margin: 3rem auto;
-    padding: 0 2rem;
-}
-
-.section-title {
-    text-align: center;
-    margin-bottom: 3rem;
-    position: relative;
-}
-
-.section-title h2 {
-    font-size: 2.2rem;
-    color: var(--primary);
-    display: inline-block;
-    padding-bottom: 0.5rem;
-}
-
-.section-title h2::after {
-    content: '';
-    position: absolute;
-    width: 80px;
-    height: 3px;
-    background-color: var(--accent);
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-}
-
-.opportunities-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 2rem;
-    margin-bottom: 4rem;
-}
-
-.opportunity-card {
-    background-color: white;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.opportunity-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
-}
-
-.card-image {
-    height: 200px;
-    overflow: hidden;
-}
-
-.card-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s ease;
-}
-
-.opportunity-card:hover .card-image img {
-    transform: scale(1.1);
-}
-
-.card-content {
-    padding: 1.5rem;
-}
-
-.card-content h3 {
-    font-size: 1.4rem;
-    margin-bottom: 0.5rem;
-    color: var(--primary);
-}
-
-.card-meta {
-    display: flex;
-    align-items: center;
-    margin-bottom: 1rem;
-    color: #6c757d;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
-.card-meta span {
-    display: flex;
-    align-items: center;
-}
-
-.card-meta i {
-    margin-right: 0.3rem;
-    color: var(--accent);
-}
-
-.card-content p {
-    margin-bottom: 1.5rem;
-    color: #495057;
-}
-
-.card-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 1rem;
-    border-top: 1px solid #e9ecef;
-}
-
-.tag {
-    display: inline-block;
-    background-color: #e9ecef;
-    color: #495057;
-    padding: 0.3rem 0.8rem;
-    border-radius: 50px;
-    font-size: 0.8rem;
-    font-weight: 500;
-}
-
-.tag.urgent {
-    background-color: #fff0f3;
-    color: var(--warning);
-}
-
-.volunteer-form-container {
-    background-color: white;
-    border-radius: 10px;
-    padding: 2.5rem;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    margin-bottom: 4rem;
-}
-
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
-}
-
-.form-group {
-    margin-bottom: 1.5rem;
-}
-
-.form-group.full-width {
-    grid-column: span 2;
-}
-
-label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-    color: var(--dark);
-}
-
-input, select, textarea {
-    width: 100%;
-    padding: 0.8rem 1rem;
-    border: 1px solid #ced4da;
-    border-radius: 6px;
-    font-family: 'Poppins', sans-serif;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-input:focus, select:focus, textarea:focus {
-    outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(72, 149, 239, 0.2);
-}
-
-textarea {
-    min-height: 120px;
-    resize: vertical;
-}
-
-.checkbox-group {
-    margin-top: 1rem;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-}
-
-.checkbox-item {
-    margin-bottom: 0.5rem;
-    display: flex;
-    align-items: center;
-}
-
-.checkbox-item input {
-    width: auto;
-    margin-right: 0.5rem;
-}
-
-.submit-btn {
-    width: 100%;
-    padding: 1rem;
-    font-size: 1.1rem;
-    margin-top: 1rem;
-}
-
-.hours-tracker {
-    background-color: white;
-    border-radius: 10px;
-    padding: 2rem;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-}
-
-.total-hours {
-    text-align: center;
-    margin-bottom: 2rem;
-}
-
-.total-hours h3 {
-    font-size: 1.2rem;
-    color: #6c757d;
-    margin-bottom: 0.5rem;
-}
-
-.total-hours p {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: var(--primary);
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-th, td {
-    padding: 1rem;
-    text-align: left;
-    border-bottom: 1px solid #e9ecef;
-}
-
-th {
-    background-color: #f8f9fa;
-    font-weight: 600;
-    color: var(--primary);
-}
-
-tr:hover {
-    background-color: #f8f9fa;
-}
-
-footer {
-    background-color: var(--dark);
-    color: white;
-    padding: 2rem 0;
-    text-align: center;
-}
-
-.footer-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 2rem;
-}
-
-.social-links {
-    margin: 1.5rem 0;
-}
-
-.social-links a {
-    color: white;
-    font-size: 1.5rem;
-    margin: 0 0.5rem;
-    transition: color 0.3s ease;
-}
-
-.social-links a:hover {
-    color: var(--accent);
-}
-
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    z-index: 1000;
-    justify-content: center;
-    align-items: center;
-}
-
-.modal-content {
-    background-color: white;
-    padding: 2rem;
-    border-radius: 10px;
-    max-width: 500px;
-    width: 90%;
-    position: relative;
-}
-
-.close-modal {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: #6c757d;
-}
-
-@media (max-width: 768px) {
-    .header-container {
-        flex-direction: column;
-        text-align: center;
-    }
-    
-    nav {
-        margin-top: 1rem;
-    }
-    
-    nav a {
-        margin: 0 0.5rem;
-    }
-    
-    .hero h1 {
-        font-size: 2.2rem;
-    }
-    
-    .form-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .form-group.full-width {
-        grid-column: span 1;
-    }
-    
-    .opportunities-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .checkbox-group {
-        grid-template-columns: 1fr;
-    }
-}
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --accent: #4895ef;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #4cc9f0;
+            --warning: #f72585;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1.5rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            color: var(--accent);
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+        }
+        
+        nav a:hover, nav a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80') no-repeat center center/cover;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            padding: 0 2rem;
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: var(--accent);
+            color: white;
+            padding: 0.8rem 1.8rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .btn:hover {
+            background-color: var(--secondary);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid white;
+            margin-left: 1rem;
+        }
+        
+        .btn-outline:hover {
+            background-color: white;
+            color: var(--primary);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+        
+        .section-title h2 {
+            font-size: 2.2rem;
+            color: var(--primary);
+            display: inline-block;
+            padding-bottom: 0.5rem;
+        }
+        
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 3px;
+            background-color: var(--accent);
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .opportunities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+        
+        .opportunity-card {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .opportunity-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-image {
+            height: 200px;
+            overflow: hidden;
+        }
+        
+        .card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .opportunity-card:hover .card-image img {
+            transform: scale(1.1);
+        }
+        
+        .card-content {
+            padding: 1.5rem;
+        }
+        
+        .card-content h3 {
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+        
+        .card-meta {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            color: #6c757d;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .card-meta span {
+            display: flex;
+            align-items: center;
+        }
+        
+        .card-meta i {
+            margin-right: 0.3rem;
+            color: var(--accent);
+        }
+        
+        .card-content p {
+            margin-bottom: 1.5rem;
+            color: #495057;
+        }
+        
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .tag {
+            display: inline-block;
+            background-color: #e9ecef;
+            color: #495057;
+            padding: 0.3rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .tag.urgent {
+            background-color: #fff0f3;
+            color: var(--warning);
+        }
+        
+        .volunteer-form-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 2.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 4rem;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-family: 'Poppins', sans-serif;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(72, 149, 239, 0.2);
+        }
+        
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .checkbox-group {
+            margin-top: 1rem;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        .checkbox-item {
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .checkbox-item input {
+            width: auto;
+            margin-right: 0.5rem;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.1rem;
+            margin-top: 1rem;
+        }
+        
+        .hours-tracker {
+            background-color: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .total-hours {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .total-hours h3 {
+            font-size: 1.2rem;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+        }
+        
+        .total-hours p {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        footer {
+            background-color: var(--dark);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+        
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .social-links {
+            margin: 1.5rem 0;
+        }
+        
+        .social-links a {
+            color: white;
+            font-size: 1.5rem;
+            margin: 0 0.5rem;
+            transition: color 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            color: var(--accent);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6c757d;
+        }
+        
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            nav {
+                margin-top: 1rem;
+            }
+            
+            nav a {
+                margin: 0 0.5rem;
+            }
+            
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-group.full-width {
+                grid-column: span 1;
+            }
+            
+            .opportunities-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .checkbox-group {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -500,8 +499,44 @@ footer {
             </div>
             
             <div class="opportunities-grid">
-                <?php include 'includes/get_opportunities.php'; ?>
-                <!-- Opportunities will be loaded from database via PHP -->
+                <!-- Sample opportunity cards - replace with PHP includes in production -->
+                <div class="opportunity-card">
+                    <div class="card-image">
+                        <img src="https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Campus Cleanup">
+                    </div>
+                    <div class="card-content">
+                        <h3>Campus Cleanup Day</h3>
+                        <div class="card-meta">
+                            <span><i class="far fa-calendar-alt"></i> Oct 15, 2023</span>
+                            <span><i class="far fa-clock"></i> 9:00 AM - 12:00 PM</span>
+                            <span><i class="fas fa-map-marker-alt"></i> Main Quad</span>
+                        </div>
+                        <p>Help keep our campus beautiful by participating in our biannual cleanup event. Gloves and supplies will be provided.</p>
+                        <div class="card-footer">
+                            <span class="tag">Environment</span>
+                            <button class="btn">Sign Up</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="opportunity-card">
+                    <div class="card-image">
+                        <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Student Orientation">
+                    </div>
+                    <div class="card-content">
+                        <h3>New Student Orientation</h3>
+                        <div class="card-meta">
+                            <span><i class="far fa-calendar-alt"></i> Aug 25-27, 2023</span>
+                            <span><i class="far fa-clock"></i> Various Times</span>
+                            <span><i class="fas fa-map-marker-alt"></i> Student Center</span>
+                        </div>
+                        <p>Welcome new students to campus by serving as an orientation leader. Help them navigate their first days at university.</p>
+                        <div class="card-footer">
+                            <span class="tag">Student Life</span>
+                            <button class="btn">Sign Up</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -511,7 +546,7 @@ footer {
             </div>
             
             <div class="volunteer-form-container">
-                <form action="process_volunteer.php" method="post">
+                <form id="volunteerForm">
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="name">Full Name</label>
@@ -554,23 +589,23 @@ footer {
                             <label>Areas of Interest (Select all that apply)</label>
                             <div class="checkbox-group">
                                 <div class="checkbox-item">
-                                    <input type="checkbox" id="interest-events" name="interests[]" value="events">
+                                    <input type="checkbox" id="interest-events" name="interests" value="events">
                                     <label for="interest-events">Campus Events</label>
                                 </div>
                                 <div class="checkbox-item">
-                                    <input type="checkbox" id="interest-community" name="interests[]" value="community">
+                                    <input type="checkbox" id="interest-community" name="interests" value="community">
                                     <label for="interest-community">Community Service</label>
                                 </div>
                                 <div class="checkbox-item">
-                                    <input type="checkbox" id="interest-orientation" name="interests[]" value="orientation">
+                                    <input type="checkbox" id="interest-orientation" name="interests" value="orientation">
                                     <label for="interest-orientation">Student Orientation</label>
                                 </div>
                                 <div class="checkbox-item">
-                                    <input type="checkbox" id="interest-sustainability" name="interests[]" value="sustainability">
+                                    <input type="checkbox" id="interest-sustainability" name="interests" value="sustainability">
                                     <label for="interest-sustainability">Sustainability Initiatives</label>
                                 </div>
                                 <div class="checkbox-item">
-                                    <input type="checkbox" id="interest-fundraising" name="interests[]" value="fundraising">
+                                    <input type="checkbox" id="interest-fundraising" name="interests" value="fundraising">
                                     <label for="interest-fundraising">Fundraising</label>
                                 </div>
                             </div>
@@ -578,12 +613,12 @@ footer {
                         
                         <div class="form-group full-width">
                             <label for="availability">Availability</label>
-                            <textarea id="availability" name="availability" placeholder="Please describe when you're typically available to volunteer"></textarea>
+                            <textarea id="availability" name="availability" placeholder="Please describe when you're typically available to volunteer (e.g., weekends, weekday evenings, etc.)"></textarea>
                         </div>
                         
                         <div class="form-group full-width">
                             <label for="skills">Skills or Special Qualifications</label>
-                            <textarea id="skills" name="skills" placeholder="Any special skills or certifications you have"></textarea>
+                            <textarea id="skills" name="skills" placeholder="Any special skills or certifications you have that might be relevant (first aid, languages, etc.)"></textarea>
                         </div>
                     </div>
                     
@@ -600,7 +635,7 @@ footer {
             <div class="hours-tracker">
                 <div class="total-hours">
                     <h3>Total Hours Contributed</h3>
-                    <p><?php include 'includes/get_total_hours.php'; ?></p>
+                    <p>15</p>
                 </div>
                 
                 <table>
@@ -613,24 +648,70 @@ footer {
                         </tr>
                     </thead>
                     <tbody>
-                        <?php include 'includes/get_volunteer_hours.php'; ?>
+                        <tr>
+                            <td>Campus Cleanup</td>
+                            <td>March 15, 2023</td>
+                            <td>4</td>
+                            <td><span class="tag">Completed</span></td>
+                        </tr>
+                        <tr>
+                            <td>New Student Orientation</td>
+                            <td>August 26-28, 2023</td>
+                            <td>12</td>
+                            <td><span class="tag">Completed</span></td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
         </section>
     </div>
 
-    
-
-    <div class="modal" id="successModal" style="display: none;">
+    <div class="modal" id="successModal">
         <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <h2>Thank You!</h2>
+            <span class="close-modal" id="closeModal">&times;</span>
+            <h2 style="color: var(--primary); margin-bottom: 1rem;">Thank You!</h2>
             <p>Your volunteer application has been submitted successfully.</p>
-            <button class="btn" id="modalCloseBtn">Close</button>
+            <p>We'll contact you soon with more details about upcoming opportunities.</p>
+            <button class="btn" style="margin-top: 1.5rem;" id="modalCloseBtn">Close</button>
         </div>
     </div>
 
-    <script src="js/volunteer.js"></script>
+    <footer>
+        <div class="footer-container">
+            <div class="logo">
+                <i class="fas fa-hands-helping"></i>
+                <span>Campus Volunteers</span>
+            </div>
+            <p>Making our university community stronger, one volunteer at a time</p>
+            <div class="social-links">
+                <a href="#"><i class="fab fa-facebook"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-linkedin"></i></a>
+            </div>
+            <p>&copy; <span id="currentYear"></span> University Campus Management System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Form submission handling
+        document.getElementById('volunteerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            document.getElementById('successModal').style.display = 'flex';
+            this.reset();
+        });
+
+        // Modal close handling
+        document.getElementById('closeModal').addEventListener('click', function() {
+            document.getElementById('successModal').style.display = 'none';
+        });
+
+        document.getElementById('modalCloseBtn').addEventListener('click', function() {
+            document.getElementById('successModal').style.display = 'none';
+        });
+
+        // Set current year in footer
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+    </script>
 </body>
 </html>
