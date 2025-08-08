@@ -182,21 +182,8 @@
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
         }
         
-        .card-image {
-            height: 200px;
-            overflow: hidden;
-        }
         
-        .card-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
         
-        .opportunity-card:hover .card-image img {
-            transform: scale(1.1);
-        }
         
         .card-content {
             padding: 1.5rem;
@@ -381,26 +368,11 @@
             text-align: center;
         }
         
-        .footer-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
-        }
+    
         
-        .social-links {
-            margin: 1.5rem 0;
-        }
+       
         
-        .social-links a {
-            color: white;
-            font-size: 1.5rem;
-            margin: 0 0.5rem;
-            transition: color 0.3s ease;
-        }
-        
-        .social-links a:hover {
-            color: var(--accent);
-        }
+
         
         .modal {
             display: none;
@@ -499,11 +471,7 @@
             </div>
             
             <div class="opportunities-grid">
-                <!-- Sample opportunity cards - replace with PHP includes in production -->
-                <div class="opportunity-card">
-                    <div class="card-image">
-                        <img src="https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Campus Cleanup">
-                    </div>
+                    
                     <div class="card-content">
                         <h3>Campus Cleanup Day</h3>
                         <div class="card-meta">
@@ -516,13 +484,11 @@
                             <span class="tag">Environment</span>
                             <button class="btn">Sign Up</button>
                         </div>
-                    </div>
+                    
                 </div>
                 
                 <div class="opportunity-card">
-                    <div class="card-image">
-                        <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Student Orientation">
-                    </div>
+                    
                     <div class="card-content">
                         <h3>New Student Orientation</h3>
                         <div class="card-meta">
@@ -676,22 +642,7 @@
         </div>
     </div>
 
-    <footer>
-        <div class="footer-container">
-            <div class="logo">
-                <i class="fas fa-hands-helping"></i>
-                <span>Campus Volunteers</span>
-            </div>
-            <p>Making our university community stronger, one volunteer at a time</p>
-            <div class="social-links">
-                <a href="#"><i class="fab fa-facebook"></i></a>
-                <a href="#"><i class="fab fa-twitter"></i></a>
-                <a href="#"><i class="fab fa-instagram"></i></a>
-                <a href="#"><i class="fab fa-linkedin"></i></a>
-            </div>
-            <p>&copy; <span id="currentYear"></span> University Campus Management System. All rights reserved.</p>
-        </div>
-    </footer>
+   
 
     <script>
         // Form submission handling
