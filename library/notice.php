@@ -25,24 +25,59 @@
         border-radius: 4px;
         margin: 20px 0;
     }
-    .back-button {
-        display: inline-block;
-        margin-top: 20px;
-        padding: 8px 15px;
-        background-color: #3498db;
-        color: white;
-        text-decoration: none;
-        border-radius: 4px;
-        transition: background-color 0.3s;
-    }
-    
-    .back-button:hover {
-        background-color: #2980b9;
-    }
-    
-    .back-button i {
-        margin-right: 5px;
-    }
+   .button-container {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+    justify-content: center;
+}
+
+.yes-button, .back-button {
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.yes-button {
+    background-color: #4CAF50;
+    color: white;
+    border: 2px solid #a04b45ff;
+}
+
+.yes-button:hover {
+    background-color: #c5dd0bff;
+    color: #f44336;
+
+}
+
+.back-button {
+    background-color: #f44336;
+    color: white;
+    border: 2px solid #d32f2f;
+}
+
+.back-button:hover {
+    background-color: #d32f2f;
+}
+
+.error-message {
+    color: #d32f2f;
+    margin: 10px 0;
+    font-weight: bold;
+}
+
+.member-details-container {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
 </style>
  </head>
  <body>
@@ -422,6 +457,7 @@ function id_check($ch_id, $category) {
     $category = mysqli_real_escape_string($con, $category);
     
     switch($category) {
+
         case 'student':
     $que = "SELECT * FROM student_registration WHERE id = '$ch_id'";
     $qres = mysqli_query($con, $que);
@@ -434,29 +470,27 @@ function id_check($ch_id, $category) {
             $output .= '<div><strong>Email:</strong> '.htmlspecialchars($book['email']).'</div>';
             $output .= '<div><strong>Category:</strong> '.htmlspecialchars($category).'</div>';
             $output .= '</div>';
+             $output .= member_check($ch_id,$category);
         }
-        // Use a proper link back to your form
-        $output .= '<a href="library.php?action=renew" class="back-button"><i class="fas fa-arrow-left"></i> Back</a>';
     } else {
         $output = '<div class="error-message">No student found with this ID</div>';
     }
     break;
             
        case 'faculty':
-    $que = "SELECT * FROM faculty WHERE id = '$ch_id'";
+    $que = "SELECT * FROM faculty WHERE faculty_id = '$ch_id'";
     $qres = mysqli_query($con, $que);
     
     if(mysqli_num_rows($qres) > 0) {
         while ($book = mysqli_fetch_assoc($qres)) {
             $output .= '<div class="book-details-container">';
-            $output .= '<div><strong>ID:</strong> '.htmlspecialchars($book['id']).'</div>';
-            $output .= '<div><strong>Name:</strong> '.htmlspecialchars($book['first_name']).' '.htmlspecialchars($book['last_name']).'</div>';
+            $output .= '<div><strong>ID:</strong> '.htmlspecialchars($book['faculty_id']).'</div>';
+            $output .= '<div><strong>Name:</strong> '.htmlspecialchars($book['name']).'</div>';
             $output .= '<div><strong>Email:</strong> '.htmlspecialchars($book['email']).'</div>';
             $output .= '<div><strong>Category:</strong> '.htmlspecialchars($category).'</div>';
             $output .= '</div>';
+             $output .= member_check($ch_id,$category);
         }
-        // Use a proper link back to your form
-        $output .= '<a href="library.php?action=renew" class="back-button"><i class="fas fa-arrow-left"></i> Back</a>';
     } else {
         $output = '<div class="error-message">No student found with this ID</div>';
     }
@@ -474,6 +508,7 @@ function id_check($ch_id, $category) {
                     $output .= '<div><strong>Email:</strong> '.htmlspecialchars($book['email']).'</div>';
                     $output .= '<div><strong>Category:</strong> '.htmlspecialchars($category).'</div>';
                     $output .= '</div>';
+                     $output .= member_check($ch_id ,$category);
                 }
             } else {
                 $output = '<div class="error-message">No staff member found with this ID</div>';
@@ -492,6 +527,7 @@ function id_check($ch_id, $category) {
                     $output .= '<div><strong>Email:</strong> '.htmlspecialchars($book['email']).'</div>';
                     $output .= '<div><strong>Category:</strong> '.htmlspecialchars($category).'</div>';
                     $output .= '</div>';
+                   $output .= member_check($ch_id, $category);
                 }
             } else {
                 $output = '<div class="error-message">No alumni found with this ID</div>';
@@ -510,6 +546,7 @@ function id_check($ch_id, $category) {
                     $output .= '<div><strong>Email:</strong> '.htmlspecialchars($book['email']).'</div>';
                     $output .= '<div><strong>Category:</strong> '.htmlspecialchars($category).'</div>';
                     $output .= '</div>';
+                     $output .= member_check($ch_id, $category);
                 }
             } else {
                 $output = '<div class="error-message">No admin found with this ID</div>';
@@ -523,6 +560,49 @@ function id_check($ch_id, $category) {
     
     return $output;
 }
+function member_check($ch_id, $category) {
+    global $con;
+    $output = '';
+    $que = "SELECT * FROM users WHERE id = '$ch_id'";
+    $qres = mysqli_query($con, $que);
+    
+    if (!$qres) {
+        // Handle query error
+        $output .= '<div class="error-message">Database error: ' . htmlspecialchars(mysqli_error($con)) . '</div>';
+        return $output;
+    }
+
+    if (mysqli_num_rows($qres) > 0) {
+        $output .= '<div class="member-details-container">';
+        $output .= '<h1><u>Library Member Requirement</u></h1>';
+        
+        while ($book = mysqli_fetch_assoc($qres)) {
+            $output .= '<div class="member-detail">';
+            $output .= '<div><strong>User ID:</strong> ' . htmlspecialchars($book['user_id'] ?? 'N/A') . '</div>';
+            $output .= '<div><strong>Library card number:</strong> ' . htmlspecialchars($book['library_card_number'] ?? 'N/A') . '</div>';
+            $output .= '<div><strong>User Type:</strong> ' . htmlspecialchars($book['user_type'] ?? 'N/A') . '</div>';
+            $output .= '<div><strong>Join Date:</strong> ' . htmlspecialchars($book['created_at'] ?? 'N/A') . '</div>';
+            $output .= '</div>'; // Close member-detail
+        }
+        
+        $output .= '</div>'; // Close member-details-container
+        $output .= '<a href="library.php?action=renew" class="back-button"><i class="fas fa-arrow-left"></i> Back</a>';
+    } else {
+        $output .= '<div class="error-message">This '. $category .' is not our member</div>';
+        $output .= '<div class="error-message">Do you want to add this person as a library member?</div>';
+        
+        $output .= '<div class="button-container">';
+        $output .= '<button id=' . htmlspecialchars($ch_id) . '" class="yes-button"><i class="fas fa-user-plus"></i> Add </button>';
+        $output .= '<a href="library.php?action=renew" class="back-button"><i class="fas fa-arrow-left"></i> Back</a>';
+        $output .= '</div>';
+    }
+    
+    return $output;}
+
+
+
+
+    
 ?>
 
 
