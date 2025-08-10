@@ -51,6 +51,7 @@ $conn->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Volunteer System | University Campus Management</title>
+    <link rel="icon" href="picture/SKST.png" type="image/png" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -683,6 +684,17 @@ $conn->close();
             <button class="btn" style="margin-top: 1.5rem;" id="modalCloseBtn">Close</button>
         </div>
     </div>
+    <div class="login-box">
+    <h2>vol Login</h2>
+    <?php if($error): ?>
+        <div class="error"><?php echo htmlspecialchars($error); ?></div>
+    <?php endif; ?>
+    <form method="POST" action="login.php" autocomplete="off">
+        <input type="text" name="username" placeholder="Username" required autofocus />
+        <input type="password" name="password" placeholder="Password" required />
+        <button type="submit">Log In</button>
+    </form>
+</div>
 <?php
 $showSuccess = false;
 
