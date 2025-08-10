@@ -1,3 +1,20 @@
+<?php
+session_start();
+$host = "localhost";
+$user = "root";
+$pass = "";
+$db = "skst_university";
+
+$conn = new mysqli($host, $user, $pass, $db);
+if ($conn->connect_error) die("DB Connection failed: " . $conn->connect_error);
+
+$error = "";
+
+if (isset($_GET['logout'])) {
+    session_destroy();
+    header("Location: faculty.php");
+    exit();
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -367,13 +384,7 @@
             padding: 2rem 0;
             text-align: center;
         }
-        
-    
-        
-       
-        
 
-        
         .modal {
             display: none;
             position: fixed;
@@ -644,25 +655,6 @@
 
    
 
-    <script>
-        // Form submission handling
-        document.getElementById('volunteerForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            document.getElementById('successModal').style.display = 'flex';
-            this.reset();
-        });
-
-        // Modal close handling
-        document.getElementById('closeModal').addEventListener('click', function() {
-            document.getElementById('successModal').style.display = 'none';
-        });
-
-        document.getElementById('modalCloseBtn').addEventListener('click', function() {
-            document.getElementById('successModal').style.display = 'none';
-        });
-
-        // Set current year in footer
-        document.getElementById('currentYear').textContent = new Date().getFullYear();
-    </script>
+   
 </body>
 </html>
