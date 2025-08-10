@@ -12,9 +12,39 @@ $error = "";
 
 if (isset($_GET['logout'])) {
     session_destroy();
-    header("Location: faculty.php");
+    header("Location: volunteer.php");
     exit();
 }
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $name        = $_POST['name'];
+    $id          = $_POST['id'];  // This should match student_registration.id
+    $email       = $_POST['email'];
+    $phone       = $_POST['phone'];
+    $affiliation = $_POST['affiliation'];
+    $department  = $_POST['department'];
+    $availability= $_POST['availability'];
+    $skills      = $_POST['skills'];
+
+    // Interests may be multiple checkboxes
+    $interests   = isset($_POST['interests']) ? implode(", ", $_POST['interests']) : "";
+
+    $sql = "INSERT INTO volunteers (id, name, email, phone, affiliation, department, availability, skills, interests, registration_date) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("issssssss", $id, $name, $email, $phone, $affiliation, $department, $availability, $skills, $interests);
+
+    if ($stmt->execute()) {
+        echo "success";
+    } else {
+        echo "error: " . $stmt->error;
+    }
+
+    $stmt->close();
+}
+
+$conn->close();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -523,7 +553,8 @@ if (isset($_GET['logout'])) {
             </div>
             
             <div class="volunteer-form-container">
-                <form id="volunteerForm">
+                <form id="volunteerForm" method="POST" action="volunteer_register.php">
+
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="name">Full Name</label>
@@ -652,9 +683,31 @@ if (isset($_GET['logout'])) {
             <button class="btn" style="margin-top: 1.5rem;" id="modalCloseBtn">Close</button>
         </div>
     </div>
+<?php
+$showSuccess = false;
 
-   
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Example: You can process your form here
+    // $name = $_POST['name'];
+    // $email = $_POST['email'];
+    // Save to database or send email...
 
+    $showSuccess = true; // Show modal after submission
+}
+?>
+
+<?php if ($showSuccess): ?>
+<div style="
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center;
+">
+    <div style="background: white; padding: 20px; border-radius: 10px; text-align: center;">
+        <h2>✅ Form Submitted Successfully!</h2>
+        <p>Thank you for registering as a volunteer.</p>
+        <a href="" style="display: inline-block; margin-top: 10px; padding: 8px 16px; background: blue; color: white; text-decoration: none; border-radius: 5px;">Close</a>
+    </div>
+</div>
+<?php endif; ?>
    
 </body>
 </html>
