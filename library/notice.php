@@ -166,7 +166,7 @@
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                 background-color: #f5f5f5;
                 margin: 0;
-                padding: 20px;
+              
                 color: #333;
             }
             
@@ -225,6 +225,7 @@
     //         }
     //     }
     // }
+    
     function see_notice(){
     global $con;
           $query ="SELECT * FROM notice 
@@ -665,80 +666,6 @@ function id_check($ch_id, $category) {
 }
 
 
-if(isset($_POST['submit'])){
-    // Sanitize and validate input
-    $user_type = mysqli_real_escape_string($con, $_POST['user_type']);
-    $library_card_number = mysqli_real_escape_string($con, $_POST['library_card_number']);
-    $id = mysqli_real_escape_string($con, $_POST['id']);
-    $max_books_allowed = intval($_POST['max_books_allowed']);
-    $membership_start_date = mysqli_real_escape_string($con, $_POST['membership_start_date']);
-    $membership_end_date = !empty($_POST['membership_end_date']) ? mysqli_real_escape_string($con, $_POST['membership_end_date']) : NULL;
-    $is_active = isset($_POST['is_active']) ? 1 : 0;
-    
-    // Validate required fields
-    $errors = [];
-    if(empty($user_type)) $errors[] = "User type is required";
-    if(empty($library_card_number)) $errors[] = "Library card number is required";
-    if(empty($id)) $errors[] = "ID is required";
-    if(empty($membership_start_date)) $errors[] = "Membership start date is required";
-    
-    if(!empty($errors)) {
-        $_SESSION['errors'] = $errors;
-        header("Location: library.php?action=add_member&id=".$id);
-        exit();
-    }
-
-    // Prepare the INSERT query
-    $addq = "INSERT INTO users (
-                user_type, 
-                library_card_number, 
-                id, 
-                max_books_allowed, 
-                membership_start_date, 
-                membership_end_date, 
-                is_active,
-                created_at,
-                updated_at
-            ) VALUES (
-                '$user_type',
-                '$library_card_number',
-                '$id',
-                $max_books_allowed,
-                '$membership_start_date',
-                " . ($membership_end_date ? "'$membership_end_date'" : "NULL") . ",
-                $is_active,
-                NOW(),
-                NOW()
-            )";
-    
-    $result = mysqli_query($con, $addq);
-    
-    if($result && mysqli_affected_rows($con) > 0) {
-        // Success - redirect with success message
-        $_SESSION['success'] = "Member added successfully!";
-        header("Location: library.php");
-        exit();
-    } else {
-        // Error handling
-        $_SESSION['errors'] = ["Error adding member: " . mysqli_error($con)];
-        header("Location: library.php?action=add_member&id=".$id);
-        exit();
-    }
-}
-
-// Display success/error messages if they exist
-if(isset($_SESSION['success'])) {
-    echo '<div class="success-message">'.$_SESSION['success'].'</div>';
-    unset($_SESSION['success']);
-}
-
-if(isset($_SESSION['errors'])) {
-    foreach($_SESSION['errors'] as $error) {
-        echo '<div class="error-message">'.$error.'</div>';
-    }
-    unset($_SESSION['errors']);
-}
-
 
 // Your existing member_check function
 function member_check($ch_id, $category) {
@@ -852,11 +779,90 @@ if (isset($_GET['action']) && $_GET['action'] == 'add_member') {
                 <a href="library.php?action=renew" class="back-button"><i class="fas fa-arrow-left"></i> Not Now?!</a>
             </form>
         </div>
+<?php
+        
+if(isset($_POST['add'])) {
+    // Ensure users table exists
+    add_members();
+    
+    // Sanitize and validate input
+    $user_type = mysqli_real_escape_string($con, $_POST['user_type']);
+    $library_card_number = mysqli_real_escape_string($con, $_POST['library_card_number']);
+    $id = mysqli_real_escape_string($con, $_POST['id']);
+    $max_books_allowed = intval($_POST['max_books_allowed']);
+    $membership_start_date = mysqli_real_escape_string($con, $_POST['membership_start_date']);
+    $membership_end_date = !empty($_POST['membership_end_date']) ? mysqli_real_escape_string($con, $_POST['membership_end_date']) : NULL;
+    $is_active = isset($_POST['is_active']) ? 1 : 0;
+    
+    // Prepare the INSERT query
+    $addq = "INSERT INTO users (
+                user_type, 
+                library_card_number, 
+                id, 
+                max_books_allowed, 
+                membership_start_date, 
+                membership_end_date, 
+                is_active
+            ) VALUES (
+                '$user_type',
+                '$library_card_number',
+                '$id',
+                $max_books_allowed,
+                '$membership_start_date',
+                " . ($membership_end_date ? "'$membership_end_date'" : "NULL") . ",
+                $is_active
+            )";
+    
+    $result = mysqli_query($con, $addq);
+    
+    if($result) {
+    echo '
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Success</title>
+        <meta http-equiv="refresh" content="5;url=library.php">
+        <style>
+            .success-container {
+                text-align: center;
+                margin: 100px auto;
+                max-width: 500px;
+                padding: 20px;
+                background-color: #dff0d8;
+                border: 1px solid #d6e9c6;
+                border-radius: 4px;
+                color: #3c763d;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="success-container">
+            <h2>Member Added Successfully!</h2>
+            <p>You will be redirected back to the homepage in 5 seconds.</p>
+            <p>If you are not redirected automatically, <a href="library.php">click here</a>.</p>
+        </div>
+    </body>
+    </html>
+    ';
+    exit();
+} else {
+        $_SESSION['errors'] = ["Error adding member: " . mysqli_error($con)];
+        header("Location: library.php?action=add_member&id=".$id);
+        exit();
+    }
+
+}
+
+?>
+
     </body>
     </html>
     <?php
-    exit;
-}
+    exit();}
+
+
+
+
 ?>
 
 

@@ -307,7 +307,7 @@ if (isset($_POST['logout'])) {
                                 $check = login_condition($_POST['email'], $_POST['password']);
                                 if ($check == true) {
                                     $_SESSION['staff_logged_in'] = true;
-                                    header("Refresh:0");
+                                    // header("Refresh:0");
                                 } else {
                                     echo "<div class='error-message'><p>Invalid email or password. Please try again.</p></div>";
                                     ?>
