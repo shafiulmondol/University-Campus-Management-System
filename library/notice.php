@@ -860,9 +860,6 @@ if (isset($_GET['action']) && $_GET['action'] == 'add_member') {
 ?>
 
 
-?>
-
-
 
 
     </body>
