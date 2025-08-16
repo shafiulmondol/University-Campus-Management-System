@@ -89,7 +89,7 @@
         }
         
         h1 {
-            color: #2c3e50;
+            color: #07f5f5ff;
             text-align: center;
             margin-bottom: 30px;
             border-bottom: 2px solid #3498db;
@@ -198,14 +198,15 @@
       date_default_timezone_set('Asia/Dhaka');
 
       // Create table if not exists (initial setup)
-      $create_table = "CREATE TABLE IF NOT EXISTS notice (
-          id INT,
-          title VARCHAR(255) NOT NULL,
-          section VARCHAR(100),
-          content TEXT NOT NULL,
-          author VARCHAR(100) NOT NULL,
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )";
+     $create_table = "CREATE TABLE IF NOT EXISTS notice (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    section VARCHAR(100),
+    content TEXT NOT NULL,
+    author VARCHAR(100) NOT NULL,
+    viewed TINYINT(1) DEFAULT 0 COMMENT '0=unread, 1=read',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)";
       mysqli_query($con, $create_table);
 
       // Handle form submissions
@@ -422,6 +423,15 @@ WHERE section='Library' ORDER BY created_at DESC";
     echo "<a href='javascript:history.back()' class='back-button'><i class='fas fa-arrow-left'></i> Back</a>";
     echo "</div>";
 }
+}function get_unread_notification_count() {
+    global $con;
+    $query = "SELECT COUNT(*) as count FROM notice WHERE viewed = 0 AND section='Staff'";
+    $result = mysqli_query($con, $query);
+    if($result) {
+        $row = mysqli_fetch_assoc($result);
+        return $row['count'] ?? 0;
+    }
+    return 0;
 }
 function see_staff_notice(){
     global $con;
@@ -462,24 +472,6 @@ WHERE section='Staff' ORDER BY created_at DESC";
     echo "</div>";
 }
 }
-
-function login_condition($email,$password) {
-    global $con;
-
-        $query = "SELECT * FROM stuf";
-        $result = mysqli_query($con, $query);
-        
-        if (mysqli_num_rows($result) > 0) {
-            $row = mysqli_fetch_assoc($result);
-              
-            if ($password == $row['password'] && $email == $row['email']  ) {
-               
-                return true; // Stop further execution
-            }
-        }
-        // If we get here, login failed
-        echo "<div class='error-message'>Wrong email or password</div>";
-    }
 
  // This should run only once to create the table, not inside the add_book function
 function create_books_table() {

@@ -7,7 +7,6 @@
       --dark: #87929cff;
     }
     nav-btn
-    
     .library-navbars {
   background: linear-gradient(135deg, var(--accent), #3a86ff);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -197,7 +196,7 @@
     .error-message {
       background-color: #ffebee;
       color: #c62828;
-      padding: 1rem;
+      padding: rem;
       border-radius: 8px;
       margin-bottom: 1rem;
       text-align: center;
@@ -288,7 +287,6 @@
         flex-direction: column;
         gap: 20px;
     }
-
     .form-row {
         display: flex;
         gap: 20px;

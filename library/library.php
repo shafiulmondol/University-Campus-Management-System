@@ -2,11 +2,23 @@
 session_start();
 require_once 'notice.php';
 
-// Handle logout first
+      // Database connection
+      $con = mysqli_connect("localhost", "root", "", "skst_university");
+      if (!$con) {
+          die("Connection failed: " . mysqli_connect_error());
+      }
+
+      // Set default timezone
+      date_default_timezone_set('Asia/Dhaka');
+
+// Handle logout
+// Alternative logout handler with JavaScript fallback
 if (isset($_POST['logout'])) {
     $_SESSION = array();
     session_destroy();
-    header("Location: library.php");
+    
+    // JavaScript redirect fallback
+    echo '<script>window.location.href = "library.php";</script>';
     exit();
 }
 ?>
@@ -49,9 +61,250 @@ if (isset($_POST['logout'])) {
         .submit-btn:active {
             transform: translateY(0);
         }
+        .dashboard-container {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.welcome-header {
+    display: flex;
+    align-items: center;
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-image {
+    flex: 0 0 200px;
+}
+
+.cartoon-img {
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.2));
+}
+
+.welcome-message {
+    flex: 1;
+    padding-left: 30px;
+}
+
+.welcome-message h2 {
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+.welcome-message p {
+    font-size: 16px;
+    opacity: 0.9;
+}
+
+.staff-bio {
+    margin-bottom: 30px;
+}
+
+.bio-card {
+    background: white;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.bio-card h3 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 22px;
+    display: flex;
+    align-items: center;
+}
+
+.bio-card h3 i {
+    margin-right: 10px;
+    color: #2575fc;
+}
+.bot-logo-container {
+    text-align: center;
+    margin: 25px 0;
+    position: relative;
+}
+
+.bot-logo {
+    display: inline-block;
+    position: relative;
+}
+
+.bot-img {
+    width: 90px;
+    height: auto;
+    filter: drop-shadow(0 0 8px rgba(74, 144, 226, 0.4));
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border-radius: 50%;
+    padding: 5px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(240,240,240,0.9) 100%);
+}
+
+.bot-img:hover {
+    transform: scale(1.1) rotate(-5deg);
+    filter: drop-shadow(0 0 12px rgba(74, 144, 226, 0.6));
+}
+
+.bot-title {
+    margin-top: 10px;
+    font-weight: 600;
+    color: #4a90e2;
+    font-size: 1.1em;
+    letter-spacing: 0.5px;
+}
+
+.bot-tooltip {
+    position: absolute;
+    bottom: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #4a90e2;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    opacity: 0;
+    transition: all 0.3s ease;
+    width: max-content;
+    max-width: 180px;
+    pointer-events: none;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+.bot-img:hover + .bot-tooltip {
+    opacity: 1;
+    bottom: -35px;
+}
+
+@media (max-width: 768px) {
+    .bot-img {
+        width: 70px;
+    }
+    .bot-title {
+        font-size: 1em;
+    }
+}
+.bio-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 15px;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: #555;
+}
+
+.detail-value {
+    color: #333;
+}
+
+.quick-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-card i {
+    font-size: 36px;
+    color: #2575fc;
+    margin-bottom: 15px;
+}
+
+.stat-card h4 {
+    color: #555;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.stat-card p {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+}
+.notification-wrapper {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+}
+
+.notification-bell {
+    position: relative;
+    display: inline-block;
+}
+
+.bell-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    padding: 10px;
+    font-size: 1.5rem;
+    color: #4a90e2;
+    transition: all 0.3s ease;
+}
+
+.bell-btn:hover {
+    transform: scale(1.1);
+    color: #2575fc;
+}
+
+.badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #e74c3c;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+
+.notice-card.unread {
+    background-color: #f8f9fa;
+    border-left: 3px solid #4a90e2;
+}
     </style>
 </head>
 <body>
+    
+
     <div class="navbar">
         <div class="navbar-top">
             <div class="logo">
@@ -100,9 +353,9 @@ if (isset($_POST['logout'])) {
                         <button class="nav-btn" type="submit" name="borrow"><i class="fas fa-laptop"></i> 📄 Borrow Details</button>
                         <button class="nav-btn" type="submit" name="suggest"><i class="fas fa-book-medical"></i>   ➕ Add Books</button>
                         <button class="nav-btn" type="submit" name="renew"><i class="fas fa-sync-alt"></i> 📝 Add Members</button>
-                        <button class="nav-btn" type="submit" name="logout">
-                            <i class="fas fa-sign-out-alt"></i> 📤 Logout
-                        </button>
+                        <button type="submit" name="logout" class="nav-btn">
+        <i class="fas fa-sign-out-alt"></i> 📤 Logout
+    </button>
                     </form>
                 </div> 
                 <div class="content">
@@ -255,17 +508,92 @@ if (isset($_POST['logout'])) {
                         }
                         else {
                             ?>
-                            <form action="library.php" method="post">
-                                <div class="notification-bell">
-                                    <button type="submit" name="ssubmit" class="bell-btn">
-                                    🔔
-                                        <span class="badge">2</span>
-                                    </button>
-                                </div>
-                            </form>
-                            <?php
-                            echo "<h2>Library Staff Dashboard</h2>";
-                            echo "<p>Welcome to the library staff portal. Please select an option from the menu.</p>";
+                         <div class="dashboard-container">
+    <!-- Notification Bell -->
+    <div class="notification-wrapper">
+        <form action="library.php" method="post">
+            <div class="notification-bell">
+                <button type="submit" name="ssubmit" class="bell-btn">
+                    <i class="fas fa-bell"></i>
+                    <?php $unread = get_unread_notification_count(); ?>
+                    <?php if($unread > 0): ?>
+                        <span class="badge"><?php echo $unread; ?></span>
+                    <?php endif; ?>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="welcome-header">
+        <div class="bot-logo-container">
+            <div class="bot-logo">
+                <img src="https://cdn-icons-png.flaticon.com/512/3344/3344372.png" alt="Library Bot" class="bot-img">
+                <div class="bot-tooltip">Hi! I'm your library assistant</div>
+            </div>
+            <p class="bot-title">LibraryAI Assistant</p>
+        </div>
+        <div class="welcome-message">
+            <h2>Welcome Back to Your Library Dashboard!</h2>
+            <p>We're glad to see you again. Here's what's happening today.</p>
+        </div>
+    </div>
+
+    <div class="staff-bio">
+        <div class="bio-card">
+            <h3><i class="fas fa-user"></i> Staff Information</h3>
+            <div class="bio-details">
+                <div class="detail-item">
+                    <span class="detail-label">Full Name:</span>
+                    <span class="detail-value"><?php echo htmlspecialchars($name ?? 'Not available'); ?></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Staff ID:</span>
+                    <span class="detail-value"><?php echo htmlspecialchars($id ?? 'Not available'); ?></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Position:</span>
+                    <span class="detail-value"><?php echo htmlspecialchars($position ?? 'Not available'); ?></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Department:</span>
+                    <span class="detail-value"><?php echo htmlspecialchars($department ?? 'Not available'); ?></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Email:</span>
+                    <span class="detail-value"><?php echo htmlspecialchars($email ?? 'Not available'); ?></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="quick-stats">
+        <div class="stat-card">
+            <i class="fas fa-book-open"></i>
+            <h4>Books Checked Out Today</h4>
+            <p>24</p>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-users"></i>
+            <h4>New Patrons This Week</h4>
+            <p>15</p>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-clock"></i>
+            <h4>Overdue Items</h4>
+            <p>7</p>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-calendar-alt"></i>
+            <h4>Upcoming Events</h4>
+            <p>3</p>
+        </div>
+    </div>
+</div>
+
+
+<!-- Include Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<?php
                         }
                         ?>
                     </div>
@@ -302,13 +630,50 @@ if (isset($_POST['logout'])) {
                                 </div>
                             </div>
                             <?php
-                        } elseif (isset($_POST['submit'])) {
-                            if (isset($_POST['email']) && isset($_POST['password'])) {
-                                $check = login_condition($_POST['email'], $_POST['password']);
-                                if ($check == true) {
-                                    $_SESSION['staff_logged_in'] = true;
+                        } 
+                        elseif (isset($_POST['submit'])) {
+if (isset($_POST['email']) && isset($_POST['password'])) {
+    $email = mysqli_real_escape_string($con, $_POST['email']);
+    $password = $_POST['password']; // Don't escape password (hashes need raw input)
+    
+    // Fixed query - select only the user with matching email
+    $query = "SELECT * FROM stuf WHERE email = '$email' LIMIT 1";
+    $result = mysqli_query($con, $query);
+    
+    if (mysqli_num_rows($result) == 1) {
+        $row = mysqli_fetch_assoc($result);
+        
+        // Check if using hashed passwords (recommended)
+        if (password_verify($password, $row['password'])) {
+            // Login success
+            $_SESSION['staff_logged_in'] = true;
+             $id= $row['id'];
+             $name= $row['first_name']. " ".$row['first_name'] ;
+             $department= $row['department'];
+             $position= $row['ipositiond'];
+             $email= $row['email'];
+          
+          
+            
+            header("Location: dashboard.php");
+            exit();
+        }
+        // If using plain text passwords (not recommended)
+        elseif ($password === $row['password']) {
+            // Login success (INSECURE - only for testing)
+            $_SESSION['staff_logged_in'] = true;
+            // ... set other session variables
+            
+            // header("Location: dashboard.php");
+            exit();
+        }
+    }
+    
+    // If we get here, login failed
+    echo "<div class='error-message'>Wrong email or password</div>";
+}                   
                                     // header("Refresh:0");
-                                } else {
+                                else {
                                     echo "<div class='error-message'><p>Invalid email or password. Please try again.</p></div>";
                                     ?>
                                     <div class="staff-login-container">
@@ -338,7 +703,7 @@ if (isset($_POST['logout'])) {
                                     <?php
                                 }
                             }
-                        } elseif (isset($_POST['borrow'])) {
+                         elseif (isset($_POST['borrow'])) {
                             echo "<h2>Borrow Book</h2>";
                             echo "<p>This section would contain information about borrowing Book equipment from the library.</p>";
                         } elseif (isset($_POST['suggest'])) {
