@@ -505,25 +505,30 @@ if (isset($_POST['logout'])) {
                       }
                         elseif(isset($_POST['ssubmit'])){
                             echo see_staff_notice();
+                            $query = "UPDATE notice SET viewed =0  WHERE section = 'Staff'";
+                             $stmt = mysqli_prepare($con, $query);
                         }
                         else {
                             ?>
                          <div class="dashboard-container">
     <!-- Notification Bell -->
+    <div class="dashboard-container">
+    <!-- Notification Bell - Improved Version -->
     <div class="notification-wrapper">
         <form action="library.php" method="post">
             <div class="notification-bell">
                 <button type="submit" name="ssubmit" class="bell-btn">
                     <i class="fas fa-bell"></i>
-                    <?php $unread = get_unread_notification_count(); ?>
-                    <?php if($unread > 0): ?>
-                        <span class="badge"><?php echo $unread; ?></span>
+                    <?php 
+                    $unread = get_unread_notification_count(); 
+                    if($unread > 0): ?>
+                        <span class="badge"><?= htmlspecialchars($unread) ?></span>
                     <?php endif; ?>
                 </button>
             </div>
         </form>
     </div>
-
+</div>
     <div class="welcome-header">
         <div class="bot-logo-container">
             <div class="bot-logo">
@@ -544,23 +549,23 @@ if (isset($_POST['logout'])) {
             <div class="bio-details">
                 <div class="detail-item">
                     <span class="detail-label">Full Name:</span>
-                    <span class="detail-value"><?php echo htmlspecialchars($name ?? 'Not available'); ?></span>
+                    <span class="detail-value"><?php echo htmlspecialchars( $_SESSION['name'] ?? 'Not available'); ?></span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Staff ID:</span>
-                    <span class="detail-value"><?php echo htmlspecialchars($id ?? 'Not available'); ?></span>
+                    <span class="detail-value"><?php echo htmlspecialchars($_SESSION['id'] ?? 'Not available'); ?></span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Position:</span>
-                    <span class="detail-value"><?php echo htmlspecialchars($position ?? 'Not available'); ?></span>
+                    <span class="detail-value"><?php echo htmlspecialchars( $_SESSION['position'] ?? 'Not available'); ?></span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Department:</span>
-                    <span class="detail-value"><?php echo htmlspecialchars($department ?? 'Not available'); ?></span>
+                    <span class="detail-value"><?php echo htmlspecialchars($_SESSION['department'] ?? 'Not available'); ?></span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Email:</span>
-                    <span class="detail-value"><?php echo htmlspecialchars($email ?? 'Not available'); ?></span>
+                    <span class="detail-value"><?php echo htmlspecialchars($_SESSION['email'] ?? 'Not available'); ?></span>
                 </div>
             </div>
         </div>
@@ -632,46 +637,44 @@ if (isset($_POST['logout'])) {
                             <?php
                         } 
                         elseif (isset($_POST['submit'])) {
-if (isset($_POST['email']) && isset($_POST['password'])) {
-    $email = mysqli_real_escape_string($con, $_POST['email']);
-    $password = $_POST['password']; // Don't escape password (hashes need raw input)
-    
-    // Fixed query - select only the user with matching email
-    $query = "SELECT * FROM stuf WHERE email = '$email' LIMIT 1";
-    $result = mysqli_query($con, $query);
-    
-    if (mysqli_num_rows($result) == 1) {
-        $row = mysqli_fetch_assoc($result);
+    if (isset($_POST['email']) && isset($_POST['password'])) {
+        $email = mysqli_real_escape_string($con, $_POST['email']);
+        $password = $_POST['password']; // Don't escape password (hashes need raw input)
         
-        // Check if using hashed passwords (recommended)
-        if (password_verify($password, $row['password'])) {
-            // Login success
-            $_SESSION['staff_logged_in'] = true;
-             $id= $row['id'];
-             $name= $row['first_name']. " ".$row['first_name'] ;
-             $department= $row['department'];
-             $position= $row['ipositiond'];
-             $email= $row['email'];
-          
-          
-            
-            header("Location: dashboard.php");
-            exit();
+        // Fixed query - select only the user with matching email
+        $query = "SELECT * FROM stuf WHERE email = '$email' LIMIT 1";
+        $result = mysqli_query($con, $query);
+        
+        if (!$result) {
+            die("Database query failed: " . mysqli_error($con));
         }
-        // If using plain text passwords (not recommended)
-        elseif ($password === $row['password']) {
-            // Login success (INSECURE - only for testing)
-            $_SESSION['staff_logged_in'] = true;
-            // ... set other session variables
+        
+        if (mysqli_num_rows($result) > 0) {
+            $row = mysqli_fetch_assoc($result);
             
-            // header("Location: dashboard.php");
-            exit();
+            // Verify password - assuming it's stored as plain text (NOT RECOMMENDED)
+            // For better security, use password_hash() and password_verify()
+            if ($password == $row['password']) {
+                // Login success
+                $_SESSION['staff_logged_in'] = true;
+                $_SESSION['id'] = $row['id'];
+                $_SESSION['name'] = $row['first_name'] . " " . $row['last_name']; // Fixed: was using first_name twice
+                $_SESSION['department'] = $row['department'];
+                $_SESSION['position'] = $row['position']; // Fixed typo in column name (was 'ipositiond')
+                $_SESSION['email'] = $row['email'];
+                
+                // header("Location: dashboard.php");
+                // exit();
+            } else {
+                // Password doesn't match
+                echo "<div class='error-message'>Wrong email or password</div>";
+            }
+        } else {
+            // No user found with that email
+            echo "<div class='error-message'>Wrong email or password</div>";
         }
-    }
-    
-    // If we get here, login failed
-    echo "<div class='error-message'>Wrong email or password</div>";
-}                   
+    } 
+        
                                     // header("Refresh:0");
                                 else {
                                     echo "<div class='error-message'><p>Invalid email or password. Please try again.</p></div>";

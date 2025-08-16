@@ -199,33 +199,19 @@
 
       // Create table if not exists (initial setup)
      $create_table = "CREATE TABLE IF NOT EXISTS notice (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id INT(20) NOT NULL,
     title VARCHAR(255) NOT NULL,
-    section VARCHAR(100),
+    section VARCHAR(100) NOT NULL,
     content TEXT NOT NULL,
     author VARCHAR(100) NOT NULL,
-    viewed TINYINT(1) DEFAULT 0 COMMENT '0=unread, 1=read',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    viewed TINYINT(1) DEFAULT 0 COMMENT '0=unread, 1=read',
 )";
-      mysqli_query($con, $create_table);
 
-      // Handle form submissions
-    //   if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    //       if (isset($_POST['add_notice'])) {
-    //           $title = $_POST['title'];
-    //           $section = $_POST['section'];
-    //           $content =  $_POST['content'];
-    //           $author = $_POST['author'];
+    //   mysqli_query($con, $create_table);
 
-    //           $stmt = mysqli_query($con,"INSERT INTO notice (title, section, content, author) VALUES (?, ?, ?, ?)");
-            
-    //         if ($stmt) {
-    //             echo "<div class='success-message'>Notice added successfully</div>";
-    //         } else {
-    //             die ("Table not created".mysqli_error($con));
-    //         }
-    //     }
-    // }
+
+
     
     function see_notice(){
     global $con;
@@ -267,6 +253,7 @@ ORDER BY created_at DESC";
     echo "</div>";
 }
 }
+
 
 function see_student_notice(){
     global $con;
@@ -433,6 +420,7 @@ WHERE section='Library' ORDER BY created_at DESC";
     }
     return 0;
 }
+
 function see_staff_notice(){
     global $con;
           $query ="SELECT * FROM notice 
@@ -457,10 +445,12 @@ WHERE section='Staff' ORDER BY created_at DESC";
         echo "<span class='notice-date'><i class='far fa-calendar-alt'></i> " . date('F j, Y h:i A', strtotime($row['created_at'])) . "</span>";
         echo "</div>";
         echo "</div>"; // Close notice-card
+         
+    
     }
     
     echo "<div class='back-button-container'>";
-     echo "<a href='javascript:history.back()' class='back-button'><i class='fas fa-arrow-left'></i> Back</a>";
+    echo "<a href='javascript:history.back()' class='back-button'><i class='fas fa-arrow-left'></i> Back</a>";
     echo "</div>";
     
     echo "</div>"; // Close notices-container
