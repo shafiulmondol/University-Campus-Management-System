@@ -305,34 +305,7 @@ if (isset($_POST['logout'])) {
 <body>
     
 
-    <div class="navbar">
-        <div class="navbar-top">
-            <div class="logo">
-                <img src="../picture/logo.gif" alt="SKST Logo">
-                <h1>SKST University || Library</h1>
-            </div>
-            <div class="home-button">
-                <a href="../index.php">🏠 Home</a>
-            </div>
 
-            <div class="menu-section" style="margin-bottom: 20px;">
-                <a href="../student/studentf.php"><button class="btn">Student</button></a>
-                <a href="../faculty.html"><button class="btn">Faculty</button></a>
-                <a href="../administration.html"><button class="btn">Administration</button></a>
-                <a href="../alumni.html"><button class="btn">Alumni</button></a>
-                <a href="../campus.html"><button class="btn">Campus Life</button></a>
-                <a href="../iqac.html"><button class="btn">IQAC</button></a>
-                <a href="../notice.html"><button class="btn">Notice</button></a>
-                <a href="../news.html"><button class="btn">News</button></a>
-                <a href="../ranking.html"><button class="btn">Ranking</button></a>
-                <a href="../academic.html"><button class="btn">Academics</button></a>
-                <a href="../scholarship.html"><button class="btn">Scholarships</button></a>
-                <a href="../admission.html"><button class="btn">Admission</button></a>
-                <a href="library.php"><button class="btn">Library</button></a>
-                <a href="../volunteer.html"><button class="btn">Volunteer</button></a>
-                <a href="../about.html"><button class="btn">About US</button></a>
-            </div>
-        </div>
     
         <!-- Main Content Area with Right Navbar -->
         <div class="main-container">
