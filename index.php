@@ -172,7 +172,7 @@
       <a href="academic.html"><button class="btn">Academics</button></a>
       <a href="scholarship.html"><button class="btn">Scholarships</button></a>
       <a href="admission.html"><button class="btn">Admission</button></a>
-      <a href="library/library.php"><button class="btn">Library</button></a>
+      <a href="library/library1.html"><button class="btn">Library</button></a>
       <a href="volunteer.html"><button class="btn">Volunteer</button></a>
       <a href="about.html"><button class="btn">About US</button></a>
       <a href="account_officer.html"><button class="btn">Account Officer</button></a>
