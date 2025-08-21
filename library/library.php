@@ -350,7 +350,7 @@ if (isset($_POST['logout'])) {
                     </a>
                     <form action="library.php" method="post">
                         <button class="nav-btn" type="submit" name="search"><i class="fas fa-search"></i>  📚 See Books</button>
-                        <button class="nav-btn" type="submit" name="borrow"><i class="fas fa-laptop"></i> 📄 Borrow Details</button>
+                         <button class="nav-btn" type="submit" name="borrow"><i class="fas fa-laptop"></i> Borrow</button>
                         <button class="nav-btn" type="submit" name="suggest"><i class="fas fa-book-medical"></i>   ➕ Add Books</button>
                         <button class="nav-btn" type="submit" name="renew"><i class="fas fa-sync-alt"></i> 📝 Add Members</button>
                         <button type="submit" name="logout" class="nav-btn">
@@ -362,9 +362,106 @@ if (isset($_POST['logout'])) {
                     <div class="bg-glass">
                         <?php
                         if (isset($_POST['borrow'])) {
-                            echo "<h2>Borrow Book</h2>";
-                            echo "<p>This section would contain information about borrowing Book equipment from the library.</p>";
-                        }
+                            echo borrow_book();
+                          ?>
+    <div style="margin:20px; text-align:center;">
+        <form action="" method="post" style="display:inline-block;">
+            <button class="nav-btn" type="submit" name="borrow_book">
+                <i class="fas fa-book"></i> Borrow Book
+            </button>
+            <button class="nav-btn" type="submit" name="details_book">
+                <i class="fas fa-info-circle"></i> Borrow Details
+            </button>
+            <button class="nav-btn" type="submit" name="renew_book">
+                <i class="fas fa-sync-alt"></i> Renew Borrow Book
+            </button>
+        </form>
+    </div>';
+<?php
+ }
+ elseif (isset($_POST['borrow_book'])){
+    ?>
+    <div class='dashboard-box'>
+        <h2>📚 Borrow Book</h2>
+        <form method="post">
+            <label>Book ID:</label><br>
+            <input type="number" name="book_id" required><br><br>
+            <label>User ID:</label><br>
+            <input type="number" name="user_id" required><br><br>
+            <button type="submit" name="confirm_borrow">Confirm Borrow</button>
+        </form>
+    </div>
+    <?php
+
+ }
+                       elseif (isset($_POST['confirm_borrow'])) {
+    $book_id = intval($_POST['book_id']);
+    $user_id = intval($_POST['user_id']);
+    $sql = "INSERT INTO borrow_books (book_id, user_id, borrow_date, due_date) 
+            VALUES ($book_id, $user_id, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 7 DAY))";
+    if (mysqli_query($con, $sql)) {
+        echo "<p style='color:green;'>✅ Book borrowed successfully!</p>";
+        
+    } else {
+        echo "<p style='color:red;'>❌ Error: " . mysqli_error($con) . "</p>";
+    }
+}
+
+// ✅ Borrow Details Dashboard
+elseif (isset($_POST['details_book'])) {
+    echo "
+    <div class='dashboard-box'>
+        <h2>📖 Borrow Details Dashboard</h2>";
+
+    $res = mysqli_query($con, "SELECT * FROM borrow_books");
+    if ($res && mysqli_num_rows($res) > 0) {
+        echo "<table border='1' cellpadding='8' style='margin:10px auto; border-collapse:collapse;'>";
+        echo "<tr><th>ID</th><th>Book</th><th>User</th><th>Borrow Date</th><th>Due Date</th><th>Status</th></tr>";
+        while ($row = mysqli_fetch_assoc($res)) {
+            echo "<tr>
+                <td>{$row['borrow_id']}</td>
+                <td>{$row['book_id']}</td>
+                <td>{$row['user_id']}</td>
+                <td>{$row['borrow_date']}</td>
+                <td>{$row['due_date']}</td>
+                <td>{$row['status']}</td>
+            </tr>";
+        }
+        echo "</table>";
+    } else {
+        echo "<p>No borrowed books found.</p>";
+    }
+
+    echo "</div>";
+}
+
+// ✅ Renew Dashboard
+elseif (isset($_POST['renew_book'])) {
+    ?>
+    <div class='dashboard-box'>
+        <h2>🔄 Renew Borrow Book Dashboard</h2>
+        <form method="post">
+            <label>Borrow ID:</label><br>
+            <input type="number" name="borrow_id" required><br><br>
+            <button type="submit" name="confirm_renew">Renew</button>
+        </form>
+    </div>
+    <?php
+}
+
+// ✅ Handle Renew Confirm
+elseif (isset($_POST['confirm_renew'])) {
+    $borrow_id = intval($_POST['borrow_id']);
+    $sql = "UPDATE borrow_books 
+            SET due_date = DATE_ADD(due_date, INTERVAL 7 DAY) 
+            WHERE borrow_id=$borrow_id";
+    if (mysqli_query($con, $sql)) {
+        echo "<p style='color:green;'>✅ Borrow renewed successfully!</p>";
+    } else {
+        echo "<p style='color:red;'>❌ Error: " . mysqli_error($con) . "</p>";
+    }
+}
+    
                         elseif (isset($_POST['search'])) { 
                             if (isset($_POST['search']) || isset($_POST['all'])) { ?>
                                 <div class="book-search-container">
@@ -706,10 +803,7 @@ if (isset($_POST['logout'])) {
                                     <?php
                                 }
                             }
-                         elseif (isset($_POST['borrow'])) {
-                            echo "<h2>Borrow Book</h2>";
-                            echo "<p>This section would contain information about borrowing Book equipment from the library.</p>";
-                        } elseif (isset($_POST['suggest'])) {
+                         elseif (isset($_POST['suggest'])) {
                             echo "<h2>Suggest a Book</h2>";
                             echo "<p>Form for suggesting new books for the library collection.</p>";
                         } elseif (isset($_POST['renew'])) {
@@ -767,9 +861,7 @@ if (isset($_POST['logout'])) {
                     <form action="library.php" method="post">
                         <button class="nav-btn" type="submit" name="notice"><i class="fas fa-bullhorn"></i> Library Notice</button>
                         <button class="nav-btn" type="submit" name="search"><i class="fas fa-search"></i> Book Search</button>
-                        <button class="nav-btn" type="submit" name="borrow"><i class="fas fa-laptop"></i> Borrow book</button>
                         <button class="nav-btn" type="submit" name="suggest"><i class="fas fa-book-medical"></i> Suggest a Book</button>
-                        <button class="nav-btn" type="submit" name="renew"><i class="fas fa-sync-alt"></i> Renew Books</button>
                         <button class="nav-btn" type="submit" name="staff"><i class="fas fa-user-tie"></i> Staff Portal</button>
                         <button class="nav-btn" type="submit" name="about"><i class="fas fa-info-circle"></i> About Us</button>
                         

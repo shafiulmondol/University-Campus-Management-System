@@ -647,6 +647,73 @@ function id_check($ch_id, $category) {
     return $output;
 }
 
+function borrow_book() {
+    global $con;
+
+    // ✅ Create table if not exists
+    $borrow = "
+    CREATE TABLE IF NOT EXISTS borrow_books (
+        borrow_id INT AUTO_INCREMENT PRIMARY KEY,
+        book_id INT NOT NULL,
+        user_id INT NOT NULL,
+        borrow_date DATE NOT NULL,
+        due_date DATE NOT NULL,
+        return_date DATE NULL,
+        status ENUM('borrowed', 'returned') DEFAULT 'borrowed',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (book_id) REFERENCES books(book_id),
+        FOREIGN KEY (user_id) REFERENCES users(user_id)
+    ) ENGINE=InnoDB;";
+
+    mysqli_query($con, $borrow);
+
+    // ✅ Borrow Book UI (navigation)
+    
+    if (isset($_POST['borrow_book'])) {
+        echo "
+        <div class='dashboard-box'>
+            <h2>📚 Borrow Book Dashboard</h2>
+            <form method='post'>
+                <input type='hidden' name='borrow_book' value='1'>
+                <label>Book ID:</label><br>
+                <input type='number' name='book_id' required><br><br>
+                <label>User ID:</label><br>
+                <input type='number' name='user_id' required><br><br>
+                <button type='submit' name='confirm_borrow'>Confirm Borrow</button>
+            </form>
+        </div>";
+
+    
+    // <style>
+    //     .nav-btn {
+    //         background: #007bff;
+    //         border: none;
+    //         color: white;
+    //         padding: 12px 18px;
+    //         margin: 5px;
+    //         border-radius: 8px;
+    //         cursor: pointer;
+    //         font-size: 16px;
+    //         transition: background 0.3s;
+    //     }
+    //     .nav-btn:hover { background: #0056b3; }
+    //     .dashboard { margin:20px; text-align:center; }
+    //     .dashboard-box {
+    //         background: #f8f9fa;
+    //         padding:20px;
+    //         border-radius:10px;
+    //         width:60%;
+    //         margin:20px auto;
+    //         box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    //     }
+    //     table { width:80%; margin:auto; border:1px solid #ccc; }
+    //     th { background:#007bff; color:white; }
+    // </style>';
+}
+}
+
+
 
 
 // Your existing member_check function
