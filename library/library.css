@@ -80,30 +80,6 @@
     gap: 5px;
 }
 
-/* Back Button */
-.back-button-container {
-    text-align: center;
-    margin-top: 30px;
-}
-
-.back-button {
-    display: inline-flex;
-    align-items: center;
-    padding: 10px 20px;
-    background: #3498db;
-    color: white;
-    text-decoration: none;
-    border-radius: 6px;
-    transition: all 0.3s ease;
-    gap: 8px;
-    font-weight: 500;
-}
-
-.back-button:hover {
-    background: #2980b9;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(41, 128, 185, 0.3);
-}
 
 /* No Notices */
 .no-notices {
