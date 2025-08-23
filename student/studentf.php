@@ -10,34 +10,7 @@
 </head>
 <body>
   <div class="navbar">
-    <div class="navbar-top">
-      <div class="logo">
-        <img src="../picture/logo.gif" alt="SKST Logo">
-        <h1>SKST University || Library</h1>
-      </div>
-      <div class="home-button">
-    <a href="../index.php">🏠 Home</a>
 
-    </div>
-
-    <div class="menu-section">
-         <a href="studentf.php"><button class="btn">Student</button></a>
-      <a href="../faculty.html"><button class="btn">Faculty</button></a>
-      <a href="../administration.html"><button class="btn">Administration</button></a>
-      <a href="../alumni.html"><button class="btn">Alumni</button></a>
-      <a href="../campus.html"><button class="btn">Campus Life</button></a>
-      <a href="../iqac.html"><button class="btn">IQAC</button></a>
-      <a href="../notice.html"><button class="btn">Notice</button></a>
-      <a href="../news.html"><button class="btn">News</button></a>
-      <a href="../ranking.html"><button class="btn">Ranking</button></a>
-      <a href="../academic.html"><button class="btn">Academics</button></a>
-      <a href="../scholarship.html"><button class="btn">Scholarships</button></a>
-      <a href="../admission.html"><button class="btn">Admission</button></a>
-      <a href="../library/library.php"><button class="btn">Library</button></a>
-      <a href="../volunteer.html"><button class="btn">Volunteer</button></a>
-      <a href="../about.html"><button class="btn">About US</button></a>
-    </div>
-  </div>
     <!-- Main Content Area with Right Navbar -->
     <div class="main-container">
         <!-- Content Section -->
@@ -106,14 +79,5 @@
     </div>
   </div>
  
-
-
-<div class="buttom_bar">
-<img src="../picture/SKST.png" alt="Logo" style="height:80px; width:auto;">
-<p>SKST University</p>
-<p>4 Embankment Drive Road,Sector-10, Uttara Model Town, Dhaka-1230.</p>
-<p>Phone: (88 02) 55091801-5, Mobile : +88 01714 014 933, 01810030041-9, 01325080581-9</p>
-<p>Fax: (880-2) 5895 2625, Email : info@skst.edu</p>
-</div>
 </body>
 </html>
