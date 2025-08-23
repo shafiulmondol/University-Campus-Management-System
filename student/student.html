@@ -135,6 +135,33 @@
       transform: translateY(-3px);
       background: linear-gradient(135deg, #18bcae, #f3af02);
     }
+
+    .sidebar {
+  flex: 0 0 240px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 20px;
+  height: fit-content;
+}
+
+.sidebar a {
+  display: block;
+  padding: 12px 15px;
+  margin-bottom: 10px;
+  background: purple;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.sidebar a:hover {
+  background: darkviolet; /* optional hover effect */
+}
+
   </style>
 </head>
 <body>
@@ -177,8 +204,8 @@
 
   <h1 style="text-align:center; color: white; background:#800000;font-weight:bold; margin-top:20px; margin-bottom:20px;">Future Students</h1>
 
-  <p style="text-align:center; max-width:1000px; margin:0 auto 30px auto; color:black; line-height:1.6; font-size:16px;">
-    IUBAT offers a number of features for the learners who are seeking admission for higher studies. Some of those features are as follows:
+  <p style="text-align:center; max-width:1200px; margin:0 auto 30px auto; color:black; line-height:1.6; font-size:16px;">
+    SKTS University offers a number of features for the learners who are seeking admission for higher studies. Some of those features are as follows:
   </p>
 
 </div>
@@ -187,14 +214,15 @@
   <div style="display:flex; gap:30px; max-width:1200px; margin:0 auto;">
 
     <!-- Sidebar -->
-    <div style="flex:0 0 240px; background:#fff; padding:20px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1); position:sticky; top:20px; height:fit-content;">
-      <a href="../scholarship.html" style="display:block; padding:12px 15px; margin-bottom:10px; background:purple; color:white; text-decoration:none; border-radius:6px; font-weight:500;">Scholarships and Aids</a>
-      <a href="../working.html" style="display:block; padding:12px 15px; margin-bottom:10px; background:purple; color:white; text-decoration:none; border-radius:6px; font-weight:500;">Student Support Services</a>
-      <a href="../admission.html" style="display:block; padding:12px 15px; margin-bottom:10px; background:purple; color:white; text-decoration:none; border-radius:6px; font-weight:500;">Admission Circular</a>
-      <a href="../admission.php" style="display:block; padding:12px 15px; margin-bottom:10px; background:purple; color:white; text-decoration:none; border-radius:6px; font-weight:500;">Admission Test</a>
-      <a href="../working.html" style="display:block; padding:12px 15px; margin-bottom:10px; background:purple; color:white; text-decoration:none; border-radius:6px; font-weight:500;">Tuition and Fees</a>
-      <a href="studentf.php" style="display:block; padding:12px 15px; margin-bottom:10px; background:purple; color:white; text-decoration:none; border-radius:6px; font-weight:500;">Student Login</a>
-    </div>
+<div class="sidebar">
+<p style="font-weight:bold; font-size:18px; margin-bottom:15px; text-align:center;">Quick Links</p>
+  <a href="../scholarship.html">Scholarships and Aids</a>
+  <a href="../admission.html">Admission Circular</a>
+  <a href="../admission.php">Admission Test</a>
+  <a href="../working.html">Tuition and Fees</a>
+  <a href="studentf.php">Student Login</a>
+</div>
+
 
     <!-- Content Area Split into Two Columns -->
     <div style="flex:1; display:flex; gap:20px;">
