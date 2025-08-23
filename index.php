@@ -182,34 +182,36 @@
   
 
   <?php  
-  if (isset($_POST['nsubmit'])) {
+if (isset($_POST['nsubmit'])) {
     require_once 'library/notice.php';
     echo see_notice();
     ?>
-     <div class="buttom_bar">
+    <div class="buttom_bar" style="line-height:1.2;">
       <img src="picture/SKST.png" alt="Logo" style="height:80px; width:auto;">
-      <p>SKST University</p>
-      <p>4 Embankment Drive Road,Sector-10, Uttara Model Town, Dhaka-1230.</p>
-      <p>Phone: (88 02) 55091801-5, Mobile : +88 01714 014 933, 01810030041-9, 01325080581-9</p>
-      <p>Fax: (880-2) 5895 2625, Email : info@skst.edu</p>
-    </div><?php
-  } else {
+      <p style="margin:0;">SKST University</p>
+      <p style="margin:0;">4 Embankment Drive Road,Sector-10, Uttara Model Town, Dhaka-1230.</p>
+      <p style="margin:0;">Phone: (88 02) 55091801-5, Mobile : +88 01714 014 933, 01810030041-9, 01325080581-9</p>
+      <p style="margin:0;">Fax: (880-2) 5895 2625, Email : info@skst.edu</p>
+    </div>
+<?php
+} else {
     ?>
     <div class="background-image">
-    <img src="picture/SKST_University.png" alt="Background Image">
-  </div>
+      <img src="picture/SKST_University.png" alt="Background Image">
+    </div>
     <div class="welcome-message">
       <h1>Welcome to SKST University</h1>
       <h2>Today SKST University</h2>
     </div>
 
-    <div class="buttom_bar">
+    <div class="buttom_bar" style="line-height:1.2;">
       <img src="picture/SKST.png" alt="Logo" style="height:80px; width:auto;">
-      <p>SKST University</p>
-      <p>4 Embankment Drive Road,Sector-10, Uttara Model Town, Dhaka-1230.</p>
-      <p>Phone: (88 02) 55091801-5, Mobile : +88 01714 014 933, 01810030041-9, 01325080581-9</p>
-      <p>Fax: (880-2) 5895 2625, Email : info@skst.edu</p>
+      <p style="margin:0;">SKST University</p>
+      <p style="margin:0;">4 Embankment Drive Road,Sector-10, Uttara Model Town, Dhaka-1230.</p>
+      <p style="margin:0;">Phone: (88 02) 55091801-5, Mobile : +88 01714 014 933, 01810030041-9, 01325080581-9</p>
+      <p style="margin:0;">Fax: (880-2) 5895 2625, Email : info@skst.edu</p>
     </div>
-  <?php } ?>
+<?php } ?>
+
 </body>
 </html>
