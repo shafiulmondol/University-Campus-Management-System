@@ -8,7 +8,7 @@
   <link rel="icon" href="picture/SKST.png" type="image/png">
   <link rel="stylesheet" href="Design/campus_Image.css">
   <link rel="stylesheet" href="Design/welcome-message.css">
-  <link rel="stylesheet" href="Design/bottom_bar.css">
+  <link rel="stylesheet" href="Design/buttom_bar.css">
   <link rel="stylesheet" href="library/library.css">
 
   <style>
