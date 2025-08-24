@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SKST University</title>
+
+  <!-- Favicon -->
+  <link rel="icon" href="../picture/SKST.png" type="image/png" />
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="../Design/bottom_bar.css">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f9f9ff;
+    }
+
+    a {
+      text-decoration: none;
+    }
+
+    .navbar {
+      background-color: #e0e7ff;
+      padding: 10px 20px;
+    }
+
+    .navbar-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo img {
+      height: 80px;
+    }
+
+    .logo h1 {
+      font-size: 26px;
+      color: #333;
+    }
+
+    .menu-section {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      font-size: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      min-width: 120px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      background: linear-gradient(135deg, #512da8, #1e88e5);
+    }
+
+    @media (max-width: 768px) {
+      .navbar-top {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .btn {
+        width: 80%;
+      }
+
+      .menu-section {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+
+    .home-button {
+      background: gray;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      font-size: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 120px;
+    }
+
+    .home-button:hover {
+      transform: translateY(-3px);
+      background: linear-gradient(135deg, #18bcae, #f3af02);
+    }
+
+    .background-image {
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .background-image img {
+      border: 1px solid black;
+      border-radius: 10px;
+      margin-top: 10px;
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .welcome-message {
+      text-align: center;
+      padding: 20px;
+      color: white;
+      background-color: rgb(139, 0, 0);
+      margin-top: 10px;
+      border: 1px solid black;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border-radius: 5px;
+    }
+
+    .schedule {
+      width: 400px;
+      margin: 20px auto;
+      padding: 20px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 25px;
+      background: aliceblue;
+      border: 1px solid black;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+        .bus-schedule {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #f8f9fa;
+        }
+        
+        .routes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: space-between;
+        }
+        
+        .route {
+            flex: 0 0 calc(50% - 10px);
+            margin-bottom: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 15px;
+        }
+        
+        .route h2 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            font-size: 18px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        .route table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .route th,
+        .route td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            font-size: 14px;
+        }
+        
+        .route th {
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+        
+        .route td:first-child,
+        .route td:nth-child(3),
+        .route td:nth-child(4) {
+            text-align: center;
+        }
+        
+        .route td:nth-child(2) {
+            text-align: left;
+        }
+        
+        @media (max-width: 768px) {
+            .route {
+                flex: 0 0 100%;
+            }
+        }
+
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <div class="navbar">
+    <div class="navbar-top">
+      <div class="logo">
+        <img src="../picture/logo.gif" alt="SKST Logo">
+        <h1>SKST University || Transportation</h1>
+      </div>
+
+      <!-- Home Page Button -->
+      <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+        <a href="../index.php" class="home-button">
+          <i class="fas fa-home"></i> Home
+        </a>
+      </div>
+    </div>
+
+    <!-- Menu -->
+    <div class="menu-section">
+      <a href="../student.html"><button class="btn">Student</button></a>
+      <a href="../faculty.html"><button class="btn">Faculty</button></a>
+      <a href="../administration.html"><button class="btn">Administration</button></a>
+      <a href="../alumni.html"><button class="btn">Alumni</button></a>
+      <a href="../campus.html"><button class="btn">Campus Life</button></a>
+      <a href="../iqac.html"><button class="btn">IQAC</button></a>
+      <a href="../notice.html"><button class="btn">Notice</button></a>
+      <a href="../news.html"><button class="btn">News</button></a>
+      <a href="../ranking.html"><button class="btn">Ranking</button></a>
+      <a href="../academic.html"><button class="btn">Academics</button></a>
+      <a href="../scholarship.html"><button class="btn">Scholarships</button></a>
+      <a href="../admission.html"><button class="btn">Admission</button></a>
+      <a href="../library/library1.html"><button class="btn">Library</button></a>
+      <a href="../volunteer.html"><button class="btn">Volunteer</button></a>
+      <a href="../about.html"><button class="btn">About Us</button></a>
+    </div>
+  </div>
+
+    <div class="background-image">
+      <img src="../picture/BUS.png" alt="Background Image">
+    </div>
+
+    <div class="welcome-message">
+      <h1>WELCOME TO SKST UNIVERSITY TRANSPORTATION SERVICE</h1>
+      <h3>"Where Every Ride Leads to Knowledge."</h3>
+    </div>
+
+    <div class ="schedule">
+      <p1>BUS Schedule</p1>
+    </div>
+
+
+ <div class="bus-schedule">
+        <div class="routes">
+          <!-- Mothijheel -->
+            <div class="route">
+                <h2>Route: Mothijheel (Bus No: 09)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sl. No.</th>
+                            <th>Stoppage</th>
+                            <th>Pick Up Time</th>
+                            <th>Campus Departure Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>01</td><td>Mothijheel Shapla Chattar</td><td>6:40 AM</td><td></td></tr>
+                        <tr><td>02</td><td>Rajarbagh</td><td>6:45 AM</td><td></td></tr>
+                        <tr><td>03</td><td>Malibagh Mour</td><td>6:47 AM</td><td></td></tr>
+                        <tr><td>04</td><td>Mouchak</td><td>6:48 AM</td><td></td></tr>
+                        <tr><td>05</td><td>Malibagh Rail Gate</td><td>6:50 AM</td><td></td></tr>
+                        <tr><td>06</td><td>Chowdhury Para</td><td>6:52 AM</td><td></td></tr>
+                        <tr><td>07</td><td>Hazipara</td><td>6:54 AM</td><td></td></tr>
+                        <tr><td>08</td><td>Rampura Bazar</td><td>6:58 AM</td><td></td></tr>
+                        <tr><td>09</td><td>Rampura TV Gate</td><td>7:00 AM</td><td></td></tr>
+                        <tr><td>10</td><td>Maddhya Badda</td><td>7:05 AM</td><td>5:40 PM (Saturday-Wednesday)</td></tr>
+                        <tr><td>11</td><td>Uttar Badda</td><td>7:10 AM</td><td></td></tr>
+                        <tr><td>12</td><td>Shahjadpur</td><td>7:12 AM</td><td></td></tr>
+                        <tr><td>13</td><td>Nuton Bazar</td><td>7:15 AM</td><td></td></tr>
+                        <tr><td>14</td><td>Narda Bazar</td><td>7:17 AM</td><td></td></tr>
+                        <tr><td>15</td><td>Bashundhara</td><td>7:20 AM</td><td></td></tr>
+                        <tr><td>16</td><td>Kuril Bishwa Road</td><td>7:25 AM</td><td></td></tr>
+                        <tr><td>17</td><td>Bishwa Road</td><td>7:27 AM</td><td></td></tr>
+                        <tr><td>18</td><td>Khilkhet</td><td>7:30 AM</td><td></td></tr>
+                        <tr><td>19</td><td>Airport</td><td>7:45 AM</td><td></td></tr>
+                        <tr><td>20</td><td>Campus</td><td>8:05 AM</td><td></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+
+            <!-- Savar -->
+            <div class="route">
+                <h2>Route: Savar (Bus No: 11)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sl. No.</th>
+                            <th>Stoppage</th>
+                            <th>Pick Up Time</th>
+                            <th>Campus Departure Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>01</td><td>Savar</td><td>6:20 AM</td><td></td></tr>
+                        <tr><td>02</td><td>CRP Gate</td><td>6:22 AM</td><td></td></tr>
+                        <tr><td>03</td><td>Radio Colony</td><td>6:25 AM</td><td></td></tr>
+                        <tr><td>04</td><td>J Nagar Dairy Gate</td><td>6:28 AM</td><td></td></tr>
+                        <tr><td>05</td><td>Bismail</td><td>6:30 AM</td><td></td></tr>
+                        <tr><td>06</td><td>RAB Gate</td><td>6:32 AM</td><td></td></tr>
+                        <tr><td>07</td><td>Nabinagar</td><td>6:35 AM</td><td></td></tr>
+                        <tr><td>08</td><td>Cantonment Board</td><td>6:37 AM</td><td></td></tr>
+                        <tr><td>09</td><td>Palli Biddut</td><td>6:40 AM</td><td></td></tr>
+                        <tr><td>10</td><td>Palash Bari</td><td>6:43 AM</td><td>5:40 PM (Saturday-Wednesday)</td></tr>
+                        <tr><td>11</td><td>Baipail Bridge</td><td>6:45 AM</td><td></td></tr>
+                        <tr><td>12</td><td>Unique</td><td>6:50 AM</td><td></td></tr>
+                        <tr><td>13</td><td>Jamghara Bazar</td><td>6:55 AM</td><td></td></tr>
+                        <tr><td>14</td><td>Sarkar Market</td><td>7:00 AM</td><td></td></tr>
+                        <tr><td>15</td><td>Nasinghapur</td><td>7:10 AM</td><td></td></tr>
+                        <tr><td>16</td><td>Nischintapur</td><td>7:12 AM</td><td></td></tr>
+                        <tr><td>17</td><td>Goshbagh</td><td>7:15 AM</td><td></td></tr>
+                        <tr><td>18</td><td>Zirabo</td><td>7:20 AM</td><td></td></tr>
+                        <tr><td>19</td><td>Ashulia</td><td>7:25 AM</td><td></td></tr>
+                        <tr><td>20</td><td>Dhour</td><td>7:28 AM</td><td></td></tr>
+                        <tr><td>21</td><td>Campus</td><td>7:50 AM</td><td></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+           
+            <!-- Signboard -->
+            <div class="route">
+                <h2>Route: Signboard (Bus No: 32)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sl. No.</th>
+                            <th>Stoppage</th>
+                            <th>Pick Up Time</th>
+                            <th>Campus Departure Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>01</td><td>Signboard</td><td>6:30 AM</td><td></td></tr>
+                        <tr><td>02</td><td>Matuaile Medical</td><td>6:32 AM</td><td></td></tr>
+                        <tr><td>03</td><td>Shonir Akra</td><td>6:36 AM</td><td></td></tr>
+                        <tr><td>04</td><td>Mayor Hanif Flyover</td><td>6:40 AM</td><td></td></tr>
+                        <tr><td>05</td><td>Jatrabari</td><td>6:42 AM</td><td></td></tr>
+                        <tr><td>06</td><td>Gulistan</td><td>6:45 AM</td><td></td></tr>
+                        <tr><td>07</td><td>National Stadium</td><td>6:48 AM</td><td></td></tr>
+                        <tr><td>08</td><td>Shahbagh</td><td>6:52 AM</td><td>5:40 PM (Saturday-Wednesday)</td></tr>
+                        <tr><td>09</td><td>Banglamotor</td><td>6:55 AM</td><td></td></tr>
+                        <tr><td>10</td><td>Sonargown Hotel</td><td>6:56 AM</td><td></td></tr>
+                        <tr><td>11</td><td>Farmgate Pollice Box</td><td>7:00 AM</td><td></td></tr>
+                        <tr><td>12</td><td>Shahin Hall</td><td>7:05 AM</td><td></td></tr>
+                        <tr><td>13</td><td>Banani</td><td>7:12 AM</td><td></td></tr>
+                        <tr><td>14</td><td>MES</td><td>7:15 AM</td><td></td></tr>
+                        <tr><td>15</td><td>Kowla</td><td>7:25 AM</td><td></td></tr>
+                        <tr><td>16</td><td>Airport</td><td>7:28 AM</td><td></td></tr>
+                        <tr><td>17</td><td>Campus</td><td>8:10 AM</td><td></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Kallyanpur -->
+            <div class="route">
+                <h2>Route: Kallyanpur (Bus No: 18)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sl. No.</th>
+                            <th>Stoppage</th>
+                            <th>Pick Up Time</th>
+                            <th>Campus Departure Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>01</td><td>Kallyanpur</td><td>6:20 AM</td><td></td></tr>
+                        <tr><td>02</td><td>Technical</td><td>6:22 AM</td><td></td></tr>
+                        <tr><td>03</td><td>Ansar Camp</td><td>6:25 AM</td><td></td></tr>
+                        <tr><td>04</td><td>Mirpur – 01</td><td>6:27 AM</td><td></td></tr>
+                        <tr><td>05</td><td>Soni Hall</td><td>6:30 AM</td><td></td></tr>
+                        <tr><td>06</td><td>Mirpur – 02</td><td>6:33 AM</td><td></td></tr>
+                        <tr><td>07</td><td>Mirpur – 10</td><td>6:40 AM</td><td></td></tr>
+                        <tr><td>08</td><td>Kazipara</td><td>6:45 AM</td><td></td></tr>
+                        <tr><td>09</td><td>Shewrapara</td><td>6:50 AM</td><td>5:40 PM (Saturday-Wednesday)</td></tr>
+                        <tr><td>10</td><td>Taltala</td><td>6:53 AM</td><td></td></tr>
+                        <tr><td>11</td><td>Agargaon</td><td>6:55 AM</td><td></td></tr>
+                        <tr><td>12</td><td>Shaheen College</td><td>7:00 AM</td><td></td></tr>
+                        <tr><td>13</td><td>Mohakhali Rail Gate</td><td>7:02 AM</td><td></td></tr>
+                        <tr><td>14</td><td>Amtali</td><td>7:05 AM</td><td></td></tr>
+                        <tr><td>15</td><td>Soinik Club</td><td>7:07 AM</td><td></td></tr>
+                        <tr><td>16</td><td>Kakali</td><td>7:10 AM</td><td></td></tr>
+                        <tr><td>17</td><td>Shewra</td><td>7:20 AM</td><td></td></tr>
+                        <tr><td>18</td><td>Khilkhet</td><td>7:25 AM</td><td></td></tr>
+                        <tr><td>19</td><td>Campus</td><td>8:10 AM</td><td></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Soni Hall, Mirpur Kalshi -->
+            <div class="route">
+                <h2>Route: Soni Hall, Mirpur Kalshi (Bus No: 20)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sl. No.</th>
+                            <th>Stoppage</th>
+                            <th>Pick Up Time</th>
+                            <th>Campus Departure Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>01</td><td>Soni Hall</td><td>6:50 AM</td><td></td></tr>
+                        <tr><td>02</td><td>Mirpur – 02</td><td>6:55 AM</td><td></td></tr>
+                        <tr><td>03</td><td>Original – 10</td><td>7:00 AM</td><td></td></tr>
+                        <tr><td>04</td><td>Mirpur – 11</td><td>7:05 AM</td><td></td></tr>
+                        <tr><td>05</td><td>Purobi Hall</td><td>7:07 AM</td><td></td></tr>
+                        <tr><td>06</td><td>Palashi</td><td>7:10 AM</td><td>5:40 PM (Saturday-Wednesday)</td></tr>
+                        <tr><td>07</td><td>Kabarsthan</td><td>7:12 AM</td><td></td></tr>
+                        <tr><td>08</td><td>Kalshi</td><td>7:15 AM</td><td></td></tr>
+                        <tr><td>09</td><td>ECB Chattar</td><td>7:20 AM</td><td></td></tr>
+                        <tr><td>10</td><td>MES</td><td>7:25 AM</td><td></td></tr>
+                        <tr><td>11</td><td>Khilkhet</td><td>7:30 AM</td><td></td></tr>
+                        <tr><td>12</td><td>Airport</td><td>7:35 AM</td><td></td></tr>
+                        <tr><td>13</td><td>Campus</td><td>8:10 AM</td><td></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Razbari, Gazipur -->
+            <div class="route">
+                <h2>Route: Razbari, Gazipur (Bus No: 17)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sl. No.</th>
+                            <th>Stoppage</th>
+                            <th>Pick Up Time</th>
+                            <th>Campus Departure Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>01</td><td>Razbari</td><td>6:50 AM</td><td></td></tr>
+                        <tr><td>02</td><td>Kendrio Jame Mosque</td><td>7:02 AM</td><td></td></tr>
+                        <tr><td>03</td><td>Krishi Gabeshana</td><td>7:08 AM</td><td></td></tr>
+                        <tr><td>04</td><td>Rice Research</td><td>7:11 AM</td><td></td></tr>
+                        <tr><td>05</td><td>T & T</td><td>7:15 AM</td><td></td></tr>
+                        <tr><td>06</td><td>Chowrastha</td><td>7:19 AM</td><td>5:40 PM (Saturday-Wednesday)</td></tr>
+                        <tr><td>07</td><td>Board Bazar</td><td>7:30 AM</td><td></td></tr>
+                        <tr><td>08</td><td>Barabari</td><td>7:36 AM</td><td></td></tr>
+                        <tr><td>09</td><td>Gazipura</td><td>7:42 AM</td><td></td></tr>
+                        <tr><td>10</td><td>College Gate</td><td>7:43 AM</td><td></td></tr>
+                        <tr><td>11</td><td>Station Road</td><td>7:51 AM</td><td></td></tr>
+                        <tr><td>12</td><td>Campus</td><td>8:00 AM</td><td></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+
+            <!-- Rajendrapur -->
+            <div class="route">
+                <h2>Route: Rajendrapur (Bus No: 12)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sl. No.</th>
+                            <th>Stoppage</th>
+                            <th>Pick Up Time</th>
+                            <th>Campus Departure Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>01</td><td>Rajendrapur Cantonment</td><td>6:30 AM</td><td></td></tr>
+                        <tr><td>02</td><td>Rajendrapur Chowrastha</td><td>6:35 AM</td><td></td></tr>
+                        <tr><td>03</td><td>Masterbari</td><td>6:45 AM</td><td></td></tr>
+                        <tr><td>04</td><td>Purabari</td><td>6:48 AM</td><td></td></tr>
+                        <tr><td>05</td><td>University Gate</td><td>6:55 AM</td><td>5:40 PM (Saturday-Wednesday)</td></tr>
+                        <tr><td>06</td><td>Salna Bridge</td><td>6:58 AM</td><td></td></tr>
+                        <tr><td>07</td><td>Nagpara</td><td>7:05 AM</td><td></td></tr>
+                        <tr><td>08</td><td>Telipara</td><td>7:06 AM</td><td></td></tr>
+                        <tr><td>09</td><td>Truck Stand</td><td>7:08 AM</td><td></td></tr>
+                        <tr><td>10</td><td>Campus</td><td>8:00 AM</td><td></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Kalshi, Mirpur -->
+            <div class="route">
+                <h2>Route: Kalshi, Mirpur (Bus No: 31)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sl. No.</th>
+                            <th>Stoppage</th>
+                            <th>Pick Up Time</th>
+                            <th>Campus Departure Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>01</td><td>11.05 (Shara Egaro)</td><td>7:00 AM</td><td></td></tr>
+                        <tr><td>02</td><td>Dha Block Mour</td><td>7:05 AM</td><td></td></tr>
+                        <tr><td>03</td><td>Sangbadik Plot</td><td>7:08 AM</td><td></td></tr>
+                        <tr><td>04</td><td>Byesh Tala</td><td>7:10 AM</td><td></td></tr>
+                        <tr><td>05</td><td>Kalshi Mour</td><td>7:12 AM</td><td></td></tr>
+                        <tr><td>06</td><td>Kalshi Bridge</td><td>7:15 AM</td><td></td></tr>
+                        <tr><td>07</td><td>ECB Chattar</td><td>7:20 AM</td><td></td></tr>
+                        <tr><td>08</td><td>Mati Kata Baribadh</td><td>7:22 AM</td><td>5:40 PM (Saturday-Wednesday)</td></tr>
+                        <tr><td>09</td><td>Shewra</td><td>7:25 AM</td><td></td></tr>
+                        <tr><td>10</td><td>Khilkhet</td><td>7:27 AM</td><td></td></tr>
+                        <tr><td>11</td><td>Kawla</td><td>7:29 AM</td><td></td></tr>
+                        <tr><td>12</td><td>Airport</td><td>7:32 AM</td><td></td></tr>
+                        <tr><td>13</td><td>Jashimuddin</td><td>7:37 AM</td><td></td></tr>
+                        <tr><td>14</td><td>Azampur</td><td>7:43 AM</td><td></td></tr>
+                        <tr><td>15</td><td>Abdullahpur</td><td>7:50 AM</td><td></td></tr>
+                        <tr><td>16</td><td>Campus</td><td>8:10 AM</td><td></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Konabari, Mouchak -->
+            <div class="route">
+                <h2>Route: Konabari, Mouchak (Bus No: 13)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sl. No.</th>
+                            <th>Stoppage</th>
+                            <th>Pick Up Time</th>
+                            <th>Campus Departure Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>01</td><td>Mouchak</td><td>6:45 AM</td><td></td></tr>
+                        <tr><td>02</td><td>Konabari</td><td>6:55 AM</td><td></td></tr>
+                        <tr><td>03</td><td>Palli Biddhut</td><td>7:08 AM</td><td></td></tr>
+                        <tr><td>04</td><td>Bhawal College</td><td>7:10 AM</td><td></td></tr>
+                        <tr><td>05</td><td>Chowrastha</td><td>7:20 AM</td><td>5:40 PM (Saturday-Wednesday)</td></tr>
+                        <tr><td>06</td><td>Board Bazar</td><td>7:35 AM</td><td></td></tr>
+                        <tr><td>07</td><td>Barabari</td><td>7:40 AM</td><td></td></tr>
+                        <tr><td>08</td><td>Gazipura</td><td>7:45 AM</td><td></td></tr>
+                        <tr><td>09</td><td>College Gate</td><td>7:50 AM</td><td></td></tr>
+                        <tr><td>10</td><td>Station Road</td><td>7:55 AM</td><td></td></tr>
+                        <tr><td>11</td><td>Campus</td><td>8:05 AM</td><td></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Physical, Mohammadpur -->
+            <div class="route">
+                <h2>Route: Physical, Mohammadpur (Bus No: 33)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sl. No.</th>
+                            <th>Stoppage</th>
+                            <th>Pick Up Time</th>
+                            <th>Campus Departure Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>01</td><td>Physical</td><td>6:45 AM</td><td></td></tr>
+                        <tr><td>02</td><td>Noorjahan Road</td><td>6:50 AM</td><td></td></tr>
+                        <tr><td>03</td><td>Shia Masjid</td><td>6:55 AM</td><td></td></tr>
+                        <tr><td>04</td><td>Japan Garden City</td><td>6:56 AM</td><td></td></tr>
+                        <tr><td>05</td><td>Shymoli</td><td>7:00 AM</td><td></td></tr>
+                        <tr><td>06</td><td>Shaheen School</td><td>7:10 AM</td><td>5:40 PM (Saturday-Wednesday)</td></tr>
+                        <tr><td>07</td><td>Mohakhali Flyover</td><td>7:13 AM</td><td></td></tr>
+                        <tr><td>08</td><td>Kakoli, Banani</td><td>7:15 AM</td><td></td></tr>
+                        <tr><td>09</td><td>MES</td><td>7:25 AM</td><td></td></tr>
+                        <tr><td>10</td><td>House Building</td><td>7:45 AM</td><td></td></tr>
+                        <tr><td>11</td><td>Abdullahpur</td><td>7:57 AM</td><td></td></tr>
+                        <tr><td>12</td><td>Campus</td><td>8:10 AM</td><td></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Shimultali, Gazipur -->
+            <div class="route">
+                <h2>Route: Shimultali, Gazipur (Bus No: 14)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sl. No.</th>
+                            <th>Stoppage</th>
+                            <th>Pick Up Time</th>
+                            <th>Campus Departure Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>01</td><td>Shimultali</td><td>6:45 AM</td><td></td></tr>
+                        <tr><td>02</td><td>Salna Road</td><td>6:49 AM</td><td></td></tr>
+                        <tr><td>03</td><td>Salim Vila</td><td>6:50 AM</td><td></td></tr>
+                        <tr><td>04</td><td>BADC</td><td>6:55 AM</td><td></td></tr>
+                        <tr><td>05</td><td>Duet Gate</td><td>6:59 AM</td><td></td></tr>
+                        <tr><td>06</td><td>Joydebpur Bus Stand</td><td>7:03 AM</td><td></td></tr>
+                        <tr><td>07</td><td>Shibbari</td><td>7:05 AM</td><td></td></tr>
+                        <tr><td>08</td><td>Krishi Gabeshana</td><td>7:08 AM</td><td>5:40 PM (Saturday-Wednesday)</td></tr>
+                        <tr><td>09</td><td>Rice Research</td><td>7:12 AM</td><td></td></tr>
+                        <tr><td>10</td><td>T & T</td><td>7:14 AM</td><td></td></tr>
+                        <tr><td>11</td><td>Chowrastha</td><td>7:18 AM</td><td></td></tr>
+                        <tr><td>12</td><td>Board Bazar</td><td>7:28 AM</td><td></td></tr>
+                        <tr><td>13</td><td>Barabari</td><td>7:34 AM</td><td></td></tr>
+                        <tr><td>14</td><td>Gazipura</td><td>7:40 AM</td><td></td></tr>
+                        <tr><td>15</td><td>College Gate</td><td>7:45 AM</td><td></td></tr>
+                        <tr><td>16</td><td>Station Road</td><td>7:52 AM</td><td></td></tr>
+                        <tr><td>17</td><td>Campus</td><td>8:05 AM</td><td></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Rampura Bridge & Notun Bazar -->
+            <div class="route">
+                <h2>Route: Rampura Bridge & Notun Bazar (Bus No: 02)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sl. No.</th>
+                            <th>Stoppage</th>
+                            <th>Pick Up Time</th>
+                            <th>Campus Departure Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>01</td><td>Rampura Bridge</td><td>7:00 AM</td><td></td></tr>
+                        <tr><td>02</td><td>Maddhya Badda</td><td>7:05 AM</td><td></td></tr>
+                        <tr><td>03</td><td>Uttar Badda</td><td>7:10 AM</td><td></td></tr>
+                        <tr><td>04</td><td>Shahjadpur</td><td>7:12 AM</td><td></td></tr>
+                        <tr><td>05</td><td>Nuton Bazar</td><td>7:15 AM</td><td></td></tr>
+                        <tr><td>06</td><td>Narda Bazar</td><td>7:17 AM</td><td>5:40 PM (Saturday-Wednesday)</td></tr>
+                        <tr><td>07</td><td>Bashundhara</td><td>7:20 AM</td><td></td></tr>
+                        <tr><td>08</td><td>Kuril Bishwa Road</td><td>7:25 AM</td><td></td></tr>
+                        <tr><td>09</td><td>Bishwa Road</td><td>7:27 AM</td><td></td></tr>
+                        <tr><td>10</td><td>Khilkhet</td><td>7:30 AM</td><td></td></tr>
+                        <tr><td>11</td><td>Airport</td><td>7:45 AM</td><td></td></tr>
+                        <tr><td>12</td><td>Campus</td><td>8:05 AM</td><td></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Chandura -->
+            <div class="route">
+                <h2>Route: Chandura (Bus No: 16)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sl. No.</th>
+                            <th>Stoppage</th>
+                            <th>Pick Up Time</th>
+                            <th>Campus Departure Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>01</td><td>Chandura</td><td>6:30 AM</td><td></td></tr>
+                        <tr><td>02</td><td>Baripara</td><td>6:32 AM</td><td></td></tr>
+                        <tr><td>03</td><td>Kabirpur</td><td>6:35 AM</td><td></td></tr>
+                        <tr><td>04</td><td>Zerane Bazar</td><td>6:38 AM</td><td></td></tr>
+                        <tr><td>05</td><td>EPZ</td><td>6:45 AM</td><td></td></tr>
+                        <tr><td>06</td><td>Baypal</td><td>6:50 AM</td><td></td></tr>
+                        <tr><td>07</td><td>Unique</td><td>7:00 AM</td><td>5:40 PM (Sat-Wed)</td></tr>
+                        <tr><td>08</td><td>Zamgora Bazar</td><td>7:05 AM</td><td></td></tr>
+                        <tr><td>09</td><td>Sarker Market</td><td>7:08 AM</td><td></td></tr>
+                        <tr><td>10</td><td>Norsinghpur</td><td>7:10 AM</td><td></td></tr>
+                        <tr><td>11</td><td>Zirabo</td><td>7:15 AM</td><td></td></tr>
+                        <tr><td>12</td><td>Ashulia</td><td>7:20 AM</td><td></td></tr>
+                        <tr><td>13</td><td>Dhour</td><td>7:28 AM</td><td></td></tr>
+                        <tr><td>14</td><td>Campus</td><td>8:10 AM</td><td></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- New Market -->
+            <div class="route">
+                <h2>Route: New Market (Bus No: 29)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sl. No.</th>
+                            <th>Stoppage</th>
+                            <th>Pick Up Time</th>
+                            <th>Campus Departure Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>01</td><td>Gonoshasthya</td><td>6:40 AM</td><td></td></tr>
+                        <tr><td>02</td><td>Science Lab</td><td>6:42 AM</td><td></td></tr>
+                        <tr><td>03</td><td>New Market</td><td>6:45 AM</td><td></td></tr>
+                        <tr><td>04</td><td>City College</td><td>6:50 AM</td><td></td></tr>
+                        <tr><td>05</td><td>Zigatala</td><td>6:55 AM</td><td></td></tr>
+                        <tr><td>06</td><td>Dhanmondi 15</td><td>6:57 AM</td><td></td></tr>
+                        <tr><td>07</td><td>Shankar Bus Stand</td><td>6:58 AM</td><td>5:40 PM (Sat-Wed)</td></tr>
+                        <tr><td>08</td><td>Farmgate</td><td>7:05 AM</td><td></td></tr>
+                        <tr><td>09</td><td>Kakoli/Banani</td><td>7:15 AM</td><td></td></tr>
+                        <tr><td>10</td><td>MES</td><td>7:20 AM</td><td></td></tr>
+                        <tr><td>11</td><td>Khilkhet</td><td>7:25 AM</td><td></td></tr>
+                        <tr><td>12</td><td>Airport</td><td>7:30 AM</td><td></td></tr>
+                        <tr><td>13</td><td>Abdullahpur</td><td>7:30 AM</td><td></td></tr>
+                        <tr><td>14</td><td>Campus</td><td>8:10 AM</td><td></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+
+  <!-- Bottom Bar -->
+  <div class="bottom_bar">
+    <img src="../picture/SKST.png" alt="Logo" style="height:80px; width:auto;">
+    <p>SKST University</p>
+    <p>4 Embankment Drive Road, Sector-10, Uttara Model Town, Dhaka-1230.</p>
+    <p>Phone: (88 02) 55091801-5, Mobile : +88 01714 014 933, 01810030041-9, 01325080581-9</p>
+    <p>Fax: (880-2) 5895 2625, Email : info@skst.edu</p>
+  </div>
+
+</body>
+</html>

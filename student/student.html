@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SKST University || Student</title>
 <link rel="icon" href="../picture/SKST.png" type="image/png" />
-    <link rel="stylesheet" href="../Design/buttom_bar.css">
+    <link rel="stylesheet" href="../Design/bottom_bar.css">
   <!-- Font Awesome (optional) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
@@ -162,6 +162,42 @@
   background: darkviolet; /* optional hover effect */
 }
 
+body {
+  font-family: Arial, sans-serif;
+  background: #f9f9f9;
+  color: #333;
+  margin: 0;
+  padding: 20px;
+}
+
+.content-container {
+  display: flex;
+  gap: 20px;
+}
+
+.column {
+  flex: 1;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.section {
+  margin-bottom: 30px;
+}
+
+.section h3 {
+  color: #0073e6;
+  margin-bottom: 10px;
+}
+
+.section p {
+  line-height: 1.6;
+  font-size: 16px;
+  color: #555;
+}
+
   </style>
 </head>
 <body>
@@ -182,20 +218,20 @@
 
     <div class="menu-section">
       <a href="student.html"><button class="btn">Student</button></a>
-      <a href="faculty.html"><button class="btn">Faculty</button></a>
-      <a href="administration.html"><button class="btn">Administration</button></a>
-      <a href="alumni.html"><button class="btn">Alumni</button></a>
-      <a href="campus.html"><button class="btn">Campus Life</button></a>
-      <a href="iqac.html"><button class="btn">IQAC</button></a>
-      <a href="notice.html"><button class="btn">Notice</button></a>
-      <a href="news.html"><button class="btn">News</button></a>
-      <a href="ranking.html"><button class="btn">Ranking</button></a>
-      <a href="academic.html"><button class="btn">Academics</button></a>
-      <a href="scholarship.html"><button class="btn">Scholarships</button></a>
-      <a href="admission.html"><button class="btn">Admission</button></a>
-      <a href="library/library.php"><button class="btn">Library</button></a>
-      <a href="volunteer.html"><button class="btn">Volunteer</button></a>
-      <a href="about.html"><button class="btn">About US</button></a>
+      <a href="../faculty.html"><button class="btn">Faculty</button></a>
+      <a href="../administration.html"><button class="btn">Administration</button></a>
+      <a href="../alumni.html"><button class="btn">Alumni</button></a>
+      <a href="../campus.html"><button class="btn">Campus Life</button></a>
+      <a href="../iqac.html"><button class="btn">IQAC</button></a>
+      <a href="../notice.html"><button class="btn">Notice</button></a>
+      <a href="../news.html"><button class="btn">News</button></a>
+      <a href="../ranking.html"><button class="btn">Ranking</button></a>
+      <a href="../academic.html"><button class="btn">Academics</button></a>
+      <a href="../scholarship.html"><button class="btn">Scholarships</button></a>
+      <a href="../admission.html"><button class="btn">Admission</button></a>
+      <a href="../library/library.php"><button class="btn">Library</button></a>
+      <a href="../volunteer.html"><button class="btn">Volunteer</button></a>
+      <a href="../about.html"><button class="btn">About US</button></a>
     </div>
   </div>
 
@@ -220,54 +256,57 @@
   <a href="../admission.html">Admission Circular</a>
   <a href="../admission.php">Admission Test</a>
   <a href="../working.html">Tuition and Fees</a>
+  <a href="../service/transportation.html">Transportation</a>
   <a href="studentf.php">Student Login</a>
 </div>
 
 
-    <!-- Content Area Split into Two Columns -->
-    <div style="flex:1; display:flex; gap:20px;">
+<!-- Content Area Split into Two Columns -->
+  <div class="content-container">
 
-      <!-- Left Column -->
-      <div style="flex:1; background:#fff; padding:20px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.05); font-family:Arial, sans-serif; color:#333;">
-        <div id="scholarships" style="margin-bottom:30px;">
-          <h3 style="color:#0073e6; margin-bottom:10px;">Scholarships and Aids</h3>
-          <p style="line-height:1.6; font-size:16px; color:#555;">A good number of scholarships for the qualified students.</p>
-        </div>
-
-        <div id="support" style="margin-bottom:30px;">
-          <h3 style="color:#0073e6; margin-bottom:10px;">Student Support Services</h3>
-          <p style="line-height:1.6; font-size:16px; color:#555;">Teaching Assistance, Consultation, Debating Forum, Grooming, Initiation Program, Orientation, Online Course Offering.</p>
-        </div>
-
-        <div id="test" style="margin-bottom:30px;">
-          <h3 style="color:#0073e6; margin-bottom:10px;">Admission Test</h3>
-          <p style="line-height:1.6; font-size:16px; color:#555;">All applicants must qualify in the admission test to be eligible for admission.</p>
-        </div>
+    <!-- Left Column -->
+    <div class="column">
+      <div id="scholarships" class="section">
+        <h3>Scholarships and Aids</h3>
+        <p>A good number of scholarships for the qualified students.</p>
       </div>
 
-      <!-- Right Column -->
-      <div style="flex:1; background:#fff; padding:20px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.05); font-family:Arial, sans-serif; color:#333;">
-        <div id="facilities" style="margin-bottom:30px;">
-          <h3 style="color:#0073e6; margin-bottom:10px;">Facilities</h3>
-          <p style="line-height:1.6; font-size:16px; color:#555;">Free Transport, Modern Living Course, Indoor and Outdoor Games, Sports, Wifi, Open Study Arena, Technical Training Courses, English Learning Center.</p>
-        </div>
-
-        <div id="circular" style="margin-bottom:30px;">
-          <h3 style="color:#0073e6; margin-bottom:10px;">Admission Circular</h3>
-          <p style="line-height:1.6; font-size:16px; color:#555;">Information on degrees, requirements, policies.</p>
-        </div>
-
-        <div id="fees" style="margin-bottom:30px;">
-          <h3 style="color:#0073e6; margin-bottom:10px;">Tuition and Fees</h3>
-          <p style="line-height:1.6; font-size:16px; color:#555;">The title of programs, duration, credit hours and fees.</p>
-        </div>
+      <div id="support" class="section">
+        <h3>Student Support Services</h3>
+        <p>Teaching Assistance, Consultation, Debating Forum, Grooming, Initiation Program, Orientation, Online Course Offering.</p>
       </div>
+
+      <div id="test" class="section">
+        <h3>Admission Test</h3>
+        <p>All applicants must qualify in the admission test to be eligible for admission.</p>
+      </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="column">
+      <div id="facilities" class="section">
+        <h3>Facilities</h3>
+        <p>Free Transport, Modern Living Course, Indoor and Outdoor Games, Sports, Wifi, Open Study Arena, Technical Training Courses, English Learning Center.</p>
+      </div>
+
+      <div id="circular" class="section">
+        <h3>Admission Circular</h3>
+        <p>Information on degrees, requirements, policies.</p>
+      </div>
+
+      <div id="fees" class="section">
+        <h3>Tuition and Fees</h3>
+        <p>The title of programs, duration, credit hours and fees.</p>
+      </div>
+    </div>
+
+  </div>
 
     </div>
   </div>
-</div>
 
-      <div class="buttom_bar">
+
+      <div class="bottom_bar">
       <img src="../picture/SKST.png" alt="Logo" style="height:80px; width:auto;">
       <p>SKST University</p>
       <p>4 Embankment Drive Road,Sector-10, Uttara Model Town, Dhaka-1230.</p>

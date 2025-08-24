@@ -8,7 +8,7 @@
   <link rel="icon" href="picture/SKST.png" type="image/png">
   <link rel="stylesheet" href="Design/campus_Image.css">
   <link rel="stylesheet" href="Design/welcome-message.css">
-  <link rel="stylesheet" href="Design/buttom_bar.css">
+  <link rel="stylesheet" href="Design/bottom_bar.css">
   <link rel="stylesheet" href="library/library.css">
 
   <style>
@@ -166,7 +166,6 @@
       <a href="alumni.html"><button class="btn">Alumni</button></a>
       <a href="campus.html"><button class="btn">Campus Life</button></a>
       <a href="iqac.html"><button class="btn">IQAC</button></a>
-      <!-- <a href="notice.html"><button class="btn">Notice</button></a> -->
       <a href="news.html"><button class="btn">News</button></a>
       <a href="ranking.html"><button class="btn">Ranking</button></a>
       <a href="academic.html"><button class="btn">Academics</button></a>
