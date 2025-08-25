@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SKST University || Library</title>
-<link rel="icon" href="../picture/SKST.png" type="image/png" />
-    <link rel="stylesheet" href="library.css">
+  <title>SKST University</title>
+  <link rel="icon" href="../picture/SKST.png" type="image/png" />
     <link rel="stylesheet" href="../Design/buttom_bar.css">
   <!-- Font Awesome (optional) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -98,23 +97,7 @@
       }
     }
 
-    .library-login {
-      background-color: #28a745;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      font-size: 16px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      transition: all 0.3s ease;
-      cursor: pointer;
-      min-width: 120px;
-    }
 
-    .library-login:hover {
-      transform: translateY(-3px);
-      background: linear-gradient(135deg, #b31217, #e52d27);
-    }
 
     .home-button {
       background: gray;
@@ -136,6 +119,109 @@
       transform: translateY(-3px);
       background: linear-gradient(135deg, #18bcae, #f3af02);
     }
+
+    .background-image {
+      display: flex;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .background-image img {
+      border: 1px solid black;
+      border-radius: 10px;
+      margin-top: 10px;
+      width: 100%;
+      height: auto;
+      display: block;
+      animation: fadeInUp 2s ease-in-out;
+    }
+
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .welcome-message {
+      text-align: center;
+      padding: 20px;
+      color: white;
+      background-color: rgb(139, 0, 0);
+      margin-top: 10px;
+      border: 1px solid black;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border-radius: 5px;
+    }
+
+    .line-through {
+      position: relative;
+      text-align: center;
+      color: #1c6e3c; /* green shade like in your screenshot */
+      font-size: 24px;
+      font-weight: 500;
+      margin-top: 20px;
+      margin-bottom: 30px;
+    }
+
+  .library-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    max-width: 1100px;
+    margin: 20px auto;
+    font-family: 'Times New Roman', Times, serif;
+  }
+
+  .library-box {
+    background: #ffffff;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    text-align: justify;
+    line-height: 1.6;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  }
+
+      .library-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 30px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      max-width: 1200px;
+      margin: 20px auto;
+      font-family: Arial, sans-serif;
+    }
+
+    .library-text {
+      flex: 1;
+      font-size: 16px;
+      line-height: 1.6;
+      color: #333;
+    }
+
+    .library-text h2 {
+      margin-bottom: 10px;
+      font-size: 20px;
+      color: #800000; /* Maroon */
+    }
+
+    .library-image img {
+      width: 400px;
+      height: 250px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+
   </style>
 </head>
 <body>
@@ -146,17 +232,16 @@
         <h1>SKST University || Library</h1>
       </div>
 
-      <!-- Library Login and Home Page Buttons -->
+      <!--Home Page Buttons -->
       <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
-        <a href="library.php"><button class="library-login">👉🏻 Library Login</button></a>
         <a href="../index.php" class="home-button">
           <i class="fas fa-home"></i> Home
         </a>
       </div>
-  </div>
+    </div>
 
     <div class="menu-section">
-      <a href="../student/student.html"><button class="btn">Student</button></a>
+      <a href="../student.html"><button class="btn">Student</button></a>
       <a href="../faculty.html"><button class="btn">Faculty</button></a>
       <a href="../administration.html"><button class="btn">Administration</button></a>
       <a href="../alumni.html"><button class="btn">Alumni</button></a>
@@ -168,11 +253,138 @@
       <a href="../academic.html"><button class="btn">Academics</button></a>
       <a href="../scholarship.html"><button class="btn">Scholarships</button></a>
       <a href="../admission.html"><button class="btn">Admission</button></a>
-      <!-- <a href="library/library.php"><button class="btn">Library</button></a> -->
+      <a href="library/library1.html"><button class="btn">Library</button></a>
       <a href="../volunteer.html"><button class="btn">Volunteer</button></a>
       <a href="../about.html"><button class="btn">About US</button></a>
     </div>
   </div>
+
+  
+    <div class="background-image">
+      <img src="../picture/library background.gif" alt="Background Image">
+    </div>
+
+        <div class="welcome-message">
+      <h1>WELCOME TO SKST UNIVERSITY CENTRAL LIBRARY</h1>
+      <p>"Where Knowledge Takes Shape"</p>
+    </div>
+
+    <h2 class="line-through">-----About SKST Library-----</h2>
+
+      <div class="library-container">
+        <div class="library-box">
+          SKTS University Central Library is Bangladesh's first private university library that is completely 
+          automated by KOHA. SKTS University Central Library serves as a cornerstone of knowledge and community 
+          participation, offering a diverse range of books and services to fulfill the needs of its patrons. The SKTS University Central 
+          Library has printed and online resource that assists the university's teaching and research activities. 
+          Library has a wide range of printed collections contain around 41,000 materials, with over 81,000 online 
+          e-resources. The Library features an outstanding digital library system for e-readers, with access to 
+          several online periodical databases, including over 41000 e-books and e-journals such as IEEE, LiCOB, 
+          and Research4Life in SKTS University Online e-resources. SKTS University Central Library is one of the largest private 
+          university libraries in Bangladesh, spanning over 18,000 square feet. <br> <br> 
+          
+          The library is organized into the following sections: Circulation, Acquisition and Processing, 
+          Archives, E-Library, Founder's Corner, Bangabandhu and Liberation War Section, Fiction Corner, 
+          Journals and Periodicals, and News Clippings. The IUBAT Library's collections include books, CDS, 
+          DVDs, journals, magazines, practicum reports, IUBAT publications, periodicals, newspapers, manuscripts, 
+          films, maps, prints, documents, microforms, cassettes, videotapes, Blu-ray Discs, e-books, audiobooks, 
+          databases, and other formats. These collections can be reached through the Online Public Access Catalogue. 
+          Approximately 2,000 users (researchers, professors, officers, and students) utilize library with 
+          barcode-printed ID cards in everyday.</div>
+
+      </div>
+
+      <!-- Library Hours and Floor Plan -->
+          <h2 class="line-through">-----Library Hours and Floor Plan-----</h2>
+
+            <div class="library-container">
+        <div class="library-text">
+          <p>
+            <strong> <u><b>Library Details:</b></u></strong><br><br>
+              1. Saturday to Friday (8.30 am to 8.00 pm). <br>
+              2. The Central Library covers an area of 18,000 square feet on the 13th floor of SKST University.<br>
+              3. It serves as a hub of knowledge and community engagement.<br>
+              4. It offers a wide variety of printed and digital resources.<br>
+              5. The library supports teaching, learning, and research activities of the university.
+        </div>
+        <div class="library-image">
+          <img src="../picture/library tag.png" alt="SKST University Library">
+        </div>
+      </div>
+
+      
+      <!-- Rules and Regulations for Library -->
+      <h2 class="line-through">-----Library Rules and Regulations-----</h2>
+        <div class="library-container">
+        <div class="library-text">
+      <p>
+        <strong> <u><b>Library Code and Regulations:</b></u></strong><br><br>
+        1. Each student must follow the dress code of SKTS University.<br>
+        2. Each student must follow the behaviour code of SKTS University.<br>
+        3. Students must carry a printed barcode ID card.<br>
+        4. Use of headphones, ear buds, or mobile phones is strictly prohibited.<br>
+        5. Bringing food or drink into the library is not allowed.<br>
+        6. Maintain silence and avoid disturbing others.<br>
+        7. Handle books, computers, and other library materials with care.<br>
+        8. Return borrowed books on or before the due date.<br>
+        9. Do not mark, damage, or remove library materials.<br>
+        10. Follow the library staff’s instructions at all times.
+    </div>
+    <div class="library-image">
+      <img src="../picture/library rules.png" alt="SKST University Library">
+    </div>
+  </div>
+
+        <!-- Borrowing Guidelines for Library Users -->
+      <h2 class="line-through">-----Borrowing Guidelines for Library Users-----</h2>
+        <div class="library-container">
+        <div class="library-text">
+      <p>
+        <strong> <u><b>Borrowing Guidelines:</b></u></strong><br><br>
+        1. Library users must show their valid ID card to borrow books and other library resources.<br>
+        2. Textbooks, Current and Rare documents are not allowed to issue.<br>
+        3. Register your ID in library OPAC for book borrowing.<br>
+        4. Every book that you borrow must be returned by the due date. If you require the same book for the following semester, you can borrow it again, but it must be returned before the new semester begins.<br>
+        5. All borrowed books must be returned on the due date or the borrower is to pay overdue charges at the following rates.
+    </div>
+    <div class="library-image">
+      <img src="../picture/borrow.png" alt="SKST University Library">
+    </div>
+  </div>
+
+
+          <!-- Replacement and Cost of Damaging Library Resources -->
+      <h2 class="line-through">-----Replacement and Cost of Damaging Library Resources-----</h2>
+        <div class="library-container">
+        <div class="library-text">
+      <p>
+       Books and Documents: Any books or documents lost by the borrower must be replaced with a new 
+       copy of the same author(s), title, and edition. A book(s) of a single author, title, and edition 
+       cannot be substituted by a book(s) or documents of another author and title. For missing books or 
+       documents, the borrower will be liable for the current market value of the lost book as a fee to the 
+       Library including 20% service charge.
+    </div>
+    </div>
+
+            <!-- Rules for Library Clearance -->
+      <h2 class="line-through">-----Rules for Library Clearance-----</h2>
+        <div class="library-container">
+        <div class="library-text">
+      <p>
+       Library clearance typically involves returning all borrowed materials, including books, journals, 
+       multimedia resources and any other items checked out from the library. Fines or fees must be settled, 
+       including overdue fines, replacement costs for lost or damaged items, and any other charges incurred 
+       during the borrowing period. The Softcopy and Hard Copy of practicum (with certificate) and thesis report 
+       including supervisor signature must be submitted to the library for library clearance.
+    </div>
+  </div>
+
+      <!--Home Page Buttons -->
+      <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: right; position: relative;
+      bottom: -80px; right: 20px;">
+        <a href="library.php" class="home-button">Library Login</a>
+      </div>
+    </div>
 
 
       <div class="buttom_bar">
@@ -182,8 +394,5 @@
       <p>Phone: (88 02) 55091801-5, Mobile : +88 01714 014 933, 01810030041-9, 01325080581-9</p>
       <p>Fax: (880-2) 5895 2625, Email : info@skst.edu</p>
     </div>
-
-
-  </div>
 </body>
 </html>
