@@ -834,12 +834,11 @@ elseif (isset($_POST['confirm_renew'])) {
                     <form action="library.php" method="post">
                         <button class="nav-btn" type="submit" name="notice"><i class="fas fa-bullhorn"></i> Library Notice</button>
                         <button class="nav-btn" type="submit" name="search"><i class="fas fa-search"></i> Book Search</button>
-                        <button class="nav-btn" type="submit" name="suggest"><i class="fas fa-book-medical"></i> Suggest a Book</button>
                         <button class="nav-btn" type="submit" name="staff"><i class="fas fa-user-tie"></i> Staff Portal</button>
                         <button class="nav-btn" type="submit" name="about"><i class="fas fa-info-circle"></i> About Us</button>
                         
-                        <button class="nav-btn" type="submit" name="resources"><i class="fas fa-graduation-cap"></i> Student Resources</button>
-                        <button class="nav-btn" type="submit" name="help"><i class="fas fa-question-circle"></i> Help Desk</button>
+                       <a href='library1.html'class='back-button'><i class='fas fa-arrow-left'></i> Dashboard</a>;
+                        
                     </form>
                 </div>
             <?php } ?>
