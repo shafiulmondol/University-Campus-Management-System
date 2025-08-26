@@ -834,7 +834,8 @@ elseif (isset($_POST['confirm_renew'])) {
                         <button class="nav-btn" type="submit" name="search"><i class="fas fa-search"></i> Book Search</button>
                         <button class="nav-btn" type="submit" name="staff"><i class="fas fa-user-tie"></i> Staff Portal</button>
                         <button class="nav-btn" type="submit" name="about"><i class="fas fa-info-circle"></i> About Us</button>
-                        
+                        <button class="nav-btn" type="submit" name="ebook"><a href="ebook.php"><i class="fas fa-book"></i> Ebook</a></button>
+
                        <a href='library1.html'class='back-button'><i class='fas fa-arrow-left'></i> Dashboard</a>;
                         
                     </form>
