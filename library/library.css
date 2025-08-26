@@ -188,11 +188,13 @@
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
+        text-decoration: none;
       }
       
       .nav-btn {
         width: auto;
         flex: 1 1 150px;
+        text-decoration: none;
       }
     }
 
@@ -515,11 +517,13 @@
       transition: all 0.3s ease;
       min-width: 120px;
       cursor: pointer;
+      text-decoration: none;
     }
 
     .btn:hover {
       transform: translateY(-3px);
       background: linear-gradient(135deg, #512da8, #1e88e5);
+      text-decoration: none;
     }
 
     @media (max-width: 768px) {
@@ -632,4 +636,3 @@
             width: 90%;
         }
     }
-
