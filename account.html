@@ -1,546 +1,343 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account Creation - SKST University</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SKST University</title>
+  <link rel="icon" href="picture/SKST.png" type="image/png" />
+    <link rel="stylesheet" href="Design/buttom_bar.css">
+  <!-- Font Awesome (optional) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-        body {
-            background: linear-gradient(135deg, #0c3d5f, #1d7a8c, #0c3d5f);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f9f9ff;
+    }
 
-        .container {
-            max-width: 1000px;
-            width: 100%;
-        }
+    a {
+      text-decoration: none; /* 🚫 Remove underline from all links */
+    }
 
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
+    .navbar {
+      background-color: #e0e7ff;
+      padding: 10px 20px;
+    }
 
-        .logo {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
+    .navbar-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
 
-        .logo-icon {
-            font-size: 3rem;
-            color: #ffd700;
-            background: #0c3d5f;
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-        .logo-text {
-            color: white;
-            font-size: 2.5rem;
-            font-weight: 700;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
+    .logo img {
+      height: 80px;
+    }
 
-        .tagline {
-            color: #ffd700;
-            font-size: 1.2rem;
-            font-style: italic;
-            letter-spacing: 1px;
-        }
+    .logo h1 {
+      font-size: 26px;
+      color: #333;
+    }
 
-        .card {
-            background: rgba(255, 255, 255, 0.97);
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-            transition: transform 0.3s ease;
-        }
+    .menu-section {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 15px;
+    }
 
-        .card:hover {
-            transform: translateY(-5px);
-        }
+    .menu-section a {
+      text-decoration: none;
+    }
 
-        .card-header {
-            background: linear-gradient(to right, #0c3d5f, #1d7a8c);
-            color: white;
-            padding: 20px;
-            text-align: center;
-            font-size: 1.5rem;
-            font-weight: 600;
-        }
+    .btn {
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      font-size: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      min-width: 120px;
+      cursor: pointer;
+    }
 
-        .card-body {
-            padding: 30px;
-        }
+    .btn:hover {
+      transform: translateY(-3px);
+      background: linear-gradient(135deg, #512da8, #1e88e5);
+    }
 
-        .form-row {
-            display: flex;
-            flex-wrap: wrap;
-            margin: 0 -15px;
-        }
+    @media (max-width: 768px) {
+      .navbar-top {
+        flex-direction: column;
+        align-items: center;
+      }
 
-        .form-group {
-            padding: 0 15px;
-            margin-bottom: 20px;
-            width: 50%;
-        }
+      .btn {
+        width: 80%;
+      }
 
-        .form-group.full-width {
-            width: 100%;
-        }
+      .menu-section {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
 
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #0c3d5f;
-        }
+    .account-login {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      min-width: 120px;
+    }
 
-        .input-group {
-            position: relative;
-        }
+    .account-login:hover {
+      transform: translateY(-3px);
+      background: linear-gradient(135deg, #b31217, #e52d27);
+    }
 
-        .input-group i {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #1d7a8c;
-        }
+    .home-button {
+      background: gray;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      font-size: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 120px;
+    }
 
-        input, select {
-            width: 100%;
-            padding: 14px 14px 14px 45px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: all 0.3s;
-        }
+    .home-button:hover {
+      transform: translateY(-3px);
+      background: linear-gradient(135deg, #18bcae, #f3af02);
+    }
 
-        input:focus, select:focus {
-            outline: none;
-            border-color: #1d7a8c;
-            box-shadow: 0 0 0 3px rgba(29, 122, 140, 0.2);
-        }
+    .home-button:hover {
+      transform: translateY(-3px);
+      background: linear-gradient(135deg, #18bcae, #f3af02);
+    }
 
-        .password-container {
-            position: relative;
-        }
+    .future-students-title {
+      text-align: center;
+      color: white;
+      background: #800000;
+      font-weight: bold;
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
 
-        .toggle-password {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: #777;
-            transition: color 0.3s;
-        }
+    .future-students-text {
+      text-align: center;
+      max-width: 1200px;
+      margin: 0 auto 30px auto;
+      color: black;
+      line-height: 1.6;
+      font-size: 16px;
+    }
 
-        .toggle-password:hover {
-            color: #0c3d5f;
-        }
+    .sidebar {    
+        flex: 0 0 240px;
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 20px;
+        height: fit-content;
+      }
 
-        .btn-container {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-        }
+      .sidebar a {
+        display: block;
+        padding: 12px 15px;
+        margin-bottom: 10px;
+        background: purple;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: 500;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      }
 
-        .btn {
-            background: linear-gradient(to right, #0c3d5f, #1d7a8c);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            position: relative;
-            overflow: hidden;
-        }
+      .sidebar a:hover {
+          background: linear-gradient(90deg, darkred);
+        transform: translateY(-3px);
+      }
 
-        .btn::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -60%;
-            width: 20px;
-            height: 200%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: rotate(25deg);
-            transition: all 0.5s;
-        }
+      .content-container {
+        display: flex;
+        gap: 20px;
+      }
 
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-        }
+      .column {
+        flex: 1;
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      }
 
-        .btn:hover::after {
-            left: 120%;
-        }
+      .section {
+        margin-bottom: 30px;
+      }
 
-        .terms {
-            margin-top: 25px;
-            text-align: center;
-            color: #555;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
+      .section h3 {
+        color: #0073e6;
+        margin-bottom: 10px;
+      }
 
-        .terms a {
-            color: #0c3d5f;
-            text-decoration: none;
-            font-weight: 600;
-        }
+      .section p {
+        line-height: 1.6;
+        font-size: 16px;
+        color: #555;
+      }
 
-        .terms a:hover {
-            text-decoration: underline;
-        }
-
-        .login-link {
-            text-align: center;
-            margin-top: 20px;
-            color: #555;
-        }
-
-        .login-link a {
-            color: #1d7a8c;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .login-link a:hover {
-            text-decoration: underline;
-        }
-
-        .password-strength {
-            height: 5px;
-            background: #eee;
-            border-radius: 5px;
-            margin-top: 8px;
-            overflow: hidden;
-        }
-
-        .strength-meter {
-            height: 100%;
-            width: 0;
-            transition: width 0.3s;
-        }
-
-        .strength-weak {
-            background: #e74c3c;
-            width: 30%;
-        }
-
-        .strength-medium {
-            background: #f39c12;
-            width: 60%;
-        }
-
-        .strength-strong {
-            background: #2ecc71;
-            width: 100%;
-        }
-
-        .cse-highlight {
-            background: linear-gradient(to right, rgba(12, 61, 95, 0.1), rgba(29, 122, 140, 0.1));
-            color: #0c3d5f;
-            font-weight: 700;
-            border-left: 3px solid #ff6b6b;
-            padding: 8px 15px;
-            margin: 5px 0;
-            border-radius: 0 5px 5px 0;
-        }
-
-        .cse-highlight::before {
-            content: "🔥";
-            margin-right: 8px;
-            color: #ff6b6b;
-        }
-
-        .department-label {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .department-label i {
-            margin-right: 10px;
-            color: #1d7a8c;
-        }
-
-        @media (max-width: 768px) {
-            .form-group {
-                width: 100%;
-            }
-            
-            .logo-text {
-                font-size: 2rem;
-            }
-            
-            .terms {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-        }
-    </style>
+      .future-students-container {
+        margin: 30px auto 40px auto;
+        padding: 0 20px;
+        font-family: Arial, sans-serif;
+      }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="logo">
-                <div class="logo-icon">
-                    <i class="fas fa-graduation-cap"></i>
-                </div>
-                <div class="logo-text">SKST UNIVERSITY</div>
-            </div>
-            <div class="tagline">Excellence in Education Since 1965</div>
-        </div>
-        
-        <div class="card">
-            <div class="card-header">
-                Create Your Account
-            </div>
-            <div class="card-body">
-                <form id="accountForm">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="firstName">First Name</label>
-                            <div class="input-group">
-                                <i class="fas fa-user"></i>
-                                <input type="text" id="firstName" placeholder="Enter your first name" required>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="lastName">Last Name</label>
-                            <div class="input-group">
-                                <i class="fas fa-user"></i>
-                                <input type="text" id="lastName" placeholder="Enter your last name" required>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="email">University Email</label>
-                            <div class="input-group">
-                                <i class="fas fa-envelope"></i>
-                                <input type="email" id="email" placeholder="name@skst.edu" required>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="studentId">Student/Faculty ID</label>
-                            <div class="input-group">
-                                <i class="fas fa-id-card"></i>
-                                <input type="text" id="studentId" placeholder="Enter your ID number" required>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="phone">Phone Number</label>
-                            <div class="input-group">
-                                <i class="fas fa-phone"></i>
-                                <input type="tel" id="phone" placeholder="Enter your phone number" required>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="role">Account Type</label>
-                            <div class="input-group">
-                                <i class="fas fa-user-tag"></i>
-                                <select id="role" required>
-                                    <option value="" disabled selected>Select your role</option>
-                                    <option value="student">Student</option>
-                                    <option value="faculty">Faculty Member</option>
-                                    <option value="staff">Administrative Staff</option>
-                                    <option value="researcher">Researcher</option>
-                                    <option value="alumni">Alumni</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="password">Password</label>
-                            <div class="input-group">
-                                <i class="fas fa-lock"></i>
-                                <div class="password-container">
-                                    <input type="password" id="password" placeholder="Create a strong password" required>
-                                    <span class="toggle-password" onclick="togglePassword()">
-                                        <i class="fas fa-eye"></i>
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="password-strength">
-                                <div class="strength-meter" id="strengthMeter"></div>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="confirmPassword">Confirm Password</label>
-                            <div class="input-group">
-                                <i class="fas fa-lock"></i>
-                                <div class="password-container">
-                                    <input type="password" id="confirmPassword" placeholder="Confirm your password" required>
-                                    <span class="toggle-password" onclick="toggleConfirmPassword()">
-                                        <i class="fas fa-eye"></i>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group full-width">
-                        <div class="department-label">
-                            <i class="fas fa-book"></i>
-                            <label for="program">Program/Department</label>
-                        </div>
-                        <select id="program" required>
-                            <option value="" disabled selected>Select your program/department</option>
-                            <option value="engineering">Engineering</option>
-                            <option value="cse" class="cse-highlight">Computer Science & Engineering (CSE)</option>
-                            <option value="medicine">Medicine</option>
-                            <option value="business">Business Administration</option>
-                            <option value="law">Law</option>
-                            <option value="arts">Arts & Humanities</option>
-                            <option value="science">Science & Technology</option>
-                            <option value="social">Social Sciences</option>
-                        </select>
-                    </div>
-                    
-                    <div class="terms">
-                        <input type="checkbox" id="terms" required>
-                        <label for="terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a> of SKST University</label>
-                    </div>
-                    
-                    <div class="btn-container">
-                        <button type="submit" class="btn">Create Account</button>
-                    </div>
-                </form>
-                
-                <div class="login-link">
-                    Already have an account? <a href="#">Sign In</a>
-                </div>
-            </div>
-        </div>
+  <div class="navbar">
+    <div class="navbar-top">
+      <div class="logo">
+        <img src="picture/logo.gif" alt="SKST Logo">
+        <h1>SKST University || Account</h1>
+      </div>
+
+      <!-- Alumni Login and Home Page Buttons -->
+      <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+        <a href="account.php"><button class="account-login"> <i class="fas fa-user"></i>  Account Login</button></a>
+        <a href="index.html" class="home-button">
+          <i class="fas fa-home"></i> Home
+        </a>
+      </div>
     </div>
 
-    <script>
-        function togglePassword() {
-            const passwordInput = document.getElementById('password');
-            const icon = document.querySelector('.toggle-password i');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                passwordInput.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
-        }
-        
-        function toggleConfirmPassword() {
-            const confirmInput = document.getElementById('confirmPassword');
-            const icon = document.querySelectorAll('.toggle-password i')[1];
-            
-            if (confirmInput.type === 'password') {
-                confirmInput.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                confirmInput.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
-        }
-        
-        document.getElementById('password').addEventListener('input', function() {
-            const password = this.value;
-            const strengthMeter = document.getElementById('strengthMeter');
-            
-            
-            strengthMeter.className = 'strength-meter';
-            
-            if (password.length === 0) {
-                return;
-            }
-            
-            let strength = 0;
-            
-            
-            if (password.length >= 8) strength += 25;
-            
-            
-            if (/[A-Z]/.test(password)) strength += 25;
-            
-            
-            if (/[a-z]/.test(password)) strength += 25;
-            
-            
-            if (/[0-9]/.test(password) || /[^A-Za-z0-9]/.test(password)) strength += 25;
-            
-            
-            if (strength >= 75) {
-                strengthMeter.classList.add('strength-strong');
-            } else if (strength >= 50) {
-                strengthMeter.classList.add('strength-medium');
-            } else {
-                strengthMeter.classList.add('strength-weak');
-            }
-        });
-        
-        document.getElementById('accountForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            
-            if (password !== confirmPassword) {
-                alert('Passwords do not match!');
-                return;
-            }
-            
-           
-            const programSelect = document.getElementById('program');
-            const selectedDepartment = programSelect.options[programSelect.selectedIndex].text;
-            
-            
-            alert(`Account created successfully! Welcome to SKST University.\nDepartment: ${selectedDepartment}`);
-            this.reset();
-            document.getElementById('strengthMeter').className = 'strength-meter';
-        });
-        
-        
-        document.getElementById('program').addEventListener('focus', function() {
-            const cseOption = this.querySelector('option[value="cse"]');
-            cseOption.classList.add('cse-highlight');
-        });
-    </script>
+    <div class="menu-section">
+      <a href="student/student.html"><button class="btn">Student</button></a>
+      <a href="faculty.html"><button class="btn">Faculty</button></a>
+      <a href="administration.html"><button class="btn">Administration</button></a>
+      <a href="alumni.html"><button class="btn">Alumni</button></a>
+      <a href="campus.html"><button class="btn">Campus Life</button></a>
+      <a href="iqac.html"><button class="btn">IQAC</button></a>
+      <a href="notice.html"><button class="btn">Notice</button></a>
+      <a href="news.html"><button class="btn">News</button></a>
+      <a href="ranking.html"><button class="btn">Ranking</button></a>
+      <a href="academic.html"><button class="btn">Academics</button></a>
+      <a href="scholarship.html"><button class="btn">Scholarships</button></a>
+      <a href="admission.html"><button class="btn">Admission</button></a>
+      <a href="library/library1.html"><button class="btn">Library</button></a>
+      <a href="volunteer.html"><button class="btn">Volunteer</button></a>
+      <a href="account.html"><button class="btn">Account</button></a>
+      <a href="about.html"><button class="btn">About US</button></a>
+    </div>
+  </div>
+
+  <div>
+  <div class="future-students-container">
+
+    <h1 class="future-students-title">Student Banking</h1>
+
+    <p class="future-students-text">
+     SKST University provides students with a secure online account that centralizes 
+     course registration, academic records, fee payments, and official communications.
+    </p>
+
+  </div>
+
+
+  <div style="display:flex; gap:30px; max-width:1200px; margin:0 auto;">
+
+    <!-- Sidebar -->
+<div class="sidebar">
+<p style="font-weight:bold; font-size:18px; margin-bottom:15px; text-align:center;">Quick Links</p>
+  <a href="account.php">Apply for Bank Account</a>
+  <a href="working.html">Student Account</a>
+  <a href="working.html">Faculty Account</a>
+  <a href="working.html">Employee Account</a>
+  <a href="account_officer.php">Account Officer</a>
+  <a href="working.html">About</a>
+</div>
+
+
+<!-- Content Area Split into Two Columns -->
+  <div class="content-container">
+
+    <!-- Left Column -->
+    <div class="column">
+      <div id="scholarships" class="section">
+        <h3>Scholarships and Aids</h3>
+        <p>A good number of scholarships for the qualified students.</p>
+      </div>
+
+      <div id="support" class="section">
+        <h3>Student Support Services</h3>
+        <p>Teaching Assistance, Consultation, Debating Forum, Grooming, Initiation Program, Orientation, Online Course Offering.</p>
+      </div>
+
+      <div id="test" class="section">
+        <h3>Admission Test</h3>
+        <p>All applicants must qualify in the admission test to be eligible for admission.</p>
+      </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="column">
+      <div id="facilities" class="section">
+        <h3>Facilities</h3>
+        <p>Free Transport, Modern Living Course, Indoor and Outdoor Games, Sports, Wifi, Open Study Arena, Technical Training Courses, English Learning Center.</p>
+      </div>
+
+      <div id="circular" class="section">
+        <h3>Admission Circular</h3>
+        <p>Information on degrees, requirements, policies.</p>
+      </div>
+
+      <div id="fees" class="section">
+        <h3>Tuition and Fees</h3>
+        <p>The title of programs, duration, credit hours and fees.</p>
+      </div>
+    </div>
+
+  </div>
+
+    </div>
+  </div>
+
+
+      <div class="buttom_bar">
+      <img src="picture/SKST.png" alt="Logo" style="height:80px; width:auto;">
+      <p>SKST University</p>
+      <p>4 Embankment Drive Road,Sector-10, Uttara Model Town, Dhaka-1230.</p>
+      <p>Phone: (88 02) 55091801-5, Mobile : +88 01714 014 933, 01810030041-9, 01325080581-9</p>
+      <p>Fax: (880-2) 5895 2625, Email : info@skst.edu</p>
+    </div>
 </body>
 </html>

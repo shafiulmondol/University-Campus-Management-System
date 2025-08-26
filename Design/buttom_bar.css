@@ -1,14 +1,14 @@
 .buttom_bar{
 
-  background-color: #6c5ce7;
+  background-color: rgb(100, 13, 13);
   border: solid 1px black;
   border-radius: 5px; 
   padding: 20px;
   text-align: center;
   font-size: 14px;
-  color: black;
+  color: white;
   margin-top: 10px;
-  font-family: Arial, sans-serif;
+  font-family: 'Times New Roman', Times, serif;
   font-weight: bold;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   justify-content: center;
