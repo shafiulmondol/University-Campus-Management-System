@@ -29,8 +29,6 @@ if (isset($_POST['logout'])) {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>SKST University</title>
-    <link rel="icon" href="../picture/SKST.png" type="image/png" />
-    <link rel="stylesheet" href="../Design/buttom_bar.css">
     <link rel="stylesheet" href="library.css">
     <link rel="stylesheet" href="stuf.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
@@ -844,13 +842,5 @@ elseif (isset($_POST['confirm_renew'])) {
             <?php } ?>
         </div>
 
-        <div class="buttom_bar">
-            <img src="../picture/SKST.png" alt="Logo" style="height:80px; width:auto;">
-            <p>SKST University</p>
-            <p>4 Embankment Drive Road,Sector-10, Uttara Model Town, Dhaka-1230.</p>
-            <p>Phone: (88 02) 55091801-5, Mobile : +88 01714 014 933, 01810030041-9, 01325080581-9</p>
-            <p>Fax: (880-2) 5895 2625, Email : info@skst.edu</p>
-        </div>
-    </div>
 </body>
 </html>

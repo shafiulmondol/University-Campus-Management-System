@@ -1,128 +1,226 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="library.css">
-</head>      
-<body>
-           <!-- Introduction -->
-            <h2>📚 Welcome to SKST University Library</h2>
-        <p>
-          Our library is a knowledge hub supporting the academic and research needs of students, faculty, and staff.
-          With access to physical and digital resources, we aim to promote learning, discovery, and innovation.
-        </p>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SKST University Library</title>
+</head>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        max-width: 100%;
+        line-height: 1.6;
+        background-color: #f9f9f9;
+        color: #333;
+      }
+
+      h2, h3 {
+        color: #800000;
+      }
+
+      .stats-grid {
+        display: flex;
+        gap: 20px;
         
-        <!-- Library Statistics -->
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-number">125,000+</div>
-            <div class="stat-label">Books Available</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number">35,000+</div>
-            <div class="stat-label">E-Journals</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number">1,200+</div>
-            <div class="stat-label">Study Spaces</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number">24/7</div>
-            <div class="stat-label">Online Access</div>
-          </div>
-        </div>
+      }
 
-        <!-- Featured Books -->
-        <h3>🌟 Featured Books</h3>
-        <div class="featured-books">
-          <div class="book-card">
-            <div class="book-cover">The Great Gatsby</div>
-            <div class="book-info">
-              <div class="book-title">The Great Gatsby</div>
-              <div class="book-author">F. Scott Fitzgerald</div>
-            </div>
-          </div>
-          <div class="book-card">
-            <div class="book-cover">To Kill a Mockingbird</div>
-            <div class="book-info">
-              <div class="book-title">To Kill a Mockingbird</div>
-              <div class="book-author">Harper Lee</div>
-            </div>
-          </div>
-          <div class="book-card">
-            <div class="book-cover">1984</div>
-            <div class="book-info">
-              <div class="book-title">1984</div>
-              <div class="book-author">George Orwell</div>
-            </div>
-          </div>
-          <div class="book-card">
-            <div class="book-cover">The Alchemist</div>
-            <div class="book-info">
-              <div class="book-title">The Alchemist</div>
-              <div class="book-author">Paulo Coelho</div>
-            </div>
-          </div>
-          <div class="book-card">
-            <div class="book-cover">Sapiens</div>
-            <div class="book-info">
-              <div class="book-title">Sapiens</div>
-              <div class="book-author">Yuval Noah Harari</div>
-            </div>
-          </div>
-        </div>
+      .stat-card {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        padding: 20px;
+        text-align: center;
+        flex: 1;
+      }
 
-        <!-- Mission -->
-        <h3>🎯 Our Mission</h3>
-        <p>
-          To provide accessible, high-quality learning materials and support services that empower students and educators
-          in achieving academic excellence and research development.
-        </p>
+      .stat-number {
+        font-size: 24px;
+        font-weight: bold;
+        color: #800000;
+      }
 
-        <!-- Benefits -->
-        <h3>✅ Why Use Our Library?</h3>
-        <ul>
-          <li>Open access to thousands of books and journals.</li>
-          <li>Quiet and clean reading zones for focus and productivity.</li>
-          <li>Digital library with e-books and research papers.</li>
-          <li>Friendly staff support and guidance.</li>
-          <li>Online book reservation and tracking system.</li>
-          <li>Special collections for faculty and departmental publications.</li>
-        </ul>
-        <!-- Rules -->
-        <h3>📌 Library Rules & Policies</h3>
-        <ul>
-          <li>Maintain silence and discipline at all times.</li>
-          <li>Carry your university ID while visiting.</li>
-          <li>Return borrowed books by the due date.</li>
-          <li>Mobile use inside the library is discouraged.</li>
-          <li>Respect library property and staff members.</li>
-        </ul>
+      .stat-label {
+        font-size: 14px;
+        color: #555;
+      }
 
-        <!-- Guide -->
-        <h3>🔍 How to Use the Library Portal</h3>
-        <ol>
-          <li>Use the search tool to find books by title, author, or keyword.</li>
-          <li>Browse by categories for subject-specific resources.</li>
-          <li>Log in to reserve books or access digital materials.</li>
-          <li>Check your borrowing history and due dates.</li>
-        </ol>
+      /* Featured Books */
+      .featured-books {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-bottom: 30px;
+      }
 
-        <!-- Suggestions -->
-        <h3>🧠 Suggest New Books</h3>
-        <p>
-          If you'd like to see a specific book or resource in our library, feel free to use the request form or talk to
-          our librarian. We welcome your suggestions!
-        </p>
+      .book-card {
+        width: 180px;
+        text-align: center;
+      }
 
-        <!-- Hours -->
-        <h3>🕐 Library Hours</h3>
-        <p>
-          <strong>Sunday – Thursday:</strong> 9:00 AM – 5:00 PM<br>
-          <strong>Friday – Saturday:</strong> Closed (except during exam sessions)
-        </p>
-                
+      .book-cover {
+        width: 100%;
+        height: 250px;
+        object-fit: cover;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        transition: transform 0.3s;
+      }
+
+      .book-cover:hover {
+        transform: scale(1.05);
+      }
+
+      .book-info {
+        margin-top: 10px;
+      }
+
+      .book-title {
+        font-weight: bold;
+        font-size: 16px;
+      }
+
+      .book-author {
+        font-size: 14px;
+        color: gray;
+      }
+
+</style>
+<body>
+
+  <!-- Introduction -->
+  <h2>📚 Welcome to SKST University Library</h2>
+  <p>
+    Our library is a knowledge hub supporting the academic and research needs of students, faculty, and staff.
+    With access to physical and digital resources, we aim to promote learning, discovery, and innovation.
+  </p>
+  
+  <!-- Library Statistics -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-number">125,000+</div>
+      <div class="stat-label">Books Available</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">35,000+</div>
+      <div class="stat-label">E-Journals</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">1,200+</div>
+      <div class="stat-label">Study Spaces</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">24/7</div>
+      <div class="stat-label">Online Access</div>
+    </div>
+  </div>
+
+  <!-- Featured Books -->
+  <h3>🌟 Featured Books</h3>
+  <div class="featured-books">
+
+    <div class="book-card">
+      <a href="https://ct02210097.schoolwires.net/site/handlers/filedownload.ashx?moduleinstanceid=26616&dataid=28467&FileName=The%20Great%20Gatsby.pdf" target="_blank">
+        <img src="https://covers.openlibrary.org/b/id/7222246-L.jpg" alt="The Great Gatsby Cover" class="book-cover">
+      </a>
+      <div class="book-info">
+        <div class="book-title">The Great Gatsby</div>
+        <div class="book-author">F. Scott Fitzgerald</div>
+      </div>
+    </div>
+
+    <div class="book-card">
+      <a href="https://www.raio.org/TKMFullText.pdf" target="_blank">
+        <img src="https://covers.openlibrary.org/b/id/8225261-L.jpg" alt="To Kill a Mockingbird Cover" class="book-cover">
+      </a>
+      <div class="book-info">
+        <div class="book-title">To Kill a Mockingbird</div>
+        <div class="book-author">Harper Lee</div>
+      </div>
+    </div>
+
+    <div class="book-card">
+      <a href="https://www.clarkchargers.org/ourpages/auto/2015/3/10/50720556/1984.pdf" target="_blank">
+        <img src="https://covers.openlibrary.org/b/id/7222246-M.jpg" alt="1984 Cover" class="book-cover">
+      </a>
+      <div class="book-info">
+        <div class="book-title">1984</div>
+        <div class="book-author">George Orwell</div>
+      </div>
+    </div>
+
+    <div class="book-card">
+      <a href="https://icrrd.com/public/media/15-05-2021-084550The-Alchemist-Paulo-Coelho.pdf" target="_blank">
+        <img src="https://covers.openlibrary.org/b/id/8231994-L.jpg" alt="The Alchemist Cover" class="book-cover">
+      </a>
+      <div class="book-info">
+        <div class="book-title">The Alchemist</div>
+        <div class="book-author">Paulo Coelho</div>
+      </div>
+    </div>
+
+    <div class="book-card">
+      <a href="https://www.ynharari.com/book/sapiens-2/" target="_blank">
+        <img src="https://images-na.ssl-images-amazon.com/images/I/713jIoMO3UL.jpg" alt="Sapiens Cover" class="book-cover">
+      </a>
+      <div class="book-info">
+        <div class="book-title">Sapiens</div>
+        <div class="book-author">Yuval Noah Harari</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Mission -->
+  <h3>🎯 Our Mission</h3>
+  <p>
+    To provide accessible, high-quality learning materials and support services that empower students and educators
+    in achieving academic excellence and research development.
+  </p>
+
+  <!-- Benefits -->
+  <h3>✅ Why Use Our Library?</h3>
+  <ul>
+    <li>Open access to thousands of books and journals.</li>
+    <li>Quiet and clean reading zones for focus and productivity.</li>
+    <li>Digital library with e-books and research papers.</li>
+    <li>Friendly staff support and guidance.</li>
+    <li>Online book reservation and tracking system.</li>
+    <li>Special collections for faculty and departmental publications.</li>
+  </ul>
+
+  <!-- Rules -->
+  <h3>📌 Library Rules & Policies</h3>
+  <ul>
+    <li>Maintain silence and discipline at all times.</li>
+    <li>Carry your university ID while visiting.</li>
+    <li>Return borrowed books by the due date.</li>
+    <li>Mobile use inside the library is discouraged.</li>
+    <li>Respect library property and staff members.</li>
+  </ul>
+
+  <!-- Guide -->
+  <h3>🔍 How to Use the Library Portal</h3>
+  <ol>
+    <li>Use the search tool to find books by title, author, or keyword.</li>
+    <li>Browse by categories for subject-specific resources.</li>
+    <li>Log in to reserve books or access digital materials.</li>
+    <li>Check your borrowing history and due dates.</li>
+  </ol>
+
+  <!-- Suggestions -->
+  <h3>🧠 Suggest New Books</h3>
+  <p>
+    If you'd like to see a specific book or resource in our library, feel free to use the request form or talk to
+    our librarian. We welcome your suggestions!
+  </p>
+
+  <!-- Hours -->
+  <h3>🕐 Library Hours</h3>
+  <p>
+    <strong>Sunday – Thursday:</strong> 9:00 AM – 5:00 PM<br>
+    <strong>Friday – Saturday:</strong> Closed (except during exam sessions)
+  </p>
+  
 </body>
 </html>
