@@ -424,7 +424,7 @@ WHERE section='Library' ORDER BY created_at DESC";
 function see_staff_notice(){
     global $con;
           $query ="SELECT * FROM notice 
-WHERE section='Staff' ORDER BY created_at DESC";
+WHERE section='Staff' AND viewed=0 ORDER BY created_at DESC";
           $result = mysqli_query($con, $query);
           
           if (mysqli_num_rows($result) > 0) {
@@ -446,11 +446,15 @@ WHERE section='Staff' ORDER BY created_at DESC";
         echo "</div>";
         echo "</div>"; // Close notice-card
          
-    
+    $update="
+    UPDATE notice SET viewed=1 WHERE section='Staff';
+    ";
+    mysqli_query($con, $update);
     }
     
     echo "<div class='back-button-container'>";
-    echo "<a href='javascript:history.back()' class='back-button'><i class='fas fa-arrow-left'></i> Back</a>";
+    ?> <a href='library.php' class='back-button'><i class='fas fa-arrow-left'></i> Back</a>
+    <?php
     echo "</div>";
     
     echo "</div>"; // Close notices-container
@@ -458,7 +462,8 @@ WHERE section='Staff' ORDER BY created_at DESC";
     echo "<div class='no-notices'>";
     echo "<i class='far fa-folder-open'></i>";
     echo "<p>No notices found at this time</p>";
-    echo "<a href='javascript:history.back()' class='back-button'><i class='fas fa-arrow-left'></i> Back</a>";
+    ?> <a href='library.php' class='back-button'><i class='fas fa-arrow-left'></i> Back</a>
+    <?php
     echo "</div>";
 }
 }
