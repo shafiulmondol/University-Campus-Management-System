@@ -18,6 +18,7 @@
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: #f9f9ff;
+      width: 100%;
     }
 
     a {
@@ -72,7 +73,6 @@
       border-radius: 10px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       transition: all 0.3s ease;
-      min-width: 120px;
       cursor: pointer;
     }
 
@@ -136,7 +136,25 @@
       background: linear-gradient(135deg, #18bcae, #f3af02);
     }
 
-    .sidebar {
+    .future-students-title {
+      text-align: center;
+      color: white;
+      background: #800000;
+      font-weight: bold;
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+
+    .future-students-text {
+      text-align: center;
+      max-width: 1200px;
+      margin: 0 auto 30px auto;
+      color: black;
+      line-height: 1.6;
+      font-size: 16px;
+    }
+
+.sidebar {
   flex: 0 0 240px;
   background: #fff;
   padding: 20px;
@@ -165,14 +183,6 @@
   transform: translateY(-3px);
 }
 
-body {
-  font-family: Arial, sans-serif;
-  background: #f9f9f9;
-  color: #333;
-  margin: 0;
-  padding: 20px;
-}
-
 .content-container {
   display: flex;
   gap: 20px;
@@ -199,6 +209,12 @@ body {
   line-height: 1.6;
   font-size: 16px;
   color: #555;
+}
+
+.future-students-container {
+  margin: 30px auto 40px auto;
+  padding: 0 20px;
+  font-family: Arial, sans-serif;
 }
 
   </style>
@@ -232,22 +248,23 @@ body {
       <a href="../academic.html"><button class="btn">Academics</button></a>
       <a href="../scholarship.html"><button class="btn">Scholarships</button></a>
       <a href="../admission.html"><button class="btn">Admission</button></a>
-      <a href="../library/library.php"><button class="btn">Library</button></a>
+      <a href="../library/library1.html"><button class="btn">Library</button></a>
       <a href="../volunteer.html"><button class="btn">Volunteer</button></a>
+      <a href="../account.html"><button class="btn">Account</button></a>
       <a href="../about.html"><button class="btn">About US</button></a>
     </div>
   </div>
 
 <div>
-<div style=" margin:30px auto 40px auto; padding:0 20px; font-family:Arial, sans-serif;">
+  <div class="future-students-container">
 
-  <h1 style="text-align:center; color: white; background:#800000;font-weight:bold; margin-top:20px; margin-bottom:20px;">Future Students</h1>
+    <h1 class="future-students-title">Future Students</h1>
 
-  <p style="text-align:center; max-width:1200px; margin:0 auto 30px auto; color:black; line-height:1.6; font-size:16px;">
-    SKTS University offers a number of features for the learners who are seeking admission for higher studies. Some of those features are as follows:
-  </p>
+    <p class="future-students-text">
+      SKTS University offers a number of features for the learners who are seeking admission for higher studies. Some of those features are as follows:
+    </p>
 
-</div>
+  </div>
 
 
   <div style="display:flex; gap:30px; max-width:1200px; margin:0 auto;">

@@ -463,6 +463,7 @@ WHERE section='Staff' ORDER BY created_at DESC";
 }
 }
 
+
  // This should run only once to create the table, not inside the add_book function
 function create_books_table() {
     global $con;
