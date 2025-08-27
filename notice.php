@@ -19,95 +19,19 @@
       background: #f9f9ff;
       color: #333;
       line-height: 1.6;
+      padding: 20px;
     }
 
-    .navbar {
-      background-color: #e0e7ff;
-      padding: 10px 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
-    .navbar-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .logo img {
-      height: 80px;
-    }
-
-    .logo h1 {
-      font-size: 26px;
-      color: #333;
-    }
-
-    .home-button {
-      background: gray;
-      color: white;
-      border: none;
-      padding: 10px 16px;
-      font-size: 15px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      transition: all 0.3s ease;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      text-decoration: none;
-    }
-
-    .home-button:hover {
-      transform: translateY(-3px);
-      background: linear-gradient(135deg, #18bcae, #f3af02);
-    }
-
-    .menu-section {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 15px;
-    }
-
-    .menu-section a {
-      text-decoration: none;
-    }
-
-    .btn {
-      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      font-size: 15px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      transition: all 0.3s ease;
-      min-width: 120px;
-      cursor: pointer;
-    }
-
-    .btn:hover {
-      transform: translateY(-3px);
-      background: linear-gradient(135deg, #512da8, #1e88e5);
-    }
+    
 
     /* Notice Section Styles */
     .content {
-      max-width: 1200px;
       margin: 30px auto;
       padding: 0 20px;
     }
 
     .notices-container {
+      display: block;
       background: white;
       border-radius: 15px;
       box-shadow: 0 5px 25px rgba(0,0,0,0.08);
@@ -137,7 +61,7 @@
 
     .notice-card:hover {
       transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      box-shadow: 0 10px 20px red;
     }
 
     .notice-header {
@@ -181,7 +105,7 @@
       gap: 15px;
       font-size: 14px;
       color: #7f8c8d;
-      border-top: 1px solid #eee;
+      
       padding-top: 15px;
     }
 
@@ -191,27 +115,31 @@
       gap: 5px;
     }
 
-    .back-button-container {
-      text-align: center;
-      margin-top: 30px;
-    }
+.back-button-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999; /* keep it above other elements */
+}
+
+
 
     .back-button {
-      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-      color: white;
-      text-decoration: none;
-      padding: 12px 25px;
-      border-radius: 8px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.3s ease;
-    }
+  background: #6a11cb; /* purple gradient base */
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
 
-    .back-button:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 5px 15px rgba(106, 17, 203, 0.4);
-    }
+.back-button:hover {
+  background: #2575fc; /* hover color */
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(106, 17, 203, 0.4);
+}
 
     .no-notices {
       text-align: center;
