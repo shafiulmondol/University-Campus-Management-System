@@ -17,7 +17,7 @@ if (isset($_GET['logout'])) {
 // Login check
 $error = "";
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
-    $id = intval($_POST['id']);
+    $id = intval($_POST['email']);
     $password = $_POST['password'];
     $stmt = $conn->prepare("SELECT full_name, password FROM admin_users WHERE id = ?");
     $stmt->bind_param("i", $id);
@@ -271,7 +271,7 @@ if (isset($_GET['faculty_biodata']) || isset($_GET['edit_faculty_biodata']) || i
             <div class="error"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
         <form method="POST">
-            <input type="number" name="id" placeholder="Enter your ID" required autofocus />
+            <input type="number" name="id" placeholder="Enter your Email" required autofocus />
             <input type="password" name="password" placeholder="Enter your Password" required />
             <button type="submit" name="login">Login</button>
         </form>

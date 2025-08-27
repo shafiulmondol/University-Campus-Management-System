@@ -186,7 +186,7 @@
  
  <?php
  if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+    // session_start();
 }
       // Database connection
       $con = mysqli_connect("localhost", "root", "", "skst_university");
