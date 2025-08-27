@@ -227,9 +227,9 @@ if (isset($_SESSION['alumni_id'])) {
             position: absolute;
             top: 20px;
             right: 20px;
-            width: 60px;
-            height: 40px;
-            border-radius: 5px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -540,8 +540,8 @@ if (isset($_SESSION['alumni_id'])) {
             max-width: 500px;
             margin: 50px auto;
             background: var(--card-bg);
-            border-radius: 20px;
-            padding: 40px;
+            border-radius: 5px;
+            padding: 30px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
             position: relative;
             border: 1px solid var(--border);
@@ -549,13 +549,12 @@ if (isset($_SESSION['alumni_id'])) {
         
         .form-header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 5px;
         }
         
         .form-header h2 {
             font-size: 2rem;
             color: var(--primary);
-            margin-bottom: 10px;
         }
         
         .form-header p {
@@ -564,12 +563,11 @@ if (isset($_SESSION['alumni_id'])) {
         }
         
         .input-group {
-            margin-bottom: 25px;
+            margin-bottom: 2px;
         }
         
         .input-group label {
             display: block;
-            margin-bottom: 8px;
             font-weight: 500;
             color: var(--text-dark);
         }
@@ -601,7 +599,7 @@ if (isset($_SESSION['alumni_id'])) {
             cursor: pointer;
             font-weight: 600;
             transition: background 0.3s ease;
-            margin-top: 10px;
+            margin-top: 5px;
         }
         
         .form-btn:hover {
@@ -796,6 +794,7 @@ if (isset($_SESSION['alumni_id'])) {
     <div class="form-container <?php echo $showSignup || $showReset ? 'form-toggle' : 'active-form'; ?>" id="login-form">
         <button class="close-btn" onclick="window.location.href='alumni.html'">×</button>
         <div class="form-header">
+            <img src="../picture/SKST.png" alt="SKST Logo" style="width: 80px; margin-bottom: -15px;">
             <h2>Alumni Login</h2>
             <p>Sign in to access your alumni account</p>
         </div>
