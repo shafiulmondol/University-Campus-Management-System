@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SKST University || Academics</title>
   <link rel="icon" href="picture/SKST.png" type="image/png" />
+  <link rel="stylesheet" href="Design/buttom_bar.css">
   <!-- Font Awesome for home icon -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
@@ -116,6 +117,153 @@
         margin-top: 10px;
       }
     }
+
+        .background-image img {
+      border: 1px solid black;
+      border-radius: 10px;
+      margin-top: 10px;
+      width: 100%;
+      height: 500px;
+      display: block;
+      animation: fadeInUp 2s ease-in-out;
+    }
+
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+  .future-students-title {
+      text-align: center;
+      color: white;
+      background: #800000;
+      font-weight: bold;
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+
+    .future-students-text {
+      text-align: center;
+      max-width: 1200px;
+      margin: 0 auto 30px auto;
+      color: black;
+      line-height: 1.6;
+      font-size: 16px;
+    }
+
+    
+  .sidebar {
+      flex: 0 0 240px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 20px;
+      height: fit-content;
+    }
+
+  .sidebar a {
+      display: block;
+      padding: 12px 15px;
+      margin-bottom: 10px;
+      background: purple;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+  .sidebar a:hover {
+        background: linear-gradient(90deg, darkred);
+      transform: translateY(-3px);
+    }
+
+  .content-container {
+      display: flex;
+      gap: 20px;
+    }
+
+  .column {
+      flex: 1;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+  .section {
+      margin-bottom: 30px;
+    }
+
+  .section h3 {
+      color: #0073e6;
+      margin-bottom: 10px;
+    }
+
+  .section p {
+      line-height: 1.6;
+      font-size: 16px;
+      color: #555;
+    }
+
+  .future-students-container {
+      margin: 30px auto 40px auto;
+      padding: 0 20px;
+      font-family: Arial, sans-serif;
+    }
+
+    .line-through {
+      position: relative;
+      text-align: center;
+      color: #1c6e3c; /* green shade like in your screenshot */
+      font-size: 24px;
+      font-weight: 500;
+      margin-top: 20px;
+      margin-bottom: 30px;
+    }
+
+  .academic-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    max-width: 1100px;
+    margin: 20px auto;
+    font-family: 'Times New Roman', Times, serif;
+  }
+
+  .academic-column {
+    background: #ffffff;
+    padding: 50px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    text-align: justify;
+    line-height: 1.6;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  }
+
+      .academic-container {
+      display: flex;
+      justify-content: space-between;
+      align-items:center;
+      gap: 20px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      max-width: 1200px;
+      margin: 20px auto;
+      font-family: Arial, sans-serif;
+    }
+
   </style>
 </head>
 <body>
@@ -136,7 +284,7 @@
       <a href="student/student.html"><button class="btn">Student</button></a>
       <a href="faculty.html"><button class="btn">Faculty</button></a>
       <a href="administration.php"><button class="btn">Administration</button></a>
-      <a href="alumni/alumni.html"><button class="btn">Alumni</button></a>
+      <a href="faculty/faculty.html"><button class="btn">Faculty</button></a>
       <a href="campus.html"><button class="btn">Campus Life</button></a>
       <a href="iqac.html"><button class="btn">IQAC</button></a>
       <a href="notice.html"><button class="btn">Notice</button></a>
@@ -150,6 +298,110 @@
       <a href="account.html"><button class="btn">Account</button></a>
       <a href="about.html"><button class="btn">About US</button></a>
     </div>
+  </div><div class="background-image">
+      <img src="picture/academic background.gif" alt="Background Image">
+    </div>
+
+    <div>
+  <div class="future-students-container">
+
+    <h1 class="future-students-title">👨🏻‍🎓👩🏻‍🎓"Our academic Is Our Mirror"</h1>
+
+    <p class="future-students-text">
+      SKST University offers a number of features and opportunities for its academic to stay 
+      connected and engaged with the institution. Some of those features are as follows:
+    </p>
+
   </div>
+
+
+  <div style="display:flex; gap:30px; max-width:1200px; margin:0 auto;">
+
+          <!-- Sidebar -->
+      <div class="sidebar">
+      <p style="font-weight:bold; font-size:18px; margin-bottom:15px; text-align:center;">Quick Links</p>
+        <a href="working.html">academic Network</a>
+        <a href="working.html">Reunions & Events</a>
+        <a href="academic/academic.html">academic & Resources</a>
+        <a href="working.html">Awards & Recognition</a>
+        <a href="working.html">Career Support</a>
+        <a href="academic.php">academic Login</a>
+      </div>
+
+
+      <!-- Content Area Split into Two Columns -->
+        <div class="content-container">
+
+          <!-- Left Column -->
+          <div class="column">
+            <div id="network" class="section">
+              <h3>academic Network</h3>
+              <p>Connect with a strong community of graduates for collaboration and opportunities.</p>
+            </div>
+
+            <div id="events" class="section">
+              <h3>Reunions & Events</h3>
+              <p>Exclusive invitations to annual reunions, seminars, and special gatherings.</p>
+            </div>
+
+            <div id="academic" class="section">
+              <h3>academic & Resources</h3>
+              <p>Continued access to selected digital and printed resources for academic.</p>
+            </div>
+          </div>
+
+          <!-- Right Column -->
+          <div class="column">
+            <div id="recognition" class="section">
+              <h3>Awards & Recognition</h3>
+              <p>Celebrating the achievements and contributions of distinguished academic.</p>
+            </div>
+
+            <div id="career" class="section">
+              <h3>Career Support</h3>
+              <p>Career counseling, job postings, and networking opportunities for academic growth.</p>
+            </div>
+
+            <div id="academic-login" class="section">
+              <h3>academic Login</h3>
+              <p>Access exclusive resources and connect with fellow academic.</p>
+            </div>
+          </div>
+          </div>
+        </div>
+
+        
+
+
+    <h2 class="line-through">-----Objectives and Preamble-----</h2>
+    <div class="academic-container">
+      <div class="academic-column">
+        <p>
+          <strong>Objectives:</strong> <br> <br>
+          SKST University academic Association plays a vital role by assisting the university in 
+          developing linkage with industries, multinational organizations as well as other firms 
+          and companies. Besides that, it assists the interns of SKST University in finding internship 
+          placement in different organizations. It also provides job opportunities to the students of SKST University.
+        </p>
+      </div>
+
+      <div class="academic-column">
+        <p>
+          <strong>Preamble:</strong> <br> <br>
+          We, the academic of the SKST University, develop mutual interest among ourselves, establish mutually
+          beneficial relations between SKST University and its academic, and promote the interests
+          of SKST University, do hereby form into an Association and adopt this constitution.
+        </p>
+      </div>
+    </div>
+
+
+      <div class="buttom_bar">
+      <img src="picture/SKST.png" alt="Logo" style="height:80px; width:auto;">
+      <p>SKST University</p>
+      <p>4 Embankment Drive Road,Sector-10, Uttara Model Town, Dhaka-1230.</p>
+      <p>Phone: (88 02) 55091801-5, Mobile : +88 01714 014 933, 01810030041-9, 01325080581-9</p>
+      <p>Fax: (880-2) 5895 2625, Email : info@skst.edu</p>
+    </div>
 </body>
 </html>
