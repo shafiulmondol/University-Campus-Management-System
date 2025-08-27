@@ -20,7 +20,7 @@ if (!in_array($sort_column, $allowed_sort)) $sort_column = 'id';
 $query = "SELECT * FROM ebook";
 if (!empty($search_term)) {
     $search_term = $conn->real_escape_string($search_term);
-    $query .= " WHERE book_name LIKE '%$search_term%' OR title LIKE '%$search_term%' OR author LIKE '%$search_term%'";
+    $query .= " WHERE book_name LIKE '%$search_term%' OR title LIKE '%$search_term%' OR author LIKE '%$search_term%' OR publish_year LIKE '%$search_term%' OR id LIKE '%$search_term%'";
 }
 $query .= " ORDER BY $sort_column ASC";
 
@@ -101,6 +101,7 @@ $books = $conn->query($query);
         display: flex;
         justify-content: center;
         margin-bottom: 20px;
+        gap: 10px;
     }
     
     .search-box {
@@ -124,6 +125,30 @@ $books = $conn->query($query);
         border: none;
         border-radius: 0 5px 5px 0;
         cursor: pointer;
+        transition: background 0.3s ease;
+    }
+    
+    .search-box button:hover {
+        background: #a52a2a;
+    }
+    
+    .refresh-btn {
+        padding: 12px 20px;
+        background: #28a745;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        transition: background 0.3s ease;
+        text-decoration: none;
+    }
+    
+    .refresh-btn:hover {
+        background: #218838;
+         transform: translateY(-2px);
     }
     
     .stats-container {
@@ -279,6 +304,19 @@ $books = $conn->query($query);
             margin-top: 15px;
         }
         
+        .search-container {
+            flex-direction: column;
+        }
+        
+        .search-box {
+            max-width: 100%;
+        }
+        
+        .refresh-btn {
+            width: 100%;
+            justify-content: center;
+        }
+        
         .book-table {
             display: block;
             overflow-x: auto;
@@ -331,16 +369,17 @@ $books = $conn->query($query);
 
     <div class="search-container">
         <form method="GET" class="search-box">
-            <input type="text" name="search" placeholder="Search by book name, title or author..." value="<?php echo htmlspecialchars($search_term); ?>">
+            <input type="text" name="search" placeholder="Search books..." value="<?php echo htmlspecialchars($search_term); ?>">
             <button type="submit"><i class="fas fa-search"></i> Search</button>
         </form>
+        <a href="?" class="refresh-btn"><i class="fas fa-sync-alt"></i> Refresh</a>
     </div>
 
     <?php if ($books->num_rows > 0): ?>
     <table class="book-table">
         <thead>
             <tr>
-                <th onclick="sortTable('id')">ID <i class="fas fa-sort"></i></th>
+                <th onclick="sortTable('id')">Book ID <i class="fas fa-sort"></i></th>
                 <th onclick="sortTable('book_name')">Book Name <i class="fas fa-sort"></i></th>
                 <th onclick="sortTable('title')">Title <i class="fas fa-sort"></i></th>
                 <th onclick="sortTable('author')">Author <i class="fas fa-sort"></i></th>
