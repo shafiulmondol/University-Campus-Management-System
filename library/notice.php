@@ -8,6 +8,330 @@
     <link rel="stylesheet" href="search_results.php">
     
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, #800000 0%, #600000 100%);
+            color: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(128, 0, 0, 0.2);
+        }
+        
+        .header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .filter-container {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .filter-container label {
+            font-weight: 600;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .filter-container select, .filter-container input {
+            padding: 12px 18px;
+            border: 1px solid #ced4da;
+            border-radius: 10px;
+            font-size: 1rem;
+        }
+        
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 5px 18px;
+            border: 1px solid #ced4da;
+            flex: 1;
+            max-width: 400px;
+        }
+        
+        .search-box input {
+            border: none;
+            background: transparent;
+            padding: 10px;
+            width: 100%;
+            outline: none;
+        }
+        
+        .notices-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 40px;
+        }
+        
+        .notices-heading {
+            background: linear-gradient(135deg, #800000 0%, #600000 100%);
+            color: white;
+            padding: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 1.6rem;
+        }
+        
+        .notice-card {
+            padding: 30px;
+            border-bottom: 1px solid #eee;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .notice-card:last-child {
+            border-bottom: none;
+        }
+        
+        .notice-card:hover {
+            background-color: #fbfbfb;
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            border-radius: 12px;
+        }
+        
+        .notice-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(to bottom, #800000, #600000);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .notice-card:hover::before {
+            opacity: 1;
+        }
+        
+        .notice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .notice-title {
+            color: #800000;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 250px;
+            font-weight: 600;
+        }
+        
+        .notice-title i {
+            color: #800000;
+            font-size: 1.2rem;
+        }
+        
+        .notice-section {
+            background: linear-gradient(135deg, #800000 0%, #600000 100%);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            box-shadow: 0 4px 10px rgba(128, 0, 0, 0.15);
+        }
+        
+        .notice-content {
+            color: #444;
+            margin-bottom: 25px;
+            line-height: 1.7;
+            font-size: 1.1rem;
+            padding: 0 10px;
+            border-left: 3px solid #e9ecef;
+            padding-left: 20px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .notice-card:hover .notice-content {
+            border-color: #800000;
+        }
+        
+        .notice-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            font-size: 0.95rem;
+            color: #6c757d;
+            padding: 0 10px;
+        }
+        
+        .notice-author, .notice-date {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f8f9fa;
+            padding: 8px 16px;
+            border-radius: 8px;
+        }
+        
+        .notice-author i, .notice-date i {
+            color: #800000;
+        }
+        
+        .back-button-container {
+            padding: 25px;
+            text-align: center;
+            background: #f8f9fa;
+        }
+        
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #800000 0%, #600000 100%);
+            color: white;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            box-shadow: 0 5px 15px rgba(128, 0, 0, 0.2);
+        }
+        
+        .back-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(128, 0, 0, 0.3);
+        }
+        
+        .no-notices {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+        
+        .no-notices i {
+            font-size: 5rem;
+            margin-bottom: 25px;
+            color: #dee2e6;
+        }
+        
+        .no-notices p {
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+        }
+        
+        .university-footer {
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(135deg, #343a40 0%, #212529 100%);
+            color: white;
+            border-radius: 16px;
+            margin-top: 50px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .university-footer p {
+            margin-bottom: 10px;
+        }
+        
+        .university-footer p:first-child {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .notice-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .notice-footer {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .filter-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-box {
+                max-width: 100%;
+            }
+            
+            .header h1 {
+                font-size: 2.2rem;
+            }
+        }
+        
+        .notice-count {
+            margin-left: auto;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .info-message {
+            background: #e9f5ff;
+            border-left: 4px solid #0066cc;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
     .book-details-container {
         width: 100%;
         margin: 20px 0;
