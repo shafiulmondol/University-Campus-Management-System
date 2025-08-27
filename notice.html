@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SKST University || Home</title>
+  <title>SKST University</title>
   <link rel="icon" href="picture/SKST.png" type="image/png" />
   <link rel="stylesheet" href="Design/buttom_bar.css">
+  <!-- Font Awesome for home icon -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-
     * {
       box-sizing: border-box;
       margin: 0;
@@ -46,6 +47,27 @@
       color: #333;
     }
 
+    .home-button {
+      background: gray;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      font-size: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+
+    .home-button:hover {
+      transform: translateY(-3px);
+      background: linear-gradient(135deg, #18bcae, #f3af02);
+    }
+
     .menu-section {
       display: flex;
       flex-wrap: wrap;
@@ -76,116 +98,62 @@
     }
 
     @media (max-width: 768px) {
-    .navbar-top {
+      .navbar-top {
         flex-direction: column;
         align-items: center;
       }
 
-    .btn {
+      .btn {
         width: 80%;
       }
 
-    .menu-section {
+      .menu-section {
         flex-direction: column;
         align-items: center;
       }
 
-    .home-button {
+      .home-button {
         margin-top: 10px;
       }
     }
 
-    /* BELL */
-    .notification-bell {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-}
-
-.bell-btn {
-    position: relative;
-    font-size: 1.8em;
-    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    cursor: pointer;
-    padding: 5px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transition: all 0.3s ease;
-}
-
-.bell-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
-    background: linear-gradient(135deg, #512da8, #1e88e5);
-}
-
-.bell-btn:active {
-    transform: scale(0.95);
-}
-
-.badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background: #ff4757;
-    color: white;
-    border-radius: 50%;
-    padding: 4px 8px;
-    font-size: 0.7em;
-    font-weight: bold;
-    min-width: 22px;
-    height: 22px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: 2px solid #e0e7ff;
-    animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-    0% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7);
-    }
-    70% {
-        transform: scale(1.1);
-        box-shadow: 0 0 0 8px rgba(255, 71, 87, 0);
-    }
-    100% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(255, 71, 87, 0);
-    }
-}
-
-/* Responsive styles for mobile */
-@media (max-width: 768px) {
-    .notification-bell {
-        position: static;
-        margin-top: 10px;
-    }
-}
-
-    .background-image {
-      display: flex;
-      width: 100%;
-      overflow: hidden;
-    }
-
-    .background-image img {
+        .background-image img {
       border: 1px solid black;
       border-radius: 10px;
       margin-top: 10px;
       width: 100%;
-      height: auto;
+      height: 500px;
       display: block;
       animation: fadeInUp 2s ease-in-out;
+    }
+
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+  .future-students-title {
+      text-align: center;
+      color: white;
+      background: #800000;
+      font-weight: bold;
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+
+    .future-students-text {
+      text-align: center;
+      max-width: 1200px;
+      margin: 0 auto 30px auto;
+      color: black;
+      line-height: 1.6;
+      font-size: 16px;
     }
 
   </style>
@@ -195,19 +163,24 @@
     <div class="navbar-top">
       <div class="logo">
         <img src="picture/logo.gif" alt="SKST Logo">
-        <h1>SKST University || Home</h1>
+        <h1>SKST University || notice</h1>
       </div>
 
+      <!-- Home Button -->
+      <a href="index.html" class="home-button">
+        <i class="fas fa-home"></i> Home
+      </a>
+    </div>
 
     <div class="menu-section">
       <a href="student/student.html"><button class="btn">Student</button></a>
       <a href="faculty.html"><button class="btn">Faculty</button></a>
-      <a href="admin/adminlogin.php"><button class="btn">Administration</button></a>
-      <a href="alumni.html"><button class="btn">Alumni</button></a>
+      <a href="administration.html"><button class="btn">Administration</button></a>
+      <a href="alumni/alumni.html"><button class="btn">Alumni</button></a>
       <a href="campus.html"><button class="btn">Campus Life</button></a>
       <a href="iqac.html"><button class="btn">IQAC</button></a>
       <a href="notice.html"><button class="btn">Notice</button></a>
-      <a href="news.html"><button class="btn">News</button></a>
+      <a href="notice.html"><button class="btn">notice</button></a>
       <a href="ranking.html"><button class="btn">Ranking</button></a>
       <a href="academic.html"><button class="btn">Academics</button></a>
       <a href="scholarship.html"><button class="btn">Scholarships</button></a>
@@ -218,13 +191,24 @@
       <a href="about.html"><button class="btn">About US</button></a>
     </div>
   </div>
-
-       
+<div class="background-image">
+      <img src="picture/notice background.gif" alt="Background Image">
     </div>
 
-    <div class="background-image">
-      <img src="picture/SKST_University.png" alt="Background Image">
-    </div>
+    <div>
+  <div class="future-students-container">
+
+    <h1 class="future-students-title">👨🏻‍🎓👩🏻‍🎓"Our notice Is Our Mirror"</h1>
+
+    <p class="future-students-text">
+      SKST University offers a number of features and opportunities for its notice to stay 
+      connected and engaged with the institution. Some of those features are as follows:
+    </p>
+
+  </div>
+
+  <iframe src="notice.php" width="100%" height="500px" style="border:none;"></iframe>
+
 
       <div class="buttom_bar">
       <img src="picture/SKST.png" alt="Logo" style="height:80px; width:auto;">
