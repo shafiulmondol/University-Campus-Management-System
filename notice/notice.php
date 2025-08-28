@@ -124,7 +124,7 @@
 
 
 
-    .back-button {
+.back-button {
   background: #6a11cb; /* purple gradient base */
   color: white;
   text-decoration: none;
