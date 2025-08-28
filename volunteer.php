@@ -1,4 +1,6 @@
 <?php
+session_start();
+
 // Database configuration
 $host = "localhost";
 $username = "root";
@@ -19,22 +21,39 @@ if ($conn->query($sql)) {
     // Select the database
     $conn->select_db($database);
     
-    // Create volunteers table if it doesn't exist
+    // Create volunteers table if it doesn't exist (matching your SQL structure)
     $sql = "CREATE TABLE IF NOT EXISTS volunteers (
-        id INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        id INT(11) NOT NULL PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
-        email VARCHAR(100) NOT NULL UNIQUE,
-        phone VARCHAR(20),
-        affiliation VARCHAR(50) NOT NULL,
-        department VARCHAR(100),
-        availability TEXT,
-        skills TEXT,
-        interests TEXT,
-        registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        email VARCHAR(100) NOT NULL,
+        phone VARCHAR(20) DEFAULT NULL,
+        affiliation ENUM('undergrad','grad','faculty','staff','alumni') NOT NULL,
+        department VARCHAR(100) DEFAULT NULL,
+        availability TEXT DEFAULT NULL,
+        skills TEXT DEFAULT NULL,
+        interests TEXT DEFAULT NULL,
+        registration_date DATETIME NOT NULL,
+        FOREIGN KEY (id) REFERENCES student_registration(id)
     )";
     
     if (!$conn->query($sql)) {
-        die("Error creating table: " . $conn->error);
+        // If foreign key constraint fails, create without it
+        $sql = "CREATE TABLE IF NOT EXISTS volunteers (
+            id INT(11) NOT NULL PRIMARY KEY,
+            name VARCHAR(100) NOT NULL,
+            email VARCHAR(100) NOT NULL,
+            phone VARCHAR(20) DEFAULT NULL,
+            affiliation ENUM('undergrad','grad','faculty','staff','alumni') NOT NULL,
+            department VARCHAR(100) DEFAULT NULL,
+            availability TEXT DEFAULT NULL,
+            skills TEXT DEFAULT NULL,
+            interests TEXT DEFAULT NULL,
+            registration_date DATETIME NOT NULL
+        )";
+        
+        if (!$conn->query($sql)) {
+            die("Error creating table: " . $conn->error);
+        }
     }
 } else {
     die("Error creating database: " . $conn->error);
@@ -44,8 +63,9 @@ if ($conn->query($sql)) {
 $success_message = "";
 $error_message = "";
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_volunteer'])) {
     // Get form data
+    $id = trim($_POST['id']);
     $name = trim($_POST['name']);
     $email = trim($_POST['email']);
     $phone = trim($_POST['phone']);
@@ -54,21 +74,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $availability = trim($_POST['availability']);
     $skills = trim($_POST['skills']);
     $interests = isset($_POST['interests']) ? implode(", ", $_POST['interests']) : "";
+    $registration_date = date("Y-m-d H:i:s");
 
     // Validate required fields
-    if (!empty($name) && !empty($email) && !empty($affiliation) && !empty($availability)) {
-        // Check if email already exists
-        $check_email = $conn->prepare("SELECT id FROM volunteers WHERE email = ?");
-        $check_email->bind_param("s", $email);
-        $check_email->execute();
-        $check_email->store_result();
+    if (!empty($id) && !empty($name) && !empty($email) && !empty($affiliation) && !empty($availability)) {
+        // Check if ID already exists
+        $check_id = $conn->prepare("SELECT id FROM volunteers WHERE id = ?");
+        $check_id->bind_param("i", $id);
+        $check_id->execute();
+        $check_id->store_result();
         
-        if ($check_email->num_rows > 0) {
-            $error_message = "This email is already registered.";
+        if ($check_id->num_rows > 0) {
+            $error_message = "This ID is already registered.";
         } else {
             // Insert data into database
-            $stmt = $conn->prepare("INSERT INTO volunteers (name, email, phone, affiliation, department, availability, skills, interests) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("ssssssss", $name, $email, $phone, $affiliation, $department, $availability, $skills, $interests);
+            $stmt = $conn->prepare("INSERT INTO volunteers (id, name, email, phone, affiliation, department, availability, skills, interests, registration_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("isssssssss", $id, $name, $email, $phone, $affiliation, $department, $availability, $skills, $interests, $registration_date);
             
             if ($stmt->execute()) {
                 $success_message = "Thank you for registering as a volunteer! We'll contact you soon.";
@@ -79,7 +100,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
             $stmt->close();
         }
-        $check_email->close();
+        $check_id->close();
     } else {
         $error_message = "Please fill in all required fields.";
     }
@@ -102,7 +123,7 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Volunteer Management System | University Campus</title>
+    <title>Volunteer Management System | SKST University</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -250,6 +271,7 @@ $conn->close();
             text-align: center;
             margin-bottom: 3rem;
             position: relative;
+            padding-top: 20px;
         }
         
         .section-title h2 {
@@ -383,6 +405,7 @@ $conn->close();
             margin-bottom: 0.6rem;
             font-weight: 500;
             color: var(--dark);
+            font-size: 1rem;
         }
         
         input, select, textarea {
@@ -393,6 +416,7 @@ $conn->close();
             font-family: 'Poppins', sans-serif;
             transition: all 0.3s ease;
             background-color: #f8f9fa;
+            font-size: 1rem;
         }
         
         input:focus, select:focus, textarea:focus {
@@ -423,6 +447,11 @@ $conn->close();
         .checkbox-item input {
             width: auto;
             margin-right: 0.8rem;
+        }
+        
+        .checkbox-item label {
+            margin-bottom: 0;
+            font-weight: normal;
         }
         
         .submit-btn {
@@ -480,6 +509,8 @@ $conn->close();
             border-radius: 8px;
             margin-bottom: 1.5rem;
             font-weight: 500;
+            display: flex;
+            align-items: center;
         }
         
         .alert-success {
@@ -492,6 +523,11 @@ $conn->close();
             background-color: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
+        }
+        
+        .alert i {
+            margin-right: 10px;
+            font-size: 1.2rem;
         }
         
         @media (max-width: 768px) {
@@ -510,6 +546,10 @@ $conn->close();
             
             .hero h1 {
                 font-size: 2.2rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
             }
             
             .form-grid {
@@ -531,6 +571,10 @@ $conn->close();
             .volunteer-form-container {
                 padding: 2rem;
             }
+            
+            .card-content {
+                padding: 1.2rem;
+            }
         }
     </style>
 </head>
@@ -539,7 +583,7 @@ $conn->close();
         <div class="header-container">
             <div class="logo">
                 <i class="fas fa-hands-helping"></i>
-                <span>University Volunteer System</span>
+                <span>SKST University Volunteer System</span>
             </div>
             <nav>
                 <a href="#" class="active"><i class="fas fa-home"></i> Home</a>
@@ -552,7 +596,7 @@ $conn->close();
     <div class="container">
         <section class="hero">
             <div class="hero-content">
-                <h1>Make a Difference at Our University</h1>
+                <h1>Make a Difference at SKST University</h1>
                 <p>Join our community of volunteers and contribute to making our university a better place for everyone</p>
                 <a href="#register" class="btn">Register Now</a>
                 <a href="#opportunities" class="btn btn-outline">Browse Opportunities</a>
@@ -645,7 +689,13 @@ $conn->close();
             
             <div class="volunteer-form-container">
                 <form id="volunteerForm" method="POST" action="">
+                    <input type="hidden" name="add_volunteer" value="1">
                     <div class="form-grid">
+                        <div class="form-group">
+                            <label for="id">Student ID *</label>
+                            <input type="number" id="id" name="id" value="<?php echo isset($_POST['id']) ? htmlspecialchars($_POST['id']) : ''; ?>" required>
+                        </div>
+                        
                         <div class="form-group">
                             <label for="name">Full Name *</label>
                             <input type="text" id="name" name="name" value="<?php echo isset($_POST['name']) ? htmlspecialchars($_POST['name']) : ''; ?>" required>
@@ -735,17 +785,18 @@ $conn->close();
                     <table>
                         <thead>
                             <tr>
+                                <th>ID</th>
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th>Affiliation</th>
                                 <th>Department</th>
-                                <th>Interests</th>
                                 <th>Registration Date</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php foreach ($volunteers as $volunteer): ?>
                             <tr>
+                                <td><?php echo htmlspecialchars($volunteer['id']); ?></td>
                                 <td><?php echo htmlspecialchars($volunteer['name']); ?></td>
                                 <td><?php echo htmlspecialchars($volunteer['email']); ?></td>
                                 <td>
@@ -755,7 +806,6 @@ $conn->close();
                                     ?>
                                 </td>
                                 <td><?php echo htmlspecialchars($volunteer['department']); ?></td>
-                                <td><?php echo htmlspecialchars($volunteer['interests']); ?></td>
                                 <td><?php echo date('M j, Y', strtotime($volunteer['registration_date'])); ?></td>
                             </tr>
                             <?php endforeach; ?>
@@ -770,92 +820,57 @@ $conn->close();
 
     <footer>
         <div class="container">
-            <p>&copy; 2023 University Volunteer System. All rights reserved.</p>
+            <p>&copy; 2023 SKST University Volunteer System. All rights reserved.</p>
             <p>Designed with <i class="fas fa-heart" style="color: #e74c3c;"></i> for our university community</p>
         </div>
     </footer>
 
-    <?php
-session_start();
-include("db.php"); // your DB connection
-
-if (isset($_POST['add_volunteer'])) {
-    // Sanitize and validate input
-    $id = mysqli_real_escape_string($con, $_POST['id']);
-    $name = mysqli_real_escape_string($con, $_POST['name']);
-    $email = mysqli_real_escape_string($con, $_POST['email']);
-    $phone = mysqli_real_escape_string($con, $_POST['phone']);
-    $affiliation = mysqli_real_escape_string($con, $_POST['affiliation']);
-    $department = mysqli_real_escape_string($con, $_POST['department']);
-    $availability = mysqli_real_escape_string($con, $_POST['availability']);
-    $skills = mysqli_real_escape_string($con, $_POST['skills']);
-    $interests = mysqli_real_escape_string($con, $_POST['interests']);
-    $registration_date = date("Y-m-d H:i:s");
-
-    // Prepare the INSERT query
-    $addq = "INSERT INTO volunteers (
-                id, 
-                name, 
-                email, 
-                phone, 
-                affiliation, 
-                department, 
-                availability, 
-                skills, 
-                interests, 
-                registration_date
-            ) VALUES (
-                '$id',
-                '$name',
-                '$email',
-                '$phone',
-                '$affiliation',
-                '$department',
-                '$availability',
-                '$skills',
-                '$interests',
-                '$registration_date'
-            )";
-
-    $result = mysqli_query($con, $addq);
-
-    if ($result) {
-        echo '
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Volunteer Added</title>
-            <meta http-equiv="refresh" content="5;url=volunteer_form.php">
-            <style>
-                .success-container {
-                    text-align: center;
-                    margin: 100px auto;
-                    max-width: 500px;
-                    padding: 20px;
-                    background-color: #dff0d8;
-                    border: 1px solid #d6e9c6;
-                    border-radius: 4px;
-                    color: #3c763d;
-                }
-            </style>
-        </head>
-        <body>
-            <div class="success-container">
-                <h2>Volunteer Registered Successfully!</h2>
-                <p>You will be redirected back to the volunteer page in 5 seconds.</p>
-                <p>If not redirected, <a href="volunteer_form.php">click here</a>.</p>
-            </div>
-        </body>
-        </html>
-        ';
-        exit();
-    } else {
-        $_SESSION['errors'] = ["Error adding volunteer: " . mysqli_error($con)];
-        header("Location: volunteer_form.php?id=".$id);
-        exit();
-    }
-}
-?>
-
+    <script>
+        // Form validation
+        document.getElementById('volunteerForm').addEventListener('submit', function(e) {
+            let valid = true;
+            const id = document.getElementById('id');
+            const name = document.getElementById('name');
+            const email = document.getElementById('email');
+            const affiliation = document.getElementById('affiliation');
+            const availability = document.getElementById('availability');
+            
+            // Reset previous error highlights
+            [id, name, email, affiliation, availability].forEach(field => {
+                field.style.borderColor = '#e1e8ed';
+            });
+            
+            // Validate required fields
+            if (!id.value.trim()) {
+                id.style.borderColor = '#e74c3c';
+                valid = false;
+            }
+            
+            if (!name.value.trim()) {
+                name.style.borderColor = '#e74c3c';
+                valid = false;
+            }
+            
+            if (!email.value.trim()) {
+                email.style.borderColor = '#e74c3c';
+                valid = false;
+            }
+            
+            if (!affiliation.value) {
+                affiliation.style.borderColor = '#e74c3c';
+                valid = false;
+            }
+            
+            if (!availability.value.trim()) {
+                availability.style.borderColor = '#e74c3c';
+                valid = false;
+            }
+            
+            if (!valid) {
+                e.preventDefault();
+                alert('Please fill in all required fields.');
+            }
+        });
+    </script>
 </body>
 </html>
