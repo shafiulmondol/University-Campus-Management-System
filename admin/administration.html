@@ -96,24 +96,6 @@
       }
     }
 
-    .Admin-login {
-      background-color: #28a745;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      font-size: 16px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      transition: all 0.3s ease;
-      cursor: pointer;
-      min-width: 120px;
-    }
-
-    .Admin-login:hover {
-      transform: translateY(-3px);
-      background: linear-gradient(135deg, #b31217, #e52d27);
-    }
-
     .home-button {
       background: gray;
       color: white;
@@ -161,8 +143,11 @@
       color: white;
       background: #800000;
       font-weight: bold;
+      height: 60px;
+      line-height: 60px;
       margin-top: 20px;
       margin-bottom: 20px;
+      border-radius: 10px;
     }
 
     .future-students-text {
@@ -286,14 +271,12 @@
   <div class="navbar">
     <div class="navbar-top">
       <div class="logo">
-        <img src="picture/logo.gif" alt="SKST Logo">
+        <img src="../picture/logo.gif" alt="SKST Logo">
         <h1>SKST University || Administration</h1>
       </div>
 
       <!-- administration Login and Home Page Buttons -->
       <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
-        <a href="admin/adminlogin.php"><button class="Admin-login"><i class="fas fa-user"></i> Admin Login</button></a>
-        <a href="admissionofficer.html"><button class="Admin-login"><i class="fas fa-user"></i> A/O Login</button></a>
         <a href="index.html" class="home-button">
           <i class="fas fa-home"></i> Home
         </a>
@@ -327,11 +310,11 @@
     <div>
   <div class="future-students-container">
 
-    <h1 class="future-students-title">👨🏻‍🎓👩🏻‍🎓"Our administration Is Our Mirror"</h1>
+    <h1 class="future-students-title"> "Welcome To SKST University || Administration Panel"</h1>
 
     <p class="future-students-text">
-      SKST University offers a number of features and opportunities for its administration to stay 
-      connected and engaged with the institution. Some of those features are as follows:
+      SKST University offers a number of features and opportunities for its administration to 
+      stay connected and engaged with the institution. Some of those features are as follows:
     </p>
 
   </div>
@@ -344,7 +327,7 @@
       <p style="font-weight:bold; font-size:18px; margin-bottom:15px; text-align:center;">Quick Links</p>
         
       <a href="../working.html">A/O Login</a>
-        <a href="admin/adminlogin.php">Admin Login</a>
+        <a href="adminlogin.php">Admin Login</a>
         <a href="../working.html">Event and Memories</a>
         <a href="../working.html">About Us</a>
         <a href="../working.html">Contact Us</a>
@@ -358,36 +341,31 @@
           <!-- Left Column -->
           <div class="column">
             <div id="network" class="section">
-              <h3>administration Network</h3>
-              <p>Connect with a strong community of graduates for collaboration and opportunities.</p>
+              <h3>A/O Login</h3>
+              <p>Secure access for administrative officers.</p>
             </div>
 
             <div id="events" class="section">
-              <h3>Reunions & Events</h3>
-              <p>Exclusive invitations to annual reunions, seminars, and special gatherings.</p>
+              <h3>Admin Login</h3>
+              <p>Dedicated login for administrators to manage university operations.</p>
             </div>
 
             <div id="administration" class="section">
-              <h3>administration & Resources</h3>
-              <p>Continued access to selected digital and printed resources for administration.</p>
+              <h3>Event and Memories</h3>
+              <p>Keep track of past and upcoming events, along with institutional achievements.</p>
             </div>
           </div>
 
           <!-- Right Column -->
           <div class="column">
             <div id="recognition" class="section">
-              <h3>Awards & Recognition</h3>
-              <p>Celebrating the achievements and contributions of distinguished administration.</p>
+              <h3>About Us</h3>
+              <p>Learn more about the university’s vision, mission, and administrative structure.</p>
             </div>
 
             <div id="career" class="section">
-              <h3>Career Support</h3>
-              <p>Career counseling, job postings, and networking opportunities for administration growth.</p>
-            </div>
-
-            <div id="administration-login" class="section">
-              <h3>administration Login</h3>
-              <p>Access exclusive resources and connect with fellow administration.</p>
+              <h3>Contact Us</h3>
+              <p>Stay connected with the administration for inquiries and support.</p>
             </div>
           </div>
           </div>

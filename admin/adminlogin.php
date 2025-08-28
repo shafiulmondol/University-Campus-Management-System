@@ -68,6 +68,7 @@ if (isset($_POST['login'])) {
 <body>
     <div class="login-container">
         <div class="login-header">
+            <img src="../picture/SKST.png" alt="SKST Logo" style="border-radius: 50%; height: 80px; width: 80px;">
             <h1><i class="fas fa-university"></i> SKST University</h1>
             <p>Administration Portal Login</p>
         </div>
