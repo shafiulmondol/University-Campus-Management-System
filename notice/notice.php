@@ -197,7 +197,7 @@
   <div class="content">
     <?php
     // Database connection
-   require_once 'library/notice.php';
+   require_once '../library/notice.php';
    echo see_notice();
     ?>
   </div>
