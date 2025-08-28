@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 26, 2025 at 07:35 PM
+-- Generation Time: Aug 28, 2025 at 08:12 AM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- PHP Version: 8.1.25
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -37,6 +37,7 @@ CREATE TABLE `student_registration` (
   `guardian_phone` varchar(20) DEFAULT NULL,
   `student_phone` varchar(20) DEFAULT NULL,
   `email` varchar(100) DEFAULT NULL,
+  `password` varchar(200) NOT NULL,
   `last_exam` varchar(30) DEFAULT NULL,
   `board` varchar(50) DEFAULT NULL,
   `other_board` varchar(100) DEFAULT NULL,
@@ -60,8 +61,9 @@ CREATE TABLE `student_registration` (
 -- Dumping data for table `student_registration`
 --
 
-INSERT INTO `student_registration` (`id`, `first_name`, `last_name`, `father_name`, `mother_name`, `date_of_birth`, `guardian_phone`, `student_phone`, `email`, `last_exam`, `board`, `other_board`, `year_of_passing`, `institution_name`, `result`, `subject_group`, `gender`, `blood_group`, `nationality`, `religion`, `present_address`, `permanent_address`, `department`, `photo_path`, `signature_path`, `submission_date`) VALUES
-(23303116, 'Taymoon Islam ', 'Estia', 'Md.Mazid', 'Mina Islam', '2003-12-14', '01718520912', '01530811222', 'Toimoon@gmail.com', 'HSC', 'Dhaka', NULL, '2022', 'Uttara high school', '5.00', 'science', 'female', 'A+', 'Bangladeshi', 'Islam', 'Uttara', 'Uttara', 'Cse', NULL, NULL, '2025-07-26 17:17:40');
+INSERT INTO `student_registration` (`id`, `first_name`, `last_name`, `father_name`, `mother_name`, `date_of_birth`, `guardian_phone`, `student_phone`, `email`, `password`, `last_exam`, `board`, `other_board`, `year_of_passing`, `institution_name`, `result`, `subject_group`, `gender`, `blood_group`, `nationality`, `religion`, `present_address`, `permanent_address`, `department`, `photo_path`, `signature_path`, `submission_date`) VALUES
+(23303100, 'tuba', 'islam', 'harun', 'khairon', '0000-00-00', '123456', '654321', 'tuba@gmail.com', '100##', 'HSC', 'dhaka', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-08-28 05:50:33'),
+(23303106, 'shafiul islam', 'Estia', 'Md.Mazid', 'Mina Islam', '2003-12-14', '01718520912', '01530811222', 'shafiul@gmail.com', '11', 'HSC', 'Dhaka', NULL, '2022', 'Uttara high school', '5.00', 'science', 'female', 'A+', 'Bangladeshi', 'Islam', 'Uttara', 'Uttara', 'Cse', NULL, NULL, '2025-07-26 17:17:40');
 
 --
 -- Indexes for dumped tables
