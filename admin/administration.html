@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SKST University</title>
-  <link rel="icon" href="picture/SKST.png" type="image/png" />
-  <link rel="stylesheet" href="Design/buttom_bar.css">
+  <link rel="icon" href="../picture/SKST.png" type="image/png" />
+  <link rel="stylesheet" href="../Design/buttom_bar.css">
   <!-- Font Awesome (optional) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
@@ -96,24 +96,6 @@
       }
     }
 
-    .faculty-login {
-      background-color: #28a745;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      font-size: 16px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      transition: all 0.3s ease;
-      cursor: pointer;
-      min-width: 120px;
-    }
-
-    .faculty-login:hover {
-      transform: translateY(-3px);
-      background: linear-gradient(135deg, #b31217, #e52d27);
-    }
-
     .home-button {
       background: gray;
       color: white;
@@ -135,7 +117,7 @@
       background: linear-gradient(135deg, #18bcae, #f3af02);
     }
 
-    .background-image img {
+        .background-image img {
       border: 1px solid black;
       border-radius: 10px;
       margin-top: 10px;
@@ -161,8 +143,11 @@
       color: white;
       background: #800000;
       font-weight: bold;
+      height: 60px;
+      line-height: 60px;
       margin-top: 20px;
       margin-bottom: 20px;
+      border-radius: 10px;
     }
 
     .future-students-text {
@@ -248,7 +233,7 @@
       margin-bottom: 30px;
     }
 
-  .faculty-container {
+  .administration-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
@@ -257,7 +242,7 @@
     font-family: 'Times New Roman', Times, serif;
   }
 
-  .faculty-column {
+  .administration-column {
     background: #ffffff;
     padding: 50px;
     border: 1px solid #ccc;
@@ -267,7 +252,7 @@
     box-shadow: 0 2px 6px rgba(0,0,0,0.08);
   }
 
-      .faculty-container {
+    .administration-container {
       display: flex;
       justify-content: space-between;
       align-items:center;
@@ -286,53 +271,51 @@
   <div class="navbar">
     <div class="navbar-top">
       <div class="logo">
-        <img src="picture/logo.gif" alt="SKST Logo">
-        <h1>SKST University || Faculty</h1>
+        <img src="../picture/logo.gif" alt="SKST Logo">
+        <h1>SKST University || Administration</h1>
       </div>
 
-      <!-- faculty Login and Home Page Buttons -->
+      <!-- administration Login and Home Page Buttons -->
       <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
         <a href="index.html" class="home-button">
           <i class="fas fa-home"></i> Home
         </a>
       </div>
-  </div>
+    </div>
 
     <div class="menu-section">
       <a href="student/student.html"><button class="btn">Student</button></a>
-      <a href="faculty.html"><button class="btn">Faculty</button></a>
+      <a href="faculty/faculty.html"><button class="btn">Faculty</button></a>
       <a href="administration.html"><button class="btn">Administration</button></a>
       <a href="alumni/alumni.html"><button class="btn">Alumni</button></a>
-      <a href="campus.html"><button class="btn">Campus Life</button></a>
-      <a href="iqac.html"><button class="btn">IQAC</button></a>
-      <a href="notice.html"><button class="btn">Notice</button></a>
-      <a href="news.html"><button class="btn">News</button></a>
-      <a href="ranking.html"><button class="btn">Ranking</button></a>
-      <a href="academic.html"><button class="btn">Academics</button></a>
-      <a href="scholarship.html"><button class="btn">Scholarships</button></a>
-      <a href="admission.html"><button class="btn">Admission</button></a>
+      <a href="campus/campus.html"><button class="btn">Campus Life</button></a>
+      <a href="iqac/iqac.html"><button class="btn">IQAC</button></a>
+      <a href="notice/notice.html"><button class="btn">Notice</button></a>
+      <a href="news/news.html"><button class="btn">News</button></a>
+      <a href="ranking/ranking.html"><button class="btn">Ranking</button></a>
+      <a href="academic/academic.html"><button class="btn">Academics</button></a>
+      <a href="scholarship/scholarship.html"><button class="btn">Scholarships</button></a>
+      <a href="admission/admission.html"><button class="btn">Admission</button></a>
       <a href="library/library1.html"><button class="btn">Library</button></a>
-      <a href="volunteer.html"><button class="btn">Volunteer</button></a>
-      <a href="account.html"><button class="btn">Account</button></a>
-      <a href="about.html"><button class="btn">About US</button></a>
+      <a href="account/account.html"><button class="btn">Account</button></a>
+      <a href="volunteer/volunteer.html"><button class="btn">Volunteer</button></a>
+      <a href="about/about.html"><button class="btn">About US</button></a>
     </div>
   </div>
 
 
-  </div>
-  
-  <div class="background-image">
-      <img src="picture/faculty background.gif" alt="Background Image">
+  </div><div class="background-image">
+      <img src="../picture/admin background.jpg" alt="Background Image">
     </div>
 
     <div>
   <div class="future-students-container">
 
-    <h1 class="future-students-title">👨🏻‍🎓👩🏻‍🎓"Our faculty Is Our Mirror"</h1>
+    <h1 class="future-students-title"> "Welcome To SKST University || Administration Panel"</h1>
 
     <p class="future-students-text">
-      SKST University offers a number of features and opportunities for its faculty to stay 
-      connected and engaged with the institution. Some of those features are as follows:
+      SKST University offers a number of features and opportunities for its administration to 
+      stay connected and engaged with the institution. Some of those features are as follows:
     </p>
 
   </div>
@@ -343,12 +326,13 @@
           <!-- Sidebar -->
       <div class="sidebar">
       <p style="font-weight:bold; font-size:18px; margin-bottom:15px; text-align:center;">Quick Links</p>
-        <a href="working.html">faculty Network</a>
-        <a href="working.html">Reunions & Events</a>
-        <a href="faculty/faculty.html">faculty & Resources</a>
-        <a href="working.html">Awards & Recognition</a>
-        <a href="working.html">Career Support</a>
-        <a href="faculty.php">faculty Login</a>
+        
+      <a href="../working.html">A/O Login</a>
+        <a href="adminlogin.php">Admin Login</a>
+        <a href="../working.html">Event and Memories</a>
+        <a href="../working.html">About Us</a>
+        <a href="../working.html">Contact Us</a>
+
       </div>
 
 
@@ -358,36 +342,31 @@
           <!-- Left Column -->
           <div class="column">
             <div id="network" class="section">
-              <h3>faculty Network</h3>
-              <p>Connect with a strong community of graduates for collaboration and opportunities.</p>
+              <h3>A/O Login</h3>
+              <p>Secure access for administrative officers.</p>
             </div>
 
             <div id="events" class="section">
-              <h3>Reunions & Events</h3>
-              <p>Exclusive invitations to annual reunions, seminars, and special gatherings.</p>
+              <h3>Admin Login</h3>
+              <p>Dedicated login for administrators to manage university operations.</p>
             </div>
 
-            <div id="faculty" class="section">
-              <h3>faculty & Resources</h3>
-              <p>Continued access to selected digital and printed resources for faculty.</p>
+            <div id="administration" class="section">
+              <h3>Event and Memories</h3>
+              <p>Keep track of past and upcoming events, along with institutional achievements.</p>
             </div>
           </div>
 
           <!-- Right Column -->
           <div class="column">
             <div id="recognition" class="section">
-              <h3>Awards & Recognition</h3>
-              <p>Celebrating the achievements and contributions of distinguished faculty.</p>
+              <h3>About Us</h3>
+              <p>Learn more about the university’s vision, mission, and administrative structure.</p>
             </div>
 
             <div id="career" class="section">
-              <h3>Career Support</h3>
-              <p>Career counseling, job postings, and networking opportunities for faculty growth.</p>
-            </div>
-
-            <div id="faculty-login" class="section">
-              <h3>faculty Login</h3>
-              <p>Access exclusive resources and connect with fellow faculty.</p>
+              <h3>Contact Us</h3>
+              <p>Stay connected with the administration for inquiries and support.</p>
             </div>
           </div>
           </div>
@@ -397,22 +376,22 @@
 
 
     <h2 class="line-through">-----Objectives and Preamble-----</h2>
-    <div class="faculty-container">
-      <div class="faculty-column">
+    <div class="administration-container">
+      <div class="administration-column">
         <p>
           <strong>Objectives:</strong> <br> <br>
-          SKST University faculty Association plays a vital role by assisting the university in 
+          SKST University administration Association plays a vital role by assisting the university in 
           developing linkage with industries, multinational organizations as well as other firms 
           and companies. Besides that, it assists the interns of SKST University in finding internship 
           placement in different organizations. It also provides job opportunities to the students of SKST University.
         </p>
       </div>
 
-      <div class="faculty-column">
+      <div class="administration-column">
         <p>
           <strong>Preamble:</strong> <br> <br>
-          We, the faculty of the SKST University, develop mutual interest among ourselves, establish mutually
-          beneficial relations between SKST University and its faculty, and promote the interests
+          We, the administration of the SKST University, develop mutual interest among ourselves, establish mutually
+          beneficial relations between SKST University and its administration, and promote the interests
           of SKST University, do hereby form into an Association and adopt this constitution.
         </p>
       </div>
@@ -420,7 +399,7 @@
 
 
       <div class="buttom_bar">
-      <img src="picture/SKST.png" alt="Logo" style="height:80px; width:auto;">
+      <img src="../picture/SKST.png" alt="Logo" style="height:80px; width:auto;">
       <p>SKST University</p>
       <p>4 Embankment Drive Road,Sector-10, Uttara Model Town, Dhaka-1230.</p>
       <p>Phone: (88 02) 55091801-5, Mobile : +88 01714 014 933, 01810030041-9, 01325080581-9</p>
