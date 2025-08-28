@@ -44,9 +44,9 @@ $login_time = $adminData['login_time'];
       </div>
        
         <div class="nav-buttons">
-            <button><i class="fas fa-home"></i><a style="text-decoration: none;color:aliceblue" href="../administration.html">Home</a> </button>
+            <button><i class="fas fa-home"></i><a style="text-decoration: none;color:aliceblue" href="administration.html">Home</a> </button>
             <button><i class="fas fa-bell"></i> Notifications</button>
-            <button><i class="fas fa-sign-out-alt"></i><a style="text-decoration: none;color:aliceblue" href="administration.html">Sign Out</a></button>
+            <button><i class="fas fa-sign-out-alt"></i><a style="text-decoration: none;color:aliceblue" href="adminlogin.php">Sign Out</a></button>
         </div>
         
         <?php
@@ -58,25 +58,7 @@ $login_time = $adminData['login_time'];
  <div class="container">
         <div class="button_bar">
             <div class="button_group">
-                <a href="#" class="button_notification">
-                    <i class="fas fa-bell"></i> Notifications
-                    <span class="notification_badge">5</span>
-                </a>
-                <a href="#" class="button_student">
-                    <i class="fas fa-user-graduate"></i> Students
-                </a>
-                <a href="#" class="button_profile">
-                    <i class="fas fa-user-circle"></i> Profile
-                </a>
-                <a href="#" class="button_faculty">
-                    <i class="fas fa-chalkboard-teacher"></i> Faculty
-                </a>
-                <a href="#" class="button_staff">
-                    <i class="fas fa-users"></i> Staff
-                </a>
-            </div>
-            
-            <a href="#" class="button_user">
+               <a href="#" class="button_user">
                 <div class="button_user_avatar">
                     <i class="fas fa-user"></i>
                 </div>
@@ -85,6 +67,24 @@ $login_time = $adminData['login_time'];
                     <div style="font-size: 0.8rem; opacity: 0.8;">Administrator</div>
                 </div>
             </a>
+            <a href="#" class="button_profile">
+                <i class="fas fa-user-circle"></i> Profile
+            </a>
+                <a href="#" class="button_student">
+                    <i class="fas fa-user-graduate"></i> Students
+                </a>
+                <a href="#" class="button_faculty">
+                    <i class="fas fa-chalkboard-teacher"></i> Faculty
+                </a>
+                <a href="#" class="button_staff">
+                    <i class="fas fa-users"></i> Staff
+                </a>
+            </div>
+             <a href="#" class="button_notification">
+                    <i class="fas fa-bell"></i> Notifications
+                   
+                </a>
+            
         </div>
         
         <div class="content">
