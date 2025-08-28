@@ -1,68 +1,121 @@
 <?php
-session_start();
+// Database configuration
 $host = "localhost";
-$user = "root";
-$pass = "";
-$db = "skst_university";
+$username = "root";
+$password = "";
+$database = "skst_university";
 
-$conn = new mysqli($host, $user, $pass, $db);
-if ($conn->connect_error) die("DB Connection failed: " . $conn->connect_error);
+// Create connection
+$conn = new mysqli($host, $username, $password);
 
-$error = "";
-
-if (isset($_GET['logout'])) {
-    session_destroy();
-    header("Location: volunteer.php");
-    exit();
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $name        = $_POST['name'];
-    $id          = $_POST['id'];  // This should match student_registration.id
-    $email       = $_POST['email'];
-    $phone       = $_POST['phone'];
-    $affiliation = $_POST['affiliation'];
-    $department  = $_POST['department'];
-    $availability= $_POST['availability'];
-    $skills      = $_POST['skills'];
 
-    // Interests may be multiple checkboxes
-    $interests   = isset($_POST['interests']) ? implode(", ", $_POST['interests']) : "";
-
-    $sql = "INSERT INTO volunteers (id, name, email, phone, affiliation, department, availability, skills, interests, registration_date) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
-
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("issssssss", $id, $name, $email, $phone, $affiliation, $department, $availability, $skills, $interests);
-
-    if ($stmt->execute()) {
-        echo "success";
-    } else {
-        echo "error: " . $stmt->error;
+// Create database if it doesn't exist
+$sql = "CREATE DATABASE IF NOT EXISTS $database";
+if ($conn->query($sql)) {
+    // Select the database
+    $conn->select_db($database);
+    
+    // Create volunteers table if it doesn't exist
+    $sql = "CREATE TABLE IF NOT EXISTS volunteers (
+        id INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        email VARCHAR(100) NOT NULL UNIQUE,
+        phone VARCHAR(20),
+        affiliation VARCHAR(50) NOT NULL,
+        department VARCHAR(100),
+        availability TEXT,
+        skills TEXT,
+        interests TEXT,
+        registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )";
+    
+    if (!$conn->query($sql)) {
+        die("Error creating table: " . $conn->error);
     }
+} else {
+    die("Error creating database: " . $conn->error);
+}
 
-    $stmt->close();
+// Handle form submission
+$success_message = "";
+$error_message = "";
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Get form data
+    $name = trim($_POST['name']);
+    $email = trim($_POST['email']);
+    $phone = trim($_POST['phone']);
+    $affiliation = $_POST['affiliation'];
+    $department = trim($_POST['department']);
+    $availability = trim($_POST['availability']);
+    $skills = trim($_POST['skills']);
+    $interests = isset($_POST['interests']) ? implode(", ", $_POST['interests']) : "";
+
+    // Validate required fields
+    if (!empty($name) && !empty($email) && !empty($affiliation) && !empty($availability)) {
+        // Check if email already exists
+        $check_email = $conn->prepare("SELECT id FROM volunteers WHERE email = ?");
+        $check_email->bind_param("s", $email);
+        $check_email->execute();
+        $check_email->store_result();
+        
+        if ($check_email->num_rows > 0) {
+            $error_message = "This email is already registered.";
+        } else {
+            // Insert data into database
+            $stmt = $conn->prepare("INSERT INTO volunteers (name, email, phone, affiliation, department, availability, skills, interests) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("ssssssss", $name, $email, $phone, $affiliation, $department, $availability, $skills, $interests);
+            
+            if ($stmt->execute()) {
+                $success_message = "Thank you for registering as a volunteer! We'll contact you soon.";
+                // Clear form fields
+                $_POST = array();
+            } else {
+                $error_message = "Error: " . $stmt->error;
+            }
+            $stmt->close();
+        }
+        $check_email->close();
+    } else {
+        $error_message = "Please fill in all required fields.";
+    }
+}
+
+// Fetch existing volunteers
+$volunteers = array();
+$result = $conn->query("SELECT * FROM volunteers ORDER BY registration_date DESC");
+if ($result && $result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $volunteers[] = $row;
+    }
 }
 
 $conn->close();
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Volunteer System | University Campus Management</title>
-    <link rel="icon" href="picture/SKST.png" type="image/png" />
+    <title>Volunteer Management System | University Campus</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #4361ee;
-            --secondary: #3f37c9;
-            --accent: #4895ef;
-            --light: #f8f9fa;
-            --dark: #212529;
-            --success: #4cc9f0;
-            --warning: #f72585;
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #3498db;
+            --success: #27ae60;
+            --warning: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --text: #2c3e50;
+            --text-light: #7f8c8d;
         }
         
         * {
@@ -73,9 +126,16 @@ $conn->close();
         
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: #f5f7fa;
-            color: var(--dark);
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--text);
             line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
         }
         
         header {
@@ -83,6 +143,8 @@ $conn->close();
             color: white;
             padding: 1.5rem 0;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 0 0 10px 10px;
+            margin-bottom: 30px;
         }
         
         .header-container {
@@ -121,13 +183,15 @@ $conn->close();
         }
         
         .hero {
-            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80') no-repeat center center/cover;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80') no-repeat center center/cover;
             height: 400px;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
             color: white;
+            border-radius: 15px;
+            margin-bottom: 40px;
             position: relative;
         }
         
@@ -147,6 +211,7 @@ $conn->close();
         .hero p {
             font-size: 1.2rem;
             margin-bottom: 2rem;
+            opacity: 0.9;
         }
         
         .btn {
@@ -161,12 +226,13 @@ $conn->close();
             border: none;
             cursor: pointer;
             font-size: 1rem;
+            box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
         }
         
         .btn:hover {
             background-color: var(--secondary);
             transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
         }
         
         .btn-outline {
@@ -178,12 +244,6 @@ $conn->close();
         .btn-outline:hover {
             background-color: white;
             color: var(--primary);
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 3rem auto;
-            padding: 0 2rem;
         }
         
         .section-title {
@@ -219,37 +279,46 @@ $conn->close();
         
         .opportunity-card {
             background-color: white;
-            border-radius: 10px;
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.05);
         }
         
         .opportunity-card:hover {
             transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
         }
         
-        
-        
+        .card-img {
+            height: 180px;
+            background-color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+        }
         
         .card-content {
-            padding: 1.5rem;
+            padding: 1.8rem;
         }
         
         .card-content h3 {
             font-size: 1.4rem;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.8rem;
             color: var(--primary);
         }
         
         .card-meta {
             display: flex;
             align-items: center;
-            margin-bottom: 1rem;
-            color: #6c757d;
+            margin-bottom: 1.2rem;
+            color: var(--text-light);
             flex-wrap: wrap;
             gap: 1rem;
+            font-size: 0.9rem;
         }
         
         .card-meta span {
@@ -258,20 +327,21 @@ $conn->close();
         }
         
         .card-meta i {
-            margin-right: 0.3rem;
+            margin-right: 0.5rem;
             color: var(--accent);
         }
         
         .card-content p {
             margin-bottom: 1.5rem;
-            color: #495057;
+            color: var(--text-light);
+            line-height: 1.7;
         }
         
         .card-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-top: 1rem;
+            padding-top: 1.2rem;
             border-top: 1px solid #e9ecef;
         }
         
@@ -279,33 +349,29 @@ $conn->close();
             display: inline-block;
             background-color: #e9ecef;
             color: #495057;
-            padding: 0.3rem 0.8rem;
+            padding: 0.4rem 0.9rem;
             border-radius: 50px;
             font-size: 0.8rem;
             font-weight: 500;
         }
         
-        .tag.urgent {
-            background-color: #fff0f3;
-            color: var(--warning);
-        }
-        
         .volunteer-form-container {
             background-color: white;
-            border-radius: 10px;
-            padding: 2.5rem;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            padding: 3rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
             margin-bottom: 4rem;
+            border: 1px solid rgba(0, 0, 0, 0.05);
         }
         
         .form-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 1.5rem;
+            gap: 1.8rem;
         }
         
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.8rem;
         }
         
         .form-group.full-width {
@@ -314,24 +380,26 @@ $conn->close();
         
         label {
             display: block;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.6rem;
             font-weight: 500;
             color: var(--dark);
         }
         
         input, select, textarea {
             width: 100%;
-            padding: 0.8rem 1rem;
-            border: 1px solid #ced4da;
-            border-radius: 6px;
+            padding: 1rem 1.2rem;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
             font-family: 'Poppins', sans-serif;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            transition: all 0.3s ease;
+            background-color: #f8f9fa;
         }
         
         input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(72, 149, 239, 0.2);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+            background-color: white;
         }
         
         textarea {
@@ -343,58 +411,47 @@ $conn->close();
             margin-top: 1rem;
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
+            gap: 1.2rem;
         }
         
         .checkbox-item {
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.8rem;
             display: flex;
             align-items: center;
         }
         
         .checkbox-item input {
             width: auto;
-            margin-right: 0.5rem;
+            margin-right: 0.8rem;
         }
         
         .submit-btn {
             width: 100%;
-            padding: 1rem;
+            padding: 1.2rem;
             font-size: 1.1rem;
-            margin-top: 1rem;
+            margin-top: 1.5rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
         }
         
-        .hours-tracker {
+        .volunteers-table {
             background-color: white;
-            border-radius: 10px;
-            padding: 2rem;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        .total-hours {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        
-        .total-hours h3 {
-            font-size: 1.2rem;
-            color: #6c757d;
-            margin-bottom: 0.5rem;
-        }
-        
-        .total-hours p {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--primary);
+            border-radius: 12px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            margin-bottom: 4rem;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            overflow-x: auto;
         }
         
         table {
             width: 100%;
             border-collapse: collapse;
+            margin-top: 1.5rem;
         }
         
         th, td {
-            padding: 1rem;
+            padding: 1.2rem;
             text-align: left;
             border-bottom: 1px solid #e9ecef;
         }
@@ -412,39 +469,29 @@ $conn->close();
         footer {
             background-color: var(--dark);
             color: white;
-            padding: 2rem 0;
+            padding: 2.5rem 0;
             text-align: center;
+            margin-top: 4rem;
+            border-radius: 10px 10px 0 0;
         }
 
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
         }
         
-        .modal-content {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 10px;
-            max-width: 500px;
-            width: 90%;
-            position: relative;
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
         }
         
-        .close-modal {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #6c757d;
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
         
         @media (max-width: 768px) {
@@ -480,6 +527,10 @@ $conn->close();
             .checkbox-group {
                 grid-template-columns: 1fr;
             }
+            
+            .volunteer-form-container {
+                padding: 2rem;
+            }
         }
     </style>
 </head>
@@ -488,32 +539,49 @@ $conn->close();
         <div class="header-container">
             <div class="logo">
                 <i class="fas fa-hands-helping"></i>
-                <span>Campus Volunteers</span>
+                <span>University Volunteer System</span>
             </div>
             <nav>
-                <a href="index.php"><i class="fas fa-home"></i> Home</a>
-                <a href="#" class="active"><i class="fas fa-hand-holding-heart"></i> Volunteer</a>
+                <a href="#" class="active"><i class="fas fa-home"></i> Home</a>
+                <a href="#"><i class="fas fa-hand-holding-heart"></i> Volunteer</a>
+                <a href="#"><i class="fas fa-info-circle"></i> About</a>
             </nav>
         </div>
     </header>
 
-    <section class="hero">
-        <div class="hero-content">
-            <h1>Make a Difference on Campus</h1>
-            <p>Join our vibrant community of volunteers and help shape the university experience for everyone</p>
-            <a href="#opportunities" class="btn">Browse Opportunities</a>
-            <a href="#register" class="btn btn-outline">Register Now</a>
-        </div>
-    </section>
-
     <div class="container">
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Make a Difference at Our University</h1>
+                <p>Join our community of volunteers and contribute to making our university a better place for everyone</p>
+                <a href="#register" class="btn">Register Now</a>
+                <a href="#opportunities" class="btn btn-outline">Browse Opportunities</a>
+            </div>
+        </section>
+
+        <?php if($success_message): ?>
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i> <?php echo $success_message; ?>
+            </div>
+        <?php endif; ?>
+        
+        <?php if($error_message): ?>
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i> <?php echo $error_message; ?>
+            </div>
+        <?php endif; ?>
+
         <section id="opportunities">
             <div class="section-title">
                 <h2>Current Volunteer Opportunities</h2>
+                <p>Join one of our upcoming volunteer events</p>
             </div>
             
             <div class="opportunities-grid">
-                    
+                <div class="opportunity-card">
+                    <div class="card-img">
+                        <i class="fas fa-trash-alt"></i>
+                    </div>
                     <div class="card-content">
                         <h3>Campus Cleanup Day</h3>
                         <div class="card-meta">
@@ -526,11 +594,13 @@ $conn->close();
                             <span class="tag">Environment</span>
                             <button class="btn">Sign Up</button>
                         </div>
-                    
+                    </div>
                 </div>
                 
                 <div class="opportunity-card">
-                    
+                    <div class="card-img">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
                     <div class="card-content">
                         <h3>New Student Orientation</h3>
                         <div class="card-meta">
@@ -545,89 +615,107 @@ $conn->close();
                         </div>
                     </div>
                 </div>
+                
+                <div class="opportunity-card">
+                    <div class="card-img">
+                        <i class="fas fa-book-reader"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Library Assistance Program</h3>
+                        <div class="card-meta">
+                            <span><i class="far fa-calendar-alt"></i> Every Wednesday</span>
+                            <span><i class="far fa-clock"></i> 2:00 PM - 5:00 PM</span>
+                            <span><i class="fas fa-map-marker-alt"></i> University Library</span>
+                        </div>
+                        <p>Assist librarians with organizing materials and helping students find resources. Perfect for those who love books and quiet environments.</p>
+                        <div class="card-footer">
+                            <span class="tag">Education</span>
+                            <button class="btn">Sign Up</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
         <section id="register">
             <div class="section-title">
                 <h2>Register as a Volunteer</h2>
+                <p>Join our volunteer community by filling out the form below</p>
             </div>
             
             <div class="volunteer-form-container">
-                <form id="volunteerForm" method="POST" action="volunteer_register.php">
-
+                <form id="volunteerForm" method="POST" action="">
                     <div class="form-grid">
                         <div class="form-group">
-                            <label for="name">Full Name</label>
-                            <input type="text" id="name" name="name" required>
+                            <label for="name">Full Name *</label>
+                            <input type="text" id="name" name="name" value="<?php echo isset($_POST['name']) ? htmlspecialchars($_POST['name']) : ''; ?>" required>
                         </div>
                         
                         <div class="form-group">
-                            <label for="id">Student/Staff ID</label>
-                            <input type="text" id="id" name="id" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="email">Email Address</label>
-                            <input type="email" id="email" name="email" required>
+                            <label for="email">Email Address *</label>
+                            <input type="email" id="email" name="email" value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>" required>
                         </div>
                         
                         <div class="form-group">
                             <label for="phone">Phone Number</label>
-                            <input type="tel" id="phone" name="phone">
+                            <input type="tel" id="phone" name="phone" value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone']) : ''; ?>">
                         </div>
                         
                         <div class="form-group">
-                            <label for="affiliation">University Affiliation</label>
+                            <label for="affiliation">University Affiliation *</label>
                             <select id="affiliation" name="affiliation" required>
                                 <option value="">Select...</option>
-                                <option value="undergrad">Undergraduate Student</option>
-                                <option value="grad">Graduate Student</option>
-                                <option value="faculty">Faculty</option>
-                                <option value="staff">Staff</option>
-                                <option value="alumni">Alumni</option>
+                                <option value="undergrad" <?php echo (isset($_POST['affiliation']) && $_POST['affiliation'] == 'undergrad') ? 'selected' : ''; ?>>Undergraduate Student</option>
+                                <option value="grad" <?php echo (isset($_POST['affiliation']) && $_POST['affiliation'] == 'grad') ? 'selected' : ''; ?>>Graduate Student</option>
+                                <option value="faculty" <?php echo (isset($_POST['affiliation']) && $_POST['affiliation'] == 'faculty') ? 'selected' : ''; ?>>Faculty</option>
+                                <option value="staff" <?php echo (isset($_POST['affiliation']) && $_POST['affiliation'] == 'staff') ? 'selected' : ''; ?>>Staff</option>
+                                <option value="alumni" <?php echo (isset($_POST['affiliation']) && $_POST['affiliation'] == 'alumni') ? 'selected' : ''; ?>>Alumni</option>
                             </select>
                         </div>
                         
                         <div class="form-group">
                             <label for="department">Department (if applicable)</label>
-                            <input type="text" id="department" name="department">
+                            <input type="text" id="department" name="department" value="<?php echo isset($_POST['department']) ? htmlspecialchars($_POST['department']) : ''; ?>">
                         </div>
                         
                         <div class="form-group full-width">
                             <label>Areas of Interest (Select all that apply)</label>
                             <div class="checkbox-group">
                                 <div class="checkbox-item">
-                                    <input type="checkbox" id="interest-events" name="interests" value="events">
+                                    <input type="checkbox" id="interest-events" name="interests[]" value="events" <?php echo (isset($_POST['interests']) && in_array('events', $_POST['interests'])) ? 'checked' : ''; ?>>
                                     <label for="interest-events">Campus Events</label>
                                 </div>
                                 <div class="checkbox-item">
-                                    <input type="checkbox" id="interest-community" name="interests" value="community">
+                                    <input type="checkbox" id="interest-community" name="interests[]" value="community" <?php echo (isset($_POST['interests']) && in_array('community', $_POST['interests'])) ? 'checked' : ''; ?>>
                                     <label for="interest-community">Community Service</label>
                                 </div>
                                 <div class="checkbox-item">
-                                    <input type="checkbox" id="interest-orientation" name="interests" value="orientation">
+                                    <input type="checkbox" id="interest-orientation" name="interests[]" value="orientation" <?php echo (isset($_POST['interests']) && in_array('orientation', $_POST['interests'])) ? 'checked' : ''; ?>>
                                     <label for="interest-orientation">Student Orientation</label>
                                 </div>
                                 <div class="checkbox-item">
-                                    <input type="checkbox" id="interest-sustainability" name="interests" value="sustainability">
+                                    <input type="checkbox" id="interest-sustainability" name="interests[]" value="sustainability" <?php echo (isset($_POST['interests']) && in_array('sustainability', $_POST['interests'])) ? 'checked' : ''; ?>>
                                     <label for="interest-sustainability">Sustainability Initiatives</label>
                                 </div>
                                 <div class="checkbox-item">
-                                    <input type="checkbox" id="interest-fundraising" name="interests" value="fundraising">
+                                    <input type="checkbox" id="interest-fundraising" name="interests[]" value="fundraising" <?php echo (isset($_POST['interests']) && in_array('fundraising', $_POST['interests'])) ? 'checked' : ''; ?>>
                                     <label for="interest-fundraising">Fundraising</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="interest-tutoring" name="interests[]" value="tutoring" <?php echo (isset($_POST['interests']) && in_array('tutoring', $_POST['interests'])) ? 'checked' : ''; ?>>
+                                    <label for="interest-tutoring">Tutoring</label>
                                 </div>
                             </div>
                         </div>
                         
                         <div class="form-group full-width">
-                            <label for="availability">Availability</label>
-                            <textarea id="availability" name="availability" placeholder="Please describe when you're typically available to volunteer (e.g., weekends, weekday evenings, etc.)"></textarea>
+                            <label for="availability">Availability *</label>
+                            <textarea id="availability" name="availability" placeholder="Please describe when you're typically available to volunteer (e.g., weekends, weekday evenings, etc.)" required><?php echo isset($_POST['availability']) ? htmlspecialchars($_POST['availability']) : ''; ?></textarea>
                         </div>
                         
                         <div class="form-group full-width">
                             <label for="skills">Skills or Special Qualifications</label>
-                            <textarea id="skills" name="skills" placeholder="Any special skills or certifications you have that might be relevant (first aid, languages, etc.)"></textarea>
+                            <textarea id="skills" name="skills" placeholder="Any special skills or certifications you have that might be relevant (first aid, languages, technical skills, etc.)"><?php echo isset($_POST['skills']) ? htmlspecialchars($_POST['skills']) : ''; ?></textarea>
                         </div>
                     </div>
                     
@@ -636,90 +724,138 @@ $conn->close();
             </div>
         </section>
 
-        <section id="hours">
+        <section id="volunteers">
             <div class="section-title">
-                <h2>Your Volunteer Hours</h2>
+                <h2>Registered Volunteers</h2>
+                <p>Our amazing volunteers who are making a difference</p>
             </div>
             
-            <div class="hours-tracker">
-                <div class="total-hours">
-                    <h3>Total Hours Contributed</h3>
-                    <p>15</p>
-                </div>
-                
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Event</th>
-                            <th>Date</th>
-                            <th>Hours</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Campus Cleanup</td>
-                            <td>March 15, 2023</td>
-                            <td>4</td>
-                            <td><span class="tag">Completed</span></td>
-                        </tr>
-                        <tr>
-                            <td>New Student Orientation</td>
-                            <td>August 26-28, 2023</td>
-                            <td>12</td>
-                            <td><span class="tag">Completed</span></td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="volunteers-table">
+                <?php if (count($volunteers) > 0): ?>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Affiliation</th>
+                                <th>Department</th>
+                                <th>Interests</th>
+                                <th>Registration Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($volunteers as $volunteer): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($volunteer['name']); ?></td>
+                                <td><?php echo htmlspecialchars($volunteer['email']); ?></td>
+                                <td>
+                                    <?php 
+                                    $affiliation = htmlspecialchars($volunteer['affiliation']);
+                                    echo ucfirst($affiliation);
+                                    ?>
+                                </td>
+                                <td><?php echo htmlspecialchars($volunteer['department']); ?></td>
+                                <td><?php echo htmlspecialchars($volunteer['interests']); ?></td>
+                                <td><?php echo date('M j, Y', strtotime($volunteer['registration_date'])); ?></td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php else: ?>
+                    <p>No volunteers registered yet. Be the first to sign up!</p>
+                <?php endif; ?>
             </div>
         </section>
     </div>
 
-    <div class="modal" id="successModal">
-        <div class="modal-content">
-            <span class="close-modal" id="closeModal">&times;</span>
-            <h2 style="color: var(--primary); margin-bottom: 1rem;">Thank You!</h2>
-            <p>Your volunteer application has been submitted successfully.</p>
-            <p>We'll contact you soon with more details about upcoming opportunities.</p>
-            <button class="btn" style="margin-top: 1.5rem;" id="modalCloseBtn">Close</button>
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 University Volunteer System. All rights reserved.</p>
+            <p>Designed with <i class="fas fa-heart" style="color: #e74c3c;"></i> for our university community</p>
         </div>
-    </div>
-    <div class="login-box">
-    <h2>vol Login</h2>
-    <?php if($error): ?>
-        <div class="error"><?php echo htmlspecialchars($error); ?></div>
-    <?php endif; ?>
-    <form method="POST" action="login.php" autocomplete="off">
-        <input type="text" name="username" placeholder="Username" required autofocus />
-        <input type="password" name="password" placeholder="Password" required />
-        <button type="submit">Log In</button>
-    </form>
-</div>
-<?php
-$showSuccess = false;
+    </footer>
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Example: You can process your form here
-    // $name = $_POST['name'];
-    // $email = $_POST['email'];
-    // Save to database or send email...
+    <?php
+session_start();
+include("db.php"); // your DB connection
 
-    $showSuccess = true; // Show modal after submission
+if (isset($_POST['add_volunteer'])) {
+    // Sanitize and validate input
+    $id = mysqli_real_escape_string($con, $_POST['id']);
+    $name = mysqli_real_escape_string($con, $_POST['name']);
+    $email = mysqli_real_escape_string($con, $_POST['email']);
+    $phone = mysqli_real_escape_string($con, $_POST['phone']);
+    $affiliation = mysqli_real_escape_string($con, $_POST['affiliation']);
+    $department = mysqli_real_escape_string($con, $_POST['department']);
+    $availability = mysqli_real_escape_string($con, $_POST['availability']);
+    $skills = mysqli_real_escape_string($con, $_POST['skills']);
+    $interests = mysqli_real_escape_string($con, $_POST['interests']);
+    $registration_date = date("Y-m-d H:i:s");
+
+    // Prepare the INSERT query
+    $addq = "INSERT INTO volunteers (
+                id, 
+                name, 
+                email, 
+                phone, 
+                affiliation, 
+                department, 
+                availability, 
+                skills, 
+                interests, 
+                registration_date
+            ) VALUES (
+                '$id',
+                '$name',
+                '$email',
+                '$phone',
+                '$affiliation',
+                '$department',
+                '$availability',
+                '$skills',
+                '$interests',
+                '$registration_date'
+            )";
+
+    $result = mysqli_query($con, $addq);
+
+    if ($result) {
+        echo '
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Volunteer Added</title>
+            <meta http-equiv="refresh" content="5;url=volunteer_form.php">
+            <style>
+                .success-container {
+                    text-align: center;
+                    margin: 100px auto;
+                    max-width: 500px;
+                    padding: 20px;
+                    background-color: #dff0d8;
+                    border: 1px solid #d6e9c6;
+                    border-radius: 4px;
+                    color: #3c763d;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="success-container">
+                <h2>Volunteer Registered Successfully!</h2>
+                <p>You will be redirected back to the volunteer page in 5 seconds.</p>
+                <p>If not redirected, <a href="volunteer_form.php">click here</a>.</p>
+            </div>
+        </body>
+        </html>
+        ';
+        exit();
+    } else {
+        $_SESSION['errors'] = ["Error adding volunteer: " . mysqli_error($con)];
+        header("Location: volunteer_form.php?id=".$id);
+        exit();
+    }
 }
 ?>
 
-<?php if ($showSuccess): ?>
-<div style="
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center;
-">
-    <div style="background: white; padding: 20px; border-radius: 10px; text-align: center;">
-        <h2>✅ Form Submitted Successfully!</h2>
-        <p>Thank you for registering as a volunteer.</p>
-        <a href="" style="display: inline-block; margin-top: 10px; padding: 8px 16px; background: blue; color: white; text-decoration: none; border-radius: 5px;">Close</a>
-    </div>
-</div>
-<?php endif; ?>
-   
 </body>
 </html>
