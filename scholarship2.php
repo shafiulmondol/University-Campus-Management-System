@@ -60,7 +60,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $errors[] = "SSC GPA must be between 0.00 and 5.00";
     }
     if ($current_gpa < 0 || $current_gpa > 5) {
-        $errors[] = "Current GPA must be between 0.00 and 5.00";
+        $errors[] = "HSC GPA must be between 0.00 and 5.00";
     }
     
     // Calculate scholarship if no errors
@@ -74,37 +74,47 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $highlight_row = "row-100";
         } 
         // Other cases based on current GPA
-        else {
-            if ($current_gpa == 5.00) {
-                $scholarship_percentage = ($gender == 'male') ? 60 : 75;
-                $criteria = "Current GPA 5.00";
-                $highlight_row = "row-75-60";
-            } 
-            else if ($current_gpa >= 4.80 && $current_gpa <= 4.99) {
-                $scholarship_percentage = ($gender == 'male') ? 50 : 65;
-                $criteria = "Current GPA between 4.80 – 4.99";
-                $highlight_row = "row-65-50";
-            } 
-            else if ($current_gpa >= 4.50 && $current_gpa < 4.80) {
-                $scholarship_percentage = ($gender == 'male') ? 25 : 40;
-                $criteria = "Current GPA between 4.50 – 4.79";
-                $highlight_row = "row-40-25";
-            } 
-            else if ($current_gpa >= 4.00 && $current_gpa < 4.50) {
-                $scholarship_percentage = ($gender == 'male') ? 15 : 30;
-                $criteria = "Current GPA between 4.00 – 4.49";
-                $highlight_row = "row-30-15";
-            } 
-            else if ($current_gpa >= 3.50 && $current_gpa < 4.00) {
-                $scholarship_percentage = ($gender == 'male') ? 10 : 25;
-                $criteria = "Current GPA between 3.50 – 3.99";
-                $highlight_row = "row-25-10";
-            } 
-            else {
-                $scholarship_percentage = 0;
-                $criteria = "Below minimum GPA requirement (3.50)";
-            }
+else {
+    if ($current_gpa == 5.00) {
+        if ($marks_percentage >= 90) {
+            // Full scholarship for GPA 5.00 with 90%+
+            $scholarship_percentage = 100;
+            $criteria = "HSC GPA 5.00 with Marks ≥ 90%";
+            $highlight_row = "row-100";
+        } else {
+            // GPA 5.00 but marks < 90%
+            $scholarship_percentage = ($gender == 'male') ? 60 : 75;
+            $criteria = "HSC GPA 5.00 with Marks < 90%";
+            $highlight_row = "row-75-60";
         }
+    } 
+    else if ($current_gpa >= 4.80 && $current_gpa <= 4.99) {
+        $scholarship_percentage = ($gender == 'male') ? 50 : 65;
+        $criteria = "HSC GPA between 4.80 – 4.99";
+        $highlight_row = "row-65-50";
+    } 
+    else if ($current_gpa >= 4.50 && $current_gpa < 4.80) {
+        $scholarship_percentage = ($gender == 'male') ? 25 : 40;
+        $criteria = "HSC GPA between 4.50 – 4.79";
+        $highlight_row = "row-40-25";
+    } 
+    else if ($current_gpa >= 4.00 && $current_gpa < 4.50) {
+        $scholarship_percentage = ($gender == 'male') ? 15 : 30;
+        $criteria = "HSC GPA between 4.00 – 4.49";
+        $highlight_row = "row-30-15";
+    } 
+    else if ($current_gpa >= 3.50 && $current_gpa < 4.00) {
+        $scholarship_percentage = ($gender == 'male') ? 10 : 25;
+        $criteria = "HSC GPA between 3.50 – 3.99";
+        $highlight_row = "row-25-10";
+    } 
+    else {
+        $scholarship_percentage = 0;
+        $criteria = "Below minimum GPA requirement (3.50)";
+        $highlight_row = "row-0";
+    }
+}
+
         
         // Save to database if connection exists
         if (empty($db_error)) {
@@ -631,10 +641,6 @@ $conn->close();
                         <li>Female students receive higher scholarship rates in each category</li>
                     </ul>
                     
-                    <h3>Database Information</h3>
-                    <p><strong>Database Name:</strong> skst_university</p>
-                    <p><strong>Table Name:</strong> scholarship_records</p>
-                    <p>Records are saved after each calculation</p>
                 </div>
             </div>
             
@@ -672,7 +678,7 @@ $conn->close();
                             <p><strong>Name:</strong> <?php echo $full_name; ?></p>
                             <p><strong>Gender:</strong> <?php echo ucfirst($gender); ?></p>
                             <p><strong>SSC GPA:</strong> <?php echo number_format($ssc_gpa, 2); ?></p>
-                            <p><strong>Current GPA:</strong> <?php echo number_format($current_gpa, 2); ?></p>
+                            <p><strong>HSC GPA:</strong> <?php echo number_format($current_gpa, 2); ?></p>
                         </div>
                     <?php else: ?>
                         <div class="result-placeholder">
@@ -690,59 +696,6 @@ $conn->close();
                 </div>
             </div>
         </div>
-
-        <?php /* <div class="scholarship-table-container">
-            <h2 class="section-title">Scholarship Rate Table</h2>
-            <table class="scholarship-table">
-                <thead>
-                    <tr>
-                        <th>Level of Score</th>
-                        <th>Marks (%)</th>
-                        <th>Rate of Scholarship (Male)</th>
-                        <th>Rate of Scholarship (Female)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr id="row-100" <?php echo $highlight_row == 'row-100' ? 'class="highlight-row"' : ''; ?>>
-                        <td>5.00</td>
-                        <td>90% or above</td>
-                        <td>100%*</td>
-                        <td>100%*</td>
-                    </tr>
-                    <tr id="row-75-60" <?php echo $highlight_row == 'row-75-60' ? 'class="highlight-row"' : ''; ?>>
-                        <td>5.00</td>
-                        <td>90% or above</td>
-                        <td>60%</td>
-                        <td>75%</td>
-                    </tr>
-                    <tr id="row-65-50" <?php echo $highlight_row == 'row-65-50' ? 'class="highlight-row"' : ''; ?>>
-                        <td>4.80 – 4.99</td>
-                        <td>80% – below 90%</td>
-                        <td>50% of Tuition Fees</td>
-                        <td>65% of Tuition Fees</td>
-                    </tr>
-                    <tr id="row-40-25" <?php echo $highlight_row == 'row-40-25' ? 'class="highlight-row"' : ''; ?>>
-                        <td>4.50 – 4.79</td>
-                        <td>75% – below 80%</td>
-                        <td>25% of Tuition Fees</td>
-                        <td>40% of Tuition Fees</td>
-                    </tr>
-                    <tr id="row-30-15" <?php echo $highlight_row == 'row-30-15' ? 'class="highlight-row"' : ''; ?>>
-                        <td>4.00 – 4.49</td>
-                        <td>70% – below 75%</td>
-                        <td>15% of Tuition Fees</td>
-                        <td>30% of Tuition Fees</td>
-                    </tr>
-                    <tr id="row-25-10" <?php echo $highlight_row == 'row-25-10' ? 'class="highlight-row"' : ''; ?>>
-                        <td>3.50 – 3.99</td>
-                        <td>60% – below 70%</td>
-                        <td>10% of Tuition Fees</td>
-                        <td>25% of Tuition Fees</td>
-                    </tr>
-                </tbody>
-            </table>
-            <p style="margin-top: 15px; text-align: center; color: var(--text-muted);">*With GPA 5.00 at SSC</p>
-        </div>*/ ?>
 
         <div class="footer">
             <p>Scholarship Calculator System © 2025 | For Educational Purposes</p>

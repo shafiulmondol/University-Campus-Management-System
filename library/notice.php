@@ -20,7 +20,6 @@
             color: #333;
             line-height: 1.6;
             min-height: 100vh;
-            padding: 20px;
         }
         
         .container {
@@ -116,11 +115,12 @@
             align-items: center;
             gap: 15px;
             font-size: 1.6rem;
+            border-radius: 10px;
         }
         
         .notice-card {
             padding: 30px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid black;
             position: relative;
             overflow: hidden;
             transition: all 0.3s ease;
@@ -128,6 +128,7 @@
         
         .notice-card:last-child {
             border-bottom: none;
+            border-radius: 1px solid black;
         }
         
         .notice-card:hover {
@@ -144,7 +145,7 @@
             left: 0;
             width: 5px;
             height: 100%;
-            background: linear-gradient(to bottom, #800000, #600000);
+            
             opacity: 0;
             transition: opacity 0.3s ease;
         }
@@ -163,7 +164,7 @@
         }
         
         .notice-title {
-            color: #800000;
+            color: blue;
             font-size: 1.5rem;
             display: flex;
             align-items: center;
@@ -174,12 +175,12 @@
         }
         
         .notice-title i {
-            color: #800000;
+            color: darkblue;
             font-size: 1.2rem;
         }
         
         .notice-section {
-            background: linear-gradient(135deg, #800000 0%, #600000 100%);
+            
             color: white;
             padding: 8px 18px;
             border-radius: 30px;
@@ -224,20 +225,20 @@
         }
         
         .notice-author i, .notice-date i {
-            color: #800000;
+            color: black;
         }
         
         .back-button-container {
             padding: 25px;
             text-align: center;
-            background: #f8f9fa;
+            
         }
         
         .back-button {
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            background: linear-gradient(135deg, #800000 0%, #600000 100%);
+            
             color: white;
             text-decoration: none;
             padding: 12px 25px;
@@ -380,13 +381,13 @@
 }
 
 .back-button {
-    background-color: #f44336;
+    background-color: green;
     color: white;
-    border: 2px solid #d32f2f;
+    border: 1px solid black;
 }
 
 .back-button:hover {
-    background-color: #d32f2f;
+    background-color: darkgreen;
 }
 
 .error-message {

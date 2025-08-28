@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SKST University</title>
+  <title>SKST University || Notice</title>
   <link rel="icon" href="picture/SKST.png" type="image/png" />
   <link rel="stylesheet" href="Design/buttom_bar.css">
   <!-- Font Awesome for home icon -->
@@ -117,12 +117,30 @@
       }
     }
 
-        .background-image img {
+    .notice-login {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      min-width: 120px;
+    }
+
+    .notice-login:hover {
+      transform: translateY(-3px);
+      background: linear-gradient(135deg, #b31217, #e52d27);
+    }
+
+    .background-image img {
       border: 1px solid black;
       border-radius: 10px;
       margin-top: 10px;
       width: 100%;
-      height: 500px;
+      height: auto;
       display: block;
       animation: fadeInUp 2s ease-in-out;
     }
@@ -163,10 +181,12 @@
     <div class="navbar-top">
       <div class="logo">
         <img src="picture/logo.gif" alt="SKST Logo">
-        <h1>SKST University || notice</h1>
+        <h1>SKST University || Notice</h1>
       </div>
 
       <!-- Home Button -->
+       <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+       <a href="notice.php"><button class="notice-login"><i class="fas fa-bullhorn"></i> All Notice</button></a>
       <a href="index.html" class="home-button">
         <i class="fas fa-home"></i> Home
       </a>
@@ -192,7 +212,7 @@
     </div>
   </div>
 <div class="background-image">
-      <img src="picture/notice background.gif" alt="Background Image">
+      <img src="picture/notice background.jpg" alt="Background Image">
     </div>
 
     <div>
@@ -206,9 +226,6 @@
     </p>
 
   </div>
-
-  <iframe src="notice.php" width="100%" height="500px" style="border:none;"></iframe>
-
 
       <div class="buttom_bar">
       <img src="picture/SKST.png" alt="Logo" style="height:80px; width:auto;">
