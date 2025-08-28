@@ -6,8 +6,7 @@
   <title>SKST University</title>
   <link rel="icon" href="picture/SKST.png" type="image/png" />
   <link rel="stylesheet" href="Design/buttom_bar.css">
-
-  <!-- Font Awesome for home icon -->
+  <!-- Font Awesome (optional) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     * {
@@ -19,6 +18,10 @@
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: #f9f9ff;
+    }
+
+    a {
+      text-decoration: none; /* 🚫 Remove underline from all links */
     }
 
     .navbar {
@@ -48,27 +51,6 @@
       color: #333;
     }
 
-    .home-button {
-      background: gray;
-      color: white;
-      border: none;
-      padding: 10px 16px;
-      font-size: 15px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      transition: all 0.3s ease;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      text-decoration: none;
-    }
-
-    .home-button:hover {
-      transform: translateY(-3px);
-      background: linear-gradient(135deg, #18bcae, #f3af02);
-    }
-
     .menu-section {
       display: flex;
       flex-wrap: wrap;
@@ -79,24 +61,6 @@
 
     .menu-section a {
       text-decoration: none;
-    }
-
-        .scholarship {
-      background-color: #28a745;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      font-size: 16px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      transition: all 0.3s ease;
-      cursor: pointer;
-      min-width: 120px;
-    }
-
-    .scholarship:hover {
-      transform: translateY(-3px);
-      background: linear-gradient(135deg, #b31217, #e52d27);
     }
 
     .btn {
@@ -130,18 +94,53 @@
         flex-direction: column;
         align-items: center;
       }
-
-      .home-button {
-        margin-top: 10px;
-      }
     }
 
-    .background-image img {
+    .admission {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      min-width: 120px;
+    }
+
+    .admission:hover {
+      transform: translateY(-3px);
+      background: linear-gradient(135deg, #b31217, #e52d27);
+    }
+
+    .home-button {
+      background: gray;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      font-size: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 120px;
+    }
+
+    .home-button:hover {
+      transform: translateY(-3px);
+      background: linear-gradient(135deg, #18bcae, #f3af02);
+    }
+
+        .background-image img {
       border: 1px solid black;
       border-radius: 10px;
       margin-top: 10px;
       width: 100%;
-      height: auto;
+      height: 500px;
       display: block;
       animation: fadeInUp 2s ease-in-out;
     }
@@ -249,7 +248,7 @@
       margin-bottom: 30px;
     }
 
-  .scholarship-container {
+  .admission-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
@@ -258,7 +257,7 @@
     font-family: 'Times New Roman', Times, serif;
   }
 
-  .scholarship-column {
+  .admission-column {
     background: #ffffff;
     padding: 50px;
     border: 1px solid #ccc;
@@ -268,7 +267,7 @@
     box-shadow: 0 2px 6px rgba(0,0,0,0.08);
   }
 
-      .scholarship-container {
+      .admission-container {
       display: flex;
       justify-content: space-between;
       align-items:center;
@@ -281,7 +280,7 @@
       margin: 20px auto;
       font-family: Arial, sans-serif;
     }
-    
+
   </style>
 </head>
 <body>
@@ -289,11 +288,12 @@
     <div class="navbar-top">
       <div class="logo">
         <img src="picture/logo.gif" alt="SKST Logo">
-        <link rel="stylesheet" href="design/scholarship_table.css">
-        <h1>SKST University || Scholarships</h1>
+        <h1>SKST University || Admission</h1>
       </div>
 
-      <!-- Scholarship calculator and Home Page Buttons -->
+      <!-- admission Login and Home Page Buttons -->
+      <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+        <a href="admission.php"><button class="admission"><i class="fas fa-user"></i> Apply Now</button></a>
         <a href="index.html" class="home-button">
           <i class="fas fa-home"></i> Home
         </a>
@@ -302,38 +302,39 @@
 
     <div class="menu-section">
       <a href="student/student.html"><button class="btn">Student</button></a>
-      <a href="faculty.html"><button class="btn">Faculty</button></a>
+      <a href="faculty/faculty.html"><button class="btn">Faculty</button></a>
       <a href="admin/administration.html"><button class="btn">Administration</button></a>
       <a href="alumni/alumni.html"><button class="btn">Alumni</button></a>
-      <a href="campus.html"><button class="btn">Campus Life</button></a>
-      <a href="iqac.html"><button class="btn">IQAC</button></a>
-      <a href="notice.html"><button class="btn">Notice</button></a>
-      <a href="news.html"><button class="btn">News</button></a>
-      <a href="ranking.html"><button class="btn">Ranking</button></a>
-      <a href="academic.html"><button class="btn">Academics</button></a>
-      <a href="scholarship.html"><button class="btn">Scholarships</button></a>
+      <a href="campus/campus.html"><button class="btn">Campus Life</button></a>
+      <a href="iqac/iqac.html"><button class="btn">IQAC</button></a>
+      <a href="notice/notice.html"><button class="btn">Notice</button></a>
+      <a href="news/news.html"><button class="btn">News</button></a>
+      <a href="ranking/ranking.html"><button class="btn">Ranking</button></a>
+      <a href="academic/academic.html"><button class="btn">Academics</button></a>
+      <a href="scholarship/scholarship.html"><button class="btn">Scholarships</button></a>
       <a href="admission.html"><button class="btn">Admission</button></a>
       <a href="library/library1.html"><button class="btn">Library</button></a>
-      <a href="volunteer.html"><button class="btn">Volunteer</button></a>
-      <a href="account.html"><button class="btn">Account</button></a>
-      <a href="about.html"><button class="btn">About US</button></a>
+      <a href="account/account.html"><button class="btn">Account</button></a>
+      <a href="volunteer/volunteer.html"><button class="btn">Volunteer</button></a>
+      <a href="about/about.html"><button class="btn">About US</button></a>
     </div>
   </div>
 
 
+  </div>
+  
   <div class="background-image">
-      <img src="picture/scholarship background.gif" alt="Background Image">
+      <img src="picture/admission background.gif" alt="Background Image">
     </div>
 
     <div>
   <div class="future-students-container">
 
-    <h1 class="future-students-title">"SKST University Scholarship"</h1>
+    <h1 class="future-students-title">👨🏻‍🎓👩🏻‍🎓"Our admission Is Our Mirror"</h1>
 
     <p class="future-students-text">
-       SKST University offers a number of features and opportunities for its scholarship program, 
-       helping students stay informed, connected, and engaged with the institution. The scholarship 
-       section provides easy access to important tools and resources.
+      SKST University offers a number of features and opportunities for its admission to stay 
+      connected and engaged with the institution. Some of those features are as follows:
     </p>
 
   </div>
@@ -344,13 +345,12 @@
           <!-- Sidebar -->
       <div class="sidebar">
       <p style="font-weight:bold; font-size:18px; margin-bottom:15px; text-align:center;">Quick Links</p>
-        <a href="scholarship2.php">Scholarship Eligibility</a>
-        <a href="scholarship.php">Scholarship Calculator</a>
-        <a href="#Table">Scholarship Rate Table</a>
-        <a href="working.html">View Scholarship</a>
-        <a href="working.html">Apply for Scholarship</a>
-
-        
+        <a href="working.html">admission Network</a>
+        <a href="working.html">Reunions & Events</a>
+        <a href="admission/admission.html">admission & Resources</a>
+        <a href="working.html">Awards & Recognition</a>
+        <a href="working.html">Career Support</a>
+        <a href="admission.php">admission Login</a>
       </div>
 
 
@@ -360,135 +360,73 @@
           <!-- Left Column -->
           <div class="column">
             <div id="network" class="section">
-              <h3>Scholarship Eligibility</h3>
-              <p>Learn about the eligibility criteria, requirements, and guidelines to qualify for different types of scholarships.</p>
+              <h3>admission Network</h3>
+              <p>Connect with a strong community of graduates for collaboration and opportunities.</p>
             </div>
 
             <div id="events" class="section">
-              <h3>Scholarship Calculator</h3>
-              <p>Use the scholarship calculator to estimate the amount of financial aid you may be eligible for based on your academic results and other criteria.</p>
+              <h3>Reunions & Events</h3>
+              <p>Exclusive invitations to annual reunions, seminars, and special gatherings.</p>
             </div>
 
-            <div id="scholarship" class="section">
-              <h3>Scholarship Rate Table</h3>
-              <p>Access a detailed table showing the rates, percentages, and categories of available scholarships.</p>
+            <div id="admission" class="section">
+              <h3>admission & Resources</h3>
+              <p>Continued access to selected digital and printed resources for admission.</p>
             </div>
           </div>
 
           <!-- Right Column -->
           <div class="column">
             <div id="recognition" class="section">
-              <h3>View Scholarship</h3>
-              <p>Celebrating the achievements and contributions of distinguished scholarship.</p>
+              <h3>Awards & Recognition</h3>
+              <p>Celebrating the achievements and contributions of distinguished admission.</p>
             </div>
 
             <div id="career" class="section">
-              <h3>Apply for Scholarship</h3>
-              <p>Browse through all the scholarships you qualify for, along with their details, benefits, and conditions.</p>
+              <h3>Career Support</h3>
+              <p>Career counseling, job postings, and networking opportunities for admission growth.</p>
             </div>
 
-            <div id="scholarship-login" class="section">
-              <h3>Scholarship Login</h3>
-              <p>Access exclusive resources and connect with fellow scholarship recipients.</p>
+            <div id="admission-login" class="section">
+              <h3>admission Login</h3>
+              <p>Access exclusive resources and connect with fellow admission.</p>
             </div>
           </div>
           </div>
-          </div>
-        
+        </div>
 
         
+
 
     <h2 class="line-through">-----Objectives and Preamble-----</h2>
-    <div class="scholarship-container">
-      <div class="scholarship-column">
+    <div class="admission-container">
+      <div class="admission-column">
         <p>
           <strong>Objectives:</strong> <br> <br>
-          SKST University scholarship Association plays a vital role by assisting the university in 
+          SKST University admission Association plays a vital role by assisting the university in 
           developing linkage with industries, multinational organizations as well as other firms 
           and companies. Besides that, it assists the interns of SKST University in finding internship 
           placement in different organizations. It also provides job opportunities to the students of SKST University.
         </p>
       </div>
 
-      <div class="scholarship-column">
+      <div class="admission-column">
         <p>
           <strong>Preamble:</strong> <br> <br>
-          We, the scholarship of the SKST University, develop mutual interest among ourselves, establish mutually
-          beneficial relations between SKST University and its scholarship, and promote the interests
+          We, the admission of the SKST University, develop mutual interest among ourselves, establish mutually
+          beneficial relations between SKST University and its admission, and promote the interests
           of SKST University, do hereby form into an Association and adopt this constitution.
         </p>
       </div>
     </div>
 
-<section id="Table">
-<div class="container">
 
-        <div class="scholarship-table-container">
-            <div class="section-title">
-              <h1 style="color:aquamarine">Academic Scholarship Program</h1>
-              <h2>Scholarship Rate Table</h2>
-            </div>
-
-            <table class="scholarship-table">
-                <thead>
-                    <tr>
-                        <th>Level of Score</th>
-                        <th>Marks (%)</th>
-                        <th>Rate of Scholarship (Male)</th>
-                        <th>Rate of Scholarship (Female)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr id="row-100" class="highlight-row">
-                        <td>5.00</td>
-                        <td>90% or above</td>
-                        <td>100%</td>
-                        <td>100%</td>
-                    </tr>
-                    <tr id="row-75-60">
-                        <td>5.00</td>
-                        <td>90% or above</td>
-                        <td>60%</td>
-                        <td>75%</td>
-                    </tr>
-                    <tr id="row-65-50">
-                        <td>4.80 – 4.99</td>
-                        <td>80% – below 90%</td>
-                        <td>50% of Tuition Fees</td>
-                        <td>65% of Tuition Fees</td>
-                    </tr>
-                    <tr id="row-40-25">
-                        <td>4.50 – 4.79</td>
-                        <td>75% – below 80%</td>
-                        <td>25% of Tuition Fees</td>
-                        <td>40% of Tuition Fees</td>
-                    </tr>
-                    <tr id="row-30-15">
-                        <td>4.00 – 4.49</td>
-                        <td>70% – below 75%</td>
-                        <td>15% of Tuition Fees</td>
-                        <td>30% of Tuition Fees</td>
-                    </tr>
-                    <tr id="row-25-10">
-                        <td>3.50 – 3.99</td>
-                        <td>60% – below 70%</td>
-                        <td>10% of Tuition Fees</td>
-                        <td>25% of Tuition Fees</td>
-                    </tr>
-                </tbody>
-            </table>
-            <p class="note">* With GPA 5.00 at SSC level examination</p>
-        </div>
-</div>
-</section>
-
-<div class="buttom_bar">
-<img src="picture/SKST.png" alt="Logo" style="height:80px; width:auto;">
-<p>SKST University</p>
-<p>4 Embankment Drive Road,Sector-10, Uttara Model Town, Dhaka-1230.</p>
-<p>Phone: (88 02) 55091801-5, Mobile : +88 01714 014 933, 01810030041-9, 01325080581-9</p>
-<p>Fax: (880-2) 5895 2625, Email : info@skst.edu</p>
-</div>
-
+      <div class="buttom_bar">
+      <img src="picture/SKST.png" alt="Logo" style="height:80px; width:auto;">
+      <p>SKST University</p>
+      <p>4 Embankment Drive Road,Sector-10, Uttara Model Town, Dhaka-1230.</p>
+      <p>Phone: (88 02) 55091801-5, Mobile : +88 01714 014 933, 01810030041-9, 01325080581-9</p>
+      <p>Fax: (880-2) 5895 2625, Email : info@skst.edu</p>
+    </div>
 </body>
 </html>
