@@ -24,8 +24,8 @@ $action = $_POST['action'] ?? '';
 $message = '';
 
 if ($action === 'insert') {
-    // Generate a unique application ID
-    $application_id = 'APP' . date('YmdHis') . rand(100, 999);
+    // Use student ID as application ID
+    $application_id = $_POST['student_id'];
     
     $stmt = $pdo->prepare("INSERT INTO scholarship_application 
         (application_id, name, department, semester, mobile_number, email, 
@@ -188,7 +188,7 @@ if (!empty($edit_id)) {
             align-items: center;
             justify-content: center;
             gap: 5px;
-            background-color: #3498db;
+            background-color: maroon;
             color: white;
             padding: 10px 18px;
             border: none;
@@ -199,7 +199,7 @@ if (!empty($edit_id)) {
             text-decoration: none;
         }
         button:hover, .btn:hover {
-            background-color: #2980b9;
+            background-color: darkred;
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
@@ -210,16 +210,16 @@ if (!empty($edit_id)) {
             background-color: #c0392b;
         }
         .btn-success {
-            background-color: #2ecc71;
+            background-color: darkgreen;
         }
         .btn-success:hover {
-            background-color: #27ae60;
+            background-color: green;
         }
         .btn-secondary {
-            background-color: #7f8c8d;
+            background-color: darkgreen;
         }
         .btn-secondary:hover {
-            background-color: #95a5a6;
+            background-color: green;
         }
         .form-container {
             display: grid;
@@ -287,6 +287,7 @@ if (!empty($edit_id)) {
             cursor: pointer;
             position: relative;
             white-space: nowrap;
+            text-decoration: none;
         }
         th:hover {
             background-color: #2980b9;
@@ -301,6 +302,7 @@ if (!empty($edit_id)) {
             background-color: #e3f2fd;
         }
         .action-buttons {
+            
             display: flex;
             gap: 8px;
         }
@@ -354,8 +356,8 @@ if (!empty($edit_id)) {
         <div class="header">
             <h1><i class="fas fa-graduation-cap"></i> Scholarship Application Management</h1>
             <div class="btn-group">
-                <a href="javascript:history.back()" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>
-                <a href="<?php echo $_SERVER['PHP_SELF']; ?>" class="btn"><i class="fas fa-home"></i> Home</a>
+                <a href="../working.html" class="btn btn-secondary"> <i class="fas fa-arrow-left"></i> Back </a>
+                <a href="../index.html" class="btn"> <i class="fas fa-home"></i> Home </a>
             </div>
         </div>
         
@@ -388,6 +390,13 @@ if (!empty($edit_id)) {
                 <?php if ($edit_record): ?>
                     <input type="hidden" name="id" value="<?php echo $edit_record['id']; ?>">
                 <?php endif; ?>
+                
+                <div class="form-group">
+                    <label for="student_id"><i class="fas fa-id-card"></i> Student ID:</label>
+                    <input type="text" id="student_id" name="student_id" required 
+                        value="<?php echo $edit_record ? $edit_record['application_id'] : ''; ?>" 
+                        placeholder="Enter student ID" <?php echo $edit_record ? 'readonly' : ''; ?>>
+                </div>
                 
                 <div class="form-group">
                     <label for="name"><i class="fas fa-user"></i> Name:</label>
@@ -474,7 +483,7 @@ if (!empty($edit_id)) {
         <h2><i class="fas fa-search"></i> Search Applications</h2>
         <div class="search-container">
             <form method="get" style="display: flex; width: 100%; gap: 10px;">
-                <input type="text" name="search" placeholder="Search by name, application ID, email or phone" 
+                <input type="text" name="search" placeholder="Search by name, student ID, email or phone" 
                     value="<?php echo htmlspecialchars($search); ?>">
                 <button type="submit"><i class="fas fa-search"></i> Search</button>
                 <a href="<?php echo $_SERVER['PHP_SELF']; ?>" class="btn btn-secondary"><i class="fas fa-times"></i> Clear</a>
@@ -493,7 +502,7 @@ if (!empty($edit_id)) {
                         </th>
                         <th>
                             <a href="?sort=application_id&order=<?php echo $sort === 'application_id' && $order === 'ASC' ? 'DESC' : 'ASC'; ?>&search=<?php echo urlencode($search); ?>">
-                                Application ID <?php echo $sort === 'application_id' ? '<span class="sort-indicator">' . ($order === 'ASC' ? '▲' : '▼') . '</span>' : ''; ?>
+                                Student ID <?php echo $sort === 'application_id' ? '<span class="sort-indicator">' . ($order === 'ASC' ? '▲' : '▼') . '</span>' : ''; ?>
                             </a>
                         </th>
                         <th>
@@ -522,7 +531,7 @@ if (!empty($edit_id)) {
                                 Application Date <?php echo $sort === 'application_date' ? '<span class="sort-indicator">' . ($order === 'ASC' ? '▲' : '▼') . '</span>' : ''; ?>
                             </a>
                         </th>
-                        <th>Actions</th>
+                        <th style="text-align: center;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
