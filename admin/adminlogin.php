@@ -26,6 +26,7 @@ $conn = mysqli_connect("localhost", "root", "", "skst_university");
       date_default_timezone_set('Asia/Dhaka');
 
 $error = "";
+
 if (isset($_POST['login'])) {
     $email = $conn->real_escape_string($_POST['email']);
     $password = $_POST['password'];
@@ -66,6 +67,7 @@ if (isset($_POST['login'])) {
   <link rel="stylesheet" href="admin.css">
 </head>
 <body>
+    <!-- ==========================login form =================== -->
     <div class="login-container">
         <div class="login-header">
             <img src="../picture/SKST.png" alt="SKST Logo" style="border-radius: 50%; height: 80px; width: 80px;">
@@ -101,11 +103,16 @@ if (isset($_POST['login'])) {
                 <button type="submit" name="login" class="login-btn">
                     <i class="fas fa-sign-in-alt"></i> Login to Dashboard
                 </button>
+                <button style="margin-top:10px" type="submit" name="login" class="login-btn">
+                    <i class="fas fa-sign-in-alt"></i> <a style="text-decoration: none;color:aliceblue;" href="administration.html">Sign Out</a>
+                </button>
             </form>
-            
             <div class="footer-links">
-                <p><a href="#"><i class="fas fa-key"></i> Forgot Password?</a> • <a href="#"><i class="fas fa-question-circle"></i> Help</a></p>
+               
+                <p><a  href="forgert_pass.php"><i class="fas fa-key"></i> Forgot Password?</a> •
+                 <a href="#"><i class="fas fa-question-circle"></i> Help</a></p>
             </div>
+            
         </div>
     </div>
 </body>
