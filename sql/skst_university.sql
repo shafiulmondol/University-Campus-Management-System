@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 29, 2025 at 09:59 AM
+-- Generation Time: Aug 29, 2025 at 07:52 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -311,19 +311,21 @@ INSERT INTO `notice` (`id`, `title`, `section`, `content`, `author`, `created_at
 -- --------------------------------------------------------
 
 --
--- Table structure for table `scholarship_applications`
+-- Table structure for table `scholarship_application`
 --
 
-CREATE TABLE `scholarship_applications` (
-  `id` int(6) UNSIGNED NOT NULL,
-  `student_id` varchar(30) NOT NULL,
-  `full_name` varchar(100) NOT NULL,
-  `gender` varchar(10) NOT NULL,
-  `ssc_gpa` float NOT NULL,
-  `hsc_gpa` float NOT NULL,
-  `cgpa` float NOT NULL,
-  `prev_scholarship` int(3) NOT NULL,
-  `scholarship_percentage` int(3) NOT NULL,
+CREATE TABLE `scholarship_application` (
+  `id` int(11) NOT NULL,
+  `application_id` varchar(20) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `department` enum('BBA','BSCE','BSAg','BSME','BATHM','BSN','BCSE','BSEEE','BA Econ','BA Eng') NOT NULL,
+  `semester` int(11) NOT NULL,
+  `mobile_number` varchar(15) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `current_semester_sgpa` decimal(3,2) NOT NULL,
+  `cgpa` decimal(3,2) NOT NULL,
+  `previous_semester_cgpa` decimal(3,2) NOT NULL,
+  `scholarship_percentage` decimal(5,2) NOT NULL,
   `application_date` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -576,10 +578,11 @@ ALTER TABLE `faculty`
   ADD UNIQUE KEY `email` (`email`);
 
 --
--- Indexes for table `scholarship_applications`
+-- Indexes for table `scholarship_application`
 --
-ALTER TABLE `scholarship_applications`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE `scholarship_application`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `application_id` (`application_id`);
 
 --
 -- Indexes for table `student_registration`
@@ -666,10 +669,10 @@ ALTER TABLE `faculty`
   MODIFY `faculty_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7654324;
 
 --
--- AUTO_INCREMENT for table `scholarship_applications`
+-- AUTO_INCREMENT for table `scholarship_application`
 --
-ALTER TABLE `scholarship_applications`
-  MODIFY `id` int(6) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE `scholarship_application`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `student_registration`
