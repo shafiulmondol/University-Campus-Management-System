@@ -1,5 +1,22 @@
 
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
         
+       body {
+    background: #f5f7fa;
+    color: #333;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+    padding: 20px;
+}
+
         .login-container {
             background: white;
             border-radius: 12px;
@@ -141,19 +158,7 @@
       height: 80px;
     }
         
-           * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background-color: #f5f7fa;
-            color: #333;
-            line-height: 1.6;
-        }
-        
+      
         /* ================ Navbar Styles ============ */
         .navbar {
             background: linear-gradient(135deg, #2b5876, #4e4376);
