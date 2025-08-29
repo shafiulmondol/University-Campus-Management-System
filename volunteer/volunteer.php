@@ -128,38 +128,164 @@ if(isset($_SESSION['id'])){
 <head>
 <meta charset="UTF-8">
 <title>Volunteer Dashboard | University</title>
+  <link rel="icon" href="../picture/SKST.png" type="image/png" />
+
 <style>
-   body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f4f4f9; }
-        header { background:#2c3e50; color:#fff; padding:15px; text-align:center; }
-        nav a { color:#fff; margin:0 15px; text-decoration:none; font-weight:bold; }
-        section { padding:40px; text-align:center; }
-        form { max-width:400px; margin:20px auto; background:#fff; padding:20px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
-        form h2 { margin-bottom:15px; }
-        .form-group { margin-bottom:15px; text-align:left; }
-        label { display:block; margin-bottom:5px; }
-        input { width:100%; padding:10px; border:1px solid #ccc; border-radius:5px; }
-        button { padding:10px 15px; background:#2c3e50; color:#fff; border:none; border-radius:5px; cursor:pointer; }
-        button:hover { background:#1a252f; }
-        .message { color:red; font-weight:bold; text-align:center; margin:10px; }
-        footer { background:#2c3e50; color:#fff; text-align:center; padding:10px; margin-top:40px; }
-body{font-family:sans-serif;background:#f4f6fb;margin:0;padding:0;}
-header{background:#4361ee;color:white;padding:15px;text-align:center;}
-.container{width:90%;max-width:1000px;margin:30px auto;}
-.cards{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;}
-.card{background:white;padding:20px;border-radius:10px;box-shadow:0 3px 10px rgba(0,0,0,0.1);text-align:center;transition:0.3s;cursor:pointer;}
-.card:hover{transform:translateY(-5px);box-shadow:0 5px 15px rgba(0,0,0,0.2);}
-.card span{font-size:30px;display:block;margin-bottom:10px;}
-input,textarea,select,button{padding:10px;margin:8px 0;border-radius:6px;border:1px solid #ccc;width:100%;}
-button{background:#4361ee;color:white;border:none;cursor:pointer;}
-button:hover{background:#3f37c9;}
-.success{background:#d4edda;color:#155724;padding:10px;border-radius:5px;margin-bottom:15px;}
-.error{background:#f8d7da;color:#721c24;padding:10px;border-radius:5px;margin-bottom:15px;}
-table{width:100%;border-collapse:collapse;}
-table,th,td{border:1px solid #ccc;}
-th,td{padding:8px;text-align:center;}
+   body { 
+    font-family: Arial, sans-serif;
+     margin:0; 
+     padding:0; 
+     background:#f4f4f9; 
+     }
+        header { 
+            background:#2c3e50; 
+            color:#fff; 
+            padding:15px; 
+            text-align:center; 
+            }
+        nav a { 
+            color:#fff; 
+            margin:0 15px; 
+            text-decoration:none; 
+            font-weight:bold; 
+            }
+        section { 
+            padding:40px; 
+            text-align:center; 
+            }
+        form { 
+            max-width:400px; 
+            margin:20px auto; 
+            background:#fff; 
+            padding:20px; 
+            border-radius:10px; 
+            box-shadow:0 2px 6px rgba(0,0,0,0.1); 
+            }
+        form h2 { 
+            margin-bottom:15px; 
+            }
+        .form-group { 
+            margin-bottom:15px; 
+            text-align:left; 
+            }
+        label { 
+            display:block; 
+            -bottom:5px; 
+            }
+        input { 
+            width:100%; 
+            :10px; 
+            border:1px solid #ccc; border-radius:5px; 
+            }
+        button { 
+            padding:10px 15px;
+             background:#2c3e50; 
+             color:#fff; 
+             :none; 
+             border-radius:5px; 
+             cursor:pointer; 
+             }
+        button:hover { 
+            background:#1a252f; 
+            }
+        .message { 
+            color:red; 
+            font-weight:bold; 
+            text-align:center; 
+            margin:10px;
+            }
+        footer { 
+            background:#2c3e50; 
+            color:#fff; 
+            text-align:center; 
+            padding:10px; 
+            margin-top:40px; 
+            }
+body{
+    font-family:sans-serif;
+    background:#f4f6fb;
+    margin:0;padding:0;
+    }
+header{
+    background:#4361ee;
+    color:white;
+    padding:15px;
+    text-align:center;
+    }
+.container{
+    width:90%;
+    max-width:1000px;
+    margin:30px auto;
+    }
+.cards{
+    display:flex;
+    flex-wrap:wrap;
+    gap:20px;
+    justify-content:center;
+    }
+.card{
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 3px 10px rgba(0,0,0,0.1);
+    text-align:center;
+    transition:0.3s;
+    cursor:pointer;
+    }
+.card:hover{
+    transform:translateY(-5px);
+    box-shadow:0 5px 15px rgba(0,0,0,0.2);
+    }
+.card span{
+    font-size:30px;
+    display:block;
+    margin-bottom:10px;
+    }
+input,textarea,select,button{
+    padding:10px;
+    margin:8px 0;
+    border-radius:6px;
+    border:1px solid #ccc;
+    width:100%;
+    }
+button{
+    background:#4361ee;
+    color:white;
+    border:none;
+    cursor:pointer;
+    }
+button:hover{
+    background:#3f37c9;
+    }
+.success{
+    background:#d4edda;
+    color:#155724;
+    padding:10px;
+    border-radius:5px;
+    margin-bottom:15px;
+    }
+.error{
+    background:#f8d7da;
+    color:#721c24;
+    padding:10px;
+    border-radius:5px;
+    margin-bottom:15px;
+    }
+table{
+    width:100%;
+    border-collapse:collapse;
+    }
+table,th,td{
+    border:1px solid #ccc;
+    }
+th,td{
+    padding:8px;
+    text-align:center;
+    }
 </style>
 </head>
 <body>
+
 <header>
     <h1>University Volunteer System</h1>
     <nav>
