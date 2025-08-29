@@ -164,6 +164,7 @@
       font-weight: bold;
       margin-top: 20px;
       margin-bottom: 20px;
+      line-height: 80px;
     }
 
     .future-students-text {
@@ -233,21 +234,7 @@
       color: #555;
     }
 
-  .future-students-container {
-      margin: 30px auto 40px auto;
-      padding: 0 20px;
-      font-family: Arial, sans-serif;
-    }
 
-    .line-through {
-      position: relative;
-      text-align: center;
-      color: #1c6e3c; /* green shade like in your screenshot */
-      font-size: 24px;
-      font-weight: 500;
-      margin-top: 20px;
-      margin-bottom: 30px;
-    }
 
   .scholarship-container {
     display: grid;
@@ -281,7 +268,88 @@
       margin: 20px auto;
       font-family: Arial, sans-serif;
     }
+
+    .scholarships {
+    background-color: #fff;
+    padding: 25px 30px;
+    max-width: 1200px;
+    margin: 20px auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+}
+
+    .scholarships h2 {
+        color: #800000;
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 24px;
+    }
+
+    .scholarships ul {
+        list-style-type: decimal;
+        padding-left: 20px;
+    }
+
+    .scholarships li {
+        margin-bottom: 12px;
+    }
+
+    .scholarships li strong {
+        font-weight: 600;
+        color: #333;
+    }
     
+    .about-us {
+        background-color: #fff;
+        padding: 30px 35px;
+        max-width: 1200px;
+        margin: 30px auto;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        font-family: Arial, sans-serif;
+    }
+
+    .about-us h2 {
+        color: #800000;
+        text-align: center;
+        margin-bottom: 25px;
+        font-size: 26px;
+    }
+
+    /* 3-column layout */
+    .about-text {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+
+    .about-text p {
+        color: #333;
+        font-size: 16px;
+        line-height: 1.6;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        box-shadow: #555;
+        text-align: justify;
+    }
+
+    /* Responsive for smaller screens */
+    @media screen and (max-width: 900px) {
+        .about-text {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media screen and (max-width: 600px) {
+        .about-text {
+            grid-template-columns: 1fr;
+        }
+    }
+
+
   </style>
 </head>
 <body>
@@ -328,7 +396,7 @@
     <div>
   <div class="future-students-container">
 
-    <h1 class="future-students-title">"SKST University Scholarship"</h1>
+    <h1 class="future-students-title">"Welcome to the SKST University Scholarship Portal"</h1>
 
     <p class="future-students-text">
        SKST University offers a number of features and opportunities for its scholarship program, 
@@ -347,9 +415,9 @@
         <a href="scholarship2.php">Scholarship Eligibility</a>
         <a href="scholarship.php">Scholarship Calculator</a>
         <a href="#Table">Scholarship Rate Table</a>
-        <a href="../working.html">View Scholarship</a>
+        <a href="#Table2">View Scholarship</a>
         <a href="scholarship_application.php">Apply for Scholarship</a>
-
+        <a href="#Table3">About Us</a>
         
       </div>
 
@@ -384,41 +452,12 @@
 
             <div id="career" class="section">
               <h3>Apply for Scholarship</h3>
-              <p>Browse through all the scholarships you qualify for, along with their details, benefits, and conditions.</p>
+              <p>Once eligible, students can apply for scholarships through the application portal. Here, they submit personal details, academic results, and any required documents. The process ensures that the scholarship committee can verify the eligibility and finalize the award. Applying online makes the process faster, more organized, and easily accessible to students.</p>
             </div>
 
-            <div id="scholarship-login" class="section">
-              <h3>Scholarship Login</h3>
-              <p>Access exclusive resources and connect with fellow scholarship recipients.</p>
-            </div>
           </div>
           </div>
           </div>
-        
-
-        
-
-    <h2 class="line-through">-----Objectives and Preamble-----</h2>
-    <div class="scholarship-container">
-      <div class="scholarship-column">
-        <p>
-          <strong>Objectives:</strong> <br> <br>
-          SKST University scholarship Association plays a vital role by assisting the university in 
-          developing linkage with industries, multinational organizations as well as other firms 
-          and companies. Besides that, it assists the interns of SKST University in finding internship 
-          placement in different organizations. It also provides job opportunities to the students of SKST University.
-        </p>
-      </div>
-
-      <div class="scholarship-column">
-        <p>
-          <strong>Preamble:</strong> <br> <br>
-          We, the scholarship of the SKST University, develop mutual interest among ourselves, establish mutually
-          beneficial relations between SKST University and its scholarship, and promote the interests
-          of SKST University, do hereby form into an Association and adopt this constitution.
-        </p>
-      </div>
-    </div>
 
 <section id="Table">
 <div class="container">
@@ -481,6 +520,76 @@
         </div>
 </div>
 </section>
+
+<section id="Table2">
+<div class="scholarships">
+    <h2>Scholarships at SKST University - Spring Semester 2025</h2>
+    <ul>
+        <li><strong>Professor Dr M Alimullah Miyan Scholarship:</strong> Tk 1000–2000 per month, various slots, all programs eligible.</li>
+        <li><strong>Professor Mahmuda Khanam Scholarship:</strong> Tk 1000–1500 per month, various slots, all programs eligible.</li>
+        <li><strong>Yamin Scholarship:</strong> Tk 1000 per month, BBA program students eligible.</li>
+        <li><strong>Ahsanullah Scholarship:</strong> Tk 2000 per month, students from Cumilla district eligible.</li>
+        <li><strong>Jaheda Khanum Scholarship:</strong> Tk 1000 per month, BSCE program students eligible.</li>
+        <li><strong>Bir Pratik Shafiqullah Scholarship:</strong> Tk 1000 per month, preference to children/grandchildren of freedom fighters.</li>
+        <li><strong>Rabeya Khatun Scholarship:</strong> Tk 1000 per month, students from Chandina or Kachua upazilla eligible.</li>
+        <li><strong>KMA Aziz Scholarship:</strong> Tk 1000 per month, College of Arts and Science students eligible.</li>
+        <li><strong>Moulovi Mohebullah Scholarship:</strong> Tk 1000 per month, all programs eligible.</li>
+        <li><strong>Professor Abdul Mutalib Scholarship:</strong> Tk 1000 per month, College of Arts and Science students eligible.</li>
+        <li><strong>Moulovi Kalimullah Scholarship:</strong> Tk 1000 per month, all programs eligible.</li>
+        <li><strong>Prof. Dr Nazmul Ahsan Kalimullah Scholarship:</strong> Tk 1000 per month, students from Cumilla, Chandpur, Brahmonbaria, Munshigonj, and Dhaka City eligible.</li>
+        <li><strong>Engr Shamim Ahsan Mohebullah Scholarship:</strong> Tk 1000 per month, students from Cumilla, Chandpur, Brahmonbaria, and Dhaka City eligible.</li>
+        <li><strong>Abdul Wadood Scholarship:</strong> Tk 1500 per month, students from Cumilla, Chandpur, Brahmonbaria, and Dhaka City eligible.</li>
+        <li><strong>Ahmed Ali Munshi Scholarship:</strong> Tk 1000 per month, only girl students eligible.</li>
+        <li><strong>Sultanul Islam Chowdhury Scholarship:</strong> Tk 1000 per month, BSAg program students from specified districts eligible.</li>
+        <li><strong>Mojibor Rahman Scholarship:</strong> Tk 1000 per month, students from Shahjadpur Upazilla of Shirajgonj eligible.</li>
+        <li><strong>RL (BOB) Southern Scholarship:</strong> Tk 1000 per month, all programs eligible.</li>
+        <li><strong>Prof Dr Abdul Wahed Scholarship:</strong> Tk 1000 per month, all programs eligible.</li>
+        <li><strong>Prof Hans Eric Frank Scholarship:</strong> Tk 2000 per month, all programs eligible.</li>
+        <li><strong>M S Zoha Scholarship:</strong> Tk 1000 per month, all programs eligible.</li>
+        <li><strong>Golden Laetitia Scholarship:</strong> Tk 2000 per month, all programs eligible.</li>
+        <li><strong>Jolly Hamid Scholarship:</strong> Tk 2000 per month, only girl students eligible.</li>
+        <li><strong>Munshi Jamiruddin Ahmed Scholarship:</strong> Tk 1500 per month, all programs eligible.</li>
+        <li><strong>Seraj Uddin Ahmed Scholarship:</strong> Tk 1500 per month, all programs eligible.</li>
+        <li><strong>Jamila Khatun Scholarship:</strong> Tk 1500 per month, all programs eligible.</li>
+        <li><strong>Rafiqul Huq Scholarship:</strong> Tk 1500 per month, all programs eligible.</li>
+        <li><strong>Rotary Club of Baridhara Scholarship:</strong> Tk 1000 per month, all programs eligible.</li>
+        <li><strong>Cheunjit Katkanant Scholarship:</strong> Tk 9700 per semester, all programs eligible.</li>
+        <li><strong>Prof. K R Kamal Wadood Scholarship:</strong> Tk 1000 per month, all programs eligible.</li>
+        <li><strong>Shahjahan Bhuiyan Scholarship:</strong> Tk 2000 per month, all programs eligible.</li>
+        <li><strong>Shahana Bilquis Scholarship:</strong> Tk 1000–1500 per month, 1–2 students, all programs eligible.</li>
+        <li><strong>Wazir Hasan Chowdhury Scholarship:</strong> Tk 1000 per month, all programs eligible.</li>
+        <li><strong>Civil Department Scholarship:</strong> Tk 1500 per month, only girl students of BSCE program eligible.</li>
+        <li><strong>M. Aminuddin Anisa Khatun Scholarship:</strong> Tk 5000 per semester, students from South and Greater Dhaka eligible.</li>
+        <li><strong>Azizur Khalilur Jamila Scholarship:</strong> Tk 4900 per semester, students from Gazipur District eligible.</li>
+    </ul>
+</div>
+
+</section>
+
+<section id="Table3">
+<div class="about-us">
+    <h2>About SKST University Scholarships</h2>
+    <div class="about-text">
+        <p>
+            SKST University is committed to supporting meritorious but financially needy students through a variety of scholarships. 
+            Our scholarships aim to promote academic excellence, encourage talented students, and make higher education accessible 
+            to students from all walks of life.
+        </p>
+        <p>
+            Scholarships are awarded based on academic performance, financial need, and in some cases, program-specific eligibility. 
+            Students from different programs, districts, and special categories are encouraged to apply. 
+            Each scholarship has specific criteria, amount, and number of slots which are updated every semester.
+        </p>
+        <p>
+            SKST University believes that investing in students’ education strengthens the community, nurtures future leaders, 
+            and contributes to national development. We encourage eligible students to explore available scholarships 
+            and apply for the opportunities that best match their profile.
+        </p>
+    </div>
+</div>
+
+</section>
+
 
 <div class="buttom_bar">
 <img src="../picture/SKST.png" alt="Logo" style="height:80px; width:auto;">

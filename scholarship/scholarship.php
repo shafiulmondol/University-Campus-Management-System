@@ -1,198 +1,19 @@
-<?php
-// Database configuration - corrected to your university database
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "skst_university";  // Changed to your database name
-
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
-// Create table if not exists - fixed syntax
-$sql = "CREATE TABLE IF NOT EXISTS scholarship_applications (
-    id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    student_id VARCHAR(30) NOT NULL,
-    full_name VARCHAR(100) NOT NULL,
-    gender VARCHAR(10) NOT NULL,
-    ssc_gpa FLOAT NOT NULL,
-    hsc_gpa FLOAT NOT NULL,
-    cgpa FLOAT NOT NULL,
-    prev_scholarship INT(3) NOT NULL,
-    scholarship_percentage INT(3) NOT NULL,
-    application_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)";
-
-// Execute table creation
-if ($conn->query($sql) === FALSE) {
-    die("Error creating table: " . $conn->error);
-}
-
-// Initialize variables
-$student_id = $full_name = $gender = $ssc_gpa = $hsc_gpa = $cgpa = $prev_scholarship = '';
-$scholarship_percentage = 0;
-$criteria = '';
-$errors = [];
-$result_display = false;
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Collect and sanitize input data
-    $student_id = htmlspecialchars($_POST['id']);
-    $full_name = htmlspecialchars($_POST['name']);
-    $gender = htmlspecialchars($_POST['gender']);
-    $ssc_gpa = floatval($_POST['ssc']);
-    $hsc_gpa = floatval($_POST['hsc']);
-    $cgpa = floatval($_POST['cgpa']);
-    $prev_scholarship = intval($_POST['prev_scholarship']);
-    
-    // Validate inputs
-    if (empty($student_id)) $errors[] = "Student ID is required";
-    if (empty($full_name)) $errors[] = "Full name is required";
-    if (empty($gender) || !in_array($gender, ['male', 'female'])) $errors[] = "Please select a valid gender";
-    if ($ssc_gpa < 0 || $ssc_gpa > 5) $errors[] = "SSC GPA must be between 0.00 and 5.00";
-    if ($hsc_gpa < 0 || $hsc_gpa > 5) $errors[] = "HSC GPA must be between 0.00 and 5.00";
-    if ($cgpa < -1 || $cgpa > 4) $errors[] = "CGPA must be between 0.00 and 4.00 (or -1 for 1st semester)";
-    if ($prev_scholarship < -1 || $prev_scholarship > 100) $errors[] = "Previous scholarship must be between -1 and 100";
-    if ($cgpa == -1 && $prev_scholarship != -1) $errors[] = "For 1st semester students, previous scholarship must be -1";
-    
-    // Calculate scholarship if no errors
-    if (empty($errors)) {
-        $result_display = true;
-        
-        if ($cgpa == -1) {
-            // First semester student
-            if ($gender == 'male') {
-                if ($ssc_gpa >= 4.5 && $hsc_gpa >= 4.0) {
-                    $scholarship_percentage = 25;
-                    $criteria = "Male student with SSC ≥ 4.5 and HSC ≥ 4.0";
-                } else {
-                    $scholarship_percentage = 0;
-                    $criteria = "Does not meet requirements for first semester male students";
-                }
-            } else {
-                if ($ssc_gpa >= 4.0 && $hsc_gpa >= 3.5) {
-                    $scholarship_percentage = 25;
-                    $criteria = "Female student with SSC ≥ 4.0 and HSC ≥ 3.5";
-                } else {
-                    $scholarship_percentage = 0;
-                    $criteria = "Does not meet requirements for first semester female students";
-                }
-            }
-        } else {
-            // Continuing student
-            if ($prev_scholarship == 25) {
-                if ($cgpa >= 3.5) {
-                    $scholarship_percentage = 25;
-                    $criteria = "Continued 25% scholarship (CGPA ≥ 3.5)";
-                } else {
-                    $scholarship_percentage = 0;
-                    $criteria = "Discontinued scholarship (CGPA < 3.5)";
-                }
-            } else if ($prev_scholarship == 50) {
-                if ($cgpa >= 3.7) {
-                    $scholarship_percentage = 50;
-                    $criteria = "Continued 50% scholarship (CGPA ≥ 3.7)";
-                } else {
-                    $scholarship_percentage = 0;
-                    $criteria = "Discontinued scholarship (CGPA < 3.7)";
-                }
-            } else {
-                // No previous scholarship or first time applying
-                if ($cgpa >= 3.9) {
-                    $scholarship_percentage = 50;
-                    $criteria = "Awarded 50% scholarship (CGPA ≥ 3.9)";
-                } else if ($cgpa >= 3.7) {
-                    $scholarship_percentage = 25;
-                    $criteria = "Awarded 25% scholarship (CGPA ≥ 3.7)";
-                } else {
-                    $scholarship_percentage = 0;
-                    $criteria = "CGPA below minimum requirement (3.7) for new scholarship";
-                }
-            }
-        }
-        
-        // Insert data into database
-        $stmt = $conn->prepare("INSERT INTO scholarship_applications (student_id, full_name, gender, ssc_gpa, hsc_gpa, cgpa, prev_scholarship, scholarship_percentage) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-        if ($stmt) {
-            $stmt->bind_param("sssddiii", $student_id, $full_name, $gender, $ssc_gpa, $hsc_gpa, $cgpa, $prev_scholarship, $scholarship_percentage);
-            if ($stmt->execute()) {
-                // Successfully saved
-            } else {
-                $errors[] = "Error saving application: " . $conn->error;
-                $result_display = false;
-            }
-            $stmt->close();
-        } else {
-            $errors[] = "Database error: " . $conn->error;
-            $result_display = false;
-        }
-    }
-}
-
-// Fetch existing applications for display
-$applications = [];
-$search_id = '';
-
-if (isset($_GET['search'])) {
-    $search_id = htmlspecialchars($_GET['search_id']);
-    $search_query = "SELECT * FROM scholarship_applications WHERE student_id LIKE ? ORDER BY application_date DESC";
-    $stmt = $conn->prepare($search_query);
-    $search_param = "%$search_id%";
-    $stmt->bind_param("s", $search_param);
-} else {
-    $search_query = "SELECT * FROM scholarship_applications ORDER BY application_date DESC LIMIT 10";
-    $stmt = $conn->prepare($search_query);
-}
-
-if ($stmt) {
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $applications = $result->fetch_all(MYSQLI_ASSOC);
-    $stmt->close();
-}
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scholarship Calculator</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Bangladesh University CGPA Calculator</title>
     <style>
-        :root {
-            --primary: #2563eb;
-            --primary-light: #3b82f6;
-            --secondary: #8b5cf6;
-            --accent: #f97316;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --error: #ef4444;
-            --light-bg: #f8fafc;
-            --card-bg: #ffffff;
-            --text-dark: #1e293b;
-            --text-medium: #334155;
-            --text-muted: #64748b;
-            --border-color: #e2e8f0;
-            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
-            --shadow-md: 0 4px 6px rgba(0,0,0,0.05);
-            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
-        }
-        
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         body {
-            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
-            color: var(--text-dark);
+            color: #333;
             min-height: 100vh;
             padding: 20px;
             display: flex;
@@ -201,484 +22,442 @@ if ($stmt) {
         }
         
         .container {
-            max-width: 1200px;
             width: 100%;
-            margin: 20px auto;
-            padding: 0 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            margin: 20px 0;
         }
         
         header {
+            background: maroon;
+            color: white;
+            padding: 20px;
             text-align: center;
-            margin-bottom: 30px;
-            padding: 30px;
-            background: white;
-            border-radius: 16px;
-            box-shadow: var(--shadow-lg);
-            width: 100%;
-            position: relative;
-            overflow: hidden;
         }
         
-        header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 5px;
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-        }
-        
-        header h1 {
-            font-size: 2.8rem;
+        h1 {
+            font-size: 28px;
             margin-bottom: 10px;
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            display: inline-block;
         }
         
-        header p {
-            font-size: 1.2rem;
-            color: var(--text-muted);
-            max-width: 700px;
-            margin: 0 auto;
-            line-height: 1.6;
+        .description {
+            font-size: 16px;
+            opacity: 0.9;
         }
         
-        .emoji {
-            font-size: 3rem;
-            margin-right: 15px;
-            vertical-align: middle;
-        }
-        
-        .calculator-container {
+        .tabs {
             display: flex;
-            gap: 30px;
-            margin-top: 20px;
-            flex-wrap: wrap;
+            border-radius: 10px;
+            border: 2px solid whitesmoke;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
         
-        .form-section, .result-section {
+        .tab {
+            padding: 15px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            text-align: center;
             flex: 1;
-            min-width: 300px;
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: var(--shadow-lg);
-            border: 1px solid var(--border-color);
+            transition: background 0.3s;
         }
         
-        .result-section {
-            display: flex;
-            flex-direction: column;
+        .tab.active {
+            background: darkgreen;
+            color: white;
+            border-radius: 2px;
         }
         
-        .section-title {
-            font-size: 1.8rem;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid var(--primary);
-            color: var(--primary);
-            position: relative;
+        .tab:hover:not(.active) {
+            background: white;
         }
         
-        .section-title::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 60px;
-            height: 3px;
-            background: var(--primary);
+        .calculator {
+            padding: 20px;
+        }
+        
+        .calculator-section {
+            display: none;
+        }
+        
+        .calculator-section.active {
+            display: block;
         }
         
         .form-group {
-            margin-bottom: 25px;
+            margin-bottom: 15px;
         }
         
         label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
             font-weight: 600;
-            color: var(--text-dark);
-            font-size: 1.1rem;
         }
         
-        input[type="text"],
-        input[type="number"],
-        select {
+        input, select {
             width: 100%;
-            padding: 14px 18px;
-            border-radius: 12px;
-            border: 2px solid var(--border-color);
-            background: white;
-            color: var(--text-dark);
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
         }
         
-        input:focus,
-        select:focus {
-            border-color: var(--primary);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-        
-        button[type="submit"] {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(to right, var(--primary), var(--primary-light));
-            border: none;
-            border-radius: 12px;
+        button {
+            background: maroon;
             color: white;
-            font-size: 1.2rem;
-            font-weight: 700;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
             cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
             transition: all 0.3s ease;
             margin-top: 10px;
-            box-shadow: var(--shadow-md);
         }
         
-        button[type="submit"]:hover {
-            background: linear-gradient(to right, var(--primary-light), var(--primary));
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+        button:hover {
+            background: darkred;
+            transform: translateY(-3px);
         }
         
-        .instructions {
-            background: #eff6ff;
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 25px;
-            border-left: 4px solid var(--primary);
-        }
-        
-        .instructions h3 {
-            margin-bottom: 12px;
-            color: var(--primary);
-        }
-        
-        .instructions ul {
-            padding-left: 20px;
-            margin-bottom: 15px;
-        }
-        
-        .instructions li {
-            margin-bottom: 8px;
-            line-height: 1.5;
-        }
-        
-        .result-content {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-        }
-        
-        .result-placeholder {
-            color: var(--text-muted);
-            font-size: 1.2rem;
-            margin: 30px 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        .result-placeholder .icon {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            color: var(--primary-light);
-            opacity: 0.7;
-        }
-        
-        .scholarship-result {
-            font-size: 2.5rem;
-            font-weight: 800;
+        .course-list {
             margin: 20px 0;
-            background: linear-gradient(to right, var(--accent), #ea580c);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
         }
         
-        .student-info {
-            background: #eff6ff;
-            border-radius: 15px;
+        .course-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        
+        .course-item input, .course-item select {
+            flex: 1;
+        }
+        
+        .remove-btn {
+            background: #ff4757;
+            width: auto;
+            padding: 12px 15px;
+        }
+        
+        .remove-btn:hover {
+            background: #ff3745;
+        }
+        
+        .result {
+            background: #f1f9ff;
             padding: 20px;
-            width: 100%;
+            border-radius: 10px;
             margin-top: 20px;
-            text-align: left;
+            text-align: center;
+            display: none;
         }
         
-        .student-info p {
-            margin: 10px 0;
-            font-size: 1.1rem;
+        .result h3 {
+            color: #1a2a6c;
+            margin-bottom: 10px;
         }
         
-        .student-info strong {
-            color: var(--primary);
+        .gpa-value {
+            font-size: 32px;
             font-weight: 700;
+            color: #1a2a6c;
         }
         
-        .criteria-info {
+        .grade-scale {
             margin-top: 30px;
-            padding: 20px;
-            background: #ecfdf5;
-            border-radius: 15px;
-            border-left: 4px solid var(--success);
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
         }
         
-        .criteria-info h3 {
-            color: var(--success);
+        .grade-scale h3 {
+            margin-bottom: 10px;
+            color: #1a2a6c;
+            text-align: center;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        
+        th {
+            background: #eaf4ff;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .add-btn {
+            background: #2ed573;
+        }
+        
+        .add-btn:hover {
+            background: #25c965;
+        }
+        
+        .reset-btn {
+            background: #ffa502;
+        }
+        
+        .reset-btn:hover {
+            background: #f59e0b;
+        }
+        
+        .semester-inputs {
+            display: flex;
+            gap: 10px;
             margin-bottom: 15px;
         }
         
-        .error {
-            color: var(--error);
-            background: #fef2f2;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            border-left: 4px solid var(--error);
-            text-align: left;
-        }
-        
-        .success {
-            color: var(--success);
-            background: #ecfdf5;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            border-left: 4px solid var(--success);
-            text-align: left;
-        }
-        
-        .records-section {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 30px;
-            margin-top: 40px;
-            box-shadow: var(--shadow-lg);
-            border: 1px solid var(--border-color);
-            width: 100%;
-        }
-        
-        .search-form {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-        }
-        
-        .search-input {
+        .semester-inputs input {
             flex: 1;
-            min-width: 250px;
-            padding: 14px 18px;
-            border-radius: 12px;
-            border: 2px solid var(--border-color);
-            font-size: 1.1rem;
         }
         
-        .search-button {
-            padding: 0 30px;
-            background: linear-gradient(to right, var(--secondary), var(--primary));
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: var(--shadow-sm);
-            transition: all 0.2s;
-        }
-        
-        .search-button:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-        
-
-        
-        .footer {
-            margin-top: 40px;
+        footer {
             text-align: center;
-            color: var(--text-muted);
-            padding: 20px;
-            font-size: 0.9rem;
-            border-top: 1px solid var(--border-color);
-            width: 100%;
-        }
-        
-        .scholarship-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-        
-        .badge-0 {
-            background: #fee2e2;
-            color: #b91c1c;
-        }
-        
-        .badge-25 {
-            background: #dbeafe;
-            color: #1d4ed8;
-        }
-        
-        .badge-50 {
-            background: #d1fae5;
-            color: #065f46;
-        }
-        
-        .date-cell {
-            white-space: nowrap;
+            margin-top: 20px;
+            color: white;
+            opacity: 0.8;
         }
         
         @media (max-width: 768px) {
-            .calculator-container {
+            .course-item {
                 flex-direction: column;
             }
             
-            header h1 {
-                font-size: 2.3rem;
+            .semester-inputs {
+                flex-direction: column;
             }
-            
-            .emoji {
-                font-size: 2.5rem;
-            }
-            
-
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1><span class="emoji">🎓</span> Scholarship Calculator</h1>
-            <p>Calculate your scholarship eligibility based on academic performance</p>
+            <h1>SKST University CGPA Calculator</h1>
+            <p class="description">Calculate your SGPA and CGPA based on the UGC grading system</p>
         </header>
         
-        <div class="calculator-container">
-            <div class="form-section">
-                <h2 class="section-title">Student Information</h2>
+        <div class="tabs">
+            <div class="tab active" data-tab="sgpa">SGPA Calculator</div>
+            <div class="tab" data-tab="cgpa">CGPA Calculator</div>
+        </div>
+        
+        <div class="calculator">
+            <!-- SGPA Calculator -->
+            <div class="calculator-section active" id="sgpa-section">
+                <h2 style="text-align: center;">Semester Grade Point Average (SGPA)</h2>
+                <p style="text-align: center;">Calculate your GPA for a single semester</p>
                 
-                <form method="POST">
+                <form id="sgpa-form">
                     <div class="form-group">
-                        <label for="id">Student ID</label>
-                        <input type="text" name="id" id="id" value="<?php echo $student_id; ?>" required>
+                        <label for="num-courses">Number of Courses:</label>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="number" id="num-courses" min="1" max="15" value="5" required>
+                        <button class="form-group" style="width: 200px;">Submit</button>
+                    </div>
+
                     </div>
                     
-                    <div class="form-group">
-                        <label for="name">Full Name</label>
-                        <input type="text" name="name" id="name" value="<?php echo $full_name; ?>" required>
+                    <div class="course-list" id="sgpa-courses">
+                        <!-- Courses will be generated here -->
                     </div>
                     
-                    <div class="form-group">
-                        <label for="gender">Gender</label>
-                        <select name="gender" id="gender" required>
-                            <option value="">Select Gender</option>
-                            <option value="male" <?php echo $gender == 'male' ? 'selected' : ''; ?>>Male</option>
-                            <option value="female" <?php echo $gender == 'female' ? 'selected' : ''; ?>>Female</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="ssc">SSC GPA (Scale: 5.00)</label>
-                        <input type="number" name="ssc" id="ssc" min="0" max="5" step="0.01" value="<?php echo $ssc_gpa; ?>" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="hsc">HSC GPA (Scale: 5.00)</label>
-                        <input type="number" name="hsc" id="hsc" min="0" max="5" step="0.01" value="<?php echo $hsc_gpa; ?>" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="cgpa">Current Semester CGPA (Scale: 4.00)</label>
-                        <input type="number" name="cgpa" id="cgpa" min="-1" max="4" step="0.01" value="<?php echo $cgpa; ?>" required>
-                        <small>Note: Enter -1 for 1st semester students</small>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="prev_scholarship">Previous Scholarship (%)</label>
-                        <input type="number" name="prev_scholarship" id="prev_scholarship" min="-1" max="100" step="1" required value="<?php echo $prev_scholarship; ?>">
-                        <small>Note: Enter -1 for first-time applicants</small>
-                    </div>
-                    
-                    <button type="submit">Calculate Scholarship</button>
+                    <button type="button" id="calculate-sgpa">Calculate SGPA</button>
                 </form>
                 
-                <div class="instructions">
-                    <h3>How It Works</h3>
-                    <ul>
-                        <li>For 1st semester students: Scholarship based on SSC & HSC results</li>
-                        <li>For continuing students: Based on current CGPA and previous scholarship</li>
-                        <li>Scholarship percentages: 0%, 25%, or 50%</li>
-                    </ul>
-                    <p>Fill in all fields to see your scholarship eligibility</p>
+                <div class="result" id="sgpa-result">
+                    <h3>Your SGPA is:</h3>
+                    <div class="gpa-value" id="sgpa-value">0.00</div>
                 </div>
             </div>
             
-            <div class="result-section">
-                <h2 class="section-title">Scholarship Result</h2>
+            <!-- CGPA Calculator -->
+            <div class="calculator-section" id="cgpa-section">
+                <h2 style="text-align: center;">Cumulative Grade Point Average (CGPA)</h2>
+                <p style="text-align: center;">Calculate your overall CGPA across multiple semesters</p>
                 
-                <div class="result-content">
-                    <?php if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($errors)): ?>
-                        <div class="error">
-                            <h3>Validation Errors:</h3>
-                            <ul>
-                                <?php foreach ($errors as $error): ?>
-                                    <li><?php echo $error; ?></li>
-                                <?php endforeach; ?>
-                            </ul>
-                        </div>
-                    <?php elseif ($result_display): ?>
-                        <div class="success">
-                            <h3>Scholarship Eligibility:</h3>
-                            <div class="scholarship-result"><?php echo $scholarship_percentage; ?>% Scholarship</div>
-                            <p>Based on: <?php echo $criteria; ?></p>
-                        </div>
-                        <div class="student-info">
-                            <h3>Student Details:</h3>
-                            <p><strong>ID:</strong> <?php echo $student_id; ?></p>
-                            <p><strong>Name:</strong> <?php echo $full_name; ?></p>
-                            <p><strong>Gender:</strong> <?php echo ucfirst($gender); ?></p>
-                            <p><strong>SSC GPA:</strong> <?php echo number_format($ssc_gpa, 2); ?></p>
-                            <p><strong>HSC GPA:</strong> <?php echo number_format($hsc_gpa, 2); ?></p>
-                            <p><strong>Current CGPA:</strong> <?php echo $cgpa == -1 ? 'First Semester' : number_format($cgpa, 2); ?></p>
-                            <p><strong>Previous Scholarship:</strong> <?php echo $prev_scholarship == -1 ? 'First-time applicant' : $prev_scholarship . '%'; ?></p>
-                        </div>
-                    <?php else: ?>
-                        <div class="result-placeholder">
-                            <div class="icon">📋</div>
-                            <p>Fill out the form to calculate your scholarship eligibility</p>
-                            <p>Your scholarship percentage will appear here</p>
-                        </div>
-                    <?php endif; ?>
-                </div>
-                
-                <div class="criteria-info">
-                    <h3>Scholarship Criteria</h3>
-                    <p><strong>First Semester:</strong> Male: SSC ≥4.5 & HSC ≥4.0 | Female: SSC ≥4.0 & HSC ≥3.5</p>
-                    <p><strong>Continuing Students:</strong> Maintain CGPA ≥3.5 (25%) or ≥3.7 (50%)</p>
-                    <p><strong>New Applicants:</strong> CGPA ≥3.7 (25%) or ≥3.9 (50%)</p>
-                </div>
-            </div>
-        </div>
+                <form id="cgpa-form">
+                    <div class="form-group">
+                        <label for="previous-cgpa">Previous CGPA (if any):</label>
+                        <input type="number" id="previous-cgpa" min="0" max="4" step="0.01" placeholder="Enter previous CGPA">
+                    </div>
                     
-        
-        <div class="footer">
-            <p>Scholarship Calculator System © 2025 | For Educational Purposes</p>
-            <p>Results are calculated based on institutional scholarship policies</p>
+                    <div class="form-group">
+                        <label for="completed-credits">Total Completed Credits:</label>
+                        <input type="number" id="completed-credits" min="0" step="1" placeholder="Enter completed credits">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="current-sgpa">Current Semester SGPA:</label>
+                        <input type="number" id="current-sgpa" min="0" max="4" step="0.01" placeholder="Enter current SGPA" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="current-credits">Current Semester Credits:</label>
+                        <input type="number" id="current-credits" min="0" step="1" placeholder="Enter current credits" required>
+                    </div>
+                    
+                    <button type="button" id="calculate-cgpa">Calculate CGPA</button>
+                </form>
+                
+                <div class="result" id="cgpa-result">
+                    <h3>Your CGPA is:</h3>
+                    <div class="gpa-value" id="cgpa-value">0.00</div>
+                </div>
+            </div>    
+            
         </div>
     </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab switching functionality
+            const tabs = document.querySelectorAll('.tab');
+            const sections = document.querySelectorAll('.calculator-section');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const targetTab = this.getAttribute('data-tab');
+                    
+                    // Update active tab
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show corresponding section
+                    sections.forEach(section => {
+                        section.classList.remove('active');
+                        if (section.id === `${targetTab}-section`) {
+                            section.classList.add('active');
+                        }
+                    });
+                });
+            });
+            
+            // SGPA Calculator functionality
+            const numCoursesInput = document.getElementById('num-courses');
+            const sgpaCoursesContainer = document.getElementById('sgpa-courses');
+            const calculateSgpaBtn = document.getElementById('calculate-sgpa');
+            const sgpaResult = document.getElementById('sgpa-result');
+            const sgpaValue = document.getElementById('sgpa-value');
+            
+            // Generate course inputs based on number of courses
+            function generateCourseInputs() {
+                const numCourses = parseInt(numCoursesInput.value);
+                sgpaCoursesContainer.innerHTML = '';
+                
+                for (let i = 1; i <= numCourses; i++) {
+                    const courseDiv = document.createElement('div');
+                    courseDiv.className = 'course-item';
+                    courseDiv.innerHTML = `
+                        <input type="text" placeholder="Course ${i} Name" class="course-name">
+                        <input type="number" placeholder="Credit Hours" min="1" max="5" step="0.5" class="credit-hours" required>
+                        <select class="grade" required>
+                            <option value="">Select Grade</option>
+                            <option value="4.0">A+ (4.0)</option>
+                            <option value="3.75">A (3.75)</option>
+                            <option value="3.5">A- (3.5)</option>
+                            <option value="3.25">B+ (3.25)</option>
+                            <option value="3.0">B (3.0)</option>
+                            <option value="2.75">B- (2.75)</option>
+                            <option value="2.5">C+ (2.5)</option>
+                            <option value="2.25">C (2.25)</option>
+                            <option value="2.0">D (2.0)</option>
+                            <option value="0.0">F (0.0)</option>
+                        </select>
+                    `;
+                    sgpaCoursesContainer.appendChild(courseDiv);
+                }
+            }
+            
+            // Initial generation of course inputs
+            generateCourseInputs();
+            
+            // Update course inputs when number changes
+            numCoursesInput.addEventListener('change', generateCourseInputs);
+            
+            // Calculate SGPA
+            calculateSgpaBtn.addEventListener('click', function() {
+                const creditInputs = document.querySelectorAll('.credit-hours');
+                const gradeSelects = document.querySelectorAll('.grade');
+                
+                let totalCreditHours = 0;
+                let totalGradePoints = 0;
+                let isValid = true;
+                
+                // Validate inputs
+                creditInputs.forEach(input => {
+                    if (!input.value) isValid = false;
+                });
+                
+                gradeSelects.forEach(select => {
+                    if (!select.value) isValid = false;
+                });
+                
+                if (!isValid) {
+                    alert('Please fill in all credit hours and select grades for all courses.');
+                    return;
+                }
+                
+                // Calculate SGPA
+                for (let i = 0; i < creditInputs.length; i++) {
+                    const credit = parseFloat(creditInputs[i].value);
+                    const grade = parseFloat(gradeSelects[i].value);
+                    
+                    totalCreditHours += credit;
+                    totalGradePoints += credit * grade;
+                }
+                
+                const sgpa = totalGradePoints / totalCreditHours;
+                
+                // Display result
+                sgpaValue.textContent = sgpa.toFixed(2);
+                sgpaResult.style.display = 'block';
+                
+                // Prefill current SGPA in CGPA calculator
+                document.getElementById('current-sgpa').value = sgpa.toFixed(2);
+            });
+            
+            // CGPA Calculator functionality
+            const calculateCgpaBtn = document.getElementById('calculate-cgpa');
+            const cgpaResult = document.getElementById('cgpa-result');
+            const cgpaValue = document.getElementById('cgpa-value');
+            
+            calculateCgpaBtn.addEventListener('click', function() {
+                const previousCgpa = parseFloat(document.getElementById('previous-cgpa').value) || 0;
+                const completedCredits = parseFloat(document.getElementById('completed-credits').value) || 0;
+                const currentSgpa = parseFloat(document.getElementById('current-sgpa').value);
+                const currentCredits = parseFloat(document.getElementById('current-credits').value);
+                
+                if (!currentSgpa || !currentCredits) {
+                    alert('Please enter current SGPA and credits.');
+                    return;
+                }
+                
+                // Calculate CGPA
+                const totalGradePoints = (previousCgpa * completedCredits) + (currentSgpa * currentCredits);
+                const totalCredits = completedCredits + currentCredits;
+                const cgpa = totalGradePoints / totalCredits;
+                
+                // Display result
+                cgpaValue.textContent = cgpa.toFixed(2);
+                cgpaResult.style.display = 'block';
+            });
+        });
+    </script>
 </body>
 </html>
-<?php
-$conn->close();
-?>
