@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SKST Student Accounts · Scholarship & Payment System</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root {
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --muted: #64748b;
+  --text: #1e293b;
+  --accent: #4f46e5;
+  --accent-light: #6366f1;
+  --accent-2: #0d9488;
+  --danger: #ef4444;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --registration: #8b5cf6;
+  --cse: #4f46e5;
+  --eee: #f59e0b;
+  --civil: #10b981;
+  --mech: #ef4444;
+  --textile: #a855f7;
+  --radius: 16px;
+  --pad: 24px;
+  --shadow: rgba(0,0,0,0.05);
+  --gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+}
+*{ box-sizing:border-box; }
+html, body{ 
+  height:100%; 
+  margin:0; 
+  font-family: 'Inter', 'Segoe UI', Roboto, sans-serif; 
+  background: var(--bg); 
+  color: var(--text); 
+  line-height: 1.5;
+}
+.wrap{ 
+  max-width:1400px; 
+  margin:0 auto; 
+  padding:32px 20px 80px; 
+}
+header{ 
+  display:flex; 
+  align-items:center; 
+  justify-content:space-between; 
+  gap:16px; 
+  margin-bottom:32px; 
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+}
+.title{ 
+  display:flex; 
+  align-items:center; 
+  gap:16px; 
+}
+.logo{ 
+  width:56px; 
+  height:56px; 
+  border-radius:14px; 
+  background: var(--gradient); 
+  display:grid; 
+  place-items:center; 
+  font-weight:700; 
+  color:white; 
+  font-size:1.6rem; 
+  box-shadow:0 6px 12px rgba(79, 70, 229, 0.25);
+}
+h1{ 
+  font-size: clamp(24px, 2.4vw, 32px); 
+  margin:0; 
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+.subtitle{ 
+  color: var(--muted); 
+  font-size:15px; 
+  margin-top:4px; 
+  font-weight: 400;
+}
+.grid{ 
+  display:grid; 
+  gap:28px; 
+  grid-template-columns: 1.5fr 1fr; 
+}
+@media (max-width: 1200px){ 
+  .grid{ 
+    grid-template-columns: 1fr; 
+  } 
+}
+.card{ 
+  background: var(--card); 
+  border-radius: var(--radius); 
+  box-shadow: 0 8px 20px var(--shadow); 
+  border: none;
+  transition: transform .2s, box-shadow .2s; 
+  overflow: hidden;
+}
+.card:hover{ 
+  transform: translateY(-4px); 
+  box-shadow: 0 12px 25px rgba(0,0,0,0.1); 
+}
+.card-head{ 
+  padding:18px var(--pad); 
+  background: #f8fafc; 
+  border-bottom:1px solid #e2e8f0; 
+  font-weight:600; 
+  font-size:17px; 
+  color: var(--text); 
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.card-head:before {
+  content: "";
+  width: 4px;
+  height: 18px;
+  background: var(--accent);
+  border-radius: 10px;
+  display: inline-block;
+}
+.card-body{ 
+  padding: var(--pad); 
+}
+label{ 
+  display:block; 
+  font-size:14px; 
+  color:var(--muted); 
+  margin:0 0 8px; 
+  font-weight: 500;
+}
+input[type="number"], select, input[type="text"], input[type="tel"]{ 
+  width:100%; 
+  padding:14px 16px; 
+  border-radius:10px; 
+  border:1px solid #cbd5e1; 
+  background:#ffffff; 
+  color:var(--text); 
+  outline:none; 
+  transition:.2s all; 
+  font-size:15px; 
+  font-weight: 500;
+}
+input::placeholder{ 
+  color:#94a3b8; 
+}
+input:focus, select:focus{ 
+  border-color: var(--accent); 
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15); 
+}
+.fee-item{ 
+  display:grid; 
+  grid-template-columns: 1fr 1fr; 
+  gap:16px; 
+  align-items:end; 
+  padding:16px 0; 
+  border-bottom:1px solid #f1f5f9; 
+}
+.fee-item:last-child{ 
+  border-bottom:0 
+}
+.summary{ 
+  display:grid; 
+  grid-template-columns: 1fr; 
+  gap:16px;
+}
+.metric{ 
+  padding:22px; 
+  border-radius:12px; 
+  background:#f8fafc; 
+  border: 1px solid #e2e8f0;
+  transition:.2s transform; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.metric:hover{ 
+  transform: translateY(-3px); 
+  box-shadow: 0 8px 20px var(--shadow); 
+}
+.metric .label{ 
+  font-size:14px; 
+  color:var(--muted); 
+  text-transform:uppercase; 
+  letter-spacing:0.5px; 
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.metric .value{ 
+  font-size: 26px; 
+  font-weight:700; 
+}
+.metric--payable .value{ 
+  color: var(--accent) 
+}
+.metric--paid .value{ 
+  color: var(--success) 
+}
+.metric--due .value{ 
+  color: var(--danger) 
+}
+.metric--registration .value {
+  color: var(--registration);
+}
+.payment-entry{ 
+  display:flex; 
+  justify-content:space-between; 
+  padding:14px 0; 
+  border-bottom:1px solid #f1f5f9; 
+  font-size:15px; 
+}
+.payment-entry:last-child{ 
+  border-bottom:0 
+}
+.btn{ 
+  appearance:none; 
+  border:1px solid #cbd5e1; 
+  background:#ffffff; 
+  color:var(--text); 
+  padding:14px 22px; 
+  border-radius:10px; 
+  cursor:pointer; 
+  font-weight:600; 
+  transition:.2s all; 
+  font-size: 15px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn:hover{ 
+  transform: translateY(-2px); 
+  background:#f1f5f9; 
+  box-shadow: 0 4px 12px var(--shadow);
+}
+.btn.primary{ 
+  background: var(--accent); 
+  color:#fff; 
+  border-color: transparent; 
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+}
+.btn.primary:hover {
+  background: var(--accent-light);
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3);
+}
+.spacer{ 
+  height:20px 
+}
+footer{ 
+  margin-top:40px; 
+  color:var(--muted); 
+  font-size:14px; 
+  text-align:center; 
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+/* Registration Section */
+.registration-section {
+  background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+  border: 1px solid #e9d5ff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.registration-section::before {
+  content: "One-Time Payment";
+  position: absolute;
+  top: -10px;
+  right: 20px;
+  background: var(--registration);
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.registration-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.registration-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-paid {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--success);
+}
+
+.status-pending {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--warning);
+}
+
+.registration-fee {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--registration);
+}
+
+/* Scholarship Section */
+.scholarship-section {
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  border: 1px solid #a7f3d0;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.scholarship-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.scholarship-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.scholarship-detail {
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+  border-left: 4px solid var(--success);
+}
+
+.scholarship-detail .label {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.scholarship-detail .value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--success);
+}
+
+/* Payment method styles */
+.payment-methods {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.payment-method {
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.payment-method:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.payment-method.selected {
+  border-color: var(--accent);
+  background: rgba(79, 70, 229, 0.05);
+}
+
+.payment-method i {
+  font-size: 32px;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.payment-method .method-name {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.payment-method .method-desc {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.method-bkash i {
+  color: #e2136e;
+}
+
+.method-nagad i {
+  color: #f60;
+}
+
+.method-bank i {
+  color: #4f46e5;
+}
+
+.method-cash i {
+  color: #10b981;
+}
+
+.payment-details {
+  margin-top: 24px;
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.payment-field {
+  margin-bottom: 16px;
+}
+
+.payment-instructions {
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-top: 16px;
+  border-left: 4px solid var(--accent);
+}
+
+.payment-instructions ol {
+  padding-left: 20px;
+  margin: 8px 0;
+}
+
+.payment-instructions li {
+  margin-bottom: 6px;
+}
+
+.verify-btn {
+  background: var(--success);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 12px;
+  width: 100%;
+  transition: background 0.3s;
+}
+
+.verify-btn:hover {
+  background: #0da271;
+}
+
+/* Progress bar */
+.progress-bar {
+  height: 10px;
+  background: #e2e8f0;
+  border-radius: 5px;
+  margin: 20px 0;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 5px;
+  transition: width 0.5s ease;
+}
+
+.amount-details {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+
+/* Breakdown items */
+.breakdown-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.breakdown-item:last-child {
+  border-bottom: none;
+}
+
+.breakdown-total {
+  font-weight: 600;
+  color: var(--text);
+  border-top: 2px solid #e2e8f0;
+  margin-top: 10px;
+  padding-top: 15px;
+}
+
+/* Department Badge */
+.department-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-left: 10px;
+}
+
+.cse-badge {
+  background: rgba(79, 70, 229, 0.15);
+  color: var(--cse);
+}
+
+.eee-badge {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--eee);
+}
+
+.civil-badge {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--civil);
+}
+
+.mech-badge {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--mech);
+}
+
+.textile-badge {
+  background: rgba(168, 85, 247, 0.15);
+  color: var(--textile);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .payment-methods {
+    grid-template-columns: 1fr;
+  }
+  
+  .scholarship-details {
+    grid-template-columns: 1fr;
+  }
+  
+  .fee-item {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .registration-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .grid {
+    gap: 20px;
+  }
+}
+
+/* Scholarship color coding */
+.scholarship-100 { background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-color: #a7f3d0; }
+.scholarship-75 { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-color: #bbf7d0; }
+.scholarship-50 { background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%); border-color: #fde68a; }
+.scholarship-0 { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border-color: #fcd34d; }
+
+/* Department Section */
+.department-section {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+  border: 1px solid #e2e8f0;
+}
+
+.department-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.department-header h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.department-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.department-option {
+  padding: 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.department-option:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.department-option.selected {
+  border-color: var(--accent);
+  background: rgba(79, 70, 229, 0.05);
+}
+
+.department-option.cse.selected {
+  border-color: var(--cse);
+  background: rgba(79, 70, 229, 0.05);
+}
+
+.department-option.eee.selected {
+  border-color: var(--eee);
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.department-option.civil.selected {
+  border-color: var(--civil);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.department-option.mech.selected {
+  border-color: var(--mech);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.department-option.textile.selected {
+  border-color: var(--textile);
+  background: rgba(168, 85, 247, 0.05);
+}
+
+.department-icon {
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.department-name {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.department-cost {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* Program Cost Highlight */
+.program-cost {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--accent);
+  text-align: center;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 12px;
+  margin: 20px 0;
+  border: 1px dashed #cbd5e1;
+}
+
+/* Summary Card Enhancements */
+.summary-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.summary-card h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e2e8f0;
+  color: var(--text);
+  font-size: 18px;
+}
+
+/* Cost Breakdown */
+.cost-breakdown {
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 16px;
+  margin-top: 20px;
+}
+
+.cost-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.cost-item:last-child {
+  border-bottom: none;
+}
+
+.cost-total {
+  font-weight: 700;
+  color: var(--text);
+  border-top: 2px solid #cbd5e1;
+  margin-top: 10px;
+  padding-top: 12px;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div class="title">
+  <div class="logo">৳</div>
+  <div>
+    <h1>SKST Student Accounts</h1>
+    <div class="subtitle">Scholarship Calculator & Payment System</div>
+  </div>
+</div>
+<div><button class="btn primary" id="saveBtn">
+  <i class="fas fa-save"></i>
+  Save Changes
+</button></div>
+</header>
+
+<!-- Department Selection -->
+<div class="department-section">
+  <div class="department-header">
+    <i class="fas fa-graduation-cap" style="color: var(--accent);"></i>
+    <h3>Select Your Department</h3>
+  </div>
+  <div class="department-grid">
+    <div class="department-option cse selected" data-department="cse" data-cost="700000">
+      <div class="department-icon" style="color: var(--cse);">
+        <i class="fas fa-laptop-code"></i>
+      </div>
+      <div class="department-name">Computer Science</div>
+      <div class="department-cost">৳700,000</div>
+    </div>
+    <div class="department-option eee" data-department="eee" data-cost="720000">
+      <div class="department-icon" style="color: var(--eee);">
+        <i class="fas fa-bolt"></i>
+      </div>
+      <div class="department-name">Electrical Engineering</div>
+      <div class="department-cost">৳720,000</div>
+    </div>
+    <div class="department-option civil" data-department="civil" data-cost="680000">
+      <div class="department-icon" style="color: var(--civil);">
+        <i class="fas fa-hard-hat"></i>
+      </div>
+      <div class="department-name">Civil Engineering</div>
+      <div class="department-cost">৳680,000</div>
+    </div>
+    <div class="department-option mech" data-department="mech" data-cost="710000">
+      <div class="department-icon" style="color: var(--mech);">
+        <i class="fas fa-cogs"></i>
+      </div>
+      <div class="department-name">Mechanical Engineering</div>
+      <div class="department-cost">৳710,000</div>
+    </div>
+    <div class="department-option textile" data-department="textile" data-cost="650000">
+      <div class="department-icon" style="color: var(--textile);">
+        <i class="fas fa-tshirt"></i>
+      </div>
+      <div class="department-name">Textile Engineering</div>
+      <div class="department-cost">৳650,000</div>
+    </div>
+  </div>
+</div>
+
+<!-- Registration Fee Section -->
+<div class="registration-section">
+  <div class="registration-header">
+    <div>
+      <div style="font-size: 18px; font-weight: 600; color: var(--registration);">Registration Fee</div>
+      <div style="font-size: 14px; color: var(--muted);">One-time payment at the beginning of your program</div>
+    </div>
+    <div class="registration-status">
+      <span>Status:</span>
+      <span class="status-badge status-paid">Paid</span>
+    </div>
+  </div>
+  <div class="registration-fee" id="registrationFee">৳15,000</div>
+  <div style="margin-top: 16px;">
+    <div class="breakdown-item">
+      <span>Registration Fee</span>
+      <span>৳15,000</span>
+    </div>
+    <div class="breakdown-item">
+      <span>Payment Date</span>
+      <span>January 10, 2025</span>
+    </div>
+    <div class="breakdown-item">
+      <span>Payment Method</span>
+      <span>bKash</span>
+    </div>
+  </div>
+</div>
+
+<!-- Scholarship Information Section -->
+<div class="scholarship-section" id="scholarshipInfo">
+  <div class="scholarship-header">
+    <div>
+      <div style="font-size: 18px; font-weight: 600; color: var(--success);">Scholarship Benefits</div>
+      <div style="font-size: 14px; color: var(--muted);">Your current scholarship details</div>
+    </div>
+  </div>
+  <div class="scholarship-details">
+    <div class="scholarship-detail">
+      <div class="label">Scholarship Type</div>
+      <div class="value" id="scholarshipType">No Scholarship</div>
+    </div>
+    <div class="scholarship-detail">
+      <div class="label">Discount on Tuition</div>
+      <div class="value" id="scholarshipDiscount">0%</div>
+    </div>
+    <div class="scholarship-detail">
+      <div class="label">Total Savings</div>
+      <div class="value" id="scholarshipSavings">৳0</div>
+    </div>
+    <div class="scholarship-detail">
+      <div class="label">Final Program Cost</div>
+      <div class="value" id="finalProgramCost">৳700,000</div>
+    </div>
+  </div>
+</div>
+
+<!-- Program Cost Highlight -->
+<div class="program-cost">
+  Total Program Cost: <span id="totalProgramCostDisplay">৳700,000</span>
+  <span class="department-badge cse-badge" id="departmentBadge">CSE</span>
+</div>
+
+<section class="grid">
+<div>
+  <div class="card">
+    <div class="card-head">Fee Structure</div>
+    <div class="card-body">
+      <div class="fee-item">
+        <div>
+          <label>Scholarship Category</label>
+          <select id="scholarship">
+            <option value="100">100% Scholarship</option>
+            <option value="75">75% Scholarship</option>
+            <option value="50">50% Scholarship</option>
+            <option value="25">25% Scholarship</option>
+            <option value="0" selected>No Scholarship</option>
+          </select>
+        </div>
+        <div class="badge badge-success">Active</div>
+      </div>
+      
+      <div class="cost-breakdown">
+        <div class="cost-item">
+          <span>Base Tuition Fee (12 Semesters)</span>
+          <span id="baseTuitionDisplay">৳650,000</span>
+        </div>
+        <div class="cost-item">
+          <span>Other Fees (12 Semesters)</span>
+          <span id="otherFeesDisplay">৳35,000</span>
+        </div>
+        <div class="cost-item">
+          <span>Registration Fee</span>
+          <span>৳15,000</span>
+        </div>
+        <div class="cost-item cost-total">
+          <span>Total Program Cost</span>
+          <span id="totalCostDisplay">৳700,000</span>
+        </div>
+        <div class="cost-item" style="color: var(--success);">
+          <span>Scholarship Discount</span>
+          <span id="discountAmount">-৳0</span>
+        </div>
+        <div class="cost-item cost-total" style="font-size: 20px;">
+          <span>Your Final Cost</span>
+          <span id="yourFinalCost">৳700,000</span>
+        </div>
+  </div>
+    </div>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="card">
+    <div class="card-head">Make Payment</div>
+    <div class="card-body">
+      <label>Select Payment Method</label>
+      <div class="payment-methods">
+        <div class="payment-method method-bkash" data-method="bkash">
+          <i class="fas fa-mobile-alt"></i>
+          <div class="method-name">bKash</div>
+          <div class="method-desc">Mobile Banking</div>
+        </div>
+        <div class="payment-method method-nagad" data-method="nagad">
+          <i class="fas fa-wallet"></i>
+          <div class="method-name">Nagad</div>
+          <div class="method-desc">Mobile Banking</div>
+        </div>
+        <div class="payment-method method-bank" data-method="bank">
+          <i class="fas fa-university"></i>
+          <div class="method-name">Bank Transfer</div>
+          <div class="method-desc">Online Banking</div>
+        </div>
+        <div class="payment-method method-cash" data-method="cash">
+          <i class="fas fa-money-bill-wave"></i>
+          <div class="method-name">Cash</div>
+          <div class="method-desc">In Person</div>
+        </div>
+      </div>
+      
+      <div class="payment-details" id="paymentDetails">
+        <div style="text-align: center; color: var(--muted);">
+          <i class="fas fa-info-circle" style="font-size: 32px; margin-bottom: 12px;"></i>
+          <p>Select a payment method to continue</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div>
+  <div class="card">
+    <div class="card-head">Financial Summary</div>
+    <div class="card-body">
+      <div class="summary">
+        <div class="metric metric--registration">
+          <div class="label">Registration Fee</div>
+          <div class="value">৳15,000</div>
+        </div>
+        <div class="metric metric--payable">
+          <div class="label">Total Program Payable</div>
+          <div class="value" id="totalPayable">৳700,000</div>
+        </div>
+        <div class="metric metric--paid">
+          <div class="label">Total Paid</div>
+          <div class="value" id="paidAmount">৳15,000</div>
+        </div>
+        <div class="metric metric--due">
+          <div class="label">Remaining Balance</div>
+          <div class="value" id="dueAmount">৳685,000</div>
+        </div>
+      </div>
+      
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width: 2.1%"></div>
+      </div>
+      <div class="amount-details">
+        <div>Completed: <span id="completedPercent">2.1%</span></div>
+        <div>Remaining: <span id="remainingPercent">97.9%</span></div>
+      </div>
+
+      <div class="fee-breakdown" style="margin-top: 24px;">
+        <div class="breakdown-item">
+          <span>Semesters Completed</span>
+          <span>0/12</span>
+        </div>
+        <div class="breakdown-item">
+          <span>Next Payment Due</span>
+          <span>May 2025</span>
+        </div>
+        <div class="breakdown-item">
+          <span>Avg. Semester Cost</span>
+          <span id="avgSemesterCost">৳57,083</span>
+        </div>
+        <div class="breakdown-item breakdown-total">
+          <span>Year 1 Total</span>
+          <span id="year1Total">৳171,250</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="spacer"></div>
+  
+  <div class="card">
+    <div class="card-head">Scholarship Comparison</div>
+    <div class="card-body">
+      <div class="payment-entry">
+        <div>
+          <div>100% Scholarship</div>
+          <div class="payment-date">Covers full tuition</div>
+        </div>
+        <div class="payment-amount">৳50,000</div>
+      </div>
+      <div class="payment-entry">
+        <div>
+          <div>75% Scholarship</div>
+          <div class="payment-date">Pay 25% of tuition</div>
+        </div>
+        <div class="payment-amount">৳192,500</div>
+      </div>
+      <div class="payment-entry">
+        <div>
+          <div>50% Scholarship</div>
+          <div class="payment-date">Pay 50% of tuition</div>
+        </div>
+        <div class="payment-amount">৳335,000</div>
+      </div>
+      <div class="payment-entry">
+        <div>
+          <div>25% Scholarship</div>
+          <div class="payment-date">Pay 75% of tuition</div>
+        </div>
+        <div class="payment-amount">৳477,500</div>
+      </div>
+      <div class="payment-entry breakdown-total">
+        <div>
+          <div>No Scholarship</div>
+          <div class="payment-date">Pay full tuition</div>
+        </div>
+        <div class="payment-amount">৳700,000</div>
+      </div>
+      
+      <div style="margin-top: 16px; padding: 12px; background: #f1f5f9; border-radius: 8px;">
+        <div style="font-size: 13px; color: var(--muted);">Your selection:</div>
+        <div style="font-size: 16px; font-weight: 600;" id="yourSelection">No Scholarship - ৳700,000</div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<footer>SKST Student Finance Module — Scholarship Program</footer>
+</div>
+
+<script>
+// Department configuration
+const departments = {
+  cse: {
+    name: "Computer Science & Engineering",
+    baseTuition: 650000,
+    otherFees: 35000,
+    registrationFee: 15000,
+    color: "#4f46e5",
+    badgeClass: "cse-badge"
+  },
+  eee: {
+    name: "Electrical & Electronic Engineering",
+    baseTuition: 670000,
+    otherFees: 35000,
+    registrationFee: 15000,
+    color: "#f59e0b",
+    badgeClass: "eee-badge"
+  },
+  civil: {
+    name: "Civil Engineering",
+    baseTuition: 630000,
+    otherFees: 35000,
+    registrationFee: 15000,
+    color: "#10b981",
+    badgeClass: "civil-badge"
+  },
+  mech: {
+    name: "Mechanical Engineering",
+    baseTuition: 660000,
+    otherFees: 35000,
+    registrationFee: 15000,
+    color: "#ef4444",
+    badgeClass: "mech-badge"
+  },
+  textile: {
+    name: "Textile Engineering",
+    baseTuition: 610000,
+    otherFees: 35000,
+    registrationFee: 15000,
+    color: "#a855f7",
+    badgeClass: "textile-badge"
+  }
+};
+
+// Scholarship configuration
+const scholarships = {
+  "100": { discount: 1.0, label: "100% Scholarship" },
+  "75": { discount: 0.75, label: "75% Scholarship" },
+  "50": { discount: 0.5, label: "50% Scholarship" },
+  "25": { discount: 0.25, label: "25% Scholarship" },
+  "0": { discount: 0, label: "No Scholarship" }
+};
+
+// Payment methods configuration
+const paymentMethods = {
+  bkash: {
+    name: "bKash",
+    instructions: [
+      "Dial *247# from your mobile",
+      "Select 'Send Money'",
+      "Enter our bKash account: 017XXXXXXXX",
+      "Enter the amount",
+      "Enter reference: Your Student ID",
+      "Complete the transaction"
+    ]
+  },
+  nagad: {
+    name: "Nagad",
+    instructions: [
+      "Dial *167# from your mobile",
+      "Select 'Send Money'",
+      "Enter our Nagad account: 017XXXXXXXX",
+      "Enter the amount",
+      "Enter reference: Your Student ID",
+      "Complete the transaction"
+    ]
+  },
+  bank: {
+    name: "Bank Transfer",
+    instructions: [
+      "Log in to your internet banking",
+      "Add SKST Institute as beneficiary",
+      "Account: 1234567890123",
+      "Bank: Prime Bank Limited",
+      "Branch: Gulshan Branch",
+      "Include your Student ID in reference"
+    ]
+  },
+  cash: {
+    name: "Cash Payment",
+    instructions: [
+      "Visit our campus during office hours (9AM-5PM)",
+      "Go to the Accounts Department",
+      "Provide your Student ID",
+      "Pay the required amount",
+      "Collect your payment receipt"
+    ]
+  }
+};
+
+// Current state
+let currentDepartment = "cse";
+let currentScholarship = "0";
+let currentPaymentMethod = null;
+
+// Initialize the application
+document.addEventListener('DOMContentLoaded', function() {
+  // Set up department selection
+  setupDepartmentSelection();
+  
+  // Set up scholarship selection
+  setupScholarshipSelection();
+  
+  // Set up payment method selection
+  setupPaymentMethodSelection();
+  
+  // Set up save button
+  document.getElementById('saveBtn').addEventListener('click', saveChanges);
+  
+  // Initial calculation
+  calculateCosts();
+});
+
+// Set up department selection
+function setupDepartmentSelection() {
+  const departmentOptions = document.querySelectorAll('.department-option');
+  
+  departmentOptions.forEach(option => {
+    option.addEventListener('click', function() {
+      // Remove selected class from all options
+      departmentOptions.forEach(opt => opt.classList.remove('selected'));
+      
+      // Add selected class to clicked option
+      this.classList.add('selected');
+      
+      // Update current department
+      currentDepartment = this.getAttribute('data-department');
+      
+      // Update department badge
+      updateDepartmentBadge();
+      
+      // Recalculate costs
+      calculateCosts();
+    });
+  });
+}
+
+// Set up scholarship selection
+function setupScholarshipSelection() {
+  const scholarshipSelect = document.getElementById('scholarship');
+  
+  scholarshipSelect.addEventListener('change', function() {
+    currentScholarship = this.value;
+    calculateCosts();
+  });
+}
+
+// Set up payment method selection
+function setupPaymentMethodSelection() {
+  const paymentMethodOptions = document.querySelectorAll('.payment-method');
+  
+  paymentMethodOptions.forEach(option => {
+    option.addEventListener('click', function() {
+      // Remove selected class from all options
+      paymentMethodOptions.forEach(opt => opt.classList.remove('selected'));
+      
+      // Add selected class to clicked option
+      this.classList.add('selected');
+      
+      // Update current payment method
+      currentPaymentMethod = this.getAttribute('data-method');
+      
+      // Update payment details
+      updatePaymentDetails();
+    });
+  });
+}
+
+// Update department badge
+function updateDepartmentBadge() {
+  const badge = document.getElementById('departmentBadge');
+  const dept = departments[currentDepartment];
+  
+  // Remove all badge classes
+  badge.className = 'department-badge';
+  
+  // Add the appropriate class
+  badge.classList.add(dept.badgeClass);
+  
+  // Update text
+  badge.textContent = currentDepartment.toUpperCase();
+}
+
+// Calculate all costs based on current selections
+function calculateCosts() {
+  const dept = departments[currentDepartment];
+  const scholarship = scholarships[currentScholarship];
+  
+  // Calculate base values
+  const baseTuition = dept.baseTuition;
+  const otherFees = dept.otherFees;
+  const registrationFee = dept.registrationFee;
+  const totalProgramCost = baseTuition + otherFees + registrationFee;
+  
+  // Calculate scholarship values
+  const tuitionDiscount = baseTuition * scholarship.discount;
+  const discountedTuition = baseTuition - tuitionDiscount;
+  const finalProgramCost = discountedTuition + otherFees + registrationFee;
+  
+  // Update displayed values
+  document.getElementById('baseTuitionDisplay').textContent = `৳${formatNumber(baseTuition)}`;
+  document.getElementById('otherFeesDisplay').textContent = `৳${formatNumber(otherFees)}`;
+  document.getElementById('totalCostDisplay').textContent = `৳${formatNumber(totalProgramCost)}`;
+  document.getElementById('discountAmount').textContent = `-৳${formatNumber(tuitionDiscount)}`;
+  document.getElementById('yourFinalCost').textContent = `৳${formatNumber(finalProgramCost)}`;
+  
+  // Update scholarship information
+  document.getElementById('scholarshipType').textContent = scholarship.label;
+  document.getElementById('scholarshipDiscount').textContent = `${scholarship.discount * 100}%`;
+  document.getElementById('scholarshipSavings').textContent = `৳${formatNumber(tuitionDiscount)}`;
+  document.getElementById('finalProgramCost').textContent = `৳${formatNumber(finalProgramCost)}`;
+  
+  // Update total program cost display
+  document.getElementById('totalProgramCostDisplay').textContent = `৳${formatNumber(finalProgramCost)}`;
+  
+  // Update financial summary
+  updateFinancialSummary(finalProgramCost);
+  
+  // Update scholarship comparison
+  updateScholarshipComparison(totalProgramCost);
+  
+  // Update scholarship section styling
+  updateScholarshipSectionStyle();
+}
+
+// Update financial summary section
+function updateFinancialSummary(finalProgramCost) {
+  const registrationFee = departments[currentDepartment].registrationFee;
+  const paidAmount = registrationFee; // Assuming registration fee is already paid
+  const remainingBalance = finalProgramCost - paidAmount;
+  const completionPercentage = (paidAmount / finalProgramCost * 100).toFixed(1);
+  const remainingPercentage = (100 - completionPercentage).toFixed(1);
+  
+  // Update values
+  document.getElementById('totalPayable').textContent = `৳${formatNumber(finalProgramCost)}`;
+  document.getElementById('paidAmount').textContent = `৳${formatNumber(paidAmount)}`;
+  document.getElementById('dueAmount').textContent = `৳${formatNumber(remainingBalance)}`;
+  
+  // Update progress bar
+  document.getElementById('progressFill').style.width = `${completionPercentage}%`;
+  document.getElementById('completedPercent').textContent = `${completionPercentage}%`;
+  document.getElementById('remainingPercent').textContent = `${remainingPercentage}%`;
+  
+  // Calculate semester costs
+  const semesters = 12;
+  const avgSemesterCost = Math.round(remainingBalance / semesters);
+  const year1Total = avgSemesterCost * 3; // 3 semesters in first year
+  
+  document.getElementById('avgSemesterCost').textContent = `৳${formatNumber(avgSemesterCost)}`;
+  document.getElementById('year1Total').textContent = `৳${formatNumber(year1Total)}`;
+}
+
+// Update scholarship comparison section
+function updateScholarshipComparison(totalProgramCost) {
+  const baseTuition = departments[currentDepartment].baseTuition;
+  const otherFees = departments[currentDepartment].otherFees;
+  const registrationFee = departments[currentDepartment].registrationFee;
+  
+  // Update your selection
+  const scholarship = scholarships[currentScholarship];
+  const tuitionDiscount = baseTuition * scholarship.discount;
+  const yourFinalCost = baseTuition - tuitionDiscount + otherFees + registrationFee;
+  
+  document.getElementById('yourSelection').textContent = 
+    `${scholarship.label} - ৳${formatNumber(yourFinalCost)}`;
+}
+
+// Update payment details based on selected method
+function updatePaymentDetails() {
+  const paymentDetails = document.getElementById('paymentDetails');
+  
+  if (!currentPaymentMethod) {
+    paymentDetails.innerHTML = `
+      <div style="text-align: center; color: var(--muted);">
+        <i class="fas fa-info-circle" style="font-size: 32px; margin-bottom: 12px;"></i>
+        <p>Select a payment method to continue</p>
+      </div>
+    `;
+    return;
+  }
+  
+  const method = paymentMethods[currentPaymentMethod];
+  
+  let instructionsHTML = '';
+  method.instructions.forEach((instruction, index) => {
+    instructionsHTML += `<li>${instruction}</li>`;
+  });
+  
+  paymentDetails.innerHTML = `
+    <div class="payment-field">
+      <label>${method.name} Account Number</label>
+      <input type="text" placeholder="Enter your ${method.name} number" />
+    </div>
+    <div class="payment-field">
+      <label>Amount to Pay</label>
+      <input type="number" placeholder="Enter amount" />
+    </div>
+    <div class="payment-field">
+      <label>Transaction ID (if available)</label>
+      <input type="text" placeholder="Enter transaction ID" />
+    </div>
+    <div class="payment-instructions">
+      <strong>Payment Instructions:</strong>
+      <ol>
+        ${instructionsHTML}
+      </ol>
+    </div>
+    <button class="verify-btn">
+      <i class="fas fa-check-circle"></i> Verify Payment
+    </button>
+  `;
+}
+
+// Update scholarship section styling based on scholarship percentage
+function updateScholarshipSectionStyle() {
+  const scholarshipSection = document.getElementById('scholarshipInfo');
+  
+  // Remove all scholarship classes
+  scholarshipSection.classList.remove(
+    'scholarship-100', 
+    'scholarship-75', 
+    'scholarship-50', 
+    'scholarship-0'
+  );
+  
+  // Add appropriate class based on scholarship percentage
+  if (currentScholarship === '100') {
+    scholarshipSection.classList.add('scholarship-100');
+  } else if (currentScholarship === '75') {
+    scholarshipSection.classList.add('scholarship-75');
+  } else if (currentScholarship === '50') {
+    scholarshipSection.classList.add('scholarship-50');
+  } else {
+    scholarshipSection.classList.add('scholarship-0');
+  }
+}
+
+// Format numbers with commas for thousands
+function formatNumber(num) {
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+// Save changes (simulated)
+function saveChanges() {
+  const btn = document.getElementById('saveBtn');
+  const originalText = btn.innerHTML;
+  
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+  btn.disabled = true;
+  
+  // Simulate saving process
+  setTimeout(() => {
+    btn.innerHTML = '<i class="fas fa-check"></i> Saved Successfully!';
+    btn.style.background = 'var(--success)';
+    
+    // Revert after 2 seconds
+    setTimeout(() => {
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+      btn.style.background = '';
+    }, 2000);
+  }, 1500);
+}
+</script>
+</body>
+</html>

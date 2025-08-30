@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Staff Salary Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #3498db;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --gray: #95a5a6;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --hover-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            background: var(--primary);
+            color: white;
+            padding: 1.5rem 1rem;
+            transition: all 0.3s ease;
+            position: fixed;
+            height: 100%;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            padding: 0 0.5rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header img {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .sidebar-menu {
+            margin-top: 2rem;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-item i {
+            margin-right: 10px;
+            font-size: 1.1rem;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            padding: 1.5rem 2rem;
+            overflow-y: auto;
+            margin-left: 250px;
+            width: calc(100% - 250px);
+        }
+
+        /* Top Header */
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            background: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .user-profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .user-department {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: white;
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            box-shadow: var(--card-shadow);
+            width: 300px;
+        }
+
+        .search-bar input {
+            border: none;
+            outline: none;
+            padding: 0.5rem;
+            width: 100%;
+        }
+
+        /* User type selector */
+        .user-type-selector {
+            display: flex;
+            background: white;
+            border-radius: 8px;
+            padding: 0.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--card-shadow);
+            flex-wrap: wrap;
+        }
+
+        .user-type {
+            padding: 0.7rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            flex: 1;
+            min-width: 120px;
+            margin: 0.2rem;
+        }
+
+        .user-type.active {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+        }
+
+        .user-type i {
+            margin-right: 8px;
+        }
+
+        /* Dashboard Cards */
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .card-icon.primary {
+            background: var(--accent);
+        }
+
+        .card-icon.success {
+            background: var(--success);
+        }
+
+        .card-icon.warning {
+            background: var(--warning);
+        }
+
+        .card-icon.danger {
+            background: var(--danger);
+        }
+
+        .card-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-change {
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .card-change.positive {
+            color: var(--success);
+        }
+
+        .card-change.negative {
+            color: var(--danger);
+        }
+
+        /* Charts Container */
+        .charts-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            height: 350px;
+            position: relative;
+        }
+
+        /* Salary Comparison */
+        .salary-comparison {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 2rem;
+            height: 400px;
+        }
+
+        /* Department Breakdown */
+        .department-breakdown {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 2rem;
+        }
+
+        .department-list {
+            margin-top: 1rem;
+        }
+
+        .department-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .department-name {
+            display: flex;
+            align-items: center;
+        }
+
+        .department-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .department-stats {
+            display: flex;
+            gap: 1rem;
+        }
+
+        /* Table Styles */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+
+        .data-table th, .data-table td {
+            padding: 1rem;
+            text-align: left;
+        }
+
+        .data-table th {
+            background-color: var(--primary);
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .data-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .data-table tr:hover {
+            background-color: #e9ecef;
+        }
+
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-paid {
+            background: #e7f6eb;
+            color: var(--success);
+        }
+
+        .status-pending {
+            background: #fef5e6;
+            color: var(--warning);
+        }
+
+        .action-btn {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        /* Section Header */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 2rem 0 1rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--dark);
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 600px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: black;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .submit-btn {
+            background: var(--accent);
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .submit-btn:hover {
+            background: #2980b9;
+        }
+
+        /* Add staff button */
+        .add-staff-btn {
+            background: var(--success);
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .add-staff-btn:hover {
+            background: #27ae60;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 70px;
+                padding: 1rem 0.5rem;
+            }
+            
+            .sidebar-header h2, .menu-item span {
+                display: none;
+            }
+            
+            .sidebar-header {
+                justify-content: center;
+            }
+            
+            .menu-item {
+                justify-content: center;
+                padding: 0.8rem;
+            }
+            
+            .menu-item i {
+                margin-right: 0;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+                width: calc(100% - 70px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                padding: 1rem;
+            }
+            
+            .sidebar-header h2, .menu-item span {
+                display: block;
+            }
+            
+            .sidebar-header {
+                justify-content: flex-start;
+            }
+            
+            .menu-item {
+                justify-content: flex-start;
+                padding: 0.8rem 1rem;
+            }
+            
+            .menu-item i {
+                margin-right: 10px;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+            
+            .dashboard-container {
+                flex-direction: column;
+            }
+            
+            .dashboard-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .top-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .search-bar {
+                margin-top: 1rem;
+                width: 100%;
+            }
+            
+            .user-profile {
+                margin-top: 1rem;
+            }
+
+            .user-type-selector {
+                flex-wrap: wrap;
+            }
+            
+            .user-type {
+                flex: 1 0 40%;
+                margin-bottom: 0.5rem;
+                min-width: 100px;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .section-header .action-btn {
+                margin-top: 1rem;
+            }
+        }
+
+        /* Loading spinner */
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 5px solid var(--accent);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <img src="https://cdn-icons-png.flaticon.com/512/3716/3716205.png" alt="University Logo">
+                <h2>University Portal</h2>
+            </div>
+            
+            <div class="sidebar-menu">
+                <div class="menu-item active">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-wallet"></i>
+                    <span>Salary Statements</span>
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-file-invoice"></i>
+                    <span>Pay Slips</span>
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Analytics</span>
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-question-circle"></i>
+                    <span>Support</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Header -->
+            <div class="top-header">
+                <h1>University Staff Salary Dashboard</h1>
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search..." id="searchInput">
+                </div>
+                <div class="user-profile">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="User Profile">
+                    <div class="user-info">
+                        <div class="user-name">University Administrator</div>
+                        <div class="user-department">Human Resources</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Staff Button -->
+            <button class="add-staff-btn" id="addStaffBtn">
+                <i class="fas fa-plus"></i> Add Staff Member
+            </button>
+
+            <!-- User Type Selector -->
+            <div class="user-type-selector">
+                <div class="user-type active" data-type="all">
+                    <i class="fas fa-users"></i> All Staff
+                </div>
+                <div class="user-type" data-type="faculty">
+                    <i class="fas fa-chalkboard-teacher"></i> Faculty
+                </div>
+                <div class="user-type" data-type="admin">
+                    <i class="fas fa-user-tie"></i> Admin Staff
+                </div>
+                <div class="user-type" data-type="support">
+                    <i class="fas fa-tools"></i> Support Staff
+                </div>
+                <div class="user-type" data-type="librarian">
+                    <i class="fas fa-book-reader"></i> Librarians
+                </div>
+                <div class="user-type" data-type="research">
+                    <i class="fas fa-flask"></i> Research Staff
+                </div>
+            </div>
+
+            <!-- Dashboard Cards -->
+            <div class="dashboard-cards">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Total Monthly Payroll</div>
+                        <div class="card-icon primary">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                    </div>
+                    <div class="card-value" id="total-earnings">Loading...</div>
+                    <div class="card-change positive">
+                        <i class="fas fa-arrow-up"></i> <span id="payroll-change">Calculating...</span>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Average Salary</div>
+                        <div class="card-icon success">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                    </div>
+                    <div class="card-value" id="net-salary">Loading...</div>
+                    <div class="card-change positive">
+                        <i class="fas fa-arrow-up"></i> <span id="avg-salary-change">Calculating...</span>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Total Deductions</div>
+                        <div class="card-icon danger">
+                            <i class="fas fa-minus-circle"></i>
+                        </div>
+                    </div>
+                    <div class="card-value" id="deductions">Loading...</div>
+                    <div class="card-change negative">
+                        <i class="fas fa-arrow-up"></i> <span id="deductions-change">Calculating...</span>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Tax Paid</div>
+                        <div class="card-icon warning">
+                            <i class="fas fa-chart-pie"></i>
+                        </div>
+                    </div>
+                    <div class="card-value" id="tax">Loading...</div>
+                    <div class="card-change negative">
+                        <i class="fas fa-arrow-down"></i> <span id="tax-change">Calculating...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="charts-container">
+                <!-- Salary Comparison Chart -->
+                <div class="chart-card">
+                    <div class="section-header">
+                        <h2 class="section-title">Salary Distribution</h2>
+                    </div>
+                    <div class="loader" id="salaryChartLoader"></div>
+                    <canvas id="salaryChart"></canvas>
+                </div>
+
+                <!-- Department Breakdown -->
+                <div class="chart-card">
+                    <div class="section-header">
+                        <h2 class="section-title">Department Breakdown</h2>
+                    </div>
+                    <div class="loader" id="deptChartLoader"></div>
+                    <canvas id="deptChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Payment History -->
+            <div class="section-header">
+                <h2 class="section-title">Payment History</h2>
+                <button class="action-btn btn-primary" id="exportBtn">
+                    <i class="fas fa-download"></i> Export Report
+                </button>
+            </div>
+            
+            <div class="loader" id="tableLoader"></div>
+            <table class="data-table" id="paymentTable">
+                <thead>
+                    <tr>
+                        <th>Staff ID</th>
+                        <th>Name</th>
+                        <th>Role</th>
+                        <th>Department</th>
+                        <th>Basic Salary</th>
+                        <th>Deductions</th>
+                        <th>Net Pay</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Table content will be populated by JavaScript from database -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add Staff Modal -->
+    <div id="staffModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Add Staff Member</h2>
+            <form id="staffForm">
+                <div class="form-group">
+                    <label for="staffId">Staff ID</label>
+                    <input type="text" id="staffId" required>
+                </div>
+                <div class="form-group">
+                    <label for="staffName">Full Name</label>
+                    <input type="text" id="staffName" required>
+                </div>
+                <div class="form-group">
+                    <label for="staffRole">Role</label>
+                    <select id="staffRole" required>
+                        <option value="Professor">Professor</option>
+                        <option value="Associate Professor">Associate Professor</option>
+                        <option value="Assistant Professor">Assistant Professor</option>
+                        <option value="Senior Lecturer">Senior Lecturer</option>
+                        <option value="Lecturer">Lecturer</option>
+                        <option value="Senior Administrator">Senior Administrator</option>
+                        <option value="Administrator">Administrator</option>
+                        <option value="Junior Administrator">Junior Administrator</option>
+                        <option value="IT Support">IT Support</option>
+                        <option value="Technical Support">Technical Support</option>
+                        <option value="Maintenance">Maintenance</option>
+                        <option value="Head Librarian">Head Librarian</option>
+                        <option value="Senior Librarian">Senior Librarian</option>
+                        <option value="Librarian">Librarian</option>
+                        <option value="Senior Researcher">Senior Researcher</option>
+                        <option value="Researcher">Researcher</option>
+                        <option value="Research Assistant">Research Assistant</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="staffDept">Department</label>
+                    <select id="staffDept" required>
+                        <option value="Engineering">Engineering</option>
+                        <option value="Medicine">Medicine</option>
+                        <option value="Business">Business</option>
+                        <option value="Arts & Sciences">Arts & Sciences</option>
+                        <option value="Administration">Administration</option>
+                        <option value="Library">Library</option>
+                        <option value="Support Services">Support Services</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="basicSalary">Basic Salary (৳)</label>
+                    <input type="number" id="basicSalary" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="deductions">Deductions (৳)</label>
+                    <input type="number" id="deductions" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="tax">Tax (৳)</label>
+                    <input type="number" id="tax" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="status">Payment Status</label>
+                    <select id="status" required>
+                        <option value="Paid">Paid</option>
+                        <option value="Pending">Pending</option>
+                    </select>
+                </div>
+                <button type="submit" class="submit-btn">Add Staff</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Chart instances
+        let salaryChartInstance = null;
+        let deptChartInstance = null;
+
+        // Modal functionality
+        const modal = document.getElementById("staffModal");
+        const addStaffBtn = document.getElementById("addStaffBtn");
+        const closeBtn = document.getElementsByClassName("close")[0];
+        const staffForm = document.getElementById("staffForm");
+        const exportBtn = document.getElementById("exportBtn");
+
+        addStaffBtn.onclick = function() {
+            modal.style.display = "block";
+        }
+
+        closeBtn.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        // Export button functionality
+        exportBtn.onclick = function() {
+            alert("Report exported successfully!");
+        }
+
+        // Form submission
+        staffForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const staffId = document.getElementById('staffId').value;
+            const staffName = document.getElementById('staffName').value;
+            const staffRole = document.getElementById('staffRole').value;
+            const staffDept = document.getElementById('staffDept').value;
+            const basicSalary = parseFloat(document.getElementById('basicSalary').value);
+            const deductions = parseFloat(document.getElementById('deductions').value);
+            const tax = parseFloat(document.getElementById('tax').value);
+            const status = document.getElementById('status').value;
+            
+            // Calculate net pay
+            const netPay = basicSalary - deductions - tax;
+            
+            // Here you would send this data to your server to be stored in the database
+            // For now, we'll simulate an API call
+            simulateAddStaffToDatabase({
+                staffId, 
+                staffName, 
+                staffRole, 
+                staffDept, 
+                basicSalary, 
+                deductions, 
+                tax, 
+                netPay, 
+                status
+            });
+            
+            // Reset form and close modal
+            staffForm.reset();
+            modal.style.display = "none";
+        });
+
+        // Simulate adding staff to database (replace with actual API call)
+        function simulateAddStaffToDatabase(staffData) {
+            console.log("Adding staff to database:", staffData);
+            // In a real application, you would make an API call to your backend here
+            // Example:
+            /*
+            fetch('/api/staff', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(staffData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Staff member added successfully!');
+                updateDashboard('all'); // Refresh the dashboard
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error adding staff member');
+            });
+            */
+            
+            // For demo purposes, we'll just show an alert
+            alert('Staff member added successfully! (This would be saved to your database)');
+            updateDashboard('all'); // Refresh the dashboard
+        }
+
+        // Function to update dashboard based on user type
+        function updateDashboard(staffType) {
+            // Show loading states
+            document.getElementById('total-earnings').textContent = 'Loading...';
+            document.getElementById('net-salary').textContent = 'Loading...';
+            document.getElementById('deductions').textContent = 'Loading...';
+            document.getElementById('tax').textContent = 'Loading...';
+            
+            document.getElementById('payroll-change').textContent = 'Calculating...';
+            document.getElementById('avg-salary-change').textContent = 'Calculating...';
+            document.getElementById('deductions-change').textContent = 'Calculating...';
+            document.getElementById('tax-change').textContent = 'Calculating...';
+            
+            document.getElementById('salaryChartLoader').style.display = 'block';
+            document.getElementById('deptChartLoader').style.display = 'block';
+            document.getElementById('tableLoader').style.display = 'block';
+            
+            // In a real application, you would fetch data from your server
+            // Example:
+            /*
+            fetch(`/api/staff?type=${staffType}`)
+                .then(response => response.json())
+                .then(data => {
+                    updateDashboardUI(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error loading data');
+                });
+            */
+            
+            // For demo purposes, we'll simulate a database fetch
+            setTimeout(() => {
+                simulateFetchDataFromDatabase(staffType);
+            }, 1000);
+        }
+        
+        // Simulate fetching data from database (replace with actual API call)
+        function simulateFetchDataFromDatabase(staffType) {
+            // This is just dummy data - in a real application, you would get this from your database
+            const dummyData = {
+                totalEarnings: '৳62,85,000',
+                netSalary: '৳52,375',
+                deductions: '৳8,45,000',
+                tax: '৳5,20,000',
+                payrollChange: '4.7% from last month',
+                avgSalaryChange: '3.2% from last month',
+                deductionsChange: '2.8% from last month',
+                taxChange: '1.2% from last month',
+                tableData: [
+                    ['FAC001', 'Dr. Ahmed Rahman', 'Professor', 'Engineering', '৳85,000', '৳12,000', '৳73,000', 'Paid'],
+                    ['LIB002', 'Mr. Asif Iqbal', 'Senior Librarian', 'Library', '৳45,000', '৳5,500', '৳39,500', 'Paid'],
+                    ['ADM002', 'Ms. Anika Chowdhury', 'Administrator', 'Administration', '৳40,000', '৳4,800', '৳35,200', 'Paid'],
+                    ['SUP002', 'Mr. Karim Uddin', 'Technical Support', 'Support Services', '৳32,000', '৳3,200', '৳28,800', 'Paid'],
+                    ['FAC002', 'Dr. Fatima Khan', 'Associate Professor', 'Medicine', '৳65,000', '৳8,500', '৳56,500', 'Paid']
+                ]
+            };
+            
+            // Update the UI with the fetched data
+            updateDashboardUI(dummyData, staffType);
+        }
+        
+        // Function to update the UI with data
+        function updateDashboardUI(data, staffType) {
+            // Hide loaders
+            document.getElementById('salaryChartLoader').style.display = 'none';
+            document.getElementById('deptChartLoader').style.display = 'none';
+            document.getElementById('tableLoader').style.display = 'none';
+            
+            // Update cards
+            document.getElementById('total-earnings').textContent = data.totalEarnings;
+            document.getElementById('net-salary').textContent = data.netSalary;
+            document.getElementById('deductions').textContent = data.deductions;
+            document.getElementById('tax').textContent = data.tax;
+            
+            document.getElementById('payroll-change').textContent = data.payrollChange;
+            document.getElementById('avg-salary-change').textContent = data.avgSalaryChange;
+            document.getElementById('deductions-change').textContent = data.deductionsChange;
+            document.getElementById('tax-change').textContent = data.taxChange;
+            
+            // Update table
+            const tableBody = document.querySelector('.data-table tbody');
+            tableBody.innerHTML = '';
+            
+            data.tableData.forEach(rowData => {
+                const row = document.createElement('tr');
+                
+                rowData.forEach((cellData, index) => {
+                    const cell = document.createElement('td');
+                    if (index === 7) { // Status column
+                        const badge = document.createElement('span');
+                        badge.className = cellData === 'Paid' ? 'status-badge status-paid' : 'status-badge status-pending';
+                        badge.textContent = cellData;
+                        cell.appendChild(badge);
+                    } else {
+                        cell.textContent = cellData;
+                    }
+                    row.appendChild(cell);
+                });
+                
+                // Add action button cell
+                const actionCell = document.createElement('td');
+                const button = document.createElement('button');
+                button.className = 'action-btn btn-primary';
+                button.innerHTML = '<i class="fas fa-eye"></i> View';
+                button.onclick = function() {
+                    viewStaffDetails(rowData);
+                };
+                actionCell.appendChild(button);
+                row.appendChild(actionCell);
+                
+                tableBody.appendChild(row);
+            });
+            
+            // Update charts
+            updateCharts(staffType);
+        }
+        
+        // Function to view staff details
+        function viewStaffDetails(staffData) {
+            alert(`Staff Details:
+ID: ${staffData[0]}
+Name: ${staffData[1]}
+Role: ${staffData[2]}
+Department: ${staffData[3]}
+Basic Salary: ${staffData[4]}
+Deductions: ${staffData[5]}
+Net Pay: ${staffData[6]}
+Status: ${staffData[7]}`);
+        }
+        
+        // Function to update charts
+        function updateCharts(staffType) {
+            // This would normally come from your database
+            // For demo purposes, we're using static data
+            const positionLabels = ['Professor', 'Associate Professor', 'Assistant Professor', 'Administrator', 'Support Staff'];
+            const positionAverages = [85000, 65000, 55000, 40000, 32000];
+            
+            const backgroundColors = [
+                'rgba(54, 162, 235, 0.7)',
+                'rgba(75, 192, 192, 0.7)',
+                'rgba(153, 102, 255, 0.7)',
+                'rgba(255, 159, 64, 0.7)',
+                'rgba(255, 99, 132, 0.7)'
+            ];
+            
+            // Update or create salary distribution chart
+            const salaryCtx = document.getElementById('salaryChart').getContext('2d');
+            if (salaryChartInstance) {
+                salaryChartInstance.destroy();
+            }
+            
+            salaryChartInstance = new Chart(salaryCtx, {
+                type: 'bar',
+                data: {
+                    labels: positionLabels,
+                    datasets: [{
+                        label: 'Average Salary (৳)',
+                        data: positionAverages,
+                        backgroundColor: backgroundColors,
+                        borderColor: backgroundColors.map(color => color.replace('0.7', '1')),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '৳' + value.toLocaleString('en-IN');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Department breakdown data
+            const deptLabels = ['Engineering', 'Medicine', 'Administration', 'Library', 'Support Services'];
+            const deptTotals = [185000, 121500, 75400, 84500, 60800];
+            
+            // Update or create department breakdown chart
+            const deptCtx = document.getElementById('deptChart').getContext('2d');
+            if (deptChartInstance) {
+                deptChartInstance.destroy();
+            }
+            
+            deptChartInstance = new Chart(deptCtx, {
+                type: 'pie',
+                data: {
+                    labels: deptLabels,
+                    datasets: [{
+                        label: 'Total Salary (৳)',
+                        data: deptTotals,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.7)',
+                            'rgba(54, 162, 235, 0.7)',
+                            'rgba(255, 206, 86, 0.7)',
+                            'rgba(75, 192, 192, 0.7)',
+                            'rgba(153, 102, 255, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 15,
+                                padding: 15
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            const searchText = this.value.toLowerCase();
+            const rows = document.querySelectorAll('.data-table tbody tr');
+            
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                let found = false;
+                
+                cells.forEach(cell => {
+                    if (cell.textContent.toLowerCase().includes(searchText)) {
+                        found = true;
+                    }
+                });
+                
+                row.style.display = found ? '' : 'none';
+            });
+        });
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            // Menu item selection
+            const menuItems = document.querySelectorAll('.menu-item');
+            menuItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    menuItems.forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+            
+            // User type selection
+            const userTypes = document.querySelectorAll('.user-type');
+            userTypes.forEach(type => {
+                type.addEventListener('click', function() {
+                    userTypes.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Update dashboard based on selection
+                    const staffType = this.getAttribute('data-type');
+                    updateDashboard(staffType);
+                });
+            });
+            
+            // Card hover effect
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                    this.style.boxShadow = '0 10px 15px rgba(0, 0, 0, 0.1)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+                });
+            });
+            
+            // Initialize with all staff data
+            updateDashboard('all');
+        });
+    </script>
+</body>
+</html>

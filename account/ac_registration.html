@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>University Registration</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --primary: #1a5fb4;
+        --primary-dark: #1a4e8e;
+        --primary-light: #64b5f6;
+        --success: #2ecc71;
+        --error: #e74c3c;
+        --text: #2c3e50;
+        --light-text: #7f8c8d;
+        --background: #f5f7fa;
+        --input-bg: #fff;
+        --border: #dcdfe6;
+        --accent: #f39c12;
+    }
+    
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+    
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: var(--text);
+        line-height: 1.6;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background: linear-gradient(135deg, var(--primary-light), var(--primary), var(--primary-dark));
+        background-size: 400% 400%;
+        animation: gradientBG 15s ease infinite;
+        position: relative;
+        overflow-x: hidden;
+    }
+    
+    body::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23ffffff' fill-opacity='0.1' d='M0,128L48,117.3C96,107,192,85,288,112C384,139,480,213,576,218.7C672,224,768,160,864,138.7C960,117,1056,139,1152,149.3C1248,160,1344,160,1392,160L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
+        background-size: cover;
+        background-position: bottom;
+        opacity: 0.7;
+    }
+    
+    @keyframes gradientBG {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    
+    .container {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 500px;
+        overflow: hidden;
+        position: relative;
+        z-index: 1;
+        transition: transform 0.3s ease;
+    }
+    
+    .container:hover {
+        transform: translateY(-5px);
+    }
+    
+    .form-header {
+        background: var(--primary);
+        color: white;
+        padding: 25px 20px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .form-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23ffffff' fill-opacity='0.1' d='M0,128L48,117.3C96,107,192,85,288,112C384,139,480,213,576,218.7C672,224,768,160,864,138.7C960,117,1056,139,1152,149.3C1248,160,1344,160,1392,160L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
+        background-size: cover;
+        background-position: bottom;
+    }
+    
+    .form-header h1 {
+        font-size: 28px;
+        margin: 0;
+        position: relative;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+    }
+    
+    .form-body {
+        padding: 25px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+        position: relative;
+    }
+    
+    label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: var(--text);
+    }
+    
+    .required {
+        color: var(--error);
+    }
+    
+    input, select {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        font-size: 16px;
+        transition: all 0.3s;
+        background: var(--input-bg);
+    }
+    
+    input:focus, select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(26, 95, 180, 0.2);
+    }
+    
+    input.error, select.error {
+        border-color: var(--error);
+    }
+    
+    input.success {
+        border-color: var(--success);
+    }
+    
+    .info-text {
+        font-size: 0.85em;
+        color: var(--light-text);
+        margin-top: 5px;
+    }
+    
+    .error-message {
+        color: var(--error);
+        font-size: 0.85em;
+        margin-top: 5px;
+        display: none;
+    }
+    
+    .password-container {
+        position: relative;
+    }
+    
+    .toggle-password {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: var(--light-text);
+        transition: color 0.3s;
+    }
+    
+    .toggle-password:hover {
+        color: var(--primary);
+    }
+    
+    .form-footer {
+        margin-top: 30px;
+        text-align: center;
+    }
+    
+    .btn {
+        padding: 12px 24px;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+    }
+    
+    .btn:active {
+        transform: translateY(0);
+    }
+    
+    .btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+    
+    #successMessage {
+        text-align: center;
+        padding: 30px 20px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        display: none;
+        position: relative;
+        z-index: 1;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+    
+    #successMessage i {
+        font-size: 48px;
+        color: var(--success);
+        margin-bottom: 15px;
+    }
+    
+    #successMessage h3 {
+        font-size: 22px;
+        margin-bottom: 10px;
+        color: var(--success);
+    }
+    
+    .progress-bar {
+        height: 5px;
+        background: var(--primary);
+        width: 0%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        transition: width 0.3s;
+        z-index: 1000;
+    }
+    
+    .university-id-container {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .id-prefix {
+        width: 30%;
+    }
+    
+    .id-number {
+        width: 70%;
+    }
+    
+    .floating-icon {
+        position: absolute;
+        right: -20px;
+        top: -20px;
+        background: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    
+    @media (max-width: 576px) {
+        body {
+            padding: 10px;
+        }
+        
+        .container {
+            border-radius: 8px;
+        }
+        
+        .form-header {
+            padding: 20px 15px;
+        }
+        
+        .form-body {
+            padding: 20px;
+        }
+        
+        .university-id-container {
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .id-prefix, .id-number {
+            width: 100%;
+        }
+    }
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="container">
+    <div class="form-header">
+        <h1>University Registration</h1>
+        <div class="floating-icon">
+            <i class="fas fa-graduation-cap" style="color: var(--primary);"></i>
+        </div>
+    </div>
+    
+    <div class="form-body">
+        <form id="registrationForm">
+            <!-- University ID -->
+            <div class="form-group">
+                <label for="userId">University ID <span class="required">*</span></label>
+                <div class="university-id-container">
+                    <select class="id-prefix" id="userIdPrefix" required>
+                        <option value="">Type</option>
+                        <option value="ST">ST (Student)</option>
+                        <option value="FAC">FAC (Faculty)</option>
+                        <option value="LIB">LIB (Librarian)</option>
+                        <option value="EMP">EMP (Employee)</option>
+                    </select>
+                    <input type="text" class="id-number" id="userIdSuffix" placeholder="e.g., 12345" required>
+                </div>
+                <p class="info-text">Enter your assigned university ID</p>
+                <div class="error-message" id="userIdError">Please enter a valid university ID (e.g., ST12345, FAC567, LIB001)</div>
+            </div>
+
+            <!-- Email -->
+            <div class="form-group">
+                <label for="email">University Email <span class="required">*</span></label>
+                <input type="email" id="email" placeholder="name@skst.edu" required>
+                <p class="info-text">Must end with <strong>@skst.edu</strong></p>
+                <div class="error-message" id="emailError">Please enter a valid university email ending with @skst.edu</div>
+            </div>
+
+            <!-- Phone -->
+            <div class="form-group">
+                <label for="phone">Phone Number <span class="required">*</span></label>
+                <input type="tel" id="phone" placeholder="Enter your 10-digit phone number" required>
+                <div class="error-message" id="phoneError">Please enter a valid 10-digit phone number</div>
+            </div>
+
+            <!-- Role -->
+            <div class="form-group">
+                <label for="role">Account Type <span class="required">*</span></label>
+                <select id="role" required>
+                    <option value="">Select your role</option>
+                    <option value="student">Student</option>
+                    <option value="faculty">Faculty</option>
+                    <option value="librarian">Librarian</option>
+                    <option value="employee">Employee</option>
+                </select>
+                <div class="error-message" id="roleError">Please select your role</div>
+            </div>
+
+            <!-- Password -->
+            <div class="form-group">
+                <label for="password">Password <span class="required">*</span></label>
+                <div class="password-container">
+                    <input type="password" id="password" placeholder="Create a strong password" required>
+                    <span class="toggle-password" id="togglePassword">
+                        <i class="far fa-eye"></i>
+                    </span>
+                </div>
+                <p class="info-text">Minimum 8 characters with at least one letter and one number</p>
+                <div class="error-message" id="passwordError">Password must be at least 8 characters long with letters and numbers</div>
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password <span class="required">*</span></label>
+                <div class="password-container">
+                    <input type="password" id="confirmPassword" placeholder="Confirm your password" required>
+                    <span class="toggle-password" id="toggleConfirmPassword">
+                        <i class="far fa-eye"></i>
+                    </span>
+                </div>
+                <div class="error-message" id="confirmPasswordError">Passwords do not match</div>
+            </div>
+
+            <!-- Terms Agreement -->
+            <div class="form-group">
+                <div style="display: flex; align-items: flex-start;">
+                    <input type="checkbox" id="terms" style="width: auto; margin-right: 10px; margin-top: 3px;">
+                    <label for="terms" style="display: inline; font-weight: normal;">I agree to the <a href="#" style="color: var(--primary);">terms and conditions</a> <span class="required">*</span></label>
+                </div>
+                <div class="error-message" id="termsError">You must agree to the terms and conditions</div>
+            </div>
+
+            <div class="form-footer">
+                <button type="submit" class="btn" id="submitBtn">Create Account</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="successMessage">
+    <i class="fas fa-check-circle"></i>
+    <h3>Registration Successful!</h3>
+    <p>Your university account has been created successfully.</p>
+    <p>You will be redirected to the login page in <span id="countdown">5</span> seconds.</p>
+    <button onclick="window.location.href='login.html'" class="btn">Go to Login Now</button>
+</div>
+
+<script>
+    // DOM Elements
+    const form = document.getElementById('registrationForm');
+    const successMessage = document.getElementById('successMessage');
+    const progressBar = document.getElementById('progressBar');
+    const submitBtn = document.getElementById('submitBtn');
+    const countdownEl = document.getElementById('countdown');
+    
+    // Password Toggles
+    const togglePassword = document.getElementById('togglePassword');
+    const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    
+    // University ID elements
+    const userIdPrefix = document.getElementById('userIdPrefix');
+    const userIdSuffix = document.getElementById('userIdSuffix');
+    
+    // Input Validation Patterns
+    const patterns = {
+        userId: {
+            student: /^ST\d{5}$/i,
+            faculty: /^FAC\d{3}$/i,
+            librarian: /^LIB\d{3}$/i,
+            employee: /^EMP\d{3,5}$/i
+        },
+        email: /^[^\s@]+@skst\.edu$/i,
+        phone: /^\d{10}$/,
+        password: /^(?=.*[A-Za-z])(?=.*\d).{8,}$/
+    };
+    
+    // Toggle Password Visibility
+    function setupPasswordToggle(toggle, input) {
+        toggle.addEventListener('click', () => {
+            if(input.type === 'password'){
+                input.type = 'text';
+                toggle.innerHTML = '<i class="far fa-eye-slash"></i>';
+            } else {
+                input.type = 'password';
+                toggle.innerHTML = '<i class="far fa-eye"></i>';
+            }
+        });
+    }
+    
+    setupPasswordToggle(togglePassword, passwordInput);
+    setupPasswordToggle(toggleConfirmPassword, confirmPasswordInput);
+    
+    // Validate Inputs in Real-time
+    function setupValidation(inputId, validationFn) {
+        const input = document.getElementById(inputId);
+        const error = document.getElementById(inputId + 'Error');
+        
+        if (!input) return;
+        
+        input.addEventListener('input', () => {
+            const isValid = validationFn(input.value);
+            
+            if (isValid) {
+                input.classList.remove('error');
+                input.classList.add('success');
+                error.style.display = 'none';
+            } else {
+                input.classList.remove('success');
+            }
+            
+            updateProgressBar();
+        });
+        
+        input.addEventListener('blur', () => {
+            const isValid = validationFn(input.value);
+            
+            if (!isValid && input.value) {
+                input.classList.add('error');
+                error.style.display = 'block';
+            }
+        });
+    }
+    
+    // Setup validation for University ID components
+    userIdPrefix.addEventListener('change', validateFullUserId);
+    userIdSuffix.addEventListener('input', validateFullUserId);
+    
+    function validateFullUserId() {
+        const prefix = userIdPrefix.value;
+        const suffix = userIdSuffix.value;
+        const fullId = prefix + suffix;
+        const error = document.getElementById('userIdError');
+        
+        let isValid = false;
+        if (prefix && suffix) {
+            const role = document.getElementById('role').value;
+            if (role) {
+                isValid = patterns.userId[role] ? patterns.userId[role].test(fullId) : false;
+            }
+        }
+        
+        if (isValid) {
+            userIdPrefix.classList.remove('error');
+            userIdPrefix.classList.add('success');
+            userIdSuffix.classList.remove('error');
+            userIdSuffix.classList.add('success');
+            error.style.display = 'none';
+        } else if (prefix || suffix) {
+            userIdPrefix.classList.remove('success');
+            userIdSuffix.classList.remove('success');
+        }
+        
+        updateProgressBar();
+    }
+    
+    // Validation Functions
+    function validateEmail(value) {
+        return patterns.email.test(value);
+    }
+    
+    function validatePhone(value) {
+        return patterns.phone.test(value.replace(/\D/g, ''));
+    }
+    
+    function validatePassword(value) {
+        return patterns.password.test(value);
+    }
+    
+    function validateConfirmPassword(value) {
+        return value === passwordInput.value;
+    }
+    
+    function validateRole(value) {
+        return value !== '';
+    }
+    
+    function validateTerms() {
+        return document.getElementById('terms').checked;
+    }
+    
+    // Setup validation for all fields
+    setupValidation('email', validateEmail);
+    setupValidation('phone', validatePhone);
+    setupValidation('password', validatePassword);
+    setupValidation('confirmPassword', validateConfirmPassword);
+    
+    // Role validation
+    const roleSelect = document.getElementById('role');
+    const roleError = document.getElementById('roleError');
+    
+    roleSelect.addEventListener('change', () => {
+        if (validateRole(roleSelect.value)) {
+            roleSelect.classList.remove('error');
+            roleSelect.classList.add('success');
+            roleError.style.display = 'none';
+            
+            // Also validate userId again when role changes
+            validateFullUserId();
+        } else {
+            roleSelect.classList.remove('success');
+        }
+        updateProgressBar();
+    });
+    
+    // Terms validation
+    const termsCheckbox = document.getElementById('terms');
+    const termsError = document.getElementById('termsError');
+    
+    termsCheckbox.addEventListener('change', () => {
+        if (validateTerms()) {
+            termsError.style.display = 'none';
+        }
+        updateProgressBar();
+    });
+    
+    // Update progress bar based on form completion
+    function updateProgressBar() {
+        const inputs = [
+            userIdPrefix,
+            userIdSuffix,
+            document.getElementById('email'),
+            document.getElementById('phone'),
+            document.getElementById('password'),
+            document.getElementById('confirmPassword'),
+            document.getElementById('role'),
+            document.getElementById('terms')
+        ];
+        
+        let validCount = 0;
+        
+        inputs.forEach(input => {
+            if (input.type === 'checkbox') {
+                if (input.checked) validCount++;
+            } else if (input.classList.contains('success')) {
+                validCount++;
+            }
+        });
+        
+        const progress = (validCount / inputs.length) * 100;
+        progressBar.style.width = `${progress}%`;
+    }
+    
+    // Form Submission
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Get values
+        const userIdPrefixVal = userIdPrefix.value;
+        const userIdSuffixVal = userIdSuffix.value;
+        const fullUserId = userIdPrefixVal + userIdSuffixVal;
+        const email = document.getElementById('email').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const role = document.getElementById('role').value;
+        const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+        const terms = document.getElementById('terms').checked;
+        
+        // Reset errors
+        document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('input, select').forEach(el => el.classList.remove('error'));
+        
+        let isValid = true;
+        
+        // Validate University ID
+        if (!userIdPrefixVal || !userIdSuffixVal) {
+            document.getElementById('userIdError').style.display = 'block';
+            userIdPrefix.classList.add('error');
+            userIdSuffix.classList.add('error');
+            isValid = false;
+        } else if (!validateFullUserId()) {
+            document.getElementById('userIdError').style.display = 'block';
+            userIdPrefix.classList.add('error');
+            userIdSuffix.classList.add('error');
+            isValid = false;
+        }
+        
+        // Validate other fields
+        if (!validateEmail(email)) {
+            document.getElementById('emailError').style.display = 'block';
+            document.getElementById('email').classList.add('error');
+            isValid = false;
+        }
+        
+        if (!validatePhone(phone)) {
+            document.getElementById('phoneError').style.display = 'block';
+            document.getElementById('phone').classList.add('error');
+            isValid = false;
+        }
+        
+        if (!validateRole(role)) {
+            document.getElementById('roleError').style.display = 'block';
+            document.getElementById('role').classList.add('error');
+            isValid = false;
+        }
+        
+        if (!validatePassword(password)) {
+            document.getElementById('passwordError').style.display = 'block';
+            document.getElementById('password').classList.add('error');
+            isValid = false;
+        }
+        
+        if (!validateConfirmPassword(confirmPassword)) {
+            document.getElementById('confirmPasswordError').style.display = 'block';
+            document.getElementById('confirmPassword').classList.add('error');
+            isValid = false;
+        }
+        
+        if (!terms) {
+            document.getElementById('termsError').style.display = 'block';
+            isValid = false;
+        }
+        
+        if (isValid) {
+            // Disable submit button to prevent multiple submissions
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing...';
+            
+            // Simulate API call
+            setTimeout(() => {
+                form.style.display = 'none';
+                successMessage.style.display = 'block';
+                
+                // Countdown for redirect
+                let countdown = 5;
+                const countdownInterval = setInterval(() => {
+                    countdown--;
+                    countdownEl.textContent = countdown;
+                    
+                    if (countdown <= 0) {
+                        clearInterval(countdownInterval);
+                        window.location.href = 'login.html';
+                    }
+                }, 1000);
+            }, 1500);
+        }
+    });
+</script>
+</body>
+</html>
