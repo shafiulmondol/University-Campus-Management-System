@@ -217,7 +217,7 @@ function fetch_students_for_course(mysqli $conn, string $course_code) {
     <input type="email" name="email" placeholder="Email" required />
     <input type="password" name="password" placeholder="Password" required />
     <button type="submit" name="login">Login</button>
-    <a href="index.html" type="back"><button type="button"><span>🔙</span> Back to Dashboard</button></a>
+    <a href="../index.html" type="back"><button type="button"><span>🔙</span> Back to home</button></a>
   </form>
 
 <?php else: ?>
