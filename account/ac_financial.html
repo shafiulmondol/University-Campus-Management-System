@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SKST Student Accounts · Finance Module</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root {
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --muted: #64748b;
+  --text: #1e293b;
+  --accent: #4f46e5;
+  --accent-light: #6366f1;
+  --accent-2: #0d9488;
+  --danger: #ef4444;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --radius: 12px;
+  --pad: 24px;
+  --shadow: rgba(0,0,0,0.05);
+  --gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+}
+*{ box-sizing:border-box; }
+html, body{ 
+  height:100%; 
+  margin:0; 
+  font-family: 'Inter', 'Segoe UI', Roboto, sans-serif; 
+  background: var(--bg); 
+  color: var(--text); 
+  line-height: 1.5;
+}
+.wrap{ 
+  max-width:1200px; 
+  margin:0 auto; 
+  padding:32px 20px 80px; 
+}
+header{ 
+  display:flex; 
+  align-items:center; 
+  justify-content:space-between; 
+  gap:16px; 
+  margin-bottom:32px; 
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e2e8f0;
+}
+.title{ 
+  display:flex; 
+  align-items:center; 
+  gap:16px; 
+}
+.logo{ 
+  width:56px; 
+  height:56px; 
+  border-radius:14px; 
+  background: var(--gradient); 
+  display:grid; 
+  place-items:center; 
+  font-weight:700; 
+  color:white; 
+  font-size:1.6rem; 
+  box-shadow:0 6px 12px rgba(79, 70, 229, 0.25);
+}
+h1{ 
+  font-size: clamp(24px, 2.4vw, 32px); 
+  margin:0; 
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+.subtitle{ 
+  color: var(--muted); 
+  font-size:15px; 
+  margin-top:4px; 
+  font-weight: 400;
+}
+.grid{ 
+  display:grid; 
+  gap:28px; 
+  grid-template-columns: 2fr 1fr; 
+}
+@media (max-width: 980px){ 
+  .grid{ 
+    grid-template-columns: 1fr; 
+  } 
+}
+.card{ 
+  background: var(--card); 
+  border-radius: var(--radius); 
+  box-shadow: 0 8px 20px var(--shadow); 
+  border: none;
+  transition: transform .2s, box-shadow .2s; 
+  overflow: hidden;
+}
+.card:hover{ 
+  transform: translateY(-4px); 
+  box-shadow: 0 12px 25px rgba(0,0,0,0.1); 
+}
+.card-head{ 
+  padding:18px var(--pad); 
+  background: #f8fafc; 
+  border-bottom:1px solid #e2e8f0; 
+  font-weight:600; 
+  font-size:17px; 
+  color: var(--text); 
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.card-head:before {
+  content: "";
+  width: 4px;
+  height: 18px;
+  background: var(--accent);
+  border-radius: 10px;
+  display: inline-block;
+}
+.card-body{ 
+  padding: var(--pad); 
+}
+label{ 
+  display:block; 
+  font-size:14px; 
+  color:var(--muted); 
+  margin:0 0 8px; 
+  font-weight: 500;
+}
+input[type="number"], select, input[type="text"], input[type="tel"]{ 
+  width:100%; 
+  padding:14px 16px; 
+  border-radius:10px; 
+  border:1px solid #cbd5e1; 
+  background:#ffffff; 
+  color:var(--text); 
+  outline:none; 
+  transition:.2s all; 
+  font-size:15px; 
+  font-weight: 500;
+}
+input::placeholder{ 
+  color:#94a3b8; 
+}
+input:focus, select:focus{ 
+  border-color: var(--accent); 
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15); 
+}
+.fee-item{ 
+  display:grid; 
+  grid-template-columns: 1fr 1fr; 
+  gap:16px; 
+  align-items:end; 
+  padding:16px 0; 
+  border-bottom:1px solid #f1f5f9; 
+}
+.fee-item:last-child{ 
+  border-bottom:0 
+}
+.summary{ 
+  display:grid; 
+  grid-template-columns: 1fr; 
+  gap:16px;
+}
+.metric{ 
+  padding:22px; 
+  border-radius:12px; 
+  background:#f8fafc; 
+  border: 1px solid #e2e8f0;
+  transition:.2s transform; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.metric:hover{ 
+  transform: translateY(-3px); 
+  box-shadow: 0 8px 20px var(--shadow); 
+}
+.metric .label{ 
+  font-size:14px; 
+  color:var(--muted); 
+  text-transform:uppercase; 
+  letter-spacing:0.5px; 
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.metric .value{ 
+  font-size: 26px; 
+  font-weight:700; 
+}
+.metric--payable .value{ 
+  color: var(--accent) 
+}
+.metric--paid .value{ 
+  color: var(--success) 
+}
+.metric--due .value{ 
+  color: var(--danger) 
+}
+.payment-entry{ 
+  display:flex; 
+  justify-content:space-between; 
+  padding:14px 0; 
+  border-bottom:1px solid #f1f5f9; 
+  font-size:15px; 
+}
+.payment-entry:last-child{ 
+  border-bottom:0 
+}
+.btn{ 
+  appearance:none; 
+  border:1px solid #cbd5e1; 
+  background:#ffffff; 
+  color:var(--text); 
+  padding:14px 22px; 
+  border-radius:10px; 
+  cursor:pointer; 
+  font-weight:600; 
+  transition:.2s all; 
+  font-size: 15px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn:hover{ 
+  transform: translateY(-2px); 
+  background:#f1f5f9; 
+  box-shadow: 0 4px 12px var(--shadow);
+}
+.btn.primary{ 
+  background: var(--accent); 
+  color:#fff; 
+  border-color: transparent; 
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+}
+.btn.primary:hover {
+  background: var(--accent-light);
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3);
+}
+.spacer{ 
+  height:20px 
+}
+footer{ 
+  margin-top:40px; 
+  color:var(--muted); 
+  font-size:14px; 
+  text-align:center; 
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+/* New styles for improved UI */
+.summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.summary-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge-success {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+}
+
+.badge-warning {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--warning);
+}
+
+.badge-danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+}
+
+.payment-date {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.payment-amount {
+  font-weight: 600;
+}
+
+.progress-bar {
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 16px 0;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 10px;
+  transition: width 0.5s ease;
+}
+
+.amount-details {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+.amount-details span {
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* Payment method styles */
+.payment-methods {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.payment-method {
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.payment-method:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.payment-method.selected {
+  border-color: var(--accent);
+  background: rgba(79, 70, 229, 0.05);
+}
+
+.payment-method i {
+  font-size: 32px;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.payment-method .method-name {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.payment-method .method-desc {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.method-bkash i {
+  color: #e2136e;
+}
+
+.method-nagad i {
+  color: #f60;
+}
+
+.method-bank i {
+  color: #4f46e5;
+}
+
+.method-cash i {
+  color: #10b981;
+}
+
+.payment-details {
+  margin-top: 24px;
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.payment-field {
+  margin-bottom: 16px;
+}
+
+.payment-instructions {
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-top: 16px;
+  border-left: 4px solid var(--accent);
+}
+
+.payment-instructions ol {
+  padding-left: 20px;
+  margin: 8px 0;
+}
+
+.payment-instructions li {
+  margin-bottom: 6px;
+}
+
+.verify-btn {
+  background: var(--success);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 12px;
+  width: 100%;
+  transition: background 0.3s;
+}
+
+.verify-btn:hover {
+  background: #0da271;
+}
+
+/* Modal styles */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  overflow: hidden;
+  animation: modalFadeIn 0.3s;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-header {
+  padding: 20px;
+  background: var(--accent);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-weight: 600;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.modal-footer {
+  padding: 20px;
+  border-top: 1px solid #e2e8f0;
+  text-align: right;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .payment-methods {
+    grid-template-columns: 1fr;
+  }
+  
+  .fee-item {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div class="title">
+  <div class="logo">৳</div>
+  <div>
+    <h1>SKST Student Accounts</h1>
+    <div class="subtitle">Registration & Fee Payment Module</div>
+  </div>
+</div>
+<div><button class="btn primary" id="saveBtn">
+  <i class="fas fa-save"></i>
+  Save Changes
+</button></div>
+</header>
+
+<section class="grid">
+<div>
+  <div class="card">
+    <div class="card-head">Fee Structure</div>
+    <div class="card-body">
+      <div class="fee-item">
+        <div>
+          <label>Scholarship Category</label>
+          <select id="scholarship">
+            <option value="100">100% Scholarship</option>
+            <option value="75">75% Scholarship</option>
+            <option value="50">50% Scholarship</option>
+            <option value="0" selected>No Scholarship</option>
+          </select>
+        </div>
+        <div class="badge badge-success">Active</div>
+      </div>
+      <div class="fee-item"><label>Registration Fee</label><input type="number" id="registration" value="5000" /></div>
+      <div class="fee-item"><label>Tuition Fee (Per Semester)</label><input type="number" id="tuition" value="45875" /></div>
+      <div class="fee-item"><label>Exam Fee</label><input type="number" id="exam" value="1500" /></div>
+      <div class="fee-item"><label>Library Fee</label><input type="number" id="library" value="500" /></div>
+      <div class="fee-item"><label>Lab Fee</label><input type="number" id="lab" value="1000" /></div>
+      <div class="fee-item"><label>Transport Fee</label><input type="number" id="transport" value="500" /></div>
+    </div>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="card">
+    <div class="card-head">Payment History</div>
+    <div class="card-body" id="paymentHistory">
+      <div class="payment-entry">
+        <div>
+          <div>Registration Fee</div>
+          <div class="payment-date">2025-01-15 | bKash</div>
+        </div>
+        <div class="payment-amount">৳5,000</div>
+      </div>
+      <div class="payment-entry">
+        <div>
+          <div>Tuition Fee</div>
+          <div class="payment-date">2025-02-20 | Bank Transfer</div>
+        </div>
+        <div class="payment-amount">৳10,000</div>
+      </div>
+      <div class="payment-entry">
+        <div>
+          <div>Exam Fee</div>
+          <div class="payment-date">2025-03-05 | Nagad</div>
+        </div>
+        <div class="payment-amount">৳1,500</div>
+      </div>
+      <div class="payment-entry">
+        <div>
+          <div>Transport Fee</div>
+          <div class="payment-date">2025-03-10 | Cash</div>
+        </div>
+        <div class="payment-amount">৳500</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div>
+  <div class="card">
+    <div class="card-head">Financial Summary</div>
+    <div class="card-body">
+      <div class="summary">
+        <div class="metric metric--payable">
+          <div class="label">Total Payable</div>
+          <div class="value" id="totalPayable">৳0</div>
+        </div>
+        <div class="metric metric--paid">
+          <div class="label">Paid Amount</div>
+          <div class="value" id="paidAmount">৳0</div>
+        </div>
+        <div class="metric metric--due">
+          <div class="label">Due Amount</div>
+          <div class="value" id="dueAmount">৳0</div>
+        </div>
+      </div>
+      
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="amount-details">
+        <div>Paid: <span id="paidPercent">0%</span></div>
+        <div>Due: <span id="duePercent">0%</span></div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="spacer"></div>
+  
+  <div class="card">
+    <div class="card-head">Make Payment</div>
+    <div class="card-body">
+      <label>Select Payment Method</label>
+      <div class="payment-methods">
+        <div class="payment-method method-bkash" data-method="bkash">
+          <i class="fas fa-mobile-alt"></i>
+          <div class="method-name">bKash</div>
+          <div class="method-desc">Mobile Banking</div>
+        </div>
+        <div class="payment-method method-nagad" data-method="nagad">
+          <i class="fas fa-wallet"></i>
+          <div class="method-name">Nagad</div>
+          <div class="method-desc">Mobile Banking</div>
+        </div>
+        <div class="payment-method method-bank" data-method="bank">
+          <i class="fas fa-university"></i>
+          <div class="method-name">Bank Transfer</div>
+          <div class="method-desc">Online Banking</div>
+        </div>
+        <div class="payment-method method-cash" data-method="cash">
+          <i class="fas fa-money-bill-wave"></i>
+          <div class="method-name">Cash</div>
+          <div class="method-desc">In Person</div>
+        </div>
+      </div>
+      
+      <div class="payment-details" id="paymentDetails">
+        <div style="text-align: center; color: var(--muted);">
+          <i class="fas fa-info-circle" style="font-size: 32px; margin-bottom: 12px;"></i>
+          <p>Select a payment method to continue</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<footer>SKST Student Finance Module — Registration & Other Fees</footer>
+</div>
+
+<!-- Payment Modal -->
+<div class="modal" id="paymentModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="modalTitle">Confirm Payment</h3>
+      <button class="modal-close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p>You are about to make a payment of <strong id="paymentAmount">৳0</strong> via <strong id="paymentMethod">bKash</strong>.</p>
+      <div class="payment-field">
+        <label>Transaction ID (if applicable)</label>
+        <input type="text" id="transactionId" placeholder="Enter transaction ID">
+      </div>
+      <div class="payment-field">
+        <label>Payment Date</label>
+        <input type="date" id="paymentDate">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" id="modalCancel">Cancel</button>
+      <button class="btn primary" id="modalConfirm">Confirm Payment</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const scholarship = document.getElementById("scholarship");
+const registration = document.getElementById("registration");
+const tuition = document.getElementById("tuition");
+const exam = document.getElementById("exam");
+const library = document.getElementById("library");
+const lab = document.getElementById("lab");
+const transport = document.getElementById("transport");
+
+const totalPayable = document.getElementById("totalPayable");
+const paidAmount = document.getElementById("paidAmount");
+const dueAmount = document.getElementById("dueAmount");
+const progressFill = document.getElementById("progressFill");
+const paidPercent = document.getElementById("paidPercent");
+const duePercent = document.getElementById("duePercent");
+
+const paymentMethods = document.querySelectorAll('.payment-method');
+const paymentDetails = document.getElementById('paymentDetails');
+const paymentModal = document.getElementById('paymentModal');
+const modalTitle = document.getElementById('modalTitle');
+const paymentAmount = document.getElementById('paymentAmount');
+const paymentMethod = document.getElementById('paymentMethod');
+const modalCancel = document.getElementById('modalCancel');
+const modalConfirm = document.getElementById('modalConfirm');
+const modalClose = document.querySelector('.modal-close');
+
+const numSemesters = 8;
+const total4Years = 400000;
+let selectedMethod = null;
+
+// Payment method templates
+const methodTemplates = {
+  bkash: `
+    <h3 style="margin-top: 0;">Pay with bKash</h3>
+    <div class="payment-field">
+      <label>bKash Phone Number</label>
+      <input type="tel" placeholder="01XXXXXXXXX" value="017XXXXXXXX">
+    </div>
+    <div class="payment-instructions">
+      <p><strong>Instructions:</strong></p>
+      <ol>
+        <li>Go to your bKash mobile menu</li>
+        <li>Select "Send Money"</li>
+        <li>Enter our bKash number: <strong>01712345678</strong></li>
+        <li>Enter amount: <strong id="bkashAmount">৳0</strong></li>
+        <li>Enter reference: <strong>SKST</strong></li>
+        <li>Complete the transaction</li>
+      </ol>
+    </div>
+    <button class="verify-btn" data-method="bkash">Verify bKash Payment</button>
+  `,
+  nagad: `
+    <h3 style="margin-top: 0;">Pay with Nagad</h3>
+    <div class="payment-field">
+      <label>Nagad Phone Number</label>
+      <input type="tel" placeholder="01XXXXXXXXX" value="017XXXXXXXX">
+    </div>
+    <div class="payment-instructions">
+      <p><strong>Instructions:</strong></p>
+      <ol>
+        <li>Go to your Nagad mobile menu</li>
+        <li>Select "Send Money"</li>
+        <li>Enter our Nagad number: <strong>01876543210</strong></li>
+        <li>Enter amount: <strong id="nagadAmount">৳0</strong></li>
+        <li>Enter reference: <strong>SKST</strong></li>
+        <li>Complete the transaction</li>
+      </ol>
+    </div>
+    <button class="verify-btn" data-method="nagad">Verify Nagad Payment</button>
+  `,
+  bank: `
+    <h3 style="margin-top: 0;">Bank Transfer</h3>
+    <div class="payment-field">
+      <label>Bank Name</label>
+      <select>
+        <option>Select Bank</option>
+        <option>Dutch-Bangla Bank</option>
+        <option>BRAC Bank</option>
+        <option>City Bank</option>
+        <option>Eastern Bank</option>
+        <option>HSBC</option>
+      </select>
+    </div>
+    <div class="payment-field">
+      <label>Account Number</label>
+      <input type="text" placeholder="Enter account number">
+    </div>
+    <div class="payment-field">
+      <label>Account Name</label>
+      <input type="text" value="SKST Institution" disabled>
+    </div>
+    <div class="payment-field">
+      <label>Routing Number</label>
+      <input type="text" value="125478695" disabled>
+    </div>
+    <div class="payment-instructions">
+      <p><strong>Bank Account Details:</strong></p>
+      <p>Account Name: SKST Institution<br>
+      Account Number: 1234567890123<br>
+      Bank Name: Dutch-Bangla Bank<br>
+      Branch: Gulshan Branch, Dhaka<br>
+      Routing Number: 125478695</p>
+    </div>
+    <button class="verify-btn" data-method="bank">Confirm Bank Transfer</button>
+  `,
+  cash: `
+    <h3 style="margin-top: 0;">Cash Payment</h3>
+    <div class="payment-field">
+      <label>Payment Location</label>
+      <select>
+        <option>Select Location</option>
+        <option>Main Campus - Accounts Office</option>
+        <option>City Campus - Admin Office</option>
+        <option>Evening Campus - Finance Desk</option>
+      </select>
+    </div>
+    <div class="payment-field">
+      <label>Preferred Date & Time</label>
+      <input type="datetime-local">
+    </div>
+    <div class="payment-instructions">
+      <p><strong>Payment Instructions:</strong></p>
+      <p>Please visit the accounts office during working hours (9AM-5PM, Sunday-Thursday).</p>
+      <p>Bring your student ID card and payment receipt if available.</p>
+    </div>
+    <button class="verify-btn" data-method="cash">Schedule Cash Payment</button>
+  `
+};
+
+function updateFees() {
+  const value = parseInt(scholarship.value);
+  
+  // Calculate fixed total of other fees over 4 years
+  const perSemesterOther = parseFloat(exam.value) + parseFloat(library.value) + parseFloat(lab.value) + parseFloat(transport.value);
+  const totalOtherFees = perSemesterOther * numSemesters;
+  
+  const regFee = parseFloat(registration.value);
+  
+  // Tuition per semester calculation to match total 4-year cost
+  let tuitionPerSemester;
+  if(value === 100){
+    tuitionPerSemester = 0;
+  } else if(value === 75){
+    tuitionPerSemester = ((total4Years - regFee - totalOtherFees) * 0.25) / numSemesters;
+  } else if(value === 50){
+    tuitionPerSemester = ((total4Years - regFee - totalOtherFees) * 0.50) / numSemesters;
+  } else {
+    tuitionPerSemester = (total4Years - regFee - totalOtherFees) / numSemesters;
+  }
+  
+  tuition.value = Math.round(tuitionPerSemester);
+  tuition.disabled = value !== 0; // disable if scholarship applied
+  
+  // Total payable = registration + (tuition × semesters) + other fees
+  const total = regFee + tuitionPerSemester * numSemesters + totalOtherFees;
+  totalPayable.textContent = "৳" + Math.round(total).toLocaleString();
+  
+  // Paid amount example (assume paid = registration + first semester tuition)
+  const paid = regFee + tuitionPerSemester; 
+  paidAmount.textContent = "৳" + Math.round(paid).toLocaleString();
+  
+  const due = total - paid;
+  dueAmount.textContent = "৳" + Math.round(due).toLocaleString();
+  
+  // Update progress bar
+  const paidPercentage = Math.round((paid / total) * 100);
+  progressFill.style.width = `${paidPercentage}%`;
+  paidPercent.textContent = `${paidPercentage}%`;
+  duePercent.textContent = `${100 - paidPercentage}%`;
+  
+  // Update payment amounts in method templates if they exist
+  if (selectedMethod) {
+    const dueElement = document.getElementById(`${selectedMethod}Amount`);
+    if (dueElement) {
+      dueElement.textContent = dueAmount.textContent;
+    }
+  }
+}
+
+// Payment method selection
+paymentMethods.forEach(method => {
+  method.addEventListener('click', () => {
+    // Remove selected class from all methods
+    paymentMethods.forEach(m => m.classList.remove('selected'));
+    
+    // Add selected class to clicked method
+    method.classList.add('selected');
+    
+    // Get method type
+    selectedMethod = method.getAttribute('data-method');
+    
+    // Show payment details
+    paymentDetails.innerHTML = methodTemplates[selectedMethod];
+    
+    // Update payment amount in the template
+    const dueElement = document.getElementById(`${selectedMethod}Amount`);
+    if (dueElement) {
+      dueElement.textContent = dueAmount.textContent;
+    }
+    
+    // Add event listener to verify button
+    const verifyBtn = paymentDetails.querySelector('.verify-btn');
+    if (verifyBtn) {
+      verifyBtn.addEventListener('click', () => {
+        paymentAmount.textContent = dueAmount.textContent;
+        paymentMethod.textContent = selectedMethod.toUpperCase();
+        paymentModal.style.display = 'flex';
+      });
+    }
+  });
+});
+
+// Modal functionality
+modalCancel.addEventListener('click', () => {
+  paymentModal.style.display = 'none';
+});
+
+modalClose.addEventListener('click', () => {
+  paymentModal.style.display = 'none';
+});
+
+modalConfirm.addEventListener('click', () => {
+  alert(`Payment of ${dueAmount.textContent} via ${selectedMethod.toUpperCase()} confirmed successfully!`);
+  paymentModal.style.display = 'none';
+  
+  // In a real application, you would process the payment here
+});
+
+// Close modal when clicking outside
+window.addEventListener('click', (e) => {
+  if (e.target === paymentModal) {
+    paymentModal.style.display = 'none';
+  }
+});
+
+// Set today's date as default for payment date
+document.getElementById('paymentDate').valueAsDate = new Date();
+
+// Event listeners
+scholarship.addEventListener("change", updateFees);
+registration.addEventListener("input", updateFees);
+exam.addEventListener("input", updateFees);
+library.addEventListener("input", updateFees);
+lab.addEventListener("input", updateFees);
+transport.addEventListener("input", updateFees);
+
+// Initial calculation
+updateFees();
+</script>
+</body>
+</html>

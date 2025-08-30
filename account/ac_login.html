@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>University Account Portal</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #0c3d5f, #1d7a8c);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #333;
+      margin: 0;
+    }
+    .card {
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+      width: 420px;
+      max-width: 90%;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #0c3d5f;
+    }
+    label {
+      font-weight: 600;
+      display: block;
+      margin: 10px 0 5px;
+    }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      font-size: 15px;
+      box-sizing: border-box;
+    }
+    input:focus, select:focus {
+      border-color: #1d7a8c;
+      outline: none;
+      box-shadow: 0 0 3px rgba(29, 122, 140, 0.5);
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(to right, #0c3d5f, #1d7a8c);
+      border: none;
+      border-radius: 30px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+      margin-top: 10px;
+    }
+    button:hover {
+      opacity: 0.9;
+    }
+    .toggle-link {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 14px;
+    }
+    .toggle-link a {
+      color: #1d7a8c;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .toggle-link a:hover {
+      text-decoration: underline;
+    }
+    .error-message {
+      color: #d32f2f;
+      font-size: 14px;
+      margin-top: -10px;
+      margin-bottom: 10px;
+      display: none;
+    }
+    .success-message {
+      color: #388e3c;
+      text-align: center;
+      margin-bottom: 15px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2 id="formHeader">Login to Your Account</h2>
+    
+    <div id="successMessage" class="success-message">
+      Account created successfully! You can now login.
+    </div>
+    
+    <!-- Login Form -->
+    <form id="loginForm">
+      <label for="loginEmail">University Email</label>
+      <input type="email" id="loginEmail" placeholder="name@skst.edu" required>
+      <div id="loginEmailError" class="error-message">Please enter a valid university email</div>
+
+      <label for="loginPassword">Password</label>
+      <input type="password" id="loginPassword" placeholder="Enter password" required>
+      <div id="loginPasswordError" class="error-message">Password is required</div>
+
+      <button type="submit">Login</button>
+    </form>
+
+    <!-- Signup Form -->
+    <form id="signupForm" style="display:none;">
+      <label for="email">University Email</label>
+      <input type="email" id="email" placeholder="name@skst.edu" required>
+      <div id="emailError" class="error-message">Please enter a valid university email ending with @skst.edu</div>
+
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="Create password" required>
+      <div id="passwordError" class="error-message">Password must be at least 8 characters</div>
+
+      <label for="phone">Phone Number</label>
+      <input type="tel" id="phone" placeholder="Enter phone number" required>
+      <div id="phoneError" class="error-message">Please enter a valid phone number</div>
+
+      <label for="userId">University ID</label>
+      <input type="text" id="userId" placeholder="e.g. ST12345 / FAC567 / LIB001" required>
+      <div id="userIdError" class="error-message">Please enter a valid university ID</div>
+
+      <label for="role">Account Type</label>
+      <select id="role" required>
+        <option value="" disabled selected>Select your role</option>
+        <option value="student">Student</option>
+        <option value="faculty">Faculty</option>
+        <option value="librarian">Librarian</option>
+        <option value="employee">Employee</option>
+      </select>
+      <div id="roleError" class="error-message">Please select your role</div>
+
+      <label for="program">Program / Department</label>
+      <select id="program" required>
+        <option value="" disabled selected>Select your department</option>
+        <option value="cse">Computer Science & Engineering</option>
+        <option value="engineering">Engineering</option>
+        <option value="business">Business Administration</option>
+        <option value="medicine">Medicine</option>
+        <option value="law">Law</option>
+        <option value="arts">Arts & Humanities</option>
+        <option value="science">Science & Technology</option>
+        <option value="social">Social Sciences</option>
+      </select>
+      <div id="programError" class="error-message">Please select your program/department</div>
+
+      <button type="submit">Create Account</button>
+    </form>
+
+    <!-- Toggle Link -->
+    <div class="toggle-link">
+      <span id="toggleText">Don’t have an account? <a id="toggleForm">Create Account</a></span>
+    </div>
+  </div>
+
+  <script>
+    const loginForm = document.getElementById("loginForm");
+    const signupForm = document.getElementById("signupForm");
+    const toggleFormLink = document.getElementById("toggleForm");
+    const toggleText = document.getElementById("toggleText");
+    const formHeader = document.getElementById("formHeader");
+    const successMessage = document.getElementById("successMessage");
+
+    let isLogin = true;
+
+    // Toggle between login and signup forms
+    toggleFormLink.addEventListener("click", () => {
+      isLogin = !isLogin;
+      if (isLogin) {
+        loginForm.style.display = "block";
+        signupForm.style.display = "none";
+        formHeader.textContent = "Login to Your Account";
+        toggleText.innerHTML = `Don’t have an account? <a id="toggleForm">Create Account</a>`;
+        successMessage.style.display = "none";
+      } else {
+        loginForm.style.display = "none";
+        signupForm.style.display = "block";
+        formHeader.textContent = "Create Your Account";
+        toggleText.innerHTML = `Already have an account? <a id="toggleForm">Login</a>`;
+      }
+    });
+
+    // Form validation and submission
+    loginForm.addEventListener("submit", function(e) {
+      e.preventDefault();
+      
+      const email = document.getElementById("loginEmail").value;
+      const password = document.getElementById("loginPassword").value;
+      let isValid = true;
+      
+      // Validate email
+      if (!validateEmail(email) || !email.endsWith('@skst.edu')) {
+        document.getElementById("loginEmailError").style.display = "block";
+        isValid = false;
+      } else {
+        document.getElementById("loginEmailError").style.display = "none";
+      }
+      
+      // Validate password
+      if (password.length < 8) {
+        document.getElementById("loginPasswordError").style.display = "block";
+        isValid = false;
+      } else {
+        document.getElementById("loginPasswordError").style.display = "none";
+      }
+      
+      if (isValid) {
+        alert("Login successful! Redirecting to your dashboard...");
+        // In a real application, you would redirect or make an API call here
+      }
+    });
+
+    signupForm.addEventListener("submit", function(e) {
+      e.preventDefault();
+      
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const phone = document.getElementById("phone").value;
+      const userId = document.getElementById("userId").value;
+      const role = document.getElementById("role").value;
+      const program = document.getElementById("program").value;
+      let isValid = true;
+      
+      // Validate email
+      if (!validateEmail(email) || !email.endsWith('@skst.edu')) {
+        document.getElementById("emailError").style.display = "block";
+        isValid = false;
+      } else {
+        document.getElementById("emailError").style.display = "none";
+      }
+      
+      // Validate password
+      if (password.length < 8) {
+        document.getElementById("passwordError").style.display = "block";
+        isValid = false;
+      } else {
+        document.getElementById("passwordError").style.display = "none";
+      }
+      
+      // Validate phone
+      if (!validatePhone(phone)) {
+        document.getElementById("phoneError").style.display = "block";
+        isValid = false;
+      } else {
+        document.getElementById("phoneError").style.display = "none";
+      }
+      
+      // Validate user ID
+      if (!validateUserId(userId, role)) {
+        document.getElementById("userIdError").style.display = "block";
+        isValid = false;
+      } else {
+        document.getElementById("userIdError").style.display = "none";
+      }
+      
+      // Validate role
+      if (!role) {
+        document.getElementById("roleError").style.display = "block";
+        isValid = false;
+      } else {
+        document.getElementById("roleError").style.display = "none";
+      }
+      
+      // Validate program
+      if (!program) {
+        document.getElementById("programError").style.display = "block";
+        isValid = false;
+      } else {
+        document.getElementById("programError").style.display = "none";
+      }
+      
+      if (isValid) {
+        // In a real application, you would send this data to a server
+        successMessage.style.display = "block";
+        signupForm.reset();
+        
+        // Switch to login form after a delay
+        setTimeout(() => {
+          isLogin = true;
+          loginForm.style.display = "block";
+          signupForm.style.display = "none";
+          formHeader.textContent = "Login to Your Account";
+          toggleText.innerHTML = `Don’t have an account? <a id="toggleForm">Create Account</a>`;
+        }, 3000);
+      }
+    });
+
+    // Validation functions
+    function validateEmail(email) {
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(email);
+    }
+
+    function validatePhone(phone) {
+      const re = /^[\+]?[1-9][\d]{0,15}$/;
+      return re.test(phone.replace(/[\s\-\(\)]/g, ''));
+    }
+
+    function validateUserId(userId, role) {
+      if (!userId) return false;
+      
+      const patterns = {
+        'student': /^ST\d{5}$/,
+        'faculty': /^FAC\d{3}$/,
+        'librarian': /^LIB\d{3}$/,
+        'employee': /^EMP\d{3}$/
+      };
+      
+      // If role is selected, validate against the pattern
+      if (role && patterns[role]) {
+        return patterns[role].test(userId);
+      }
+      
+      // If no role selected, check if it matches any pattern
+      return Object.values(patterns).some(pattern => pattern.test(userId));
+    }
+
+    // Real-time validation for user ID based on selected role
+    document.getElementById('role').addEventListener('change', function() {
+      const role = this.value;
+      const userIdInput = document.getElementById('userId');
+      const patterns = {
+        'student': 'ST12345',
+        'faculty': 'FAC567',
+        'librarian': 'LIB001',
+        'employee': 'EMP123'
+      };
+      
+      if (patterns[role]) {
+        userIdInput.placeholder = `e.g. ${patterns[role]}`;
+      }
+    });
+  </script>
+
+</body>
+</html>
