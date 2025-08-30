@@ -1,12 +1,12 @@
 <?php
 require_once 'student.php';
-
+session_start();
 
 // Check if student is logged in
 if (!isset($_SESSION['student_data'])) {
     header("Location: studentlogin.php");
     exit();
-}
+} 
 
 // Get the student data from session
 $stdata = $_SESSION['student_data'];
@@ -61,7 +61,7 @@ $login_time        = $stdata['login_time'] ?? '';
         </div>
        
         <div class="nav-buttons">
-            <button><i class="fas fa-home"></i><a style="text-decoration: none;color:aliceblue" href="administration.html">Home</a></button>
+            <button><i class="fas fa-home"></i><a style="text-decoration: none;color:aliceblue" href="student.html">Home</a></button>
             <button><i class="fas fa-bell"></i> Notifications</button>
         </div>
     </div>
