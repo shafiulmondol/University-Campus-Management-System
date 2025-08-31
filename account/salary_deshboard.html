@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>University Staff Salary Dashboard</title>
+    <title>University Employee Salary Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -288,51 +288,17 @@
             position: relative;
         }
 
-        /* Salary Comparison */
-        .salary-comparison {
-            background: white;
-            border-radius: 10px;
-            padding: 1.5rem;
-            box-shadow: var(--card-shadow);
-            margin-bottom: 2rem;
-            height: 400px;
-        }
-
-        /* Department Breakdown */
-        .department-breakdown {
-            background: white;
-            border-radius: 10px;
-            padding: 1.5rem;
-            box-shadow: var(--card-shadow);
-            margin-bottom: 2rem;
-        }
-
-        .department-list {
-            margin-top: 1rem;
-        }
-
-        .department-item {
+        /* Payment History */
+        .section-header {
             display: flex;
             justify-content: space-between;
-            padding: 0.8rem 0;
-            border-bottom: 1px solid #eee;
-        }
-
-        .department-name {
-            display: flex;
             align-items: center;
+            margin: 2rem 0 1rem;
         }
 
-        .department-color {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-
-        .department-stats {
-            display: flex;
-            gap: 1rem;
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--dark);
         }
 
         /* Table Styles */
@@ -397,19 +363,6 @@
 
         .btn-primary:hover {
             background: #2980b9;
-        }
-
-        /* Section Header */
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 2rem 0 1rem;
-        }
-
-        .section-title {
-            font-size: 1.5rem;
-            color: var(--dark);
         }
 
         /* Modal styles */
@@ -477,8 +430,8 @@
             background: #2980b9;
         }
 
-        /* Add staff button */
-        .add-staff-btn {
+        /* Add employee button */
+        .add-employee-btn {
             background: var(--success);
             color: white;
             padding: 10px 15px;
@@ -488,7 +441,7 @@
             margin-bottom: 20px;
         }
 
-        .add-staff-btn:hover {
+        .add-employee-btn:hover {
             background: #27ae60;
         }
 
@@ -615,6 +568,33 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            color: white;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+
+        .notification.success {
+            background-color: var(--success);
+        }
+
+        .notification.error {
+            background-color: var(--danger);
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
     </style>
 </head>
 <body>
@@ -658,7 +638,7 @@
         <div class="main-content">
             <!-- Top Header -->
             <div class="top-header">
-                <h1>University Staff Salary Dashboard</h1>
+                <h1>University Employee Salary Dashboard</h1>
                 <div class="search-bar">
                     <i class="fas fa-search"></i>
                     <input type="text" placeholder="Search..." id="searchInput">
@@ -672,30 +652,30 @@
                 </div>
             </div>
 
-            <!-- Add Staff Button -->
-            <button class="add-staff-btn" id="addStaffBtn">
-                <i class="fas fa-plus"></i> Add Staff Member
+            <!-- Add Employee Button -->
+            <button class="add-employee-btn" id="addEmployeeBtn">
+                <i class="fas fa-plus"></i> Add Employee
             </button>
 
             <!-- User Type Selector -->
             <div class="user-type-selector">
                 <div class="user-type active" data-type="all">
-                    <i class="fas fa-users"></i> All Staff
+                    <i class="fas fa-users"></i> All Employees
                 </div>
                 <div class="user-type" data-type="faculty">
                     <i class="fas fa-chalkboard-teacher"></i> Faculty
                 </div>
                 <div class="user-type" data-type="admin">
-                    <i class="fas fa-user-tie"></i> Admin Staff
+                    <i class="fas fa-user-tie"></i> Admin
                 </div>
                 <div class="user-type" data-type="support">
-                    <i class="fas fa-tools"></i> Support Staff
+                    <i class="fas fa-tools"></i> Support
                 </div>
                 <div class="user-type" data-type="librarian">
                     <i class="fas fa-book-reader"></i> Librarians
                 </div>
                 <div class="user-type" data-type="research">
-                    <i class="fas fa-flask"></i> Research Staff
+                    <i class="fas fa-flask"></i> Research
                 </div>
             </div>
 
@@ -739,19 +719,6 @@
                         <i class="fas fa-arrow-up"></i> <span id="deductions-change">Calculating...</span>
                     </div>
                 </div>
-                
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">Tax Paid</div>
-                        <div class="card-icon warning">
-                            <i class="fas fa-chart-pie"></i>
-                        </div>
-                    </div>
-                    <div class="card-value" id="tax">Loading...</div>
-                    <div class="card-change negative">
-                        <i class="fas fa-arrow-down"></i> <span id="tax-change">Calculating...</span>
-                    </div>
-                </div>
             </div>
 
             <!-- Charts Section -->
@@ -787,7 +754,7 @@
             <table class="data-table" id="paymentTable">
                 <thead>
                     <tr>
-                        <th>Staff ID</th>
+                        <th>Employee ID</th>
                         <th>Name</th>
                         <th>Role</th>
                         <th>Department</th>
@@ -805,23 +772,23 @@
         </div>
     </div>
 
-    <!-- Add Staff Modal -->
-    <div id="staffModal" class="modal">
+    <!-- Add Employee Modal -->
+    <div id="employeeModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <h2>Add Staff Member</h2>
-            <form id="staffForm">
+            <h2>Add Employee</h2>
+            <form id="employeeForm">
                 <div class="form-group">
-                    <label for="staffId">Staff ID</label>
-                    <input type="text" id="staffId" required>
+                    <label for="employeeId">Employee ID</label>
+                    <input type="text" id="employeeId" required>
                 </div>
                 <div class="form-group">
-                    <label for="staffName">Full Name</label>
-                    <input type="text" id="staffName" required>
+                    <label for="employeeName">Full Name</label>
+                    <input type="text" id="employeeName" required>
                 </div>
                 <div class="form-group">
-                    <label for="staffRole">Role</label>
-                    <select id="staffRole" required>
+                    <label for="employeeRole">Role</label>
+                    <select id="employeeRole" required>
                         <option value="Professor">Professor</option>
                         <option value="Associate Professor">Associate Professor</option>
                         <option value="Assistant Professor">Assistant Professor</option>
@@ -842,8 +809,8 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="staffDept">Department</label>
-                    <select id="staffDept" required>
+                    <label for="employeeDept">Department</label>
+                    <select id="employeeDept" required>
                         <option value="Engineering">Engineering</option>
                         <option value="Medicine">Medicine</option>
                         <option value="Business">Business</option>
@@ -862,20 +829,19 @@
                     <input type="number" id="deductions" min="0" required>
                 </div>
                 <div class="form-group">
-                    <label for="tax">Tax (৳)</label>
-                    <input type="number" id="tax" min="0" required>
-                </div>
-                <div class="form-group">
                     <label for="status">Payment Status</label>
                     <select id="status" required>
                         <option value="Paid">Paid</option>
                         <option value="Pending">Pending</option>
                     </select>
                 </div>
-                <button type="submit" class="submit-btn">Add Staff</button>
+                <button type="submit" class="submit-btn">Add Employee</button>
             </form>
         </div>
     </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification"></div>
 
     <script>
         // Chart instances
@@ -883,13 +849,14 @@
         let deptChartInstance = null;
 
         // Modal functionality
-        const modal = document.getElementById("staffModal");
-        const addStaffBtn = document.getElementById("addStaffBtn");
+        const modal = document.getElementById("employeeModal");
+        const addEmployeeBtn = document.getElementById("addEmployeeBtn");
         const closeBtn = document.getElementsByClassName("close")[0];
-        const staffForm = document.getElementById("staffForm");
+        const employeeForm = document.getElementById("employeeForm");
         const exportBtn = document.getElementById("exportBtn");
+        const notification = document.getElementById("notification");
 
-        addStaffBtn.onclick = function() {
+        addEmployeeBtn.onclick = function() {
             modal.style.display = "block";
         }
 
@@ -909,119 +876,115 @@
         }
 
         // Form submission
-        staffForm.addEventListener('submit', function(e) {
+        employeeForm.addEventListener('submit', function(e) {
             e.preventDefault();
             
             // Get form values
-            const staffId = document.getElementById('staffId').value;
-            const staffName = document.getElementById('staffName').value;
-            const staffRole = document.getElementById('staffRole').value;
-            const staffDept = document.getElementById('staffDept').value;
+            const employeeId = document.getElementById('employeeId').value;
+            const employeeName = document.getElementById('employeeName').value;
+            const employeeRole = document.getElementById('employeeRole').value;
+            const employeeDept = document.getElementById('employeeDept').value;
             const basicSalary = parseFloat(document.getElementById('basicSalary').value);
             const deductions = parseFloat(document.getElementById('deductions').value);
-            const tax = parseFloat(document.getElementById('tax').value);
             const status = document.getElementById('status').value;
             
-            // Calculate net pay
-            const netPay = basicSalary - deductions - tax;
+            // Calculate net pay (no tax component)
+            const netPay = basicSalary - deductions;
+            
+            // Determine employee type based on role
+            let employeeType = 'admin'; // Default
+            if (employeeRole.includes('Professor') || employeeRole.includes('Lecturer')) {
+                employeeType = 'faculty';
+            } else if (employeeRole.includes('Support')) {
+                employeeType = 'support';
+            } else if (employeeRole.includes('Librarian')) {
+                employeeType = 'librarian';
+            } else if (employeeRole.includes('Research')) {
+                employeeType = 'research';
+            }
             
             // Here you would send this data to your server to be stored in the database
             // For now, we'll simulate an API call
-            simulateAddStaffToDatabase({
-                staffId, 
-                staffName, 
-                staffRole, 
-                staffDept, 
+            addEmployeeToDatabase({
+                employeeId, 
+                employeeName, 
+                employeeRole, 
+                employeeDept, 
+                employeeType,
                 basicSalary, 
                 deductions, 
-                tax, 
                 netPay, 
                 status
             });
-            
-            // Reset form and close modal
-            staffForm.reset();
-            modal.style.display = "none";
         });
 
-        // Simulate adding staff to database (replace with actual API call)
-        function simulateAddStaffToDatabase(staffData) {
-            console.log("Adding staff to database:", staffData);
-            // In a real application, you would make an API call to your backend here
-            // Example:
-            /*
-            fetch('/api/staff', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(staffData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert('Staff member added successfully!');
-                updateDashboard('all'); // Refresh the dashboard
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error adding staff member');
-            });
-            */
+        // Function to show notification
+        function showNotification(message, isSuccess = true) {
+            notification.textContent = message;
+            notification.className = isSuccess ? 'notification success' : 'notification error';
+            notification.classList.add('show');
             
-            // For demo purposes, we'll just show an alert
-            alert('Staff member added successfully! (This would be saved to your database)');
-            updateDashboard('all'); // Refresh the dashboard
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Add employee to database
+        function addEmployeeToDatabase(employeeData) {
+            // In a real application, you would make an API call to your backend here
+            // This is a simulation of the process
+            
+            console.log("Adding employee to database:", employeeData);
+            
+            // Simulate API call delay
+            setTimeout(() => {
+                // Generate a random ID for the new employee
+                const newId = Math.floor(Math.random() * 1000);
+                
+                // Show success message
+                showNotification('Employee added successfully!', true);
+                
+                // Reset form and close modal
+                employeeForm.reset();
+                modal.style.display = "none";
+                
+                // Update the dashboard with the new data
+                updateDashboard('all');
+            }, 1500);
         }
 
         // Function to update dashboard based on user type
-        function updateDashboard(staffType) {
+        function updateDashboard(employeeType) {
             // Show loading states
             document.getElementById('total-earnings').textContent = 'Loading...';
             document.getElementById('net-salary').textContent = 'Loading...';
             document.getElementById('deductions').textContent = 'Loading...';
-            document.getElementById('tax').textContent = 'Loading...';
             
             document.getElementById('payroll-change').textContent = 'Calculating...';
             document.getElementById('avg-salary-change').textContent = 'Calculating...';
             document.getElementById('deductions-change').textContent = 'Calculating...';
-            document.getElementById('tax-change').textContent = 'Calculating...';
             
             document.getElementById('salaryChartLoader').style.display = 'block';
             document.getElementById('deptChartLoader').style.display = 'block';
             document.getElementById('tableLoader').style.display = 'block';
             
             // In a real application, you would fetch data from your server
-            // Example:
-            /*
-            fetch(`/api/staff?type=${staffType}`)
-                .then(response => response.json())
-                .then(data => {
-                    updateDashboardUI(data);
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error loading data');
-                });
-            */
-            
             // For demo purposes, we'll simulate a database fetch
             setTimeout(() => {
-                simulateFetchDataFromDatabase(staffType);
+                fetchDataFromDatabase(employeeType);
             }, 1000);
         }
         
-        // Simulate fetching data from database (replace with actual API call)
-        function simulateFetchDataFromDatabase(staffType) {
+        // Fetch data from database
+        function fetchDataFromDatabase(employeeType) {
             // This is just dummy data - in a real application, you would get this from your database
             const dummyData = {
                 totalEarnings: '৳62,85,000',
                 netSalary: '৳52,375',
                 deductions: '৳8,45,000',
-                tax: '৳5,20,000',
                 payrollChange: '4.7% from last month',
                 avgSalaryChange: '3.2% from last month',
                 deductionsChange: '2.8% from last month',
-                taxChange: '1.2% from last month',
                 tableData: [
                     ['FAC001', 'Dr. Ahmed Rahman', 'Professor', 'Engineering', '৳85,000', '৳12,000', '৳73,000', 'Paid'],
                     ['LIB002', 'Mr. Asif Iqbal', 'Senior Librarian', 'Library', '৳45,000', '৳5,500', '৳39,500', 'Paid'],
@@ -1031,12 +994,29 @@
                 ]
             };
             
+            // Filter data based on employee type if not "all"
+            if (employeeType !== 'all') {
+                // In a real application, this filtering would be done in the database query
+                dummyData.tableData = dummyData.tableData.filter(row => {
+                    const idPrefix = row[0].substring(0, 3);
+                    const typeMap = {
+                        'FAC': 'faculty',
+                        'ADM': 'admin',
+                        'SUP': 'support',
+                        'LIB': 'librarian',
+                        'RES': 'research'
+                    };
+                    
+                    return typeMap[idPrefix] === employeeType;
+                });
+            }
+            
             // Update the UI with the fetched data
-            updateDashboardUI(dummyData, staffType);
+            updateDashboardUI(dummyData, employeeType);
         }
         
         // Function to update the UI with data
-        function updateDashboardUI(data, staffType) {
+        function updateDashboardUI(data, employeeType) {
             // Hide loaders
             document.getElementById('salaryChartLoader').style.display = 'none';
             document.getElementById('deptChartLoader').style.display = 'none';
@@ -1046,12 +1026,10 @@
             document.getElementById('total-earnings').textContent = data.totalEarnings;
             document.getElementById('net-salary').textContent = data.netSalary;
             document.getElementById('deductions').textContent = data.deductions;
-            document.getElementById('tax').textContent = data.tax;
             
             document.getElementById('payroll-change').textContent = data.payrollChange;
             document.getElementById('avg-salary-change').textContent = data.avgSalaryChange;
             document.getElementById('deductions-change').textContent = data.deductionsChange;
-            document.getElementById('tax-change').textContent = data.taxChange;
             
             // Update table
             const tableBody = document.querySelector('.data-table tbody');
@@ -1079,7 +1057,7 @@
                 button.className = 'action-btn btn-primary';
                 button.innerHTML = '<i class="fas fa-eye"></i> View';
                 button.onclick = function() {
-                    viewStaffDetails(rowData);
+                    viewEmployeeDetails(rowData);
                 };
                 actionCell.appendChild(button);
                 row.appendChild(actionCell);
@@ -1088,27 +1066,27 @@
             });
             
             // Update charts
-            updateCharts(staffType);
+            updateCharts(employeeType);
         }
         
-        // Function to view staff details
-        function viewStaffDetails(staffData) {
-            alert(`Staff Details:
-ID: ${staffData[0]}
-Name: ${staffData[1]}
-Role: ${staffData[2]}
-Department: ${staffData[3]}
-Basic Salary: ${staffData[4]}
-Deductions: ${staffData[5]}
-Net Pay: ${staffData[6]}
-Status: ${staffData[7]}`);
+        // Function to view employee details
+        function viewEmployeeDetails(employeeData) {
+            alert(`Employee Details:
+ID: ${employeeData[0]}
+Name: ${employeeData[1]}
+Role: ${employeeData[2]}
+Department: ${employeeData[3]}
+Basic Salary: ${employeeData[4]}
+Deductions: ${employeeData[5]}
+Net Pay: ${employeeData[6]}
+Status: ${employeeData[7]}`);
         }
         
         // Function to update charts
-        function updateCharts(staffType) {
+        function updateCharts(employeeType) {
             // This would normally come from your database
             // For demo purposes, we're using static data
-            const positionLabels = ['Professor', 'Associate Professor', 'Assistant Professor', 'Administrator', 'Support Staff'];
+            const positionLabels = ['Professor', 'Associate Professor', 'Assistant Professor', 'Administrator', 'Support'];
             const positionAverages = [85000, 65000, 55000, 40000, 32000];
             
             const backgroundColors = [
@@ -1241,8 +1219,8 @@ Status: ${staffData[7]}`);
                     this.classList.add('active');
                     
                     // Update dashboard based on selection
-                    const staffType = this.getAttribute('data-type');
-                    updateDashboard(staffType);
+                    const employeeType = this.getAttribute('data-type');
+                    updateDashboard(employeeType);
                 });
             });
             
@@ -1260,7 +1238,7 @@ Status: ${staffData[7]}`);
                 });
             });
             
-            // Initialize with all staff data
+            // Initialize with all employee data
             updateDashboard('all');
         });
     </script>
