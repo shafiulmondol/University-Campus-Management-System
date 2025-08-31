@@ -1,6 +1,6 @@
 <?php
 require_once 'student.php';
-session_start();
+// session_start();
 
 // Check if student is logged in
 if (!isset($_SESSION['student_data'])) {
@@ -50,6 +50,7 @@ $login_time        = $stdata['login_time'] ?? '';
     <link rel="icon" href="../picture/SKST.png" type="image/png" />
     <link rel="stylesheet" href="../Design/buttom_bar.css">
     <link rel="stylesheet" href="../admin/admin.css">
+    <link rel="stylesheet" href="student.css">
 </head>
 <body>
 
@@ -71,13 +72,12 @@ $login_time        = $stdata['login_time'] ?? '';
         <div class="sidebar">
            <ul class="sidebar-menu">
                 <form method="post" style="display: contents;">
-                    <li><button type="submit" name="dashboard"><i class="fas fa-th-large"></i> Dashboard</button></li>
-                    <li><button type="submit" name="student"><i class="fas fa-user-graduate"></i> Students</button></li>
-                    <li><button type="submit" name="faculty"><i class="fas fa-chalkboard-teacher"></i> Faculty</button></li>
-                    <li><button type="submit" name="staff"><i class="fas fa-users"></i> Staff</button></li>
-                    <li><button type="submit" name="course"><i class="fas fa-book"></i> Courses</button></li>
-                    <li><button type="submit" name="stats"><i class="fas fa-chart-bar"></i> University Statistics</button></li>
-                    <li><button type="submit" name="notification"><i class="fas fa-bell"></i> Notifications</button></li>
+                    <li><button type="submit" name="dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</button></li>
+<li><button type="submit" name="biodata"><i class="fas fa-id-card"></i> Biodata</button></li>
+<li><button type="submit" name="result"><i class="fas fa-poll"></i> Result</button></li>
+<li><button type="submit" name="course"><i class="fas fa-book-open"></i> Courses</button></li>
+<li><button type="submit" name="account"><i class="fas fa-exchange-alt"></i> Transaction</button></li>
+
                 </form>
                 <li><a href="studentlogin.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
@@ -85,7 +85,13 @@ $login_time        = $stdata['login_time'] ?? '';
 
         <!-- Main content -->
         <?php
-        if (isset($_POST['student'])) {
+        if (isset($_POST['biodata'])) {
+ 
+       studentbiodata($stdata);
+        }
+
+
+        elseif (isset($_POST['student'])) {
             echo "<div class='content-area'><h2>Student Section</h2></div>";
         } elseif (isset($_POST['stats'])) { ?>
             <div class="stats">
@@ -115,7 +121,7 @@ $login_time        = $stdata['login_time'] ?? '';
             <div class="content-area">
                 <div class="page-header">
                     <h2 class="page-title">Student Profile</h2>
-                    <button class="btn-edit"><i class="fas fa-edit"></i> Edit Profile</button>
+                    <!-- <button class="btn-edit"><i class="fas fa-edit"></i> Edit Profile</button> -->
                 </div>
                 
                 <div class="profile-card">

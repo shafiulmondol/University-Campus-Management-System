@@ -815,6 +815,7 @@ if (isset($_GET['faculty_biodata']) || isset($_GET['edit_faculty_biodata']) || i
             </div>
         </div>
 
+
     <?php elseif (isset($_GET['edit_biodata'])): ?>
         <!-- Edit Admin Biodata -->
         <?php
