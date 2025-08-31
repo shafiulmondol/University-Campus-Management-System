@@ -45,12 +45,6 @@ CREATE TABLE `faculty` (
 -- Dumping data for table `faculty`
 --
 
-INSERT INTO `faculty` (`faculty_id`, `name`, `email`, `password`, `department`, `address`, `phone`, `room_number`, `salary`, `last_login`, `profile_picture`) VALUES
-(7654321, 'Md.fozlul Islam', 'fozlul123@iubat.edu', '123', 'BCSE', NULL, NULL, NULL, NULL, '2025-07-25 18:31:23', NULL),
-(7654322, 'Bashar (Professor)', 'bashar124@skst.edu', '124', 'BCSE', 'Dhamnondi2, house_no 34,north road, Dhaka', '12345678910', '1022', 54321.00, '2025-07-25 04:33:52', NULL),
-(7654323, 'kamrul', 'kamrul125@skst.edu', '125', 'EEE', 'uttara ,new model towen,Road_5 house 23,Dhaka', '12345678911', '910', 34500.00, NULL, NULL);
-
---
 -- Indexes for dumped tables
 --
 

@@ -22,7 +22,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
     $password = $_POST['password'];
     
     // For demo purposes - in real application, use password_verify with hashed passwords
-    $sql = "SELECT alumni_id, name, email FROM alumni WHERE email = ? AND password = ? AND is_active = 1";
+    $sql = "SELECT faculty_id, name, email FROM faculty WHERE email = ? AND password = ?";
     
     if ($stmt = $mysqli->prepare($sql)) {
         $stmt->bind_param("ss", $email, $password);
@@ -33,12 +33,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
             if ($stmt->num_rows == 1) {
                 $stmt->bind_result($id, $name, $email);
                 if ($stmt->fetch()) {
-                    $_SESSION['alumni_id'] = $id;
-                    $_SESSION['alumni_name'] = $name;
-                    $_SESSION['alumni_email'] = $email;
+                    $_SESSION['faculty_id'] = $id;
+                    $_SESSION['faculty_name'] = $name;
+                    $_SESSION['faculty_email'] = $email;
                     
                     // Update last login time
-                    $update_sql = "UPDATE alumni SET last_login = NOW() WHERE alumni_id = ?";
+                    $update_sql = "UPDATE faculty SET last_login = NOW() WHERE faculty_id = ?";
                     if ($update_stmt = $mysqli->prepare($update_sql)) {
                         $update_stmt->bind_param("i", $id);
                         $update_stmt->execute();
@@ -67,9 +67,9 @@ if (isset($_GET['logout'])) {
 }
 
 // Handle profile picture upload
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['profile_picture']) && isset($_SESSION['alumni_id'])) {
-    $alumni_id = $_SESSION['alumni_id'];
-    $uploadDir = 'uploads/profile_pictures/';
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['profile_picture']) && isset($_SESSION['faculty_id'])) {
+    $faculty_id = $_SESSION['faculty_id'];
+    $uploadDir = 'uploads/faculty_pictures/';
     
     // Create directory if it doesn't exist
     if (!file_exists($uploadDir)) {
@@ -86,9 +86,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['profile_picture']) &&
         // Upload file to server
         if (move_uploaded_file($_FILES['profile_picture']['tmp_name'], $targetFilePath)) {
             // Update database with file path
-            $update_sql = "UPDATE alumni SET profile_picture = ? WHERE alumni_id = ?";
+            $update_sql = "UPDATE faculty SET profile_picture = ? WHERE faculty_id = ?";
             if ($update_stmt = $mysqli->prepare($update_sql)) {
-                $update_stmt->bind_param("si", $targetFilePath, $alumni_id);
+                $update_stmt->bind_param("si", $targetFilePath, $faculty_id);
                 $update_stmt->execute();
                 $update_stmt->close();
                 
@@ -105,17 +105,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['profile_picture']) &&
 }
 
 // Check if user is logged in
-$is_logged_in = isset($_SESSION['alumni_id']);
+$is_logged_in = isset($_SESSION['faculty_id']);
 
-// Get alumni data if logged in
+// Get faculty data if logged in
 if ($is_logged_in) {
-    $alumni_id = $_SESSION['alumni_id'];
-    $sql = "SELECT * FROM alumni WHERE alumni_id = ?";
+    $faculty_id = $_SESSION['faculty_id'];
+    $sql = "SELECT * FROM faculty WHERE faculty_id = ?";
     $stmt = $mysqli->prepare($sql);
-    $stmt->bind_param("i", $alumni_id);
+    $stmt->bind_param("i", $faculty_id);
     $stmt->execute();
     $result = $stmt->get_result();
-    $alumni = $result->fetch_assoc();
+    $faculty = $result->fetch_assoc();
     $stmt->close();
 }
 
@@ -127,7 +127,7 @@ $mysqli->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alumni Portal - SKST University</title>
+    <title>Faculty Portal - SKST University</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -379,21 +379,18 @@ $mysqli->close();
         
         .page-header {
             background: linear-gradient(to right, #f0f5ff, #f8faff);
+            padding: 20px 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 25px;
-            border-top-left-radius: 10px;
-            border-top-right-radius: 10px;
-            
+            border-radius: 10px;
         }
-
         
         .page-title {
             color: #2b5876;
             font-size: 30px;
             font-weight: 600;
-            margin-left: 10px;
             margin: 0;
         }
         
@@ -830,7 +827,7 @@ $mysqli->close();
         <div class="login-box">
             <div class="login-header">
                 <img src="../picture/SKST.png" alt="Logo" style="width: 50px; height: 50px; border-radius: 50%;">
-                <h1>Alumni Portal</h1>
+                <h1>Faculty Portal</h1>
                 <p>SKST University - Sign in to your account</p>
             </div>
             
@@ -851,6 +848,7 @@ $mysqli->close();
                 <?php if (!empty($error)): ?>
                     <div class="error-msg"><?php echo $error; ?></div>
                 <?php endif; ?>
+                
             </form>
         </div>
     </div>
@@ -859,15 +857,13 @@ $mysqli->close();
     <div class="navbar">
         <div class="logo">
             <img src="../picture/SKST.png" alt="Logo" style="width: 50px; height: 50px; border-radius: 50%;">
-            <h1>SKST University Alumni</h1>
+            <h1>SKST University Faculty</h1>
         </div>
-        
         
         <div class="nav-buttons">
             <button onclick="location.href='../index.html'">
                 <i class="fas fa-home"></i> Home
             </button>
-
             <button onclick="location.href='?logout=1'">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </button>
@@ -883,23 +879,34 @@ $mysqli->close();
                     </a>
                 </li>
                 <li>
-                    <a href="#">
+                    <a href="../working.html">
                         <i class="fas fa-book"></i> Courses
                     </a>
                 </li>
                 <li>
-                    <a href="#">
-                        <i class="fas fa-bullhorn"></i> Notices
+                    <a href="../working.html">
+                        <i class="fas fa-calendar-alt"></i> Schedule
                     </a>
                 </li>
                 <li>
-                    <a href="#">
-                        <i class="fas fa-graduation-cap"></i> Degree
+                    <a href="../working.html">
+                        <i class="fas fa-users"></i> Students
                     </a>
                 </li>
                 <li>
-                    <a href="#">
-                        <i class="fas fa-briefcase"></i> Internship
+                    <a href="../working.html">
+                        <i class="fas fa-chalkboard"></i> Classes
+                    </a>
+                </li>
+
+                <li>
+                    <a href="attendance.html">
+                        <i class="fas fa-user-check"></i> Attendance
+                    </a>
+                </li>
+                <li>
+                    <a href="../working.html">
+                        <i class="fas fa-file-alt"></i> Reports
                     </a>
                 </li>
                 <li>
@@ -912,7 +919,7 @@ $mysqli->close();
         
         <div class="content-area">
             <div class="page-header">
-                <h1 class="page-title"><i class="fas fa-user-graduate"></i> Alumni Dashboard</h1>
+                <h1 class="page-title"><i class="fas fa-chalkboard-teacher"></i> Faculty Dashboard</h1>
                 <button class="btn-edit">
                     <i class="fas fa-edit"></i> Edit Profile
                 </button>
@@ -921,11 +928,11 @@ $mysqli->close();
             <!-- Profile Card with Picture Upload -->
             <div class="profile-card">
                 <div class="profile-img-container">
-                    <?php if (!empty($alumni['profile_picture'])): ?>
-                        <img id="profile-image" class="profile-img" src="<?php echo htmlspecialchars($alumni['profile_picture']); ?>" alt="Profile Image">
+                    <?php if (!empty($faculty['profile_picture'])): ?>
+                        <img id="profile-image" class="profile-img" src="<?php echo htmlspecialchars($faculty['profile_picture']); ?>" alt="Profile Image">
                     <?php else: ?>
                         <div id="profile-placeholder" class="profile-placeholder">
-                            <i class="fas fa-user"></i>
+                            <i class="fas fa-user-tie"></i>
                         </div>
                     <?php endif; ?>
                     <div class="edit-overlay" onclick="document.getElementById('file-input').click()">
@@ -941,10 +948,10 @@ $mysqli->close();
                 </div>
 
                 <div class="profile-info">
-                    <h2><?php echo htmlspecialchars($alumni['name']); ?></h2>
-                    <p><i class="fas fa-envelope"></i> <?php echo htmlspecialchars($alumni['email']); ?></p>
-                    <p><i class="fas fa-phone"></i> <?php echo htmlspecialchars($alumni['phone'] ?? 'Not provided'); ?></p>
-                    <p><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($alumni['address'] ?? 'Not provided'); ?></p>
+                    <h2><?php echo htmlspecialchars($faculty['name']); ?></h2>
+                    <p><i class="fas fa-envelope"></i> <?php echo htmlspecialchars($faculty['email']); ?></p>
+                    <p><i class="fas fa-phone"></i> <?php echo htmlspecialchars($faculty['phone'] ?? 'Not provided'); ?></p>
+                    <p><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($faculty['address'] ?? 'Not provided'); ?></p>
                 </div>
             </div>
             
@@ -954,34 +961,34 @@ $mysqli->close();
             
             <div class="info-cards">
                 <div class="detail-card">
-                    <h3><i class="fas fa-user-graduate"></i> Academic Information</h3>
+                    <h3><i class="fas fa-building"></i> Department Information</h3>
                     <div class="info-group">
-                        <div class="info-label">Degree</div>
-                        <div class="info-value"><?php echo htmlspecialchars($alumni['degree'] ?? 'Not provided'); ?></div>
+                        <div class="info-label">Faculty ID</div>
+                        <div class="info-value"><?php echo htmlspecialchars($faculty['faculty_id']); ?></div>
                     </div>
                     <div class="info-group">
-                        <div class="info-label">Major</div>
-                        <div class="info-value"><?php echo htmlspecialchars($alumni['major'] ?? 'Not provided'); ?></div>
+                        <div class="info-label">Department</div>
+                        <div class="info-value"><?php echo htmlspecialchars($faculty['department'] ?? 'Not provided'); ?></div>
                     </div>
                     <div class="info-group">
-                        <div class="info-label">Graduation Year</div>
-                        <div class="info-value"><?php echo htmlspecialchars($alumni['graduation_year'] ?? 'Not provided'); ?></div>
+                        <div class="info-label">Room Number</div>
+                        <div class="info-value"><?php echo htmlspecialchars($faculty['room_number'] ?? 'Not provided'); ?></div>
                     </div>
                 </div>
                 
                 <div class="detail-card">
-                    <h3><i class="fas fa-briefcase"></i> Professional Information</h3>
+                    <h3><i class="fas fa-money-check-alt"></i> Salary Information</h3>
                     <div class="info-group">
-                        <div class="info-label">Current Job</div>
-                        <div class="info-value"><?php echo htmlspecialchars($alumni['current_job'] ?? 'Not provided'); ?></div>
+                        <div class="info-label">Salary</div>
+                        <div class="info-value">$<?php echo isset($faculty['salary']) ? number_format($faculty['salary'], 2) : 'Not provided'; ?></div>
                     </div>
                     <div class="info-group">
-                        <div class="info-label">Company</div>
-                        <div class="info-value"><?php echo htmlspecialchars($alumni['company'] ?? 'Not provided'); ?></div>
+                        <div class="info-label">Payment Method</div>
+                        <div class="info-value">Direct Deposit</div>
                     </div>
                     <div class="info-group">
-                        <div class="info-label">Employment Status</div>
-                        <div class="info-value"><?php echo htmlspecialchars($alumni['current_job'] ? 'Employed' : 'Not specified'); ?></div>
+                        <div class="info-label">Pay Schedule</div>
+                        <div class="info-value">Monthly</div>
                     </div>
                 </div>
                 
@@ -989,32 +996,71 @@ $mysqli->close();
                     <h3><i class="fas fa-address-card"></i> Contact Information</h3>
                     <div class="info-group">
                         <div class="info-label">Email</div>
-                        <div class="info-value"><?php echo htmlspecialchars($alumni['email']); ?></div>
+                        <div class="info-value"><?php echo htmlspecialchars($faculty['email']); ?></div>
                     </div>
                     <div class="info-group">
                         <div class="info-label">Phone</div>
-                        <div class="info-value"><?php echo htmlspecialchars($alumni['phone'] ?? 'Not provided'); ?></div>
+                        <div class="info-value"><?php echo htmlspecialchars($faculty['phone'] ?? 'Not provided'); ?></div>
                     </div>
                     <div class="info-group">
                         <div class="info-label">Address</div>
-                        <div class="info-value"><?php echo htmlspecialchars($alumni['address'] ?? 'Not provided'); ?></div>
+                        <div class="info-value"><?php echo htmlspecialchars($faculty['address'] ?? 'Not provided'); ?></div>
                     </div>
                 </div>
                 
                 <div class="detail-card">
                     <h3><i class="fas fa-info-circle"></i> Account Information</h3>
                     <div class="info-group">
-                        <div class="info-label">Member Since</div>
-                        <div class="info-value"><?php echo date('M j, Y', strtotime($alumni['registration_date'])); ?></div>
+                        <div class="info-label">Faculty Since</div>
+                        <div class="info-value"><?php echo date('M j, Y', strtotime($faculty['registration_date'] ?? 'now')); ?></div>
                     </div>
                     <div class="info-group">
                         <div class="info-label">Last Login</div>
-                        <div class="info-value"><?php echo $alumni['last_login'] ? date('M j, Y g:i A', strtotime($alumni['last_login'])) : 'First login'; ?></div>
+                        <div class="info-value"><?php echo $faculty['last_login'] ? date('M j, Y g:i A', strtotime($faculty['last_login'])) : 'First login'; ?></div>
                     </div>
                     <div class="info-group">
                         <div class="info-label">Status</div>
                         <div class="info-value"><span style="color: #00a651;">Active</span></div>
                     </div>
+                </div>
+            </div>
+            
+            <!-- Stats Section -->
+            <div class="page-header">
+                <h2 class="page-title"><i class="fas fa-chart-line"></i> Teaching Statistics</h2>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div class="stat-number">5</div>
+                    <div class="stat-label">Courses</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-number">142</div>
+                    <div class="stat-label">Students</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-number">18</div>
+                    <div class="stat-label">Hours/Week</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="stat-number">4.8</div>
+                    <div class="stat-label">Rating</div>
                 </div>
             </div>
         </div>
