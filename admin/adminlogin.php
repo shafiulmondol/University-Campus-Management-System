@@ -107,6 +107,7 @@ if (isset($_POST['login'])) {
             align-items: center;
             justify-content: center;
             gap: 12px;
+            color: whitesmoke;
         }
         
         .login-header p {
