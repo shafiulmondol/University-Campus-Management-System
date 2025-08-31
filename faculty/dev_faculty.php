@@ -411,7 +411,11 @@ if (isset($_GET['view_profile']) && $_GET['view_profile']) {
         </header>
         
         <!-- Trigger button -->
-        <button id="toggleFormBtn" class="btn btn-primary" style="margin-bottom: 10px; background:#2ecc71">+ Add New Faculty</button>
+        <button id="toggleFormBtn" class="btn btn-primary" style="margin-bottom: 10px; background:#2ecc71">+ Add Faculty</button>
+        <button class="btn btn-secondary" onclick="history.back()">⬅ Back</button>
+
+
+
 
         <!-- Hidden Faculty Form -->
         <div id="facultyForm" class="card" style="display: none;">

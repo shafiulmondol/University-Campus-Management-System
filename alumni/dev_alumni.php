@@ -324,7 +324,7 @@ if ($action === 'edit' && $alumni_id) {
         
         <!-- Trigger button -->
 <button id="toggleFormBtn" class="btn btn-primary" style="margin-bottom: 10px; background:#2ecc71">+ Add New Alumni</button>
-
+<button class="btn btn-secondary" onclick="history.back()">⬅ Back</button>
 <!-- Hidden Alumni Form -->
 <div id="alumniForm" class="card" style="display: none;">
     <h2 class="card-title">
