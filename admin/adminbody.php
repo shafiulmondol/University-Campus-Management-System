@@ -23,10 +23,10 @@ $adminData = $_SESSION['admin_data'];
 // Extract values for easier access
 $admin_id = $adminData['id'];
 $full_name = $adminData['full_name'];
-// $username = $adminData['username'];
+$username = $adminData['username'];
 $email = $adminData['email'];
 $phone = $adminData['phone'];
-// $password = $adminData['password'];
+$password = $adminData['password'];
 $admin_key = $adminData['admin_key'];
 $login_time = $adminData['login_time'];
 
@@ -114,6 +114,237 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_admin'])) {
         }
         
         /* =====================edit biodata form============== */
+        .form-container {
+            max-width: 600px;
+            margin: 30px auto;
+            background: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from {opacity: 0; transform: translateY(10px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+        .form-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #007bff;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 6px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+        .btn-submit {
+            background: #28a745;
+            color: #fff;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .btn-submit:hover {
+            background: #218838;
+        }
+        .success-msg, .error-msg {
+            padding: 12px 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 15px auto;
+            max-width: 600px;
+            font-weight: 500;
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from {opacity: 0; transform: translateY(-10px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+        .success-msg {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error-msg {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .notification-container {
+            width: 100%;
+            position: relative;
+        }
+        
+        /* Student search form in sidebar */
+        .student-search-sidebar {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+        .student-search-sidebar input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .student-search-sidebar button {
+            width: 100%;
+            padding: 8px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .student-search-sidebar button:hover {
+            background: #0069d9;
+        }
+        
+        /* Active menu item style */
+        .sidebar-menu button.active {
+            background-color: #e9ecef;
+            border-left: 4px solid #007bff;
+        }
+        
+        /* Sidebar menu buttons */
+        .sidebar-menu button {
+            width: 100%;
+            text-align: left;
+            padding: 12px 15px;
+            background: none;
+            border: none;
+            border-left: 4px solid transparent;
+            cursor: pointer;
+            margin-bottom: 5px;
+            transition: all 0.2s;
+        }
+        .sidebar-menu button:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .password-info {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
+        .db-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        /* Profile display styles */
+        .profile-card {
+            display: flex;
+            align-items: center;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .profile-img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin-right: 20px;
+            object-fit: cover;
+        }
+        
+        .profile-info h2 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .profile-info p {
+            margin-bottom: 5px;
+            color: #7f8c8d;
+        }
+        
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .detail-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .detail-card h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+        }
+        
+        .info-group {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #7f8c8d;
+        }
+        
+        .info-value {
+            color: #2c3e50;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .page-title {
+            color: #2c3e50;
+        }
+        
+        .btn-edit {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .btn-edit:hover {
+            background: #2980b9;
+        }
     </style>
 </head>
 <body>
@@ -234,7 +465,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_admin'])) {
                         <div class="stat-label">Pending Tasks</div>
                     </div>
                 </div>
-           
+            <?php elseif ($active_section == 'edit_admin_bio'): ?>
+                <!-- Edit Profile Form with Username Field -->
+                <div class="form-container">
+                    <h2><i class="fas fa-user-edit"></i> Edit Admin Profile</h2>
+                    
+                    <form method="POST">
+                        <div class="form-group">
+                            <label for="full_name">Full Name</label>
+                            <input type="text" name="full_name" id="full_name" value="<?= htmlspecialchars($full_name) ?>" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" name="username" id="username" value="<?= htmlspecialchars($username) ?>" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" name="email" id="email" value="<?= htmlspecialchars($email) ?>" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="text" name="phone" id="phone" value="<?= htmlspecialchars($phone) ?>" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" name="password" id="password" value="<?= htmlspecialchars($password) ?>" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="key">Admin Key</label>
+                            <input type="text" name="key" id="key" value="<?= htmlspecialchars($admin_key) ?>" required>
+                        </div>
+
+                        <button type="submit" name="update_admin" class="btn-submit"><i class="fas fa-save"></i> Update Profile</button>
+                    </form>
+                </div>
             <?php else: ?>
                 <!-- Default Dashboard View -->
                 <form action="" method="post">
