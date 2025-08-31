@@ -18,47 +18,71 @@ if ($mysqli->connect_error) {
 
 // Handle admin login
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
-    $email = trim($_POST['email']); // Changed from username to email
+    $email = trim($_POST['email']);
     $password = $_POST['password'];
     
-    // Changed query to use email instead of username
-    $sql = "SELECT id, full_name, username, password, email, phone, profile_picture FROM admin_users WHERE email = ? AND password = ?";
-    
-    if ($stmt = $mysqli->prepare($sql)) {
-        $stmt->bind_param("ss", $email, $password); // Bind email instead of username
+    // Input validation
+    if (empty($email) || empty($password)) {
+        $error = "Please enter both email and password.";
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $error = "Please enter a valid email address.";
+    } else {
+        // Prepare SQL statement to get user by email only
+        $sql = "SELECT id, full_name, username, password, email, phone, profile_picture 
+                FROM admin_users 
+                WHERE email = ?";
         
-        if ($stmt->execute()) {
-            $stmt->store_result();
+        if ($stmt = $mysqli->prepare($sql)) {
+            $stmt->bind_param("s", $email);
             
-            if ($stmt->num_rows == 1) {
-                $stmt->bind_result($id, $full_name, $username, $password, $email, $phone, $profile_picture);
-                if ($stmt->fetch()) {
-                    $_SESSION['admin_id'] = $id;
-                    $_SESSION['admin_name'] = $full_name;
-                    $_SESSION['admin_username'] = $username;
-                    $_SESSION['admin_email'] = $email;
-                    $_SESSION['admin_phone'] = $phone;
-                    $_SESSION['admin_profile_picture'] = $profile_picture;
-                    
-                    // Update last login time
-                    $update_sql = "UPDATE admin_users SET last_login = NOW() WHERE id = ?";
-                    if ($update_stmt = $mysqli->prepare($update_sql)) {
-                        $update_stmt->bind_param("i", $id);
-                        $update_stmt->execute();
-                        $update_stmt->close();
+            if ($stmt->execute()) {
+                $stmt->store_result();
+                
+                if ($stmt->num_rows == 1) {
+                    $stmt->bind_result($id, $full_name, $username, $hashed_password, $email, $phone, $profile_picture);
+                    if ($stmt->fetch()) {
+                        // Verify password (assuming you're using password_hash())
+                        if (password_verify($password, $hashed_password)) {
+                            // Regenerate session ID to prevent session fixation
+                            session_regenerate_id(true);
+                            
+                            $_SESSION['admin_id'] = $id;
+                            $_SESSION['admin_name'] = $full_name;
+                            $_SESSION['admin_username'] = $username;
+                            $_SESSION['admin_email'] = $email;
+                            $_SESSION['admin_phone'] = $phone;
+                            $_SESSION['admin_profile_picture'] = $profile_picture;
+                            
+                            // Update last login time
+                            $update_sql = "UPDATE admin_users SET last_login = NOW() WHERE id = ?";
+                            if ($update_stmt = $mysqli->prepare($update_sql)) {
+                                $update_stmt->bind_param("i", $id);
+                                $update_stmt->execute();
+                                $update_stmt->close();
+                            }
+                            
+                            // Redirect to prevent form resubmission
+                            header("Location: dashboard.php"); // Redirect to a specific page
+                            exit();
+                        } else {
+                            $error = "Invalid email or password.";
+                        }
                     }
-                    
-                    header("Location: " . $_SERVER['PHP_SELF']);
-                    exit();
+                } else {
+                    // Use generic error message to prevent user enumeration
+                    $error = "Invalid email or password.";
                 }
             } else {
-                $error = "Invalid email or password."; // Update error message
+                $error = "Oops! Something went wrong. Please try again later.";
+                // Log the error for debugging
+                error_log("Login query failed: " . $stmt->error);
             }
+            
+            $stmt->close();
         } else {
-            $error = "Oops! Something went wrong. Please try again later.";
+            $error = "Database error. Please try again later.";
+            error_log("Prepare statement failed: " . $mysqli->error);
         }
-        
-        $stmt->close();
     }
 }
 
@@ -109,29 +133,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['profile_picture']) &&
         $error = "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
     }
 }
+
 // Handle profile update
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_profile']) && isset($_SESSION['admin_id'])) {
     $admin_id = $_SESSION['admin_id'];
     $full_name = trim($_POST['full_name']);
     $username = trim($_POST['username']);
     $email = trim($_POST['email']);
-    $password = trim($_POST['password']);   
     $phone = trim($_POST['phone']);
     $key = trim($_POST['key']);
-
-    // Include phone field in the SQL query
-    $update_sql = "UPDATE admin_users SET full_name = ?, username = ?, email = ?, password = ?, phone = ?, `key` = ? WHERE id = ?";
     
+    $update_sql = "UPDATE admin_users SET full_name = ?, username = ?, email = ?, phone = ?, key = ? WHERE id = ?";
     if ($update_stmt = $mysqli->prepare($update_sql)) {
-        // Corrected bind_param with 7 parameters (6 values + 1 ID)
-        $update_stmt->bind_param("ssssssi", $full_name, $username, $email, $password, $phone, $key, $admin_id);
-
+        $update_stmt->bind_param("sssssi", $full_name, $username, $email, $phone, $key, $admin_id);
+        
         if ($update_stmt->execute()) {
             // Update session variables
             $_SESSION['admin_name'] = $full_name;
             $_SESSION['admin_username'] = $username;
             $_SESSION['admin_email'] = $email;
-            $_SESSION['admin_password'] = $password;
             $_SESSION['admin_phone'] = $phone;
             
             // Refresh page
@@ -1021,15 +1041,15 @@ $mysqli->close();
             <form class="login-form" method="post">
                 <input type="hidden" name="login" value="1">
                 <div class="form-group">
-                    <label for="email">Email Address</label>
-                    <input type="email" id="email" name="email" required placeholder="Enter your email address">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required placeholder="Enter your username">
                 </div>
                 
                 <div class="form-group">
                     <label for="password">Password</label>
                     <input type="password" id="password" name="password" required placeholder="Enter your password">
                 </div>
-
+                
                 <button type="submit" class="login-btn">Login to Admin Dashboard</button>
                 
                 <div class="login-links">
@@ -1040,6 +1060,7 @@ $mysqli->close();
                 <?php if (!empty($error)): ?>
                     <div class="error-msg"><?php echo $error; ?></div>
                 <?php endif; ?>
+                
             </form>
         </div>
     </div>
@@ -1084,12 +1105,12 @@ $mysqli->close();
         </div>
         
         <div class="nav-buttons">
-            <button onclick="location.href='../working.html'">
-                <i class="fas fa-bell"></i>
-            </button>
             
             <button onclick="location.href='../index.html'">
                 <i class="fas fa-home"></i> Home
+            </button>
+            <button onclick="location.href='?logout=1'">
+                <i class="fas fa-sign-out-alt"></i> Logout
             </button>
         </div>
     </div>
@@ -1284,33 +1305,13 @@ $mysqli->close();
                     <div class="stat-label">Students</div>
                 </div>
                 
-                <?php
-                // Connect to MySQL database
-                $mysqli = new mysqli("localhost", "root", "", "skst_university");
-
-                // Check connection
-                if ($mysqli->connect_error) {
-                    die("Connection failed: " . $mysqli->connect_error);
-                }
-
-                // Query to count total faculty
-                $result = $mysqli->query("SELECT COUNT(*) AS total_faculty FROM faculty");
-
-                if ($result) {
-                    $row = $result->fetch_assoc();
-                    $totalFaculty = $row['total_faculty'];
-                } else {
-                    $totalFaculty = 0; // fallback if query fails
-                }
-                ?>
                 <div class="stat-card">
                     <div class="stat-icon">
                         <i class="fas fa-chalkboard-teacher"></i>
                     </div>
-                    <div class="stat-number"><?php echo $totalFaculty; ?></div>
+                    <div class="stat-number">64</div>
                     <div class="stat-label">Faculty</div>
                 </div>
-
             </div>
         </div>
     </div>
@@ -1340,26 +1341,6 @@ $mysqli->close();
                         <label for="email">Email Address</label>
                         <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($admin['email']); ?>" required>
                     </div>
-
-                    <div class="form-group" style="position: relative;">
-                        <label for="password">Password</label>
-                        <input type="password" id="password" name="password" value="<?php echo htmlspecialchars($admin['password']); ?>" required>
-                        <span id="togglePassword" style="position:absolute; right:10px; top:42px; cursor:pointer;"><i class="fas fa-eye"></i></span>
-                    </div>
-
-                    <script>
-                    const password = document.getElementById('password');
-                    const toggle = document.getElementById('togglePassword');
-
-                    toggle.addEventListener('click', () => {
-                        if (password.type === 'password') {
-                            password.type = 'text';
-                        } else {
-                            password.type = 'password';
-                        }
-                    });
-                    </script>
-
                     
                     <div class="form-group">
                         <label for="phone">Phone Number</label>
