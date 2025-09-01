@@ -1041,8 +1041,8 @@ $mysqli->close();
             <form class="login-form" method="post">
                 <input type="hidden" name="login" value="1">
                 <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" name="username" required placeholder="Enter your username">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required placeholder="Enter your email address">
                 </div>
                 
                 <div class="form-group">
@@ -1076,7 +1076,7 @@ $mysqli->close();
                 <h3>Administrator Login Assistance</h3>
                 <p>If you're having trouble accessing your account, please follow these steps:</p>
                 <ol>
-                    <li style="margin-left: 20px;">Ensure you're using the correct username and password (case sensitive)</li>
+                    <li style="margin-left: 20px;">Ensure you're using the correct email and password (case sensitive)</li>
                     <li style="margin-left: 20px;">Try resetting your password using the "Forgot Password" link</li>
                     <li style="margin-left: 20px;">Clear your browser cache and cookies</li>
                     <li style="margin-left: 20px;">Try using a different browser</li>

@@ -70,6 +70,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         // Validate update type
+        $category = mysqli_real_escape_string($conn, $_POST['change_category']);
+        if (!in_array($category, ['Student', 'Staff','Faculty'])) {
+            $errors[] = "Invalid update type selected.";
+        }
         $update_type = mysqli_real_escape_string($conn, $_POST['change_type']);
         if (!in_array($update_type, ['password', 'email'])) {
             $errors[] = "Invalid update type selected.";
@@ -104,8 +108,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $request_time = date('Y-m-d H:i:s');
             
             // Fixed query to match your database structure
-            $query = "INSERT INTO update_requests (admin_email, update_type, current_value, new_value, comments, request_time, action) 
-                      VALUES ('$admin_email', '$update_type', '$current_value', '$new_value', '$comments', '$request_time', '$action')";
+            $query = "INSERT INTO update_requests (admin_email,category, update_type, current_value, new_value, comments, request_time, action) 
+                      VALUES ('$admin_email','$category', '$update_type', '$current_value', '$new_value', '$comments', '$request_time', '$action')";
             
             if (mysqli_query($conn, $query)) {
                 $success = "Your update request has been submitted successfully.";
@@ -215,6 +219,15 @@ if ($admin_result && mysqli_num_rows($admin_result) > 0) {
                                     </select>
                                 </div>
                                 
+                                <div class="form-group">
+                                    <label for="change_category">Select Category *</label>
+                                    <select id="change_category" name="change_category" required>
+                                        <option value="">Select Category</option>
+                                        <option value="Student" <?php if (isset($update_category) && $update_category === 'Student') echo 'selected'; ?>>Student</option>
+                                        <option value="Staff" <?php if (isset($update_category) && $update_category === 'Staff') echo 'selected'; ?>>Staff</option>
+                                        <option value="Faculty" <?php if (isset($update_category) && $update_category === 'Faculty') echo 'selected'; ?>>Faculty</option>
+                                    </select>
+                                </div>
                                 <div class="form-group">
                                     <label for="change_type">Update Type *</label>
                                     <select id="change_type" name="change_type" required>
