@@ -308,7 +308,7 @@ if (isset($_POST['forget_password'])) {
                     <p>Please keep this password secure and consider changing it after login.</p>
                 </div>
                 <div class="action-buttons">
-                    <a href="adminlogin.php" class="login-btn button-link">
+                    <a href="admin.php" class="login-btn button-link">
                         <i class="fas fa-sign-in-alt"></i> Back to Login
                     </a>
                     <a href="administration.html" class="login-btn secondary-btn button-link">
@@ -340,7 +340,7 @@ if (isset($_POST['forget_password'])) {
                     </button>
                     
                     <div class="back-link">
-                        <a href="admin1.php">
+                        <a href="admin.php">
                             <i class="fas fa-arrow-left"></i> Back to Main Portal
                         </a>
                     </div>

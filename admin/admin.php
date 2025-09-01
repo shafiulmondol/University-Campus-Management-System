@@ -18,8 +18,8 @@ if ($mysqli->connect_error) {
 
 // Handle admin login
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
-    $email = trim($_POST['email']);
-    $password = $_POST['password'];
+    $email = isset($_POST['email']) ? trim($_POST['email']) : '';
+    $password = isset($_POST['password']) ? $_POST['password'] : '';
     
     // Input validation
     if (empty($email) || empty($password)) {
@@ -28,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
         $error = "Please enter a valid email address.";
     } else {
         // Prepare SQL statement to get user by email only
-        $sql = "SELECT id, full_name, username, password, email, phone, profile_picture 
+        $sql = "SELECT id, full_name, username, password, email, phone, profile_picture, `key` 
                 FROM admin_users 
                 WHERE email = ?";
         
@@ -39,31 +39,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
                 $stmt->store_result();
                 
                 if ($stmt->num_rows == 1) {
-                    $stmt->bind_result($id, $full_name, $username, $hashed_password, $email, $phone, $profile_picture);
+                    $stmt->bind_result($id, $full_name, $username, $hashed_password, $email, $phone, $profile_picture, $key);
                     if ($stmt->fetch()) {
-                        // Verify password (assuming you're using password_hash())
+                        // Check if password is hashed or plain text (for migration)
                         if (password_verify($password, $hashed_password)) {
-                            // Regenerate session ID to prevent session fixation
-                            session_regenerate_id(true);
-                            
-                            $_SESSION['admin_id'] = $id;
-                            $_SESSION['admin_name'] = $full_name;
-                            $_SESSION['admin_username'] = $username;
-                            $_SESSION['admin_email'] = $email;
-                            $_SESSION['admin_phone'] = $phone;
-                            $_SESSION['admin_profile_picture'] = $profile_picture;
-                            
-                            // Update last login time
-                            $update_sql = "UPDATE admin_users SET last_login = NOW() WHERE id = ?";
+                            // Password is correct (hashed)
+                            loginUser($id, $full_name, $username, $email, $phone, $profile_picture, $mysqli);
+                        } elseif ($hashed_password === $password) {
+                            // Password is correct (plain text - needs migration)
+                            // Hash the password and update database
+                            $new_hashed_password = password_hash($password, PASSWORD_DEFAULT);
+                            $update_sql = "UPDATE admin_users SET password = ? WHERE id = ?";
                             if ($update_stmt = $mysqli->prepare($update_sql)) {
-                                $update_stmt->bind_param("i", $id);
+                                $update_stmt->bind_param("si", $new_hashed_password, $id);
                                 $update_stmt->execute();
                                 $update_stmt->close();
                             }
-                            
-                            // Redirect to prevent form resubmission
-                            header("Location: dashboard.php"); // Redirect to a specific page
-                            exit();
+                            loginUser($id, $full_name, $username, $email, $phone, $profile_picture, $mysqli);
                         } else {
                             $error = "Invalid email or password.";
                         }
@@ -84,6 +76,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
             error_log("Prepare statement failed: " . $mysqli->error);
         }
     }
+}
+
+// Function to handle user login
+function loginUser($id, $full_name, $username, $email, $phone, $profile_picture, $mysqli) {
+    // Regenerate session ID to prevent session fixation
+    session_regenerate_id(true);
+    
+    $_SESSION['admin_id'] = $id;
+    $_SESSION['admin_name'] = $full_name;
+    $_SESSION['admin_username'] = $username;
+    $_SESSION['admin_email'] = $email;
+    $_SESSION['admin_phone'] = $phone;
+    $_SESSION['admin_profile_picture'] = $profile_picture;
+    
+    // Update last login time
+    $update_sql = "UPDATE admin_users SET last_login = NOW() WHERE id = ?";
+    if ($update_stmt = $mysqli->prepare($update_sql)) {
+        $update_stmt->bind_param("i", $id);
+        $update_stmt->execute();
+        $update_stmt->close();
+    }
+    
+    // Redirect to prevent form resubmission
+    header("Location: dashboard.php"); // Redirect to a specific page
+    exit();
 }
 
 // Handle logout
@@ -143,7 +160,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_profile']) && i
     $phone = trim($_POST['phone']);
     $key = trim($_POST['key']);
     
-    $update_sql = "UPDATE admin_users SET full_name = ?, username = ?, email = ?, phone = ?, key = ? WHERE id = ?";
+    $update_sql = "UPDATE admin_users SET full_name = ?, username = ?, email = ?, phone = ?, `key` = ? WHERE id = ?";
     if ($update_stmt = $mysqli->prepare($update_sql)) {
         $update_stmt->bind_param("sssssi", $full_name, $username, $email, $phone, $key, $admin_id);
         
@@ -788,6 +805,7 @@ $mysqli->close();
             border-radius: 8px;
             font-size: 16px;
             transition: border-color 0.3s;
+            box-sizing: border-box;
         }
         
         .form-group input:focus {
@@ -885,6 +903,12 @@ $mysqli->close();
         .modal-title {
             color: #2b5876;
             font-size: 24px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .modal-title i {
+            margin-right: 10px;
         }
         
         .modal-body {
@@ -934,15 +958,15 @@ $mysqli->close();
             text-decoration: underline;
         }
         
+        /* Forgot Password Modal */
+        #forgotPasswordModal .modal-content {
+            max-width: 500px;
+        }
         
         /* ================ Responsive Design ============ */
         @media (max-width: 1024px) {
             .info-cards {
                 grid-template-columns: 1fr;
-            }
-            
-            .quick-links {
-                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
             }
         }
         
@@ -1025,6 +1049,23 @@ $mysqli->close();
                 align-items: center;
             }
         }
+        .password-container {
+    position: relative;
+    width: 100%;
+}
+.password-container input {
+    width: 100%;
+    padding-right: 40px; /* space for eye icon */
+}
+.password-container .toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 18px;
+    color: #666;
+}
     </style>
 </head>
 <body>
@@ -1064,6 +1105,7 @@ $mysqli->close();
             </form>
         </div>
     </div>
+
 
     <!-- Help Modal -->
     <div id="helpModal" class="modal">
@@ -1105,7 +1147,7 @@ $mysqli->close();
         </div>
         
         <div class="nav-buttons">
-            
+            <span class="welcome"><i class="fas fa-user"></i> Welcome, <?php echo htmlspecialchars($_SESSION['admin_name']); ?></span>
             <button onclick="location.href='../index.html'">
                 <i class="fas fa-home"></i> Home
             </button>
@@ -1120,7 +1162,7 @@ $mysqli->close();
             <ul class="sidebar-menu">
                 <li>
                     <a href="#" class="active">
-                        <i class="fas fa-th-large"></i> Profile
+                        <i class="fas fa-th-large"></i> Dashboard
                     </a>
                 </li>
                 <li>
@@ -1305,13 +1347,29 @@ $mysqli->close();
                     <div class="stat-label">Students</div>
                 </div>
                 
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-chalkboard-teacher"></i>
-                    </div>
-                    <div class="stat-number">64</div>
-                    <div class="stat-label">Faculty</div>
-                </div>
+                <?php
+// Database connection
+$mysqli = new mysqli("localhost", "root", "", "skst_university");
+
+// Check connection
+if ($mysqli->connect_error) {
+    die("Connection failed: " . $mysqli->connect_error);
+}
+
+// Count faculty
+$result = $mysqli->query("SELECT COUNT(*) AS total FROM faculty");
+$row = $result->fetch_assoc();
+$faculty_count = $row['total'];
+?>
+
+<div class="stat-card">
+    <div class="stat-icon">
+        <i class="fas fa-chalkboard-teacher"></i>
+    </div>
+    <div class="stat-number"><?php echo $faculty_count; ?></div>
+    <div class="stat-label">Faculty</div>
+</div>
+
             </div>
         </div>
     </div>
@@ -1341,6 +1399,29 @@ $mysqli->close();
                         <label for="email">Email Address</label>
                         <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($admin['email']); ?>" required>
                     </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="password-container">
+                            <input type="password" id="password" name="password" 
+                                value="<?php echo htmlspecialchars($admin['password']); ?>" required>
+                            <i class="fa-solid fa-eye toggle-password" id="togglePassword"></i>
+                        </div>
+                    </div>
+
+                    <script>
+                    const passwordField = document.getElementById("password");
+                    const togglePassword = document.getElementById("togglePassword");
+
+                    togglePassword.addEventListener("click", function () {
+                        const type = passwordField.type === "password" ? "text" : "password";
+                        passwordField.type = type;
+
+                        // Switch between eye and eye-slash
+                        this.classList.toggle("fa-eye");
+                        this.classList.toggle("fa-eye-slash");
+                    });
+                    </script>
                     
                     <div class="form-group">
                         <label for="phone">Phone Number</label>
@@ -1362,7 +1443,7 @@ $mysqli->close();
     <?php endif; ?>
 
     <script>
-        // Simple JavaScript for interactive elements
+        // JavaScript for interactive elements
         document.addEventListener('DOMContentLoaded', function() {
             // Stats panel toggle functionality
             const statsButton = document.querySelector('.stats-button');
