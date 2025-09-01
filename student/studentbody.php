@@ -42,6 +42,7 @@ $login_time = $stdata['login_time'] ?? '';
 
 // Initialize variables
 $show_request_form = false;
+$show_result_section = false;
 $errors = [];
 $success = '';
 
@@ -118,6 +119,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $errors[] = "Error submitting request: " . mysqli_error($conn);
             }
         }
+    } elseif (isset($_POST['result'])) {
+        $show_result_section = true;
+    } elseif (isset($_POST['dashboard'])) {
+        $show_result_section = false;
+        $show_request_form = false;
+    } elseif (isset($_POST['biodata'])) {
+        $show_result_section = false;
+        $show_request_form = false;
     }
 }
 
@@ -128,6 +137,46 @@ $admin_result = mysqli_query($conn, $admin_query);
 if ($admin_result && mysqli_num_rows($admin_result) > 0) {
     while ($row = mysqli_fetch_assoc($admin_result)) {
         $admin_emails[] = $row['email'];
+    }
+}
+
+// Handle result search
+$results = [];
+$all_semesters = [];
+$selected_semester = '';
+
+if (isset($_POST['search_result']) || isset($_POST['show_all_results'])) {
+    $show_result_section = true;
+    
+    if (isset($_POST['semester'])) {
+        $selected_semester = mysqli_real_escape_string($conn, $_POST['semester']);
+    }
+    
+    // Fetch available semesters for this student
+    $semester_query = "SELECT DISTINCT semister FROM student_result WHERE st_id = '$id' ORDER BY semister";
+    $semester_result = mysqli_query($conn, $semester_query);
+    if ($semester_result && mysqli_num_rows($semester_result) > 0) {
+        while ($row = mysqli_fetch_assoc($semester_result)) {
+            $all_semesters[] = $row['semister'];
+        }
+    }
+    
+    // Build query based on search criteria
+    if (isset($_POST['show_all_results'])) {
+        $query = "SELECT * FROM student_result WHERE st_id = '$id' ORDER BY semister, course";
+    } else {
+        if (!empty($selected_semester)) {
+            $query = "SELECT * FROM student_result WHERE st_id = '$id' AND semister = '$selected_semester' ORDER BY course";
+        } else {
+            $query = "SELECT * FROM student_result WHERE st_id = '$id' ORDER BY semister, course";
+        }
+    }
+    
+    $result_query = mysqli_query($conn, $query);
+    if ($result_query && mysqli_num_rows($result_query) > 0) {
+        while ($row = mysqli_fetch_assoc($result_query)) {
+            $results[] = $row;
+        }
     }
 }
 ?>
@@ -144,7 +193,107 @@ if ($admin_result && mysqli_num_rows($admin_result) > 0) {
     <link rel="stylesheet" href="student.css">
     <style>
         /* Additional styles for better form presentation */
-     
+        .result-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        
+        .search-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: flex-end;
+        }
+        
+        .form-group-row {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group-row label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group-row select, 
+        .form-group-row input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .btn-search {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .btn-show-all {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .btn-back {
+            background: #6c757d;
+            color: white;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .result-table th, 
+        .result-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        
+        .result-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        
+        .result-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+            font-style: italic;
+        }
+        
+        .semester-header {
+            background-color: #e9ecef;
+            font-weight: bold;
+        }
+        
+        .gpa-display {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
     </style>
 </head>
 <body>
@@ -331,6 +480,133 @@ if ($admin_result && mysqli_num_rows($admin_result) > 0) {
                     </div>
                 </div>
             <?php endif; ?>
+        <?php elseif ($show_result_section || isset($_POST['result'])): ?>
+            <!-- Result Section -->
+            <div class="content-area">
+                <div class="page-header">
+                    <h2 class="page-title"><i class="fas fa-poll"></i> Academic Results</h2>
+                    <form method="post">
+                        <button type="submit" name="dashboard" class="btn-back"><i class="fas fa-arrow-left"></i> Back to Dashboard</button>
+                    </form>
+                </div>
+                
+                <div class="result-container">
+                    <form method="post" class="search-form">
+                        <div class="form-group-row">
+                            <label for="semester">Select Semester:</label>
+                            <select id="semester" name="semester">
+                                <option value="">All Semesters</option>
+                                <?php foreach ($all_semesters as $sem): ?>
+                                    <option value="<?= $sem ?>" <?= ($selected_semester == $sem) ? 'selected' : '' ?>>
+                                        Semester <?= $sem ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <button type="submit" name="search_result" class="btn-search">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <button type="submit" name="show_all_results" class="btn-show-all">
+                            <i class="fas fa-list"></i> Show All Results
+                        </button>
+                    </form>
+                    
+                    <?php if (!empty($results)): ?>
+                        <?php
+                        // Group results by semester
+                        $grouped_results = [];
+                        foreach ($results as $result) {
+                            $semester = $result['semister'];
+                            $grouped_results[$semester][] = $result;
+                        }
+                        
+                        // Calculate CGPA and SGPA for each semester
+                        $semester_gpas = [];
+                        foreach ($grouped_results as $semester => $courses) {
+                            $total_grade_points = 0;
+                            $total_courses = count($courses);
+                            
+                            foreach ($courses as $course) {
+                                // Convert grade to points (simplified)
+                                $grade = $course['grade'];
+                                $grade_points = 0;
+                                
+                                switch ($grade) {
+                                    case 'A+': $grade_points = 4.0; break;
+                                    case 'A': $grade_points = 3.75; break;
+                                    case 'A-': $grade_points = 3.5; break;
+                                    case 'B+': $grade_points = 3.25; break;
+                                    case 'B': $grade_points = 3.0; break;
+                                    case 'B-': $grade_points = 2.75; break;
+                                    case 'C+': $grade_points = 2.5; break;
+                                    case 'C': $grade_points = 2.25; break;
+                                    case 'D': $grade_points = 2.0; break;
+                                    case 'F': $grade_points = 0.0; break;
+                                    default: $grade_points = 0.0;
+                                }
+                                
+                                $total_grade_points += $grade_points;
+                            }
+                            
+                            $sgpa = $total_courses > 0 ? $total_grade_points / $total_courses : 0;
+                            $semester_gpas[$semester] = number_format($sgpa, 2);
+                        }
+                        ?>
+                        
+                        <?php foreach ($grouped_results as $semester => $semester_results): ?>
+                            <h3>Semester <?= $semester ?> Results</h3>
+                            <table class="result-table">
+                                <thead>
+                                    <tr>
+                                        <th>Course Code</th>
+                                        <th>Course Name</th>
+                                        <th>Grade</th>
+                                        <th>Credit Hours</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($semester_results as $result): ?>
+                                        <tr>
+                                            <td><?= htmlspecialchars($result['course']) ?></td>
+                                            <td><?= htmlspecialchars($result['course']) ?> Name</td>
+                                            <td><?= htmlspecialchars($result['grade']) ?></td>
+                                            <td>3</td> <!-- Assuming fixed credit hours -->
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                            
+                            <div class="gpa-display">
+                                <strong>Semester <?= $semester ?> SGPA: <?= $semester_gpas[$semester] ?></strong>
+                            </div>
+                        <?php endforeach; ?>
+                        
+                        <!-- Display overall CGPA if showing all results -->
+                        <?php if (isset($_POST['show_all_results']) && !empty($semester_gpas)): ?>
+                            <?php
+                            $total_sgpa = 0;
+                            $total_semesters = count($semester_gpas);
+                            
+                            foreach ($semester_gpas as $sgpa) {
+                                $total_sgpa += $sgpa;
+                            }
+                            
+                            $cgpa = $total_semesters > 0 ? $total_sgpa / $total_semesters : 0;
+                            ?>
+                            <div class="gpa-display" style="border-left-color: #28a745; margin-top: 30px;">
+                                <strong>Overall CGPA: <?= number_format($cgpa, 2) ?></strong>
+                            </div>
+                        <?php endif; ?>
+                        
+                    <?php else: ?>
+                        <div class="no-results">
+                            <i class="fas fa-info-circle" style="font-size: 48px; margin-bottom: 15px;"></i>
+                            <h3>No results found</h3>
+                            <p>Please select a different semester or try again later.</p>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
         <?php else: ?>
             <!-- Default Dashboard View -->
             <div class="content-area">
