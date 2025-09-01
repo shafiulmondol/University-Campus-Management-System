@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 29, 2025 at 07:52 PM
+-- Generation Time: Sep 01, 2025 at 09:24 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -35,9 +35,9 @@ CREATE TABLE `admin_users` (
   `email` varchar(100) NOT NULL,
   `phone` varchar(20) NOT NULL,
   `key` int(5) NOT NULL,
-  `profile_picture` varchar(255) DEFAULT NULL,
-  `registration_date` timestamp NOT NULL DEFAULT current_timestamp(),
-  `last_login` timestamp NULL DEFAULT NULL,
+  `profile_picture` varchar(255) NOT NULL,
+  `registration_date` datetime NOT NULL DEFAULT current_timestamp(),
+  `last_login` datetime(6) DEFAULT current_timestamp(6),
   `is_active` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -45,9 +45,9 @@ CREATE TABLE `admin_users` (
 -- Dumping data for table `admin_users`
 --
 
-INSERT INTO `admin_users` (`id`, `full_name`, `username`, `password`, `email`, `phone`, `key`) VALUES
-(1, 'Admin User', 'admin', 'admin123', 'admin@university.edu', '123-456-7890', 123),
-(23303106, 'shafiul islam mondol', 'sdf', 'shafiul123', '23303106@iubat.edu', '01701535780', 123);
+INSERT INTO `admin_users` (`id`, `full_name`, `username`, `password`, `email`, `phone`, `key`, `profile_picture`, `registration_date`, `last_login`, `is_active`) VALUES
+(1, 'Admin User', 'admin', 'admin123', 'admin@university.edu', '123-456-7890', 123, '', '2025-09-01 21:21:06', '2025-09-01 21:16:08.636532', 1),
+(23303106, 'Md. Shafiul Islam', 'Admin-1', '$2y$10$DbqNzQvmDEzO.rnJ44KZXuthl/U73yiq1PGtqT09DBh', '23303106@iubat.edu', '01701535780', 123, 'uploads/admin_pictures/1756740221_{E41600A5-6F2F-477B-A387-7B418585B689}.png', '2025-09-01 21:21:06', '2025-09-02 01:08:20.000000', 1);
 
 -- --------------------------------------------------------
 
@@ -131,6 +131,21 @@ INSERT INTO `alumni` (`alumni_id`, `name`, `email`, `password`, `graduation_year
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `attendance`
+--
+
+CREATE TABLE `attendance` (
+  `id` int(11) NOT NULL,
+  `faculty_id` int(11) DEFAULT NULL,
+  `course_code` varchar(20) DEFAULT NULL,
+  `student_id` int(11) DEFAULT NULL,
+  `status` enum('Present','Absent') NOT NULL,
+  `date` date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `books`
 --
 
@@ -181,6 +196,32 @@ CREATE TABLE `borrow_books` (
 
 INSERT INTO `borrow_books` (`borrow_id`, `book_id`, `user_id`, `borrow_date`, `due_date`, `return_date`, `status`, `created_at`, `updated_at`) VALUES
 (1, 1, 1000, '2025-08-21', '2025-09-11', '2025-09-25', 'borrowed', '2025-08-21 08:27:10', '2025-08-25 12:29:16');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `course`
+--
+
+CREATE TABLE `course` (
+  `course_id` int(11) NOT NULL,
+  `course_code` varchar(20) NOT NULL,
+  `course_name` varchar(100) NOT NULL,
+  `credit_hours` int(11) NOT NULL,
+  `department` varchar(50) NOT NULL,
+  `semester` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `course`
+--
+
+INSERT INTO `course` (`course_id`, `course_code`, `course_name`, `credit_hours`, `department`, `semester`, `created_at`, `updated_at`) VALUES
+(112, 'csc 112', 'dbms', 4, 'BCSE', 1, '2025-09-01 12:21:45', '2025-09-01 12:21:45'),
+(123, 'csc 123', 'dbms', 5, 'BCSE', 1, '2025-09-01 18:59:59', '2025-09-01 18:59:59'),
+(222, 'csc 222', 'computer archetecture', 3, 'BCSE', 2, '2025-09-01 18:17:02', '2025-09-01 18:17:02');
 
 -- --------------------------------------------------------
 
@@ -258,17 +299,6 @@ CREATE TABLE `faculty` (
   `profile_picture` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `faculty`
---
-
-INSERT INTO `faculty` (`faculty_id`, `name`, `email`, `password`, `department`, `address`, `phone`, `room_number`, `salary`, `last_login`, `profile_picture`) VALUES
-(10, 'shafiul', 'sasdf@gmail.com', '123', 'BCSE', 'asdfgsdf', '01701535780', '1000', 1000000.00, '2025-07-25 22:41:42', NULL),
-(11, 'mondol', 'asdf@gmail.com', '123', 'CSE', 'asdfas', '01701535780', '1000', 1000000.00, '2025-07-25 22:41:42', NULL),
-(7654321, 'Md.fozlul Islam', 'fozlul123@iubat.edu', '123', 'BCSE', NULL, NULL, NULL, NULL, '2025-07-30 20:51:32', NULL),
-(7654322, 'Bashar (Professor)', 'bashar124@skst.edu', '124', 'BCSE', 'Dhamnondi2, house_no 34,north road, Dhaka', '12345678910', '1022', 54321.00, '2025-07-25 04:33:52', NULL),
-(7654323, 'kamrul', 'kamrul125@skst.edu', '125', 'EEE', 'uttara ,new model towen,Road_5 house 23,Dhaka', '12345678911', '910', 34500.00, NULL, NULL);
-
 -- --------------------------------------------------------
 
 --
@@ -290,6 +320,27 @@ CREATE TABLE `notice` (
 --
 
 INSERT INTO `notice` (`id`, `title`, `section`, `content`, `author`, `created_at`, `viewed`) VALUES
+(23303106, 'off day', '', 'for my weekness today is off', 'shafiul', '2025-07-30 17:06:21', 0),
+(23303105, 'new', 'cse', 'test', 'kawsar', '2025-07-30 17:45:02', 0),
+(23303106, 'peragraph', 'Bcse', 'A paragraph is a series of sentences that are organized and coherent, and are all related to a single topic.', 'Md shafiul Islam', '2025-07-31 07:49:23', 0),
+(23303106, 'library notice check', 'Library', 'library notice section works successfully', 'Md Shafiul Islam', '2025-08-06 11:03:52', 0),
+(0, '234444', 'Alumni', 'inseert alumni data notice', 'shafiul', '2025-08-06 16:56:33', 0),
+(0, '23444455', 'Alumni', 'inseert alumni data notice', 'shafiul', '2025-08-06 16:57:00', 0),
+(23303106, 'for stuf checking', 'stuf', 'this is correct successfully', 'shafiul', '2025-08-16 10:47:08', 0),
+(23303106, 'for stuf checking', 'stuf', 'this is correct successfully', 'shafiul', '2025-08-16 10:48:16', 1),
+(23303106, 'sdftgsdff', 'staf', 'sdfgsd 2nd', 'shafiul', '2025-08-16 11:01:44', 0),
+(23303106, 'sdftgsdff', 'Staff', 'sdfgsd 2nd', 'shafiul', '2025-08-16 11:10:07', 1),
+(23303105, 'sdfvads', 'Staff', 'dfgj fghikyu rftyjughhj', 'ssssssssss', '2025-08-16 11:50:53', 1),
+(23303106, 'sdfgjkhjksd ', 'Staff', 'jkhkjhsjkdf ', 'shafiul ', '2025-08-26 12:57:53', 1),
+(23303105, 'fgfgfdf', 'Staff', 'gjhuhfyh', 'shafiul', '2025-08-26 12:59:03', 1),
+(23303105, 'ghdfhh', 'Staff', 'hgff', 'hfg', '2025-08-26 12:59:59', 1),
+(23303105, 'ghdfhh', 'Staff', 'hgff', 'hfg', '2025-08-26 13:07:38', 1),
+(23303105, 'ghdfhh', 'Staff', 'hgff', 'hfg', '2025-08-26 13:07:50', 1),
+(23303105, 'ghdfhh', 'Staff', 'hgff', 'hfg', '2025-08-26 13:08:01', 1),
+(23303105, 'ghdfhh', 'Staff', 'hgff', 'hfg', '2025-08-26 13:08:14', 1),
+(23303105, 'ghdfhh', 'Staff', 'hgff', 'hfg', '2025-08-26 13:08:25', 1),
+(23303106, 'sdfgsdf', 'Staff', 'sdfgsd', 'sdfg', '2025-08-26 14:40:26', 1),
+(23303106, 'sdfgsdf', 'Staf', 'sdfgsd', 'sdfg', '2025-08-26 14:40:44', 0),
 (23303106, 'off day', '', 'for my weekness today is off', 'shafiul', '2025-07-30 17:06:21', 0),
 (23303105, 'new', 'cse', 'test', 'kawsar', '2025-07-30 17:45:02', 0),
 (23303106, 'peragraph', 'Bcse', 'A paragraph is a series of sentences that are organized and coherent, and are all related to a single topic.', 'Md shafiul Islam', '2025-07-31 07:49:23', 0),
@@ -381,6 +432,29 @@ INSERT INTO `student_registration` (`id`, `first_name`, `last_name`, `father_nam
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `student_result`
+--
+
+CREATE TABLE `student_result` (
+  `st_id` int(20) NOT NULL,
+  `semister` int(100) NOT NULL,
+  `course` varchar(50) NOT NULL,
+  `grade` varchar(20) DEFAULT NULL,
+  `cgpa` float DEFAULT NULL,
+  `sgpa` float DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `student_result`
+--
+
+INSERT INTO `student_result` (`st_id`, `semister`, `course`, `grade`, `cgpa`, `sgpa`) VALUES
+(23303106, 1, 'csc 112', '4', 3.2, 3.98),
+(23303106, 2, 'csc 112', '3.7', 3.2, 3.98);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `stuf`
 --
 
@@ -460,74 +534,31 @@ INSERT INTO `users` (`user_id`, `library_card_number`, `user_type`, `id`, `max_b
 --
 
 CREATE TABLE `volunteers` (
-  `id` int(11) UNSIGNED NOT NULL,
-  `name` varchar(100) NOT NULL,
-  `email` varchar(100) NOT NULL,
-  `phone` varchar(20) DEFAULT NULL,
-  `affiliation` varchar(50) NOT NULL,
+  `sl` int(11) NOT NULL,
+  `student_id` int(11) DEFAULT NULL,
+  `student_name` varchar(100) NOT NULL,
   `department` varchar(100) DEFAULT NULL,
-  `availability` text DEFAULT NULL,
-  `skills` text DEFAULT NULL,
-  `interests` text DEFAULT NULL,
-  `registration_date` timestamp NOT NULL DEFAULT current_timestamp()
+  `email` varchar(100) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `activity_name` varchar(150) NOT NULL,
+  `activity_date` date NOT NULL,
+  `role` varchar(50) DEFAULT NULL,
+  `hours` int(11) DEFAULT 0,
+  `remarks` text DEFAULT NULL,
+  `stratus` varchar(10) NOT NULL DEFAULT '1',
+  `password` varchar(255) NOT NULL DEFAULT 'volunteer123'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `volunteers`
 --
 
-INSERT INTO `volunteers` (`id`, `name`, `email`, `phone`, `affiliation`, `department`, `availability`, `skills`, `interests`, `registration_date`) VALUES
-(23303106, 'shafiul', '23303106', '01701535780', 'dfghjdgf ', 'cse', NULL, 'ok', 'gjh', '2025-08-28 17:30:19');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `volunteer_hours`
---
-
-CREATE TABLE `volunteer_hours` (
-  `id` int(11) NOT NULL,
-  `volunteer_id` int(11) DEFAULT NULL,
-  `event_name` varchar(255) NOT NULL,
-  `event_date` date NOT NULL,
-  `hours` decimal(5,2) NOT NULL,
-  `status` enum('Completed','Pending','Approved') DEFAULT 'Completed'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `volunteer_hours`
---
-
-INSERT INTO `volunteer_hours` (`id`, `volunteer_id`, `event_name`, `event_date`, `hours`, `status`) VALUES
-(23303106, 23303106, 'Campus clean up ', '2025-09-17', 4.00, 'Approved');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `volunteer_opportunities`
---
-
-CREATE TABLE `volunteer_opportunities` (
-  `id` int(11) NOT NULL,
-  `title` varchar(255) NOT NULL,
-  `description` text NOT NULL,
-  `date` date NOT NULL,
-  `time` varchar(50) NOT NULL,
-  `location` varchar(255) NOT NULL,
-  `category` varchar(100) NOT NULL,
-  `is_urgent` tinyint(1) DEFAULT 0,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `volunteer_opportunities`
---
-
-INSERT INTO `volunteer_opportunities` (`id`, `title`, `description`, `date`, `time`, `location`, `category`, `is_urgent`, `created_at`) VALUES
-(23303107, 'Campus Cleanup Day', 'Help keep our campus beautiful by participating in cleanup event', '2023-11-20', '09:00-12:00', 'Main Quad', 'Environment', 0, '2025-08-09 15:18:10'),
-(23303108, 'Food Drive', 'Collect and organize food donations for local food banks', '2023-12-05', '10:00-14:00', 'Student Center', 'Community Service', 1, '2025-08-09 15:18:10'),
-(23303109, 'Orientation Leaders', 'Help new students navigate campus during orientation', '2024-01-15', '08:00-16:00', 'Various Locations', 'Student Life', 0, '2025-08-09 15:18:10'),
-(23303110, 'Tutoring Program', 'Provide academic support to fellow students', '2023-11-25', '15:00-17:00', 'Library', 'Education', 0, '2025-08-09 15:18:10');
+INSERT INTO `volunteers` (`sl`, `student_id`, `student_name`, `department`, `email`, `phone`, `activity_name`, `activity_date`, `role`, `hours`, `remarks`, `stratus`, `password`) VALUES
+(1, 2, 'Rahim Uddin', 'Computer Science', 'rahim@example.com', '01710000001', 'Blood Donation Camp', '2025-02-15', 'Volunteer', 5, 'Donated blood and helped in registration', '1', 'volunteer123'),
+(2, 201, 'Karim Hasan', 'Electrical Engineering', 'karim@example.com', '01710000002', 'Tree Plantation Drive', '2025-03-05', 'Organizer', 8, 'Coordinated volunteers and managed logistics', '1', 'volunteer123'),
+(3, 3, 'Nusrat Jahan', 'Business Administration', 'nusrat@example.com', '01710000003', 'Campus Clean-up', '2025-04-10', 'Volunteer', 4, 'Participated in cleaning and waste management', '1', 'volunteer123'),
+(4, NULL, 'Taslima Akter', 'Civil Engineering', 'taslima@example.com', '01710000004', 'Fundraising Event', '2025-05-20', 'Leader', 10, 'Led a fundraising team for charity', '1', 'volunteer123'),
+(5, 15, 'Mahmudul Islam', 'Mechanical Engineering', 'mahmud@example.com', '01710000005', 'Cultural Festival', '2025-06-12', 'Volunteer', 6, 'Assisted in stage setup and coordination', '1', 'volunteer123');
 
 --
 -- Indexes for dumped tables
@@ -554,6 +585,14 @@ ALTER TABLE `alumni`
   ADD UNIQUE KEY `email` (`email`);
 
 --
+-- Indexes for table `attendance`
+--
+ALTER TABLE `attendance`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `faculty_id` (`faculty_id`),
+  ADD KEY `student_id` (`student_id`);
+
+--
 -- Indexes for table `books`
 --
 ALTER TABLE `books`
@@ -567,6 +606,13 @@ ALTER TABLE `borrow_books`
   ADD PRIMARY KEY (`borrow_id`),
   ADD KEY `book_id` (`book_id`),
   ADD KEY `user_id` (`user_id`);
+
+--
+-- Indexes for table `course`
+--
+ALTER TABLE `course`
+  ADD PRIMARY KEY (`course_id`),
+  ADD UNIQUE KEY `course_code` (`course_code`);
 
 --
 -- Indexes for table `ebook`
@@ -595,6 +641,13 @@ ALTER TABLE `student_registration`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `student_result`
+--
+ALTER TABLE `student_result`
+  ADD PRIMARY KEY (`st_id`,`semister`,`course`),
+  ADD KEY `course` (`course`);
+
+--
 -- Indexes for table `stuf`
 --
 ALTER TABLE `stuf`
@@ -616,21 +669,7 @@ ALTER TABLE `users`
 -- Indexes for table `volunteers`
 --
 ALTER TABLE `volunteers`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `email` (`email`);
-
---
--- Indexes for table `volunteer_hours`
---
-ALTER TABLE `volunteer_hours`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `volunteer_id` (`volunteer_id`);
-
---
--- Indexes for table `volunteer_opportunities`
---
-ALTER TABLE `volunteer_opportunities`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`sl`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -653,6 +692,12 @@ ALTER TABLE `admissions`
 --
 ALTER TABLE `alumni`
   MODIFY `alumni_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `attendance`
+--
+ALTER TABLE `attendance`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `books`
@@ -700,23 +745,18 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `volunteers`
 --
 ALTER TABLE `volunteers`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23303107;
-
---
--- AUTO_INCREMENT for table `volunteer_hours`
---
-ALTER TABLE `volunteer_hours`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23303107;
-
---
--- AUTO_INCREMENT for table `volunteer_opportunities`
---
-ALTER TABLE `volunteer_opportunities`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23303111;
+  MODIFY `sl` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `attendance`
+--
+ALTER TABLE `attendance`
+  ADD CONSTRAINT `attendance_ibfk_1` FOREIGN KEY (`faculty_id`) REFERENCES `faculty` (`faculty_id`),
+  ADD CONSTRAINT `attendance_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `student_registration` (`id`);
 
 --
 -- Constraints for table `borrow_books`
@@ -724,6 +764,13 @@ ALTER TABLE `volunteer_opportunities`
 ALTER TABLE `borrow_books`
   ADD CONSTRAINT `borrow_books_ibfk_1` FOREIGN KEY (`book_id`) REFERENCES `books` (`book_id`),
   ADD CONSTRAINT `borrow_books_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
+
+--
+-- Constraints for table `student_result`
+--
+ALTER TABLE `student_result`
+  ADD CONSTRAINT `student_result_ibfk_1` FOREIGN KEY (`st_id`) REFERENCES `student_registration` (`id`),
+  ADD CONSTRAINT `student_result_ibfk_2` FOREIGN KEY (`course`) REFERENCES `course` (`course_code`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
