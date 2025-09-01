@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Volunteer Registration - SKST University</title>
+    <link rel="icon" href="../picture/SKST.png" type="image/png" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -24,7 +25,6 @@
 
         .container {
             width: 100%;
-            max-width: 1000px;
             background: white;
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
@@ -32,7 +32,7 @@
         }
 
         header {
-            background: linear-gradient(135deg, #2c3e50, #1a2530);
+            background: linear-gradient(135deg, maroon, #1a2530);
             color: white;
             padding: 25px 30px;
             text-align: center;
@@ -149,24 +149,6 @@
             margin-top: 25px;
         }
         
-        .volunteer-info {
-            background: #f8f9fa;
-            border-left: 4px solid #3498db;
-            padding: 20px;
-            margin: 25px 0;
-            border-radius: 4px;
-        }
-        
-        .volunteer-info h3 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-        
-        .volunteer-info p {
-            color: #7f8c8d;
-            line-height: 1.5;
-        }
-        
         .icon {
             margin-right: 8px;
             color: #3498db;
@@ -214,10 +196,6 @@
         <div class="form-container">
             <h2 class="form-title"><i class="fas fa-hand-holding-heart icon"></i>Volunteer Registration Form</h2>
             
-            <div class="volunteer-info">
-                <h3><i class="fas fa-info-circle icon"></i>Why Volunteer With Us?</h3>
-                <p>SKST University values community engagement and the development of well-rounded individuals. Our volunteer program offers opportunities for personal growth, skill development, and making a positive impact in our community. All registered volunteers will receive a certificate of participation and hours served.</p>
-            </div>
             
             <form id="volunteerForm">
                 <div class="form-row">
@@ -236,14 +214,24 @@
                     <div class="form-group">
                         <label for="department" class="required">Department</label>
                         <select id="department" name="department" required>
-                            <option value="">Select Department</option>
-                            <option value="Computer Science">Computer Science</option>
-                            <option value="Electrical Engineering">Electrical Engineering</option>
-                            <option value="Business Administration">Business Administration</option>
-                            <option value="Civil Engineering">Civil Engineering</option>
-                            <option value="Mechanical Engineering">Mechanical Engineering</option>
-                            <option value="English">English</option>
-                            <option value="Economics">Economics</option>
+                            <option value="">Select a program</option>
+                                <option value="BBA in Accounting">BBA in Accounting</option>
+                                <option value="BBA in Finance">BBA in Finance</option>
+                                <option value="BBA in Human Resource Management">BBA in Human Resource Management</option>
+                                <option value="BBA in Management">BBA in Management</option>
+                                <option value="BBA in Marketing">BBA in Marketing</option>
+                                <option value="BSc in Computer Science and Engineering">BSc in Computer Science and Engineering</option>
+                                <option value="BSc in Civil Engineering">BSc in Civil Engineering</option>
+                                <option value="BSc in Electrical and Electronic Engineering">BSc in Electrical and Electronic Engineering</option>
+                                <option value="BSc in Mechanical Engineering">BSc in Mechanical Engineering</option>
+                                <option value="BSEEE in Electrical and Electronic Engineering">BSEEE in Electrical and Electronic Engineering</option>
+                                <option value="BSAg in Agriculture">BSAg in Agriculture</option>
+                                <option value="BSN in Nursing (Basic)">BSN in Nursing (Basic)</option>
+                                <option value="BSN in Nursing (Post Basic)">BSN in Nursing (Post Basic)</option>
+                                <option value="BATHM in Tourism and Hospitality Management">BATHM in Tourism and Hospitality Management</option>
+                                <option value="BSECO in Economics">BSECO in Economics</option>
+                                <option value="BA in English">BA in English</option>
+                                <option value="LLB (Honours)">LLB (Honours)</option>
                         </select>
                     </div>
                     
@@ -270,6 +258,8 @@
                             <option value="Cultural Festival">Cultural Festival</option>
                             <option value="Student Mentorship">Student Mentorship</option>
                             <option value="Community Outreach">Community Outreach</option>
+                            <option value="Health Awareness Campaign">Health Awareness Campaign</option>
+
                         </select>
                     </div>
                 </div>
@@ -304,9 +294,9 @@
                         <select id="experience" name="experience">
                             <option value="">Select Experience Level</option>
                             <option value="None">None</option>
-                            <option value="Beginner">Beginner (1-2 events)</option>
-                            <option value="Intermediate">Intermediate (3-5 events)</option>
-                            <option value="Experienced">Experienced (5+ events)</option>
+                            <option value="Beginner">Beginner (1-4 events)</option>
+                            <option value="Intermediate">Intermediate (5-10 events)</option>
+                            <option value="Experienced">Experienced (10+ events)</option>
                         </select>
                     </div>
                 </div>
@@ -321,6 +311,9 @@
                 <div class="action-buttons">
                     <button type="submit" class="btn btn-submit"><i class="fas fa-paper-plane"></i> Submit Application</button>
                     <button type="reset" class="btn btn-reset"><i class="fas fa-redo"></i> Reset Form</button>
+                    <button type="button" class="btn btn-reset" onclick="history.back();"><i class="fas fa-arrow-left"></i> Back</button>
+                    <button type="button" class="btn btn-reset" onclick="window.location.href='index.php';"><i class="fas fa-home"></i> Home</button>
+
                 </div>
             </form>
             
