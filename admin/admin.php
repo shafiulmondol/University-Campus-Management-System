@@ -99,7 +99,7 @@ function loginUser($id, $full_name, $username, $email, $phone, $profile_picture,
     }
     
     // Redirect to prevent form resubmission
-    header("Location: dashboard.php"); // Redirect to a specific page
+    header("Location: admin.php"); // Redirect to a specific page
     exit();
 }
 
@@ -1147,12 +1147,11 @@ $mysqli->close();
         </div>
         
         <div class="nav-buttons">
-            <span class="welcome"><i class="fas fa-user"></i> Welcome, <?php echo htmlspecialchars($_SESSION['admin_name']); ?></span>
             <button onclick="location.href='../index.html'">
                 <i class="fas fa-home"></i> Home
             </button>
-            <button onclick="location.href='?logout=1'">
-                <i class="fas fa-sign-out-alt"></i> Logout
+            <button onclick="location.href='../working.html'">
+                <i class="fas fa-bell"></i> Notifications
             </button>
         </div>
     </div>

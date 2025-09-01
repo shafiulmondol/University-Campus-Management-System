@@ -34,7 +34,11 @@ CREATE TABLE `admin_users` (
   `password` varchar(50) NOT NULL,
   `email` varchar(100) NOT NULL,
   `phone` varchar(20) NOT NULL,
-  `key` int(5) NOT NULL
+  `key` int(5) NOT NULL,
+  `profile_picture` varchar(255) DEFAULT NULL,
+  `registration_date` timestamp NOT NULL DEFAULT current_timestamp(),
+  `last_login` timestamp NULL DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -43,7 +47,7 @@ CREATE TABLE `admin_users` (
 
 INSERT INTO `admin_users` (`id`, `full_name`, `username`, `password`, `email`, `phone`, `key`) VALUES
 (1, 'Admin User', 'admin', 'admin123', 'admin@university.edu', '123-456-7890', 123),
-(23303106, 'shafiul islam mondol', 'sdf', 'shafiul', '23303106@iubat.edu', '01701535780', 123);
+(23303106, 'shafiul islam mondol', 'sdf', 'shafiul123', '23303106@iubat.edu', '01701535780', 123);
 
 -- --------------------------------------------------------
 
