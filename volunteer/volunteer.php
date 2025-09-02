@@ -1,417 +1,852 @@
 <?php
 session_start();
+$error = '';
 
 // Database configuration
-$host = "localhost";
-$user = "root";
-$pass = "";
-$db = "skst_university";
+define('DB_SERVER', 'localhost');
+define('DB_USERNAME', 'root');
+define('DB_PASSWORD', '');
+define('DB_NAME', 'skst_university');
 
-$conn = new mysqli($host, $user, $pass, $db);
-if ($conn->connect_error) die("DB Connection failed: " . $conn->connect_error);
+// Create connection
+$mysqli = new mysqli(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME);
 
-// Logout
+// Check connection
+if ($mysqli->connect_error) {
+    die("Connection failed: " . $mysqli->connect_error);
+}
+
+// Handle login
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
+    $email = trim($_POST['email']);
+    $password = $_POST['password'];
+    
+    // For demo purposes - in real application, use password_verify with hashed passwords
+    $sql = "SELECT sl, student_id, student_name, email FROM volunteers WHERE email = ? AND password = ?";
+    
+    if ($stmt = $mysqli->prepare($sql)) {
+        $stmt->bind_param("ss", $email, $password);
+        
+        if ($stmt->execute()) {
+            $stmt->store_result();
+            
+            if ($stmt->num_rows == 1) {
+                $stmt->bind_result($sl, $student_id, $student_name, $email);
+                if ($stmt->fetch()) {
+                    $_SESSION['volunteer_sl'] = $sl;
+                    $_SESSION['volunteer_id'] = $student_id;
+                    $_SESSION['volunteer_name'] = $student_name;
+                    $_SESSION['volunteer_email'] = $email;
+                    
+                    header("Location: " . $_SERVER['PHP_SELF']);
+                    exit();
+                }
+            } else {
+                $error = "Invalid email or password.";
+            }
+        } else {
+            $error = "Oops! Something went wrong. Please try again later.";
+        }
+        
+        $stmt->close();
+    }
+}
+
+// Handle logout
 if (isset($_GET['logout'])) {
     session_destroy();
-    header("Location: volunteer.php");
+    header("Location: " . $_SERVER['PHP_SELF']);
     exit();
 }
 
-// Login check
-$error = "";
-$success_message = "";
-$signup_message = "";
+// Check if user is logged in
+$is_logged_in = isset($_SESSION['volunteer_sl']);
 
-// Handle Volunteer Registration Form
-if ($_SERVER['REQUEST_METHOD'] === "POST" && isset($_POST['register'])) {
-    $name = $conn->real_escape_string($_POST['name']);
-    $id = intval($_POST['id']);
-    $email = $conn->real_escape_string($_POST['email']);
-    $phone = $conn->real_escape_string($_POST['phone']);
-    $affiliation = $conn->real_escape_string($_POST['affiliation']);
-    $availability = $conn->real_escape_string($_POST['availability']);
-    $skills = $conn->real_escape_string($_POST['skills']);
-
-    $interests = isset($_POST['interests']) ? $_POST['interests'] : [];
-    $interests_str = implode(', ', $interests);
-
-    $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
-
-    // Check if ID or email already exists
-    $check = $conn->prepare("SELECT id FROM volunteers WHERE id = ? OR email = ?");
-    $check->bind_param("is", $id, $email);
-    $check->execute();
-    $check_result = $check->get_result();
-    
-    if ($check_result->num_rows > 0) {
-        $error = "ID or Email already registered.";
-    } else {
-        $stmt = $conn->prepare("INSERT INTO volunteers (id, name, email, phone, affiliation, availability, skills, interests, password, registration_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
-        $stmt->bind_param("issssssss", $id, $name, $email, $phone, $affiliation, $availability, $skills, $interests_str, $password);
-        
-        if ($stmt->execute()) {
-            $success_message = "Volunteer registration successful! You can login now.";
-        } else {
-            $error = "Error: " . $conn->error;
-        }
-    }
-}
-
-// Handle Login
-if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['login'])) {
-    $id = intval($_POST['id']);
-    $password = $_POST['password'];
-
-    $stmt = $conn->prepare("SELECT * FROM volunteers WHERE id = ?");
-    $stmt->bind_param("i", $id);
+// Get volunteer data if logged in
+if ($is_logged_in) {
+    $volunteer_sl = $_SESSION['volunteer_sl'];
+    $sql = "SELECT * FROM volunteers WHERE sl = ?";
+    $stmt = $mysqli->prepare($sql);
+    $stmt->bind_param("i", $volunteer_sl);
     $stmt->execute();
     $result = $stmt->get_result();
-
-    if ($row = $result->fetch_assoc()) {
-        if (password_verify($password, $row['password'])) {
-            $_SESSION['id'] = $id;
-            $_SESSION['name'] = $row['name'];
-            header("Location: volunteer.php");
-            exit();
-        } else {
-            $error = "Incorrect password.";
-        }
-    } else {
-        $error = "ID not found.";
-    }
-}
-
-// Handle Sign-Up to Opportunity
-if (isset($_GET['signup']) && isset($_SESSION['id'])) {
-    $opp_id = intval($_GET['signup']);
-    $vol_id = intval($_SESSION['id']);
-
-    // Check if already signed up
-    $check = $conn->prepare("SELECT * FROM volunteer_signups WHERE volunteer_id=? AND opportunity_id=?");
-    $check->bind_param("ii", $vol_id, $opp_id);
-    $check->execute();
-    $check_res = $check->get_result();
+    $volunteer = $result->fetch_assoc();
+    $stmt->close();
     
-    if ($check_res->num_rows > 0) {
-        $signup_message = "You have already signed up for this opportunity!";
-    } else {
-        $stmt = $conn->prepare("INSERT INTO volunteer_signups (volunteer_id, opportunity_id, signup_date) VALUES (?, ?, NOW())");
-        $stmt->bind_param("ii", $vol_id, $opp_id);
-        
-        if ($stmt->execute()) {
-            $signup_message = "Successfully signed up for the opportunity!";
-        } else {
-            $signup_message = "Error signing up: " . $conn->error;
-        }
+    // Get volunteer statistics
+    $stats_sql = "SELECT 
+                    COUNT(*) as total_activities,
+                    SUM(hours) as total_hours,
+                    MIN(activity_date) as first_activity,
+                    MAX(activity_date) as last_activity
+                  FROM volunteers 
+                  WHERE student_id = ? OR email = ?";
+    $stats_stmt = $mysqli->prepare($stats_sql);
+    $stats_stmt->bind_param("is", $volunteer['student_id'], $volunteer['email']);
+    $stats_stmt->execute();
+    $stats_result = $stats_stmt->get_result();
+    $stats = $stats_result->fetch_assoc();
+    $stats_stmt->close();
+    
+    // Get all activities for this volunteer
+    $activities_sql = "SELECT activity_name, activity_date, role, hours, remarks 
+                       FROM volunteers 
+                       WHERE student_id = ? OR email = ? 
+                       ORDER BY activity_date DESC";
+    $activities_stmt = $mysqli->prepare($activities_sql);
+    $activities_stmt->bind_param("is", $volunteer['student_id'], $volunteer['email']);
+    $activities_stmt->execute();
+    $activities_result = $activities_stmt->get_result();
+    $activities = [];
+    while ($row = $activities_result->fetch_assoc()) {
+        $activities[] = $row;
     }
+    $activities_stmt->close();
 }
 
-// Fetch Volunteer Opportunities
-$opportunities_result = $conn->query("SELECT * FROM volunteer_opportunities ORDER BY date DESC");
-
-// Fetch Volunteer Hours
-$total_hours = 0;
-$hours_result = null;
-if(isset($_SESSION['id'])){
-    $volunteer_id = intval($_SESSION['id']);
-    $hours_result = $conn->query("SELECT * FROM volunteer_hours WHERE volunteer_id = $volunteer_id");
-    if ($hours_result && $hours_result->num_rows > 0) {
-        while($row = $hours_result->fetch_assoc()) {
-            $total_hours += $row['hours'];
-        }
-        $hours_result->data_seek(0);
-    }
-}
+$mysqli->close();
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Volunteer Dashboard | University</title>
-  <link rel="icon" href="../picture/SKST.png" type="image/png" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volunteer Portal - SKST University</title>
+    <link rel="icon" href="../picture/SKST.png" type="image/png" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+        /* ================ Navbar Styles ============ */
+        .navbar {
+            background: linear-gradient(135deg, #2b5876, #4e4376);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: white;
+            padding: 5px;
+        }
+        
+        .logo h1 {
+            font-size: 22px;
+            font-weight: 600;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .nav-buttons button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .nav-buttons button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .welcome {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        
+        /* ================ Main Layout ============ */
+        .main-layout {
+            display: flex;
+            min-height: calc(100vh - 80px);
+        }
+        
+        /* ================ Sidebar Styles ============ */
+        .sidebar {
+            width: 250px;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 80px;
+            height: calc(100vh - 80px);
+            overflow-y: auto;
+            z-index: 90;
+            padding: 25px 0;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+            width: 100%;
+        }
+        
+        .sidebar-menu li {
+            margin-bottom: 5px;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+        
+        .sidebar-menu a, .sidebar-menu button {
+            display: flex;
+            align-items: center;
+            color: #4e4376;
+            text-decoration: none;
+            padding: 12px 25px;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-align: left;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .sidebar-menu a:hover, 
+        .sidebar-menu a.active, 
+        .sidebar-menu button:hover {
+            background-color: #f0f5ff;
+            color: #2b5876;
+            border-right: 4px solid #2b5876;
+        }
+        
+        .sidebar-menu i {
+            margin-right: 12px;
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+        
+        /* ================ Content Area ============ */
+        .content-area {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            height: calc(100vh - 80px);
+        }
+        
+        .page-header {
+            background: linear-gradient(to right, #f0f5ff, #f8faff);
+            padding: 20px 25px;
+            margin-bottom: 25px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .page-title {
+            color: #2b5876;
+            font-size: 30px;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .btn-edit {
+            background: linear-gradient(135deg, #2b5876, #4e4376);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: opacity 0.3s;
+        }
+        
+        .btn-edit:hover {
+            opacity: 0.9;
+        }
+        
+        /* ================ Profile Section ============ */
+        .profile-card {
+            background: linear-gradient(to right, #f0f5ff, #f8faff);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .profile-img-container {
+            position: relative;
+            margin-right: 30px;
+        }
+        
+        .profile-img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .profile-placeholder {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: #2b5876;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 40px;
+            border: 5px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .profile-info h2 {
+            color: #2b5876;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .profile-info p {
+            color: #666;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .profile-info i {
+            margin-right: 10px;
+            color: #4e4376;
+        }
+        
+        /* ================ Stats Section ============ */
+        .stats {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
 
-<style>
-   body { 
-    font-family: Arial, sans-serif;
-     margin:0; 
-     padding:0; 
-     background:#f4f4f9; 
-     }
-        header { 
-            background:#2c3e50; 
-            color:#fff; 
-            padding:15px; 
-            text-align:center; 
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            flex: 1;
+            min-width: 180px;
+            transition: all 0.3s ease;
+            border-top: 3px solid;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+        }
+
+        .stat-card:nth-child(1) {
+            border-color: #4e4376;
+        }
+
+        .stat-card:nth-child(2) {
+            border-color: #2b5876;
+        }
+
+        .stat-card:nth-child(3) {
+            border-color: #4a90e2;
+        }
+
+        .stat-card:nth-child(4) {
+            border-color: #f39c12;
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: white;
+        }
+
+        .stat-card:nth-child(1) .stat-icon {
+            background: linear-gradient(135deg, #4e4376, #826ab4);
+        }
+
+        .stat-card:nth-child(2) .stat-icon {
+            background: linear-gradient(135deg, #2b5876, #4e8fa8);
+        }
+
+        .stat-card:nth-child(3) .stat-icon {
+            background: linear-gradient(135deg, #4a90e2, #6bb9ff);
+        }
+
+        .stat-card:nth-child(4) .stat-icon {
+            background: linear-gradient(135deg, #f39c12, #f1c40f);
+        }
+
+        .stat-number {
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 3px;
+            background: linear-gradient(135deg, #2b5876, #4e4376);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* ================ Activities Table ============ */
+        .activities-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+        
+        .activities-card h3 {
+            color: #2b5876;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f5ff;
+            display: flex;
+            align-items: center;
+        }
+        
+        .activities-card h3 i {
+            margin-right: 10px;
+            background: #f0f5ff;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            color: #4e4376;
+        }
+        
+        .activities-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .activities-table th, 
+        .activities-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .activities-table th {
+            background-color: #f8f9fa;
+            color: #2b5876;
+            font-weight: 600;
+        }
+        
+        .activities-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .activities-table .role {
+            background: #e8f4ff;
+            color: #2b5876;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        /* ================ Login Form Styles ============ */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        
+        .login-box {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+            overflow: hidden;
+        }
+        
+        .login-header {
+            background: linear-gradient(135deg, #2b5876, #4e4376);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .login-header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: white;
+        }
+        
+        .login-header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .login-form {
+            padding: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2b5876;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            border-color: #2b5876;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(43, 88, 118, 0.2);
+        }
+        
+        .login-btn {
+            background: linear-gradient(135deg, #2b5876, #4e4376);
+            color: white;
+            border: none;
+            padding: 15px;
+            width: 100%;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        .login-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        .error-msg {
+            color: #e74c3c;
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            background: #ffecec;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .demo-credentials {
+            margin-top: 25px;
+            padding: 15px;
+            background: #f0f5ff;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #4e4376;
+            text-align: center;
+        }
+        
+        /* ================ Responsive Design ============ */
+        @media (max-width: 900px) {
+            .main-layout {
+                flex-direction: column;
             }
-        nav a { 
-            color:#fff; 
-            margin:0 15px; 
-            text-decoration:none; 
-            font-weight:bold; 
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+                top: 0;
             }
-        section { 
-            padding:40px; 
-            text-align:center; 
+            
+            .content-area {
+                height: auto;
             }
-        form { 
-            max-width:400px; 
-            margin:20px auto; 
-            background:#fff; 
-            padding:20px; 
-            border-radius:10px; 
-            box-shadow:0 2px 6px rgba(0,0,0,0.1); 
+            
+            .profile-card {
+                flex-direction: column;
+                text-align: center;
             }
-        form h2 { 
-            margin-bottom:15px; 
+            
+            .profile-img-container {
+                margin-right: 0;
+                margin-bottom: 20px;
             }
-        .form-group { 
-            margin-bottom:15px; 
-            text-align:left; 
+            
+            .stats {
+                flex-direction: column;
             }
-        label { 
-            display:block; 
-            -bottom:5px; 
+        }
+        
+        @media (max-width: 600px) {
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
             }
-        input { 
-            width:100%; 
-            :10px; 
-            border:1px solid #ccc; border-radius:5px; 
+            
+            .nav-buttons {
+                flex-wrap: wrap;
+                justify-content: center;
             }
-        button { 
-            padding:10px 15px;
-             background:#2c3e50; 
-             color:#fff; 
-             :none; 
-             border-radius:5px; 
-             cursor:pointer; 
-             }
-        button:hover { 
-            background:#1a252f; 
+            
+            .page-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
             }
-        .message { 
-            color:red; 
-            font-weight:bold; 
-            text-align:center; 
-            margin:10px;
+            
+            .activities-table {
+                display: block;
+                overflow-x: auto;
             }
-        footer { 
-            background:#2c3e50; 
-            color:#fff; 
-            text-align:center; 
-            padding:10px; 
-            margin-top:40px; 
-            }
-body{
-    font-family:sans-serif;
-    background:#f4f6fb;
-    margin:0;padding:0;
-    }
-header{
-    background:#4361ee;
-    color:white;
-    padding:15px;
-    text-align:center;
-    }
-.container{
-    width:90%;
-    max-width:1000px;
-    margin:30px auto;
-    }
-.cards{
-    display:flex;
-    flex-wrap:wrap;
-    gap:20px;
-    justify-content:center;
-    }
-.card{
-    background:white;
-    padding:20px;
-    border-radius:10px;
-    box-shadow:0 3px 10px rgba(0,0,0,0.1);
-    text-align:center;
-    transition:0.3s;
-    cursor:pointer;
-    }
-.card:hover{
-    transform:translateY(-5px);
-    box-shadow:0 5px 15px rgba(0,0,0,0.2);
-    }
-.card span{
-    font-size:30px;
-    display:block;
-    margin-bottom:10px;
-    }
-input,textarea,select,button{
-    padding:10px;
-    margin:8px 0;
-    border-radius:6px;
-    border:1px solid #ccc;
-    width:100%;
-    }
-button{
-    background:#4361ee;
-    color:white;
-    border:none;
-    cursor:pointer;
-    }
-button:hover{
-    background:#3f37c9;
-    }
-.success{
-    background:#d4edda;
-    color:#155724;
-    padding:10px;
-    border-radius:5px;
-    margin-bottom:15px;
-    }
-.error{
-    background:#f8d7da;
-    color:#721c24;
-    padding:10px;
-    border-radius:5px;
-    margin-bottom:15px;
-    }
-table{
-    width:100%;
-    border-collapse:collapse;
-    }
-table,th,td{
-    border:1px solid #ccc;
-    }
-th,td{
-    padding:8px;
-    text-align:center;
-    }
-</style>
+        }
+    </style>
 </head>
 <body>
-
-<header>
-    <h1>University Volunteer System</h1>
-    <nav>
-   <a href="../index.html" class="home-button">
-          <i class="fas fa-home"></i> Home
-        </a>
-        <a href="#opportunities">Opportunities</a>
-        <?php if(isset($_SESSION['id'])): ?>
-            <a href="#myhours">My Hours</a>
-            <a href="#profile">Profile</a>
-            <a href="?logout=true">Logout</a>
-        <?php else: ?>
-            <a href="#signup">Sign Up</a>
-            <a href="#signin">Sign In</a>
-        <?php endif; ?>
-    </nav>
-</header>
-
-<div class="container">
-    <!-- Hero / Home Section -->
-    <section id="home" class="hero">
-        <h2>Make a Difference Today</h2>
-        <p>Join our volunteer program and be part of positive change at SKST University.</p>
-    </section>
-
-    <?php if(!isset($_SESSION['id'])): ?>
-        <!-- Sign In Form -->
-        <section id="signin">
-            <h2>Volunteer Login</h2>
-            <?php if($error): ?><div class="error"><?=htmlspecialchars($error)?></div><?php endif; ?>
-            <form method="POST">
-                <input type="number" name="id" placeholder="Enter your ID" required>
-                <input type="password" name="password" placeholder="Enter your Password" required>
-                <button type="submit" name="login">Login</button>
-            </form>
-        </section>
-
-        <!-- Registration Form -->
-        <section id="signup">
-            <h2>Register as New Volunteer</h2>
-            <?php if($success_message): ?><div class="success"><?=htmlspecialchars($success_message)?></div><?php endif; ?>
-            <form method="POST">
-                <input type="number" name="id" placeholder="Your ID" required>
-                <input type="text" name="name" placeholder="Full Name" required>
-                <input type="email" name="email" placeholder="Email" required>
-                <input type="text" name="phone" placeholder="Phone">
-                <input type="text" name="affiliation" placeholder="Affiliation">
-                <input type="text" name="availability" placeholder="Availability">
-                <input type="text" name="skills" placeholder="Skills/Certifications">
-                <input type="password" name="password" placeholder="Password" required>
-                <label>Interests:</label><br>
-                <input type="checkbox" name="interests[]" value="Community Service"> Community Service
-                <input type="checkbox" name="interests[]" value="Events"> Events
-                <input type="checkbox" name="interests[]" value="Orientation"> Orientation
-                <button type="submit" name="register">Register</button>
-            </form>
-        </section>
-
-    <?php else: ?>
-        <h2>Welcome <?=htmlspecialchars($_SESSION['name'])?></h2>
-        <?php if($signup_message): ?><div class="success"><?=htmlspecialchars($signup_message)?></div><?php endif; ?>
-        <div class="cards">
-            <a href="#opportunities" class="card"><span>📋</span>Opportunities</a>
-            <a href="#myhours" class="card"><span>⏱️</span>My Hours</a>
-            <a href="#profile" class="card"><span>👤</span>Profile</a>
-            <a href="?logout=true" class="card" style="background:#e74c3c;color:white;"><span>🚪</span>Logout</a>
-        </div>
-
-        <section id="opportunities">
-            <h2>Volunteer Opportunities</h2>
-            <div class="cards">
-            <?php if($opportunities_result && $opportunities_result->num_rows>0):
-                while($opp = $opportunities_result->fetch_assoc()): ?>
-                <div class="card">
-                    <span>📌</span>
-                    <strong><?=htmlspecialchars($opp['title'])?></strong><br>
-                    <?=htmlspecialchars($opp['description'])?><br>
-                    Date: <?=htmlspecialchars($opp['date'])?><br>
-                    <a href="?signup=<?=$opp['id']?>"><button>Sign Up</button></a>
-                </div>
-                <?php endwhile; else: ?>
-                <p>No opportunities available.</p>
-                <?php endif; ?>
+    <?php if (!$is_logged_in): ?>
+    <!-- Login Page -->
+    <div class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <h1>Volunteer Portal</h1>
+                <p>SKST University - Sign in to your account</p>
             </div>
-        </section>
+            
+            <form class="login-form" method="post">
+                <input type="hidden" name="login" value="1">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required placeholder="Enter your email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required placeholder="Enter your password">
+                </div>
+                
+                <button type="submit" class="login-btn">Login to Dashboard</button>
+                
+                <?php if (!empty($error)): ?>
+                    <div class="error-msg"><?php echo $error; ?></div>
+                <?php endif; ?>
+            </form>
+        </div>
+    </div>
+    <?php else: ?>
+    <!-- Dashboard -->
+    <div class="navbar">
+        <div class="logo">
+            <h1>SKST University Volunteers</h1>
+        </div>
+        
+        <div class="nav-buttons">
+            <button type="button" class="btn btn-reset" onclick="history.back();"><i class="fas fa-arrow-left"></i> Back</button>
+            <button onclick="location.href='../index.html'"><i class="fas fa-home"></i> Home</button>
+        </div>
+    </div>
+    
+    <div class="main-layout">
+        <div class="sidebar">
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="#" class="active">
+                        <i class="fas fa-user"></i> Profile
+                    </a>
+                </li>
+                <li>
+                    <a href="../working.html">
+                        <i class="fas fa-calendar"></i> Upcoming Events
+                    </a>
+                </li>
+                <li>
+                    <a href="#Table1">
+                        <i class="fas fa-chart-line"></i> Statistics
+                    </a>
+                </li>
+                <li>
+                    <button onclick="location.href='?logout=1'">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="content-area">
+            <div class="page-header">
+                <h1 class="page-title"><i class="fas fa-hands-helping"></i> Volunteer Dashboard</h1>
+            </div>
 
-        <section id="myhours">
-            <h2>My Volunteer Hours</h2>
-            <p>Total Hours: <?=intval($total_hours)?></p>
-            <?php if($hours_result && $hours_result->num_rows>0): ?>
-            <table>
-                <tr><th>Event</th><th>Date</th><th>Hours</th></tr>
-                <?php while($h=$hours_result->fetch_assoc()): ?>
-                <tr>
-                    <td><?=htmlspecialchars($h['event_name'])?></td>
-                    <td><?=htmlspecialchars($h['event_date'])?></td>
-                    <td><?=htmlspecialchars($h['hours'])?></td>
-                </tr>
-                <?php endwhile; ?>
-            </table>
-            <?php else: ?>
-            <p>No hours recorded yet.</p>
+            <!-- Profile Card -->
+            <div class="profile-card">
+                <div class="profile-img-container">
+                    <div class="profile-placeholder">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
+
+                <div class="profile-info">
+                    <h2><?php echo htmlspecialchars($volunteer['student_name']); ?></h2>
+                    <p><i class="fas fa-id-card"></i> Student ID: <?php echo htmlspecialchars($volunteer['student_id'] ?? 'Not provided'); ?></p>
+                    <p><i class="fas fa-envelope"></i> <?php echo htmlspecialchars($volunteer['email']); ?></p>
+                    <p><i class="fas fa-phone"></i> <?php echo htmlspecialchars($volunteer['phone'] ?? 'Not provided'); ?></p>
+                    <p><i class="fas fa-graduation-cap"></i> <?php echo htmlspecialchars($volunteer['department'] ?? 'Not specified'); ?></p>
+                </div>
+            </div>
+            
+            <?php if (!empty($error)): ?>
+                <div class="error-msg"><?php echo $error; ?></div>
             <?php endif; ?>
-        </section>
-
-        <section id="profile">
-            <h2>Profile / Biodata</h2>
-            <?php
-            $stmt = $conn->prepare("SELECT * FROM volunteers WHERE id=?");
-            $stmt->bind_param("i", $_SESSION['id']);
-            $stmt->execute();
-            $res = $stmt->get_result();
-            $profile = $res->fetch_assoc();
-            ?>
-            <p><strong>ID:</strong> <?=htmlspecialchars($profile['id'])?></p>
-            <p><strong>Name:</strong> <?=htmlspecialchars($profile['name'])?></p>
-            <p><strong>Email:</strong> <?=htmlspecialchars($profile['email'])?></p>
-            <p><strong>Phone:</strong> <?=htmlspecialchars($profile['phone'])?></p>
-            <p><strong>Affiliation:</strong> <?=htmlspecialchars($profile['affiliation'])?></p>
-            <p><strong>Availability:</strong> <?=htmlspecialchars($profile['availability'])?></p>
-            <p><strong>Skills:</strong> <?=htmlspecialchars($profile['skills'])?></p>
-            <p><strong>Interests:</strong> <?=htmlspecialchars($profile['interests'])?></p>
-        </section>
-
+            
+            <!-- Statistics Section -->
+            <section id="Table1">
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="stat-number"><?php echo $stats['total_activities'] ?? 0; ?></div>
+                    <div class="stat-label">Total Activities</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-number"><?php echo $stats['total_hours'] ?? 0; ?></div>
+                    <div class="stat-label">Total Hours</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-day"></i>
+                    </div>
+                    <div class="stat-number"><?php echo $stats['first_activity'] ? date('M Y', strtotime($stats['first_activity'])) : 'N/A'; ?></div>
+                    <div class="stat-label">First Activity</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-star"></i>
+                    </div>
+                    <div class="stat-number"><?php echo $stats['last_activity'] ? date('M Y', strtotime($stats['last_activity'])) : 'N/A'; ?></div>
+                    <div class="stat-label">Latest Activity</div>
+                </div>
+            </div>
+            </section>
+            
+            
+            <!-- Activities Table -->
+            <div class="activities-card">
+                <h3><i class="fas fa-tasks"></i> Volunteer Activities</h3>
+                
+                <table class="activities-table">
+                    <thead>
+                        <tr>
+                            <th>Activity Name</th>
+                            <th>Date</th>
+                            <th>Role</th>
+                            <th>Hours</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (!empty($activities)): ?>
+                            <?php foreach ($activities as $activity): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($activity['activity_name']); ?></td>
+                                    <td><?php echo date('M j, Y', strtotime($activity['activity_date'])); ?></td>
+                                    <td><span class="role"><?php echo htmlspecialchars($activity['role']); ?></span></td>
+                                    <td><?php echo $activity['hours']; ?> hrs</td>
+                                    <td><?php echo htmlspecialchars($activity['remarks']); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="5" style="text-align: center;">No volunteer activities found.</td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
     <?php endif; ?>
-</div>
+
+    <script>
+        // Simple JavaScript for interactive elements
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add active class to clicked sidebar items
+            const sidebarItems = document.querySelectorAll('.sidebar-menu a, .sidebar-menu button');
+            sidebarItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    sidebarItems.forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        });
+    </script>
 </body>
 </html>
-<?php $conn->close(); ?>

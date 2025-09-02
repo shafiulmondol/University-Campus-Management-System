@@ -6,7 +6,7 @@ if (!isset($_SESSION['student_data'])) {
     header("Location: studentlogin.php");
     exit();
 } 
-
+$conn= mysqli_connect('localhost', 'root','','skst_university');
 // Get the student data from session
 $stdata = $_SESSION['student_data'];
 
@@ -64,10 +64,24 @@ $login_time        = $stdata['login_time'] ?? '';
         .info-group { display: flex; justify-content: space-between; margin-bottom: 10px; }
         .info-label { font-weight: 500; color: #555; }
         .info-value { font-weight: 600; color: #333; }
+
+        /* Request Form Styles */
+
     </style>
 </head>
 <body><?php
-function studentbiodata($stdata) {
+if(isset($_POST['editreq'])){
+    global $conn; 
+    ?>
+    <div class="editcontainer">
+    <form action="" method="post">
+    <label for="" class="edith1" ><h1>Student ID</h1></label>
+
+    </form>
+    </div>
+<?php
+}
+else{
     // Extract variables from $stdata
     extract($stdata);
     ?>
@@ -75,7 +89,8 @@ function studentbiodata($stdata) {
     <div class="content-area">
         <div class="page-header">
             <h2 class="page-title"><i class="fas fa-user-circle"></i> Student Profile</h2>
-            <button class="btn-edit"><i class="fas fa-edit"></i> Edit Profile</button>
+            <form action="" method="post">
+            <button class="btn-edit" name="editreq"><i class="fas fa-edit"></i> Requiest Biodata Update</button> </form>
         </div>
 
         <!-- Profile Card -->
@@ -136,8 +151,10 @@ function studentbiodata($stdata) {
             </div>
         </div>
     </div>
+    
 <?php
 }
+
 ?>
 
 </body>
