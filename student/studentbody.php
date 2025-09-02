@@ -57,7 +57,13 @@ if (isset($_GET['action'])) {
         $show_request_form = false;
     }
 }
-
+ if (isset($_POST['routine'])) {
+        $show_routine_section = true;
+        $show_result_section = false;
+        $show_course_section = false;
+        $show_enrollment_section = false;
+        $show_request_form = false;
+    }
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['editreq'])) {
@@ -2335,7 +2341,59 @@ if (isset($_POST['search_course']) && !empty($selected_semester)) {
                     <?php endif; ?>
                 </div>
             </div>
-Routine
+<?php elseif ($show_routine_section || isset($_POST['routine'])): ?>
+    <!-- Routine Section -->
+    <div class="content-area">
+        <div class="page-header">
+            <h2 class="page-title"><i class="fas fa-calendar-alt"></i> My Class Routine</h2>
+            <form method="post">
+                <button type="submit" name="enrolment" class="btn-back">
+                    <i class="fas fa-arrow-left"></i> Back to Enrollment
+                </button>
+            </form>
+        </div>
+        
+        <div class="routine-container">
+            <?php if (!empty($enrolled_courses)): ?>
+                <h3>Your Class Schedule for Semester <?= $current_semester ?></h3>
+                
+                <div class="table-responsive">
+                    <table class="routine-table">
+                        <thead>
+                            <tr>
+                                <th>SI</th>
+                                <th>Course Code</th>
+                                <th>Course Name</th>
+                                <th>Instructor</th>
+                                <th>Time</th>
+                                <th>Room</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php $si = 1; ?>
+                            <?php foreach ($enrolled_courses as $course): ?>
+                                <tr>
+                                    <td><?= $si++ ?></td>
+                                    <td><?= htmlspecialchars($course['course_code']) ?></td>
+                                    <td><?= htmlspecialchars($course['course_name']) ?></td>
+                                    <td><?= htmlspecialchars($course['instructor_name'] ?? 'Not Assigned') ?></td>
+                                    <td><?= htmlspecialchars($course['class_time'] ?? 'Not Scheduled') ?></td>
+                                    <td><?= htmlspecialchars($course['room_number'] ?? 'Not Assigned') ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php else: ?>
+                <div class="no-results">
+                    <i class="fas fa-info-circle" style="font-size: 48px; margin-bottom: 15px;"></i>
+                    <h3>No enrolled courses found</h3>
+                    <p>You haven't enrolled in any courses yet. Please enroll in courses to view your routine.</p>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
         <?php else: ?>
             <!-- Default Dashboard View -->
             <div class="content-area">
