@@ -44,6 +44,8 @@ $login_time = $stdata['login_time'] ?? '';
 $show_request_form = false;
 $show_result_section = false;
 $show_course_section = false;
+$show_enrollment_section = false;
+$show_routine_section = false;
 $errors = [];
 $success = '';
 
@@ -123,17 +125,70 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (isset($_POST['result'])) {
         $show_result_section = true;
         $show_course_section = false;
+        $show_enrollment_section = false;
+        $show_routine_section = false;
     } elseif (isset($_POST['course'])) {
         $show_course_section = true;
         $show_result_section = false;
+        $show_enrollment_section = false;
+        $show_routine_section = false;
     } elseif (isset($_POST['dashboard'])) {
         $show_result_section = false;
         $show_request_form = false;
         $show_course_section = false;
+        $show_enrollment_section = false;
+        $show_routine_section = false;
     } elseif (isset($_POST['biodata'])) {
         $show_result_section = false;
         $show_request_form = false;
         $show_course_section = false;
+        $show_enrollment_section = false;
+        $show_routine_section = false;
+    } elseif (isset($_POST['enrolment'])) {
+        $show_enrollment_section = true;
+        $show_result_section = false;
+        $show_course_section = false;
+        $show_routine_section = false;
+    } elseif (isset($_POST['routine'])) {
+        $show_routine_section = true;
+        $show_result_section = false;
+        $show_course_section = false;
+        $show_enrollment_section = false;
+    } elseif (isset($_POST['enroll_course'])) {
+        // Handle course enrollment
+        $course_id = mysqli_real_escape_string($conn, $_POST['course_id']);
+        $faculty_id = mysqli_real_escape_string($conn, $_POST['faculty_id']);
+        $enrollment_date = date('Y-m-d H:i:s');
+        
+        // Check if already enrolled
+        $check_query = "SELECT * FROM enrollments WHERE student_id = '$id' AND course_id = '$course_id'";
+        $check_result = mysqli_query($conn, $check_query);
+        
+        if (mysqli_num_rows($check_result) > 0) {
+            $errors[] = "You are already enrolled in this course.";
+        } else {
+            // Insert enrollment
+            $enroll_query = "INSERT INTO enrollments (student_id, course_id, faculty_id, enrollment_date, status) 
+                             VALUES ('$id', '$course_id', '$faculty_id', '$enrollment_date', 'enrolled')";
+            
+            if (mysqli_query($conn, $enroll_query)) {
+                $success = "Successfully enrolled in the course!";
+                $show_enrollment_section = true;
+            } else {
+                $errors[] = "Error enrolling in course: " . mysqli_error($conn);
+            }
+        }
+    } elseif (isset($_POST['cancel_enrollment'])) {
+        $course_id = mysqli_real_escape_string($conn, $_POST['course_id']);
+        
+        $cancel_query = "DELETE FROM enrollments WHERE student_id = '$id' AND course_id = '$course_id'";
+        
+        if (mysqli_query($conn, $cancel_query)) {
+            $success = "Enrollment canceled successfully!";
+            $show_enrollment_section = true;
+        } else {
+            $errors[] = "Error canceling enrollment: " . mysqli_error($conn);
+        }
     }
 }
 
@@ -224,7 +279,157 @@ if (isset($_POST['course']) || isset($_POST['search_course']) || isset($_POST['s
         }
     }
 }
+
+// Calculate current semester based on student results
+$current_semester = 1;
+$max_semester_query = "SELECT MAX(semister) as max_semester FROM student_result WHERE st_id = '$id'";
+$max_semester_result = mysqli_query($conn, $max_semester_query);
+
+if ($max_semester_result && mysqli_num_rows($max_semester_result) > 0) {
+    $row = mysqli_fetch_assoc($max_semester_result);
+    if ($row['max_semester'] !== null) {
+        $current_semester = $row['max_semester'] + 1;
+    }
+}
+
+// Fetch available courses for the current semester with faculty information
+$available_courses = [];
+$enrolled_courses = [];
+
+// Get current academic year
+$current_year = date('Y');
+
+// Check if course_instructor table has academic_year column
+$check_academic_year = mysqli_query($conn, "SHOW COLUMNS FROM course_instructor LIKE 'academic_year'");
+$has_academic_year = mysqli_num_rows($check_academic_year) > 0;
+
+// Check if class_days column exists in course_instructor table
+$check_class_days = mysqli_query($conn, "SHOW COLUMNS FROM course_instructor LIKE 'class_days'");
+$has_class_days = mysqli_num_rows($check_class_days) > 0;
+
+// Build query based on database structure
+if ($has_academic_year) {
+    $query = "SELECT c.*, f.faculty_id, f.name as instructor_name, 
+                     ci.class_time, ci.room_number";
+    
+    if ($has_class_days) {
+        $query .= ", ci.class_days";
+    }
+    
+    $query .= " FROM course as c 
+              LEFT JOIN course_instructor ci ON c.course_id = ci.course_id 
+              LEFT JOIN faculty as f ON ci.faculty_id = f.faculty_id
+              WHERE c.semester = '$current_semester' 
+              AND ci.academic_year = '$current_year'
+              ORDER BY c.course_code";
+} else {
+    $query = "SELECT c.*, f.faculty_id, f.name as instructor_name, 
+                     ci.class_time, ci.room_number";
+    
+    if ($has_class_days) {
+        $query .= ", ci.class_days";
+    }
+    
+    $query .= " FROM course as c 
+              LEFT JOIN course_instructor ci ON c.course_id = ci.course_id 
+              LEFT JOIN faculty as f ON ci.faculty_id = f.faculty_id
+              WHERE c.semester = '$current_semester' 
+              ORDER BY c.course_code";
+}
+
+$course_query = mysqli_query($conn, $query);
+if ($course_query && mysqli_num_rows($course_query) > 0) {
+    while ($row = mysqli_fetch_assoc($course_query)) {
+        // Check if student is already enrolled
+        $course_id = $row['course_id'];
+        $enrollment_query = "SELECT * FROM enrollments WHERE student_id = '$id' AND course_id = '$course_id'";
+        $enrollment_result = mysqli_query($conn, $enrollment_query);
+        $row['is_enrolled'] = mysqli_num_rows($enrollment_result) > 0;
+        
+        $available_courses[] = $row;
+    }
+}
+
+// Get enrolled courses for routine
+$enrolled_query = "SELECT c.*, f.name as instructor_name, ci.class_time, ci.room_number";
+if ($has_class_days) {
+    $enrolled_query .= ", ci.class_days";
+}
+$enrolled_query .= " FROM enrollments e
+                   JOIN course c ON e.course_id = c.course_id
+                   LEFT JOIN course_instructor ci ON c.course_id = ci.course_id 
+                   LEFT JOIN faculty f ON ci.faculty_id = f.faculty_id
+                   WHERE e.student_id = '$id' AND e.status = 'enrolled'";
+
+$enrolled_result = mysqli_query($conn, $enrolled_query);
+if ($enrolled_result && mysqli_num_rows($enrolled_result) > 0) {
+    while ($row = mysqli_fetch_assoc($enrolled_result)) {
+        $enrolled_courses[] = $row;
+    }
+}
+
+// Check if required tables exist, create them if not
+$check_tables = mysqli_query($conn, "SHOW TABLES LIKE 'course_instructor'");
+if (mysqli_num_rows($check_tables) == 0) {
+    // Create course_instructor table
+    $create_table = "CREATE TABLE course_instructor (
+        ci_id INT(11) PRIMARY KEY AUTO_INCREMENT,
+        course_id INT(11) NOT NULL,
+        faculty_id INT(11) NOT NULL,
+        class_time VARCHAR(50) NOT NULL,
+        room_number VARCHAR(20) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (course_id) REFERENCES course(course_id),
+        FOREIGN KEY (faculty_id) REFERENCES faculty(faculty_id)
+    )";
+    
+    mysqli_query($conn, $create_table);
+    
+    // Insert sample data - link courses with faculty
+    $sample_data = [
+        [1, 1, '10:00-11:30', 'Room 101'],
+        [2, 2, '14:00-15:30', 'Room 202'],
+        [3, 3, '11:00-12:30', 'Room 303'],
+        [4, 4, '09:00-10:30', 'Room 404'],
+        [5, 5, '13:00-14:30', 'Room 505'],
+    ];
+    
+    foreach ($sample_data as $data) {
+        $insert = "INSERT INTO course_instructor (course_id, faculty_id, class_time, room_number) 
+                   VALUES ('$data[0]', '$data[1]', '$data[2]', '$data[3]')";
+        mysqli_query($conn, $insert);
+    }
+}
+
+$check_tables = mysqli_query($conn, "SHOW TABLES LIKE 'enrollments'");
+if (mysqli_num_rows($check_tables) == 0) {
+    // Create enrollments table with faculty_id column
+    $create_table = "CREATE TABLE enrollments (
+        enrollment_id INT(11) PRIMARY KEY AUTO_INCREMENT,
+        student_id INT(11) NOT NULL,
+        course_id INT(11) NOT NULL,
+        faculty_id INT(11) NOT NULL,
+        enrollment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        status ENUM('enrolled', 'completed', 'dropped') DEFAULT 'enrolled',
+        FOREIGN KEY (student_id) REFERENCES student_registration(id),
+        FOREIGN KEY (course_id) REFERENCES course(course_id),
+        FOREIGN KEY (faculty_id) REFERENCES faculty(faculty_id)
+    )";
+    
+    mysqli_query($conn, $create_table);
+}
+
+// If enrollments table exists but doesn't have faculty_id column, add it
+$check_column = mysqli_query($conn, "SHOW COLUMNS FROM enrollments LIKE 'faculty_id'");
+if (mysqli_num_rows($check_column) == 0) {
+    $alter_table = "ALTER TABLE enrollments ADD COLUMN faculty_id INT(11) NOT NULL AFTER course_id";
+    mysqli_query($conn, $alter_table);
+    
+    $add_foreign_key = "ALTER TABLE enrollments ADD FOREIGN KEY (faculty_id) REFERENCES faculty(faculty_id)";
+    mysqli_query($conn, $add_foreign_key);
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -239,8 +444,336 @@ if (isset($_POST['course']) || isset($_POST['search_course']) || isset($_POST['s
     <link rel="stylesheet" href="student.css">
     <style>
         /* =======       student body ===================== */
-
+   .result-container, .course-container, .routine-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        
+        .search-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+        
+        .form-group-row {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group-row label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group-row select, 
+        .form-group-row input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .btn-search {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .btn-routine {
+            background: #6f42c1;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .btn-show-all {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .btn-back {
+            background: #6c757d;
+            color: white;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        
+        .result-table, .course-table, .routine-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .result-table th, 
+        .result-table td,
+        .course-table th, 
+        .course-table td,
+        .routine-table th, 
+        .routine-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        .result-table th,
+        .course-table th,
+        .routine-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        
+        .result-table tr:nth-child(even),
+        .course-table tr:nth-child(even),
+        .routine-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+            font-style: italic;
+        }
+        
+        .semester-header {
+            background-color: #e9ecef;
+            font-weight: bold;
+        }
+        
+        .gpa-display {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+        
+        .btn-enroll {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-enroll:hover {
+            background: #218838;
+        }
+        
+        .btn-enroll:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .btn-enrolled {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: default;
+        }
+        
+        .course-card {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .course-item {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .course-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .course-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .course-code {
+            font-weight: bold;
+            color: #007bff;
+            font-size: 1.1rem;
+        }
+        
+        .course-credits {
+            background: #6c757d;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+        
+        .course-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+            color: #333;
+        }
+        
+        .course-details {
+            margin-bottom: 15px;
+            color: #555;
+        }
+        
+        .course-details div {
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .course-details i {
+            margin-right: 8px;
+            width: 16px;
+            color: #007bff;
+        }
+        
+        .course-schedule {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border-left: 3px solid #007bff;
+        }
+        
+        .course-schedule div {
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .course-schedule i {
+            margin-right: 8px;
+            width: 16px;
+            color: #28a745;
+        }
+        
+        .course-actions {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+        
+        .semester-info {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #007bff;
+        }
+        
+        .semester-info h3 {
+            margin: 0;
+            color: #495057;
+        }
+        
+        .semester-info p {
+            margin: 5px 0 0 0;
+            color: #6c757d;
+        }
+        
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+        
+        .alert-success {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        
+        .alert-error {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        
+        .enrollment-status {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .status-enrolled {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-available {
+            background-color: #cce5ff;
+            color: #004085;
+        }
+        
+        .instructor-info {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #ddd;
+        }
+        
+        .instructor-info div {
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .instructor-info i {
+            margin-right: 8px;
+            width: 16px;
+            color: #6f42c1;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .table-responsive {
+            overflow-x: auto;
+        }
         /* =================== search bar and search form====================== */
+        *{
+            padding: 0;
+            margin: 0;
+        }
         .content-area {
             padding: 20px;
             font-family: 'Segoe UI', sans-serif;
@@ -256,11 +789,7 @@ if (isset($_POST['course']) || isset($_POST['search_course']) || isset($_POST['s
             color: #333;
         }
 
-        .search-form {
-            display: flex;
-            gap: 10px;
-            max-width: 500px;
-        }
+       
 
         .search-form input {
             flex: 1;
@@ -899,107 +1428,23 @@ if (isset($_POST['course']) || isset($_POST['search_course']) || isset($_POST['s
         }
 
         /* Additional styles for better form presentation */
-        .result-container {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            margin-top: 20px;
-        }
+        
 
-        .search-form {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            align-items: flex-end;
-        }
 
-        .form-group-row {
-            display: flex;
-            flex-direction: column;
-        }
+       
 
-        .form-group-row label {
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
+    
 
-        .form-group-row select,
-        .form-group-row input {
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
+       
 
-        .btn-search {
-            background: #007bff;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
+    
 
-        .btn-show-all {
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
 
-        .btn-back {
-            background: #6c757d;
-            color: white;
-            text-decoration: none;
-            padding: 8px 15px;
-            border-radius: 4px;
-            display: inline-block;
-            margin-top: 20px;
-        }
+       
 
-        .result-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
 
-        .result-table th,
-        .result-table td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: left;
-        }
+    
 
-        .result-table th {
-            background-color: #f8f9fa;
-            font-weight: bold;
-        }
-
-        .result-table tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-
-        .no-results {
-            text-align: center;
-            padding: 20px;
-            color: #6c757d;
-            font-style: italic;
-        }
-
-        .semester-header {
-            background-color: #e9ecef;
-            font-weight: bold;
-        }
-
-        .gpa-display {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-            border-left: 4px solid #007bff;
-        }
  
     /* Grade value styling */
     .grade-a-plus {
@@ -1066,12 +1511,151 @@ if (isset($_POST['course']) || isset($_POST['search_course']) || isset($_POST['s
         color: #757575;
         font-style: italic;
     }
+      /* Improved styles for enrollment section */
+        .enrollment-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        
+        .course-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #f9f9f9;
+        }
+        
+        .course-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .course-code {
+            font-weight: bold;
+            color: #2b5876;
+            font-size: 1.2rem;
+        }
+        
+        .course-credits {
+            background: #6c757d;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+        
+        .course-details {
+            margin-bottom: 10px;
+        }
+        
+        .course-schedule {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .enrollment-actions {
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .btn-enroll {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .btn-enroll:hover {
+            background: #218838;
+        }
+        
+        .btn-cancel {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .btn-cancel:hover {
+            background: #c82333;
+        }
+        
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .status-enrolled {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-available {
+            background: #cce5ff;
+            color: #004085;
+        }
+        
+        .no-courses-message {
+            text-align: center;
+            padding: 30px;
+            color: #6c757d;
+        }
+        
+        .semester-info {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2b5876;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .btn-routine {
+            background: #6f42c1;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .btn-back {
+            background: #6c757d;
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
 </style>
 </head>
 
 <body>
 
-    <!-- Navbar -->
+       <!-- Navbar -->
     <div class="navbar">
         <div class="logo">
             <img src="../picture/logo.gif" alt="SKST Logo">
@@ -1093,6 +1677,8 @@ if (isset($_POST['course']) || isset($_POST['search_course']) || isset($_POST['s
                     <li><button type="submit" name="biodata"><i class="fas fa-id-card"></i> Biodata</button></li>
                     <li><button type="submit" name="result"><i class="fas fa-poll"></i> Result</button></li>
                     <li><button type="submit" name="course"><i class="fas fa-book-open"></i> Courses</button></li>
+                    <li><button type="submit" name="enrolment"><i class="fas fa-user-plus"></i> Enrollment</button></li>
+                    <li><button type="submit" name="routine"><i class="fas fa-calendar-alt"></i> Routine</button></li>
                     <li><button type="submit" name="account"><i class="fas fa-exchange-alt"></i> Transaction</button></li>
                 </form>
                 <li><a href="studentlogin.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
@@ -1325,7 +1911,7 @@ if (isset($_POST['course']) || isset($_POST['search_course']) || isset($_POST['s
                     </div>
                 </div>
             <?php endif; ?>
-       <?php elseif ($show_result_section || isset($_POST['result'])): ?>
+        <?php elseif ($show_result_section || isset($_POST['result'])): ?>
     <!-- Result Section -->
     <div class="content-area">
         <div class="page-header">
@@ -1564,7 +2150,8 @@ if (isset($_POST['search_course']) && !empty($selected_semester)) {
 }
 ?>
 
-<?php elseif ($show_course_section || isset($_POST['course'])): ?>
+
+   <?php elseif ($show_course_section || isset($_POST['course'])): ?>
     <!-- Academic Courses Section -->
     <div class="content-area">
         <div class="page-header">
@@ -1583,9 +2170,9 @@ if (isset($_POST['search_course']) && !empty($selected_semester)) {
                     <label for="semester">Select Semester:</label>
                     <select id="semester" name="semester">
                         <option value="">All Semesters</option>
-                        <?php foreach ($course_semesters as $sem): ?>
-                            <option value="<?= $sem ?>" <?= ($selected_course_semester == $sem) ? 'selected' : '' ?>>
-                                Semester <?= $sem ?>
+                        <?php foreach ($all_semesters as $sem): ?>
+                            <option value="<?= htmlspecialchars($sem) ?>" <?= ($selected_semester == $sem) ? 'selected' : '' ?>>
+                                Semester <?= htmlspecialchars($sem) ?>
                             </option>
                         <?php endforeach; ?>
                     </select>
@@ -1634,7 +2221,6 @@ if (isset($_POST['search_course']) && !empty($selected_semester)) {
                         </tbody>
                     </table>
                 <?php endforeach; ?>
-
             <?php else: ?>
                 <div class="no-courses">
                     <i class="fas fa-info-circle" style="font-size: 48px; margin-bottom: 15px;"></i>
@@ -1644,7 +2230,112 @@ if (isset($_POST['search_course']) && !empty($selected_semester)) {
             <?php endif; ?>
         </div>
     </div>
-
+   <?php elseif ($show_enrollment_section || isset($_POST['enrolment'])): ?>
+            <!-- Enrollment Section -->
+            <div class="content-area">
+                <div class="page-header">
+                    <h2 class="page-title"><i class="fas fa-plus-circle"></i> Course Enrolment</h2>
+                    <form method="post">
+                        <button type="submit" name="course" class="btn-back">
+                            <i class="fas fa-arrow-left"></i> Back to Courses
+                        </button>
+                    </form>
+                </div>
+                
+                <div class="enrollment-container">
+                    <?php if (!empty($errors)): ?>
+                        <div class="alert alert-error">
+                            <h3><i class="fas fa-exclamation-circle"></i> Errors:</h3>
+                            <ul>
+                                <?php foreach ($errors as $error): ?>
+                                    <li><?= htmlspecialchars($error) ?></li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <?php if (!empty($success)): ?>
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i> <?= htmlspecialchars($success) ?>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <div class="semester-info">
+                        <h3><i class="fas fa-info-circle"></i> Enrollment Information</h3>
+                        <p>Based on your academic progress, you are eligible to enroll in <strong>Semester <?= $current_semester ?></strong> courses.</p>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <form method="post">
+                            <button type="submit" name="routine" class="btn-routine">
+                                <i class="fas fa-calendar-alt"></i> View My Routine
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <?php if (!empty($available_courses)): ?>
+                        <h3>Available Courses for Semester <?= $current_semester ?></h3>
+                        
+                        <?php foreach ($available_courses as $course): ?>
+                            <div class="course-card">
+                                <div class="course-header">
+                                    <span class="course-code"><?= htmlspecialchars($course['course_code']) ?></span>
+                                    <span class="course-credits"><?= htmlspecialchars($course['credit_hours']) ?> Credits</span>
+                                </div>
+                                
+                                <div class="course-details">
+                                    <h4><?= htmlspecialchars($course['course_name']) ?></h4>
+                                    <p><strong>Department:</strong> <?= htmlspecialchars($course['department']) ?></p>
+                                    <p><strong>Instructor:</strong> <?= htmlspecialchars($course['instructor_name'] ?? 'Not Assigned') ?></p>
+                                    
+                                    <?php if (!empty($course['class_time'])): ?>
+                                        <div class="course-schedule">
+                                            <p><strong>Schedule:</strong> <?= htmlspecialchars($course['class_time']) ?></p>
+                                            <?php if (!empty($course['room_number'])): ?>
+                                                <p><strong>Room:</strong> <?= htmlspecialchars($course['room_number']) ?></p>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endif; ?>
+                                    
+                                    <p>
+                                        <strong>Status:</strong> 
+                                        <span class="status-badge <?= $course['is_enrolled'] ? 'status-enrolled' : 'status-available' ?>">
+                                            <?= $course['is_enrolled'] ? 'Enrolled' : 'Available' ?>
+                                        </span>
+                                    </p>
+                                </div>
+                                
+                                <div class="enrollment-actions">
+                                    <?php if ($course['is_enrolled']): ?>
+                                        <form method="post">
+                                            <input type="hidden" name="course_id" value="<?= $course['course_id'] ?>">
+                                            <button type="submit" name="cancel_enrollment" class="btn-cancel">
+                                                <i class="fas fa-times"></i> Cancel Enrollment
+                                            </button>
+                                        </form>
+                                    <?php else: ?>
+                                        <form method="post">
+                                            <input type="hidden" name="course_id" value="<?= $course['course_id'] ?>">
+                                            <input type="hidden" name="faculty_id" value="<?= $course['faculty_id'] ?>">
+                                            <button type="submit" name="enroll_course" class="btn-enroll">
+                                                <i class="fas fa-user-plus"></i> Enroll
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <div class="no-courses-message">
+                            <i class="fas fa-info-circle" style="font-size: 48px; margin-bottom: 15px;"></i>
+                            <h3>No courses available for enrollment</h3>
+                            <p>There are no courses available for Semester <?= $current_semester ?> at this time.</p>
+                            <p>Please contact your department for course availability.</p>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+Routine
         <?php else: ?>
             <!-- Default Dashboard View -->
             <div class="content-area">
