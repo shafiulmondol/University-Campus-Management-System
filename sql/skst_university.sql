@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 01, 2025 at 09:24 PM
+-- Generation Time: Sep 03, 2025 at 03:08 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -46,8 +46,8 @@ CREATE TABLE `admin_users` (
 --
 
 INSERT INTO `admin_users` (`id`, `full_name`, `username`, `password`, `email`, `phone`, `key`, `profile_picture`, `registration_date`, `last_login`, `is_active`) VALUES
-(1, 'Admin User', 'admin', 'admin123', 'admin@university.edu', '123-456-7890', 123, '', '2025-09-01 21:21:06', '2025-09-01 21:16:08.636532', 1),
-(23303106, 'Md. Shafiul Islam', 'Admin-1', 'kawsar1234', '23303106@iubat.edu', '01701535780', 123, 'uploads/admin_pictures/1756740221_{E41600A5-6F2F-477B-A387-7B418585B689}.png', '2025-09-01 21:21:06', '2025-09-02 01:08:20.000000', 1);
+(1, 'Admin User', 'admin', 'kawsar123', '23303105@iubat.edu', '123-456-7890', 123, '', '2025-09-01 21:21:06', '2025-09-03 15:25:11.000000', 1),
+(1490, 'Md. Kawsar Miah', 'Admission Officer', '', '23303105@ao.edu', '01884273156', 123, '', '2025-09-03 15:04:27', '2025-09-03 15:50:48.000000', 1);
 
 -- --------------------------------------------------------
 
@@ -125,8 +125,8 @@ CREATE TABLE `alumni` (
 --
 
 INSERT INTO `alumni` (`alumni_id`, `name`, `email`, `password`, `graduation_year`, `degree`, `major`, `current_job`, `company`, `phone`, `address`, `profile_picture`, `last_login`, `registration_date`, `is_active`) VALUES
-(1, 'John Doe', 'john.doe@example.com', 'password123', 2015, 'Bachelor of Science', 'Computer Science', 'Software Engineer', 'Tech Corp', '1234567890', '123 Main St, Anytown', NULL, '2025-07-25 21:53:04', '2025-07-26 01:51:35', 1),
-(2, 'Jane Smith', 'jane.smith@example.com', 'securepass', 2018, 'Master of Business', 'Business Administration', 'Marketing Manager', 'Global Inc', '9876543210', '456 Oak Ave, Somewhere', NULL, NULL, '2025-07-26 01:51:35', 1);
+(1, 'Md. Kawsar Miah', '23303105@iubat.edu', 'kawsar', 2015, 'Bachelor of Science', 'Computer Science', 'Software Engineer', 'Tech Corp', '1234567890', '123 Main St, Anytown', NULL, '2025-07-25 21:53:04', '2025-07-26 01:51:35', 1),
+(2, 'Md. Shafiul Islam', '23303106@iubat.edu', 'shafiul', 2018, 'Master of Business', 'Business Administration', 'Marketing Manager', 'Global Inc', '9876543210', '456 Oak Ave, Somewhere', NULL, NULL, '2025-07-26 01:51:35', 1);
 
 -- --------------------------------------------------------
 
@@ -219,9 +219,31 @@ CREATE TABLE `course` (
 --
 
 INSERT INTO `course` (`course_id`, `course_code`, `course_name`, `credit_hours`, `department`, `semester`, `created_at`, `updated_at`) VALUES
-(112, 'csc 112', 'dbms', 4, 'BCSE', 1, '2025-09-01 12:21:45', '2025-09-01 12:21:45'),
+(112, 'csc 112', 'DBMS', 4, 'BCSE', 3, '2025-09-01 12:21:45', '2025-09-01 12:21:45'),
 (123, 'csc 123', 'dbms', 5, 'BCSE', 1, '2025-09-01 18:59:59', '2025-09-01 18:59:59'),
 (222, 'csc 222', 'computer archetecture', 3, 'BCSE', 2, '2025-09-01 18:17:02', '2025-09-01 18:17:02');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `course_instructor`
+--
+
+CREATE TABLE `course_instructor` (
+  `faculty_id` int(11) NOT NULL,
+  `course_id` int(11) NOT NULL,
+  `class_day` enum('Saturday','Sunday','Monday','Tuesday','Wednesday','Thursday','Friday') NOT NULL,
+  `class_time` enum('8:30-9:30','9:35-10:35','10:40-11:40','11:45-12:45','1:10-2:10','2:15-3:15','4:20-5:20') NOT NULL,
+  `room_number` varchar(20) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `course_instructor`
+--
+
+INSERT INTO `course_instructor` (`faculty_id`, `course_id`, `class_day`, `class_time`, `room_number`) VALUES
+(7654327, 112, 'Sunday', '10:40-11:40', '1211'),
+(7654324, 332, 'Saturday', '9:35-10:35', '1000');
 
 -- --------------------------------------------------------
 
@@ -282,6 +304,30 @@ INSERT INTO `ebook` (`id`, `book_name`, `title`, `author`, `publish_year`, `link
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `enrollments`
+--
+
+CREATE TABLE `enrollments` (
+  `enrollment_id` int(11) NOT NULL,
+  `student_id` int(11) NOT NULL,
+  `course_id` int(11) NOT NULL,
+  `faculty_id` int(11) NOT NULL,
+  `enrollment_date` timestamp NOT NULL DEFAULT current_timestamp(),
+  `status` enum('enrolled','completed','dropped') DEFAULT 'enrolled'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `enrollments`
+--
+
+INSERT INTO `enrollments` (`enrollment_id`, `student_id`, `course_id`, `faculty_id`, `enrollment_date`, `status`) VALUES
+(3, 23303106, 332, 7654324, '2025-09-02 13:22:27', 'enrolled'),
+(4, 23303106, 121, 7654327, '2025-09-02 13:22:31', 'enrolled'),
+(5, 23303106, 112, 0, '2025-09-03 08:57:26', 'enrolled');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `faculty`
 --
 
@@ -298,6 +344,13 @@ CREATE TABLE `faculty` (
   `last_login` datetime DEFAULT NULL,
   `profile_picture` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `faculty`
+--
+
+INSERT INTO `faculty` (`faculty_id`, `name`, `email`, `password`, `department`, `address`, `phone`, `room_number`, `salary`, `last_login`, `profile_picture`) VALUES
+(7654327, 'Md. Kawsar Miah', '23303105@iubat.edu', 'kawsar', 'BCSE', 'Uttara, Dhaka-1230', '01884273156', '1010', 1000.00, '2025-09-03 09:56:24', NULL);
 
 -- --------------------------------------------------------
 
@@ -425,7 +478,6 @@ CREATE TABLE `student_registration` (
 --
 
 INSERT INTO `student_registration` (`id`, `first_name`, `last_name`, `father_name`, `mother_name`, `date_of_birth`, `guardian_phone`, `student_phone`, `email`, `password`, `last_exam`, `board`, `other_board`, `year_of_passing`, `institution_name`, `result`, `subject_group`, `gender`, `blood_group`, `nationality`, `religion`, `present_address`, `permanent_address`, `department`, `photo_path`, `signature_path`, `submission_date`) VALUES
-(23303105, 'Md. kawsar', 'Miah', 'sdfg', 'sdfg', '2006-08-02', '01701535780', '01701535780', 'mdsdfs@gmail.com', '1234', 'HSC', 'Dinajpur', NULL, '2022', 'ccr', '5.00', 'science', 'male', 'B+', 'Bangladeshi', 'Islam', 'sdfgsdfgsd', 'sdfgsdfgsd', NULL, NULL, NULL, '2025-08-15 13:09:51'),
 (23303106, 'shafiul islam', 'Estia', 'Md.Mazid', 'Mina Islam', '2003-12-14', '01718520912', '01530811222', 'shafiul@gmail.com', '11', 'HSC', 'Dhaka', NULL, '2022', 'Uttara high school', '5.00', 'science', 'female', 'A+', 'Bangladeshi', 'Islam', 'Uttara', 'Uttara', 'Cse', NULL, NULL, '2025-07-26 17:17:40'),
 (23303137, 'sumaiya', 'haq', 'father', 'mother', '2003-09-17', '+8801712345678', '01701535780', '23303137@iubat.edu', 'sumaiya', 'HSC', 'Dhaka', NULL, '2021', 'dhaka college', '3.75', 'science', 'female', 'O+', 'Bangladeshi', 'Islam', 'sdfg sdfg sdfg sdfg', 'sfg sdfgh fghj fghj', 'BCSE', NULL, NULL, '2025-08-29 04:51:27');
 
@@ -495,6 +547,32 @@ CREATE TABLE `stuf` (
 
 INSERT INTO `stuf` (`id`, `first_name`, `last_name`, `father_name`, `mother_name`, `date_of_birth`, `guardian_phone`, `stuff_phone`, `email`, `password`, `position`, `last_exam`, `board`, `other_board`, `year_of_passing`, `institution_name`, `result`, `subject_group`, `gender`, `blood_group`, `nationality`, `religion`, `present_address`, `permanent_address`, `department`, `photo_path`, `signature_path`, `submission_date`) VALUES
 (1, 'shafiul ', 'islam', 'Robert Doe', 'Mary Doe', '1990-05-15', '+8801712345678', '+8801812345678', '23303106@iubat.edu', 'shafiul', 'Menager', 'Bachelor of Science', 'Dhaka', NULL, 2012, 'University of Dhaka', 3.75, 'Science', 'Male', 'B+', 'Bangladeshi', 'Islam', '123 Main Road, Dhaka', '456 Village Street, Faridpur', 'Computer Science', '/uploads/photos/john_doe.jpg', '/uploads/signatures/john_doe_sig.png', '2025-07-31 10:04:12');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `update_requests`
+--
+
+CREATE TABLE `update_requests` (
+  `id` int(11) NOT NULL,
+  `admin_email` varchar(50) NOT NULL,
+  `category` varchar(100) NOT NULL,
+  `update_type` enum('password','email') NOT NULL,
+  `current_value` varchar(255) NOT NULL,
+  `new_value` varchar(255) NOT NULL,
+  `comments` text NOT NULL,
+  `request_time` datetime NOT NULL,
+  `action` tinyint(1) DEFAULT 0 COMMENT '0 = Pending, 1 = Approved, 2 = Rejected'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `update_requests`
+--
+
+INSERT INTO `update_requests` (`id`, `admin_email`, `category`, `update_type`, `current_value`, `new_value`, `comments`, `request_time`, `action`) VALUES
+(1, '23303106@iubat.edu', '', 'password', 'shafiul', 'shafiulmondol', 'i think that i any one hack my id', '2025-08-31 20:39:28', 0),
+(2, 'admin@university.edu', 'Student', 'password', 'shafiul', 'shafiulmondol', 'nothing', '2025-09-01 03:07:52', 0);
 
 -- --------------------------------------------------------
 
@@ -569,7 +647,8 @@ INSERT INTO `volunteers` (`sl`, `student_id`, `student_name`, `department`, `ema
 --
 ALTER TABLE `admin_users`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `username` (`username`);
+  ADD UNIQUE KEY `username` (`username`),
+  ADD UNIQUE KEY `email` (`email`);
 
 --
 -- Indexes for table `admissions`
@@ -615,10 +694,26 @@ ALTER TABLE `course`
   ADD UNIQUE KEY `course_code` (`course_code`);
 
 --
+-- Indexes for table `course_instructor`
+--
+ALTER TABLE `course_instructor`
+  ADD PRIMARY KEY (`faculty_id`,`class_day`,`class_time`,`room_number`),
+  ADD KEY `course_id` (`course_id`);
+
+--
 -- Indexes for table `ebook`
 --
 ALTER TABLE `ebook`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `enrollments`
+--
+ALTER TABLE `enrollments`
+  ADD PRIMARY KEY (`enrollment_id`),
+  ADD KEY `student_id` (`student_id`),
+  ADD KEY `course_id` (`course_id`),
+  ADD KEY `faculty_id` (`faculty_id`);
 
 --
 -- Indexes for table `faculty`
@@ -654,6 +749,12 @@ ALTER TABLE `stuf`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `email` (`email`);
 ALTER TABLE `stuf` ADD FULLTEXT KEY `first_name` (`first_name`,`last_name`,`father_name`,`mother_name`,`email`,`institution_name`,`present_address`,`permanent_address`);
+
+--
+-- Indexes for table `update_requests`
+--
+ALTER TABLE `update_requests`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `users`
@@ -712,10 +813,16 @@ ALTER TABLE `borrow_books`
   MODIFY `borrow_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
+-- AUTO_INCREMENT for table `enrollments`
+--
+ALTER TABLE `enrollments`
+  MODIFY `enrollment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
 -- AUTO_INCREMENT for table `faculty`
 --
 ALTER TABLE `faculty`
-  MODIFY `faculty_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7654324;
+  MODIFY `faculty_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7654328;
 
 --
 -- AUTO_INCREMENT for table `scholarship_application`
@@ -734,6 +841,12 @@ ALTER TABLE `student_registration`
 --
 ALTER TABLE `stuf`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `update_requests`
+--
+ALTER TABLE `update_requests`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `users`
