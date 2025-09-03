@@ -1,111 +1,173 @@
 <?php
-// Enable error reporting
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
-// Database configuration
-$servername = "localhost";
+// ---------------------------
+// Database Connection
+// ---------------------------
+$host = "localhost";
+$dbname = "skst_university";
 $username = "root";
 $password = "";
-$dbname = "skst_university";
 
-$message = '';
-$messageClass = '';
-
-try {
-    // Create PDO connection
-    $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    // Create accounts table if it doesn't exist
-    $sql = "CREATE TABLE IF NOT EXISTS accounts (
-        account_id VARCHAR(20) NOT NULL PRIMARY KEY,
-        account_name VARCHAR(100) NOT NULL,
-        account_type VARCHAR(50) NOT NULL,
-        department VARCHAR(50) NOT NULL,
-        current_balance DECIMAL(15,2) NOT NULL DEFAULT 0.00,
-        budget_allocation DECIMAL(15,2) NOT NULL,
-        fiscal_year VARCHAR(9) NOT NULL,
-        account_status VARCHAR(20) NOT NULL DEFAULT 'Active' CHECK (account_status IN ('Active','Inactive','Suspended')),
-        created_date DATE NOT NULL DEFAULT CURDATE(),
-        last_transaction DATE DEFAULT NULL,
-        account_manager VARCHAR(100) NOT NULL,
-        contact_email VARCHAR(100) DEFAULT NULL
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
-    $conn->exec($sql);
-
-    // Handle form submission
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $account_id = $_POST['account_id'];
-        $account_name = $_POST['account_name'];
-        $account_type = $_POST['account_type'];
-        $department = $_POST['department'];
-        $current_balance = $_POST['current_balance'] ?? 0;
-        $budget_allocation = $_POST['budget_allocation'];
-        $fiscal_year = $_POST['fiscal_year'];
-        $account_status = $_POST['account_status'] ?? 'Active';
-        $account_manager = $_POST['account_manager'];
-        $contact_email = $_POST['contact_email'] ?? null;
-
-        // Insert data into accounts table
-        $stmt = $conn->prepare("INSERT INTO accounts 
-            (account_id, account_name, account_type, department, current_balance, budget_allocation, fiscal_year, account_status, account_manager, contact_email)
-            VALUES (:account_id, :account_name, :account_type, :department, :current_balance, :budget_allocation, :fiscal_year, :account_status, :account_manager, :contact_email)");
-        
-        $stmt->bindParam(':account_id', $account_id);
-        $stmt->bindParam(':account_name', $account_name);
-        $stmt->bindParam(':account_type', $account_type);
-        $stmt->bindParam(':department', $department);
-        $stmt->bindParam(':current_balance', $current_balance);
-        $stmt->bindParam(':budget_allocation', $budget_allocation);
-        $stmt->bindParam(':fiscal_year', $fiscal_year);
-        $stmt->bindParam(':account_status', $account_status);
-        $stmt->bindParam(':account_manager', $account_manager);
-        $stmt->bindParam(':contact_email', $contact_email);
-
-        if ($stmt->execute()) {
-            $message = "Account created successfully!";
-            $messageClass = "success";
-        } else {
-            $message = "Failed to create account. Please try again.";
-            $messageClass = "error";
-        }
-    }
-
-} catch(PDOException $e) {
-    if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
-        $message = "This account ID already exists!";
-        $messageClass = "error";
-    } else {
-        $message = "Database error: " . $e->getMessage();
-        $messageClass = "error";
-    }
+$conn = new mysqli($host, $username, $password, $dbname);
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
+
+// Fetch all accounts
+$sql = "SELECT * FROM accounts";
+$result = $conn->query($sql);
 ?>
 
-<!-- Display message -->
-<?php if (!empty($message)): ?>
-<div class="message <?php echo $messageClass; ?>">
-    <?php echo $message; ?>
-</div>
-<?php endif; ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SKST University Accounts</title>
+<link rel="icon" href="../picture/SKST.png" type="image/png" />
+<link rel="stylesheet" href="../Design/buttom_bar.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+/* ---------- Global Styles ---------- */
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#f9f9ff; line-height:1.6; }
+a { text-decoration:none; }
 
-<!-- Example HTML Form for account creation -->
-<form method="POST" action="">
-    <input type="text" name="account_id" placeholder="Account ID" required>
-    <input type="text" name="account_name" placeholder="Account Name" required>
-    <input type="text" name="account_type" placeholder="Account Type" required>
-    <input type="text" name="department" placeholder="Department" required>
-    <input type="number" step="0.01" name="current_balance" placeholder="Current Balance">
-    <input type="number" step="0.01" name="budget_allocation" placeholder="Budget Allocation" required>
-    <input type="text" name="fiscal_year" placeholder="Fiscal Year" required>
-    <select name="account_status">
-        <option value="Active">Active</option>
-        <option value="Inactive">Inactive</option>
-        <option value="Suspended">Suspended</option>
-    </select>
-    <input type="text" name="account_manager" placeholder="Account Manager" required>
-    <input type="email" name="contact_email" placeholder="Contact Email">
-    <button type="submit">Create Account</button>
-</form>
+/* ---------- Navigation Styles ---------- */
+.navbar { background-color:#e0e7ff; padding:10px 20px; }
+.navbar-top { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; }
+.logo { display:flex; align-items:center; gap:10px; }
+.logo img { height:80px; }
+.logo h1 { font-size:26px; color:#333; }
+.menu-section { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-top:15px; }
+.btn { background:linear-gradient(135deg,#6a11cb 0%,#2575fc 100%); color:white; border:none; padding:12px 20px; font-size:15px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.1); transition:all 0.3s ease; cursor:pointer; }
+.btn:hover { transform:translateY(-3px); background:linear-gradient(135deg,#512da8,#1e88e5); }
+.account-login { background-color:#28a745; color:white; border:none; padding:10px 20px; font-size:16px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.1); transition:0.3s; cursor:pointer; min-width:120px; }
+.account-login:hover { transform:translateY(-3px); background:linear-gradient(135deg,#b31217,#e52d27); }
+.home-button { background:gray; color:white; border:none; padding:10px 16px; font-size:15px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.1); transition:0.3s; cursor:pointer; display:flex; align-items:center; gap:8px; }
+.home-button:hover { transform:translateY(-3px); background:linear-gradient(135deg,#18bcae,#f3af02); }
+
+/* ---------- Content Styles ---------- */
+.future-students-title { text-align:center; color:white; background:#800000; font-weight:bold; margin:20px 0; padding:15px; }
+.future-students-text { text-align:center; max-width:1200px; margin:0 auto 30px auto; color:black; line-height:1.6; font-size:16px; padding:0 20px; }
+.content-container { max-width:1200px; margin:0 auto 50px auto; padding:0 20px; }
+
+/* ---------- Table Styles ---------- */
+.table-container { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; margin-top:20px; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+table, th, td { border:1px solid #ccc; }
+th, td { padding:12px; text-align:left; }
+th { background:#6a11cb; color:white; position:sticky; top:0; }
+tr:nth-child(even) { background-color:#f2f2f2; }
+tr:hover { background-color:#e6e6ff; }
+
+/* ---------- Responsive Design ---------- */
+@media screen and (max-width: 768px) {
+    .navbar-top { flex-direction:column; }
+    .logo { margin-bottom:15px; }
+    .logo h1 { font-size:20px; }
+    .menu-section { gap:5px; }
+    .btn { padding:8px 12px; font-size:14px; }
+    
+    table { font-size:14px; }
+    th, td { padding:8px; }
+    
+    .future-students-title { font-size:18px; }
+}
+
+@media screen and (max-width: 480px) {
+    .logo img { height:60px; }
+    .logo h1 { font-size:18px; }
+    
+    th, td { padding:6px; font-size:12px; }
+    
+    .future-students-title { font-size:16px; padding:10px; }
+}
+</style>
+</head>
+<body>
+<div class="navbar">
+  <div class="navbar-top">
+    <div class="logo">
+      <img src="../picture/logo.gif" alt="SKST Logo">
+      <h1>SKST University || Accounts</h1>
+    </div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+      <a href="account.php"><button class="account-login"><i class="fas fa-user"></i> Account Login</button></a>
+      <a href="../index.html" class="home-button"><i class="fas fa-home"></i> Home</a>
+    </div>
+  </div>
+  <div class="menu-section">
+    <a href="../student/student.html"><button class="btn">Student</button></a>
+    <a href="../faculty/faculty.html"><button class="btn">Faculty</button></a>
+    <a href="../admin/administration.html"><button class="btn">Administration</button></a>
+    <a href="../alumni/alumni.html"><button class="btn">Alumni</button></a>
+    <a href="../campus/campus.html"><button class="btn">Campus Life</button></a>
+    <a href="../iqac/iqac.html"><button class="btn">IQAC</button></a>
+    <a href="../notice/notice.html"><button class="btn">Notice</button></a>
+    <a href="../news/news.html"><button class="btn">News</button></a>
+    <a href="../ranking/ranking.html"><button class="btn">Ranking</button></a>
+    <a href="../academic/academic.html"><button class="btn">Academics</button></a>
+    <a href="../scholarship/scholarship.html"><button class="btn">Scholarships</button></a>
+    <a href="../admission/admission.html"><button class="btn">Admission</button></a>
+    <a href="../library/library1.html"><button class="btn">Library</button></a>
+    <a href="account.php"><button class="btn">Account</button></a>
+    <a href="../volunteer/volunteer.html"><button class="btn">Volunteer</button></a>
+    <a href="../about/about.html"><button class="btn">About US</button></a>
+  </div>
+</div>
+
+<div class="future-students-title">SKST University Banking Accounts</div>
+<p class="future-students-text">All university accounts and balances are listed below.</p>
+
+<div class="content-container">
+  <div class="table-container">
+    <table>
+      <tr>
+        <th>Account ID</th>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Department</th>
+        <th>Balance</th>
+        <th>Budget</th>
+        <th>Fiscal Year</th>
+        <th>Status</th>
+        <th>Manager</th>
+        <th>Email</th>
+      </tr>
+      <?php
+      if ($result->num_rows > 0) {
+          while($row = $result->fetch_assoc()) {
+              echo "<tr>
+              <td>{$row['account_id']}</td>
+              <td>{$row['account_name']}</td>
+              <td>{$row['account_type']}</td>
+              <td>{$row['department']}</td>
+              <td>{$row['current_balance']}</td>
+              <td>{$row['budget_allocation']}</td>
+              <td>{$row['fiscal_year']}</td>
+              <td>{$row['account_status']}</td>
+              <td>{$row['account_manager']}</td>
+              <td>{$row['contact_email']}</td>
+              </tr>";
+          }
+      } else {
+          echo "<tr><td colspan='10' style='text-align:center;'>No accounts found.</td></tr>";
+      }
+      ?>
+    </table>
+  </div>
+</div>
+
+<div class="buttom_bar">
+  <img src="../picture/SKST.png" alt="Logo" style="height:80px; width:auto;">
+  <p>SKST University</p>
+  <p>4 Embankment Drive Road,Sector-10, Uttara Model Town, Dhaka-1230.</p>
+  <p>Phone: (88 02) 55091801-5, Mobile : +88 01714 014 933, 01810030041-9, 01325080581-9</p>
+  <p>Fax: (880-2) 5895 2625, Email : info@skst.edu</p>
+</div>
+</body>
+</html>
+
+<?php
+$conn->close();
+?>
