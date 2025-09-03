@@ -16,92 +16,54 @@ if ($mysqli->connect_error) {
     die("Connection failed: " . $mysqli->connect_error);
 }
 
-// Handle admin login
+
+// Handle login
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
-    $email = isset($_POST['email']) ? trim($_POST['email']) : '';
-    $password = isset($_POST['password']) ? $_POST['password'] : '';
-    
-    // Input validation
-    if (empty($email) || empty($password)) {
-        $error = "Please enter both email and password.";
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error = "Please enter a valid email address.";
-    } else {
-        // Prepare SQL statement to get user by email only
-        $sql = "SELECT id, full_name, username, password, email, phone, profile_picture, `key` 
-                FROM admin_users 
-                WHERE email = ?";
+    $email = trim($_POST['email']);
+    $password = $_POST['password'];
+
+    // ✅ Use correct columns (full_name, username, email)
+    $sql = "SELECT id, full_name, email, phone FROM admin_users WHERE email = ? AND password = ? LIMIT 1";
+
+    $stmt = $mysqli->prepare($sql);
+
+    if ($stmt) {
+        $stmt->bind_param("ss", $email, $password);
+        $stmt->execute();
+        $stmt->store_result();
         
-        if ($stmt = $mysqli->prepare($sql)) {
-            $stmt->bind_param("s", $email);
-            
-            if ($stmt->execute()) {
-                $stmt->store_result();
-                
-                if ($stmt->num_rows == 1) {
-                    $stmt->bind_result($id, $full_name, $username, $hashed_password, $email, $phone, $profile_picture, $key);
-                    if ($stmt->fetch()) {
-                        // Check if password is hashed or plain text (for migration)
-                        if (password_verify($password, $hashed_password)) {
-                            // Password is correct (hashed)
-                            loginUser($id, $full_name, $username, $email, $phone, $profile_picture, $mysqli);
-                        } elseif ($hashed_password === $password) {
-                            // Password is correct (plain text - needs migration)
-                            // Hash the password and update database
-                            $password = $_POST['password']; // stores plain text (unsafe!)
-                            $update_sql = "UPDATE admin_users SET password = ? WHERE id = ?";
-                            if ($update_stmt = $mysqli->prepare($update_sql)) {
-                                $update_stmt->bind_param("si", $new_hashed_password, $id);
-                                $update_stmt->execute();
-                                $update_stmt->close();
-                            }
-                            loginUser($id, $full_name, $username, $email, $phone, $profile_picture, $mysqli);
-                        } else {
-                            $error = "Invalid email or password.";
-                        }
-                    }
-                } else {
-                    // Use generic error message to prevent user enumeration
-                    $error = "Invalid email or password.";
+        if ($stmt->num_rows == 1) {
+            $stmt->bind_result($id, $full_name, $email, $phone);
+            if ($stmt->fetch()) {
+                $_SESSION['admin_id'] = $id;
+                $_SESSION['admin_name'] = $full_name;  // use full_name from DB
+                $_SESSION['admin_email'] = $email;
+                $_SESSION['admin_phone'] = $phone;
+
+                // Update last login time
+                $update_sql = "UPDATE admin_users SET last_login = NOW() WHERE id = ?";
+                $update_stmt = $mysqli->prepare($update_sql);
+                if ($update_stmt) {
+                    $update_stmt->bind_param("i", $id);
+                    $update_stmt->execute();
+                    $update_stmt->close();
                 }
-            } else {
-                $error = "Oops! Something went wrong. Please try again later.";
-                // Log the error for debugging
-                error_log("Login query failed: " . $stmt->error);
+
+                header("Location: admin.php");
+                exit();
             }
-            
-            $stmt->close();
         } else {
-            $error = "Database error. Please try again later.";
-            error_log("Prepare statement failed: " . $mysqli->error);
+            $error = "Invalid email or password.";
         }
+
+        $stmt->close();
+    } else {
+        $error = "SQL Prepare failed: " . $mysqli->error;
     }
 }
 
-// Function to handle user login
-function loginUser($id, $full_name, $username, $email, $phone, $profile_picture, $mysqli) {
-    // Regenerate session ID to prevent session fixation
-    session_regenerate_id(true);
-    
-    $_SESSION['admin_id'] = $id;
-    $_SESSION['admin_name'] = $full_name;
-    $_SESSION['admin_username'] = $username;
-    $_SESSION['admin_email'] = $email;
-    $_SESSION['admin_phone'] = $phone;
-    $_SESSION['admin_profile_picture'] = $profile_picture;
-    
-    // Update last login time
-    $update_sql = "UPDATE admin_users SET last_login = NOW() WHERE id = ?";
-    if ($update_stmt = $mysqli->prepare($update_sql)) {
-        $update_stmt->bind_param("i", $id);
-        $update_stmt->execute();
-        $update_stmt->close();
-    }
-    
-    // Redirect to prevent form resubmission
-    header("Location: admin.php"); // Redirect to a specific page
-    exit();
-}
+
+
 
 // Handle logout
 if (isset($_GET['logout'])) {
@@ -225,6 +187,11 @@ if ($is_logged_in) {
     $result = $stmt->get_result();
     $admin = $result->fetch_assoc();
     $stmt->close();
+
+    // Update session phone number if available
+    if (!empty($admin['phone'])) {
+        $_SESSION['admin_phone'] = $admin['phone'];
+    }
 }
 
 $mysqli->close();
@@ -1245,9 +1212,9 @@ $mysqli->close();
 
                 <div class="profile-info">
                     <h2><?php echo htmlspecialchars($_SESSION['admin_name']); ?></h2>
-                    <p><i class="fas fa-user"></i> <?php echo htmlspecialchars($_SESSION['admin_username']); ?></p>
+                    <p><i class="fas fa-user"></i> <?php echo htmlspecialchars($_SESSION['admin_name']); ?></p>
                     <p><i class="fas fa-envelope"></i> <?php echo htmlspecialchars($_SESSION['admin_email']); ?></p>
-                    <p><i class="fas fa-phone"></i> <?php echo htmlspecialchars($_SESSION['admin_phone']); ?></p>
+                    <p><i class="fas fa-phone"></i> <?php echo (!empty($_SESSION['admin_phone'])) ? htmlspecialchars($_SESSION['admin_phone']) : 'N/A'; ?></p>
                 </div>
             </div>
             
