@@ -640,21 +640,86 @@ elseif (isset($_POST['confirm_renew'])) {
     </div>
 
     <div class="quick-stats">
+        <?php
+         // Execute query
+                            $query = "SELECT COUNT(*) as total FROM books";
+                            $execute = mysqli_query($con, $query);
+                            
+        
+                            if ($execute) {
+                                $row = mysqli_fetch_assoc($execute);
+       echo '<div class="stat-card">';
+     echo '<div class="stat-number">';
+    
+                                echo number_format($row['total']);
+                            }
+echo "</div>";
+      ?> 
+      <div class="stat-label">Books Available</div>
+    </div>
+    <div class="stat-card">
+        <?php
+        $query = "SELECT COUNT(*) as total FROM ebook";
+                            $execute = mysqli_query($con, $query);
+                            
+        
+                            if ($execute) {
+                                $row = mysqli_fetch_assoc($execute);
+      echo '<div class="stat-number">';
+     echo number_format($row['total']);
+                            }
+echo "</div>";
+      ?> 
+      <div class="stat-label">E-Journals</div>
+    </div>
         <div class="stat-card">
-            <i class="fas fa-book-open"></i>
-            <h4>Books Checked Out Today</h4>
-            <p>24</p>
-        </div>
+             <?php
+             $query = "SELECT COUNT(*) as today_borrows FROM borrow_books
+                                     WHERE DATE(borrow_date) = CURDATE()";
+                            $execute = mysqli_query($con, $query);
+                             if ($execute) {
+                                $row = mysqli_fetch_assoc($execute);
+                                
+           echo '<i class="fas fa-book-open">'.'</i>';
+          echo  '<h4>'.'Books Checked Out Today'.'</h4>';
+           echo '<p>';
+           echo number_format($row['today_borrows']);
+                            }
+                            echo '</p>'.'</div>'; ?>
+        
         <div class="stat-card">
+           
             <i class="fas fa-users"></i>
             <h4>New Patrons This Week</h4>
-            <p>15</p>
-        </div>
+              <?php
+             $query = "SELECT COUNT(*) as today_borrows FROM users
+                                     WHERE DATE(created_at) = CURDATE()";
+                            $execute = mysqli_query($con, $query);
+                             if ($execute) {
+                                $row = mysqli_fetch_assoc($execute);
+            echo '<p>';
+           echo number_format($row['today_borrows']);
+                            }
+                            echo '</p>'.'</div>'; ?>
         <div class="stat-card">
-            <i class="fas fa-clock"></i>
-            <h4>Overdue Items</h4>
-            <p>7</p>
-        </div>
+    <i class="fas fa-clock"></i>
+    <h4>Overdue Items</h4>
+    <?php
+    $query = "SELECT COUNT(*) AS overdue_count 
+              FROM borrow_books
+              WHERE DATE(due_date) < CURDATE()";
+    
+    $execute = mysqli_query($con, $query);
+
+    if ($execute) {
+        $row = mysqli_fetch_assoc($execute);
+        echo '<p>' . number_format($row['overdue_count']) . '</p>';
+    } else {
+        echo '<p>0</p>';
+    }
+    ?>
+</div>
+
         <div class="stat-card">
             <i class="fas fa-calendar-alt"></i>
             <h4>Upcoming Events</h4>
