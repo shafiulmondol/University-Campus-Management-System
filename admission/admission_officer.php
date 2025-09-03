@@ -48,7 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
                         } elseif ($hashed_password === $password) {
                             // Password is correct (plain text - needs migration)
                             // Hash the password and update database
-                            $new_hashed_password = password_hash($password, PASSWORD_DEFAULT);
+                            $password = $_POST['password']; // stores plain text (unsafe!)
                             $update_sql = "UPDATE admin_users SET password = ? WHERE id = ?";
                             if ($update_stmt = $mysqli->prepare($update_sql)) {
                                 $update_stmt->bind_param("si", $new_hashed_password, $id);
@@ -1293,11 +1293,6 @@ $mysqli->close();
                 </li>
                 <li>
                     <a href="#">
-                        <i class="fas fa-file-alt"></i> Applications
-                    </a>
-                </li>
-                <li>
-                    <a href="#">
                         <i class="fas fa-tasks"></i> Review Process
                     </a>
                 </li>
@@ -1414,7 +1409,7 @@ $mysqli->close();
                     </div>
                     <div class="info-group">
                         <div class="info-label">Access Rights</div>
-                        <div class="info-value">Admission Management</div>
+                        <div class="info-value">Student Admission Management</div>
                     </div>
                     <div class="info-group">
                         <div class="info-label">Security</div>
@@ -1424,90 +1419,7 @@ $mysqli->close();
             </div>
             
             <!-- Stats Section -->
-            <div class="page-header">
-                <h2 class="page-title"><i class="fas fa-chart-line"></i> Admission Statistics</h2>
-            </div>
-            
-            <div class="stats">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-file-alt"></i>
-                    </div>
-                    <div class="stat-number"><?php echo $total_applications; ?></div>
-                    <div class="stat-label">Total Applications</div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <div class="stat-number"><?php echo $pending_applications; ?></div>
-                    <div class="stat-label">Pending Review</div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="stat-number"><?php echo $approved_applications; ?></div>
-                    <div class="stat-label">Approved</div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-times-circle"></i>
-                    </div>
-                    <div class="stat-number"><?php echo $rejected_applications; ?></div>
-                    <div class="stat-label">Rejected</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Edit Profile Modal -->
-    <div id="editModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span class="close">&times;</span>
-                <h2 class="modal-title"><i class="fas fa-user-edit"></i> Edit Profile</h2>
-            </div>
-            <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
-                <div class="modal-body">
-                    <input type="hidden" name="update_profile" value="1">
-                    
-                    <div class="form-group">
-                        <label for="full_name">Full Name</label>
-                        <input type="text" id="full_name" name="full_name" value="<?php echo htmlspecialchars($officer['full_name']); ?>" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="username">Username</label>
-                        <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($officer['username']); ?>" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="email">Email Address</label>
-                        <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($officer['email']); ?>" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="phone">Phone Number</label>
-                        <input type="text" id="phone" name="phone" value="<?php echo htmlspecialchars($officer['phone']); ?>">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="key">Security Key</label>
-                        <input type="text" id="key" name="key" value="<?php echo htmlspecialchars($officer['key']); ?>">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn-cancel" id="cancelEdit">Cancel</button>
-                    <button type="submit" class="btn-save">Save Changes</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
+             
     <!-- Change Password Modal -->
     <div id="changePasswordModal" class="modal">
         <div class="modal-content">

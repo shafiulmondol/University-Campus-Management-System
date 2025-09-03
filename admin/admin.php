@@ -48,7 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
                         } elseif ($hashed_password === $password) {
                             // Password is correct (plain text - needs migration)
                             // Hash the password and update database
-                            $new_hashed_password = password_hash($password, PASSWORD_DEFAULT);
+                            $password = $_POST['password']; // stores plain text (unsafe!)
                             $update_sql = "UPDATE admin_users SET password = ? WHERE id = ?";
                             if ($update_stmt = $mysqli->prepare($update_sql)) {
                                 $update_stmt->bind_param("si", $new_hashed_password, $id);
