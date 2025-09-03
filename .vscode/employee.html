@@ -312,6 +312,37 @@
             border-top: 1px solid #ddd;
         }
         
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background: #f1f1f1;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+        }
+        
+        .tab.active {
+            background: var(--skst-blue);
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .currency {
+            font-family: monospace;
+        }
+        
         @media (max-width: 900px) {
             .main-content {
                 flex-direction: column;
@@ -323,6 +354,14 @@
             
             .add-employee-form {
                 grid-template-columns: 1fr;
+            }
+            
+            .tabs {
+                flex-wrap: wrap;
+            }
+            
+            .tab {
+                margin-bottom: 5px;
             }
         }
     </style>
@@ -390,153 +429,309 @@
                     </div>
                 </div>
 
-                <h2 class="section-title">Employee Directory</h2>
-                
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <div>
-                        <input type="text" placeholder="Search employees..." style="padding: 10px; width: 300px; border-radius: 5px; border: 1px solid #ddd;">
-                    </div>
-                    <button class="btn btn-primary"><i class="fas fa-plus"></i> Add New Employee</button>
+                <div class="tabs">
+                    <div class="tab active" data-tab="employees">Employee Directory</div>
+                    <div class="tab" data-tab="attendance">Attendance</div>
+                    <div class="tab" data-tab="payroll">Payroll</div>
+                    <div class="tab" data-tab="add-employee">Add Employee</div>
                 </div>
                 
-                <table class="employee-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Position</th>
-                            <th>Department</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>FAC001</td>
-                            <td>Dr. Ahmed Rahman</td>
-                            <td>Professor</td>
-                            <td>Engineering</td>
-                            <td><span class="status status-active">Active</span></td>
-                            <td class="action-buttons">
-                                <button class="btn btn-primary btn-sm"><i class="fas fa-eye"></i></button>
-                                <button class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
-                                <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>LIB002</td>
-                            <td>Mr. Asif Iqbal</td>
-                            <td>Senior Librarian</td>
-                            <td>Library</td>
-                            <td><span class="status status-active">Active</span></td>
-                            <td class="action-buttons">
-                                <button class="btn btn-primary btn-sm"><i class="fas fa-eye"></i></button>
-                                <button class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
-                                <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>ADM002</td>
-                            <td>Ms. Anika Chowdhury</td>
-                            <td>Administrator</td>
-                            <td>Administration</td>
-                            <td><span class="status status-onleave">On Leave</span></td>
-                            <td class="action-buttons">
-                                <button class="btn btn-primary btn-sm"><i class="fas fa-eye"></i></button>
-                                <button class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
-                                <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>SUP002</td>
-                            <td>Mr. Karim Uddin</td>
-                            <td>Technical Support</td>
-                            <td>Support Services</td>
-                            <td><span class="status status-active">Active</span></td>
-                            <td class="action-buttons">
-                                <button class="btn btn-primary btn-sm"><i class="fas fa-eye"></i></button>
-                                <button class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
-                                <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>FAC002</td>
-                            <td>Dr. Fatima Khan</td>
-                            <td>Associate Professor</td>
-                            <td>Medicine</td>
-                            <td><span class="status status-active">Active</span></td>
-                            <td class="action-buttons">
-                                <button class="btn btn-primary btn-sm"><i class="fas fa-eye"></i></button>
-                                <button class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
-                                <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <h2 class="section-title" style="margin-top: 40px;">Add New Employee</h2>
+                <div class="tab-content active" id="employees-tab">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <div>
+                            <input type="text" placeholder="Search employees..." style="padding: 10px; width: 300px; border-radius: 5px; border: 1px solid #ddd;">
+                        </div>
+                        <button class="btn btn-primary" id="show-add-employee"><i class="fas fa-plus"></i> Add New Employee</button>
+                    </div>
+                    
+                    <table class="employee-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Position</th>
+                                <th>Department</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>FAC001</td>
+                                <td>Dr. Ahmed Rahman</td>
+                                <td>Professor</td>
+                                <td>Engineering</td>
+                                <td><span class="status status-active">Active</span></td>
+                                <td class="action-buttons">
+                                    <button class="btn btn-primary btn-sm"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>LIB002</td>
+                                <td>Mr. Asif Iqbal</td>
+                                <td>Senior Librarian</td>
+                                <td>Library</td>
+                                <td><span class="status status-active">Active</span></td>
+                                <td class="action-buttons">
+                                    <button class="btn btn-primary btn-sm"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>ADM002</td>
+                                <td>Ms. Anika Chowdhury</td>
+                                <td>Administrator</td>
+                                <td>Administration</td>
+                                <td><span class="status status-onleave">On Leave</span></td>
+                                <td class="action-buttons">
+                                    <button class="btn btn-primary btn-sm"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>SUP002</td>
+                                <td>Mr. Karim Uddin</td>
+                                <td>Technical Support</td>
+                                <td>Support Services</td>
+                                <td><span class="status status-active">Active</span></td>
+                                <td class="action-buttons">
+                                    <button class="btn btn-primary btn-sm"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>FAC002</td>
+                                <td>Dr. Fatima Khan</td>
+                                <td>Associate Professor</td>
+                                <td>Medicine</td>
+                                <td><span class="status status-active">Active</span></td>
+                                <td class="action-buttons">
+                                    <button class="btn btn-primary btn-sm"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
                 
-                <div class="add-employee-form">
-                    <div class="form-group">
-                        <label for="empId">Employee ID</label>
-                        <input type="text" id="empId" placeholder="Enter employee ID">
+                <div class="tab-content" id="attendance-tab">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <div>
+                            <input type="date" id="attendance-date" style="padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+                        </div>
+                        <button class="btn btn-success"><i class="fas fa-download"></i> Export Report</button>
                     </div>
-                    <div class="form-group">
-                        <label for="firstName">First Name</label>
-                        <input type="text" id="firstName" placeholder="Enter first name">
+                    
+                    <table class="employee-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Date</th>
+                                <th>Check-In</th>
+                                <th>Check-Out</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>FAC001</td>
+                                <td>Dr. Ahmed Rahman</td>
+                                <td>2025-09-03</td>
+                                <td>08:45 AM</td>
+                                <td>05:15 PM</td>
+                                <td><span class="status status-active">Present</span></td>
+                            </tr>
+                            <tr>
+                                <td>ADM002</td>
+                                <td>Ms. Anika Chowdhury</td>
+                                <td>2025-09-03</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td><span class="status status-onleave">On Leave</span></td>
+                            </tr>
+                            <tr>
+                                <td>LIB002</td>
+                                <td>Mr. Asif Iqbal</td>
+                                <td>2025-09-03</td>
+                                <td>09:30 AM</td>
+                                <td>04:45 PM</td>
+                                <td><span class="status status-active">Present</span></td>
+                            </tr>
+                            <tr>
+                                <td>SUP002</td>
+                                <td>Mr. Karim Uddin</td>
+                                <td>2025-09-03</td>
+                                <td>08:55 AM</td>
+                                <td>05:30 PM</td>
+                                <td><span class="status status-active">Present</span></td>
+                            </tr>
+                            <tr>
+                                <td>FAC002</td>
+                                <td>Dr. Fatima Khan</td>
+                                <td>2025-09-03</td>
+                                <td>09:15 AM</td>
+                                <td>04:30 PM</td>
+                                <td><span class="status status-active">Present</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="tab-content" id="payroll-tab">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <div>
+                            <select id="payroll-month" style="padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+                                <option value="2025-08">August 2025</option>
+                                <option value="2025-07">July 2025</option>
+                                <option value="2025-06">June 2025</option>
+                            </select>
+                        </div>
+                        <div>
+                            <button class="btn btn-primary"><i class="fas fa-calculator"></i> Calculate Payroll</button>
+                            <button class="btn btn-success"><i class="fas fa-download"></i> Export</button>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="lastName">Last Name</label>
-                        <input type="text" id="lastName" placeholder="Enter last name">
-                    </div>
-                    <div class="form-group">
-                        <label for="position">Position</label>
-                        <select id="position">
-                            <option value="">Select Position</option>
-                            <option value="Professor">Professor</option>
-                            <option value="Associate Professor">Associate Professor</option>
-                            <option value="Assistant Professor">Assistant Professor</option>
-                            <option value="Lecturer">Lecturer</option>
-                            <option value="Research Fellow">Research Fellow</option>
-                            <option value="Department Head">Department Head</option>
-                            <option value="Dean">Dean</option>
-                            <option value="Administrator">Administrator</option>
-                            <option value="IT Support">IT Support</option>
-                            <option value="Lab Assistant">Lab Assistant</option>
-                            <option value="Librarian">Librarian</option>
-                            <option value="Accountant">Accountant</option>
-                            <option value="Receptionist">Receptionist</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="department">Department</label>
-                        <select id="department">
-                            <option value="">Select Department</option>
-                            <option value="engineering">Engineering</option>
-                            <option value="medicine">Medicine</option>
-                            <option value="library">Library</option>
-                            <option value="administration">Administration</option>
-                            <option value="support">Support Services</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email Address</label>
-                        <input type="email" id="email" placeholder="Enter email address">
-                    </div>
-                    <div class="form-group">
-                        <label for="phone">Phone Number</label>
-                        <input type="tel" id="phone" placeholder="Enter phone number">
-                    </div>
-                    <div class="form-group">
-                        <label for="status">Employment Status</label>
-                        <select id="status">
-                            <option value="active">Active</option>
-                            <option value="onleave">On Leave</option>
-                            <option value="inactive">Inactive</option>
-                        </select>
-                    </div>
-                    <div class="form-group form-full">
-                        <button class="btn btn-success" style="width: 100%;"><i class="fas fa-save"></i> Save Employee</button>
+                    
+                    <table class="employee-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Month</th>
+                                <th>Basic Salary</th>
+                                <th>Bonus</th>
+                                <th>Deductions</th>
+                                <th>Net Salary</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>FAC001</td>
+                                <td>Dr. Ahmed Rahman</td>
+                                <td>2025-08</td>
+                                <td class="currency">50,000</td>
+                                <td class="currency">5,000</td>
+                                <td class="currency">2,000</td>
+                                <td class="currency">53,000</td>
+                                <td><span class="status status-active">Paid</span></td>
+                            </tr>
+                            <tr>
+                                <td>ADM002</td>
+                                <td>Ms. Anika Chowdhury</td>
+                                <td>2025-08</td>
+                                <td class="currency">35,000</td>
+                                <td class="currency">2,000</td>
+                                <td class="currency">1,000</td>
+                                <td class="currency">36,000</td>
+                                <td><span class="status status-active">Paid</span></td>
+                            </tr>
+                            <tr>
+                                <td>LIB002</td>
+                                <td>Mr. Asif Iqbal</td>
+                                <td>2025-08</td>
+                                <td class="currency">40,000</td>
+                                <td class="currency">0</td>
+                                <td class="currency">1,500</td>
+                                <td class="currency">38,500</td>
+                                <td><span class="status status-active">Paid</span></td>
+                            </tr>
+                            <tr>
+                                <td>SUP002</td>
+                                <td>Mr. Karim Uddin</td>
+                                <td>2025-08</td>
+                                <td class="currency">32,000</td>
+                                <td class="currency">1,500</td>
+                                <td class="currency">1,200</td>
+                                <td class="currency">32,300</td>
+                                <td><span class="status status-active">Paid</span></td>
+                            </tr>
+                            <tr>
+                                <td>FAC002</td>
+                                <td>Dr. Fatima Khan</td>
+                                <td>2025-08</td>
+                                <td class="currency">45,000</td>
+                                <td class="currency">4,000</td>
+                                <td class="currency">2,500</td>
+                                <td class="currency">46,500</td>
+                                <td><span class="status status-active">Paid</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="tab-content" id="add-employee-tab">
+                    <h2 class="section-title">Add New Employee</h2>
+                    
+                    <div class="add-employee-form">
+                        <div class="form-group">
+                            <label for="empId">Employee ID</label>
+                            <input type="text" id="empId" placeholder="Enter employee ID">
+                        </div>
+                        <div class="form-group">
+                            <label for="firstName">First Name</label>
+                            <input type="text" id="firstName" placeholder="Enter first name">
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">Last Name</label>
+                            <input type="text" id="lastName" placeholder="Enter last name">
+                        </div>
+                        <div class="form-group">
+                            <label for="position">Position</label>
+                            <select id="position">
+                                <option value="">Select Position</option>
+                                <option value="Professor">Professor</option>
+                                <option value="Associate Professor">Associate Professor</option>
+                                <option value="Assistant Professor">Assistant Professor</option>
+                                <option value="Lecturer">Lecturer</option>
+                                <option value="Research Fellow">Research Fellow</option>
+                                <option value="Department Head">Department Head</option>
+                                <option value="Dean">Dean</option>
+                                <option value="Administrator">Administrator</option>
+                                <option value="IT Support">IT Support</option>
+                                <option value="Lab Assistant">Lab Assistant</option>
+                                <option value="Librarian">Librarian</option>
+                                <option value="Accountant">Accountant</option>
+                                <option value="Receptionist">Receptionist</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="department">Department</label>
+                            <select id="department">
+                                <option value="">Select Department</option>
+                                <option value="engineering">Engineering</option>
+                                <option value="medicine">Medicine</option>
+                                <option value="library">Library</option>
+                                <option value="administration">Administration</option>
+                                <option value="support">Support Services</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" placeholder="Enter email address">
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" placeholder="Enter phone number">
+                        </div>
+                        <div class="form-group">
+                            <label for="status">Employment Status</label>
+                            <select id="status">
+                                <option value="active">Active</option>
+                                <option value="onleave">On Leave</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
+                        <div class="form-group form-full">
+                            <button class="btn btn-success" style="width: 100%;"><i class="fas fa-save"></i> Save Employee</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -589,6 +784,38 @@
                     alert('Please fill in all required fields');
                 }
             });
+            
+            // Tab functionality
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    
+                    // Remove active class from all tabs and contents
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked tab and corresponding content
+                    tab.classList.add('active');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                });
+            });
+            
+            // Show add employee form when button is clicked
+            document.getElementById('show-add-employee').addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                
+                document.querySelector('.tab[data-tab="add-employee"]').classList.add('active');
+                document.getElementById('add-employee-tab').classList.add('active');
+            });
+            
+            // Set current date as default for attendance
+            const today = new Date();
+            const formattedDate = today.toISOString().substr(0, 10);
+            document.getElementById('attendance-date').value = formattedDate;
         });
     </script>
 </body>
