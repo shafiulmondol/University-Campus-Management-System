@@ -21,6 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
     $email = trim($_POST['email']);
     $password = $_POST['password'];
     
+    // For demo purposes - in real application, use password_verify with hashed passwords
     $sql = "SELECT faculty_id, name, email FROM faculty WHERE email = ? AND password = ?";
     
     if ($stmt = $mysqli->prepare($sql)) {
@@ -103,36 +104,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['profile_picture']) &&
     }
 }
 
-// Handle profile update
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_profile']) && isset($_SESSION['faculty_id'])) {
-    $faculty_id = $_SESSION['faculty_id'];
-    $name = trim($_POST['name']);
-    $email = trim($_POST['email']);
-    $phone = trim($_POST['phone']);
-    $address = trim($_POST['address']);
-    $room_number = trim($_POST['room_number']);
-    $department = trim($_POST['department']);
-    
-    $update_sql = "UPDATE faculty SET name = ?, email = ?, phone = ?, address = ?, room_number = ?, department = ? WHERE faculty_id = ?";
-    if ($update_stmt = $mysqli->prepare($update_sql)) {
-        $update_stmt->bind_param("ssssssi", $name, $email, $phone, $address, $room_number, $department, $faculty_id);
-        
-        if ($update_stmt->execute()) {
-            // Update session variables
-            $_SESSION['faculty_name'] = $name;
-            $_SESSION['faculty_email'] = $email;
-            
-            // Refresh page
-            header("Location: " . $_SERVER['PHP_SELF']);
-            exit();
-        } else {
-            $error = "Error updating profile: " . $mysqli->error;
-        }
-        
-        $update_stmt->close();
-    }
-}
-
 // Check if user is logged in
 $is_logged_in = isset($_SESSION['faculty_id']);
 
@@ -146,43 +117,6 @@ if ($is_logged_in) {
     $result = $stmt->get_result();
     $faculty = $result->fetch_assoc();
     $stmt->close();
-    
-    // Get statistics data
-    // Courses count
-    $courses_sql = "SELECT COUNT(*) as course_count FROM course_instructor WHERE faculty_id = ?";
-    $stmt = $mysqli->prepare($courses_sql);
-    $stmt->bind_param("i", $faculty_id);
-    $stmt->execute();
-    $courses_result = $stmt->get_result();
-    $courses_data = $courses_result->fetch_assoc();
-    $course_count = $courses_data['course_count'] ?? 0;
-    $stmt->close();
-    
-    // Students count
-    $students_sql = "SELECT COUNT(DISTINCT e.student_id) as student_count 
-                     FROM enrollments e 
-                     JOIN course_instructor ci ON e.course_id = ci.course_id 
-                     WHERE ci.faculty_id = ?";
-    $stmt = $mysqli->prepare($students_sql);
-    $stmt->bind_param("i", $faculty_id);
-    $stmt->execute();
-    $students_result = $stmt->get_result();
-    $students_data = $students_result->fetch_assoc();
-    $student_count = $students_data['student_count'] ?? 0;
-    $stmt->close();
-    
-    // Hours per week (assuming each class is 1 hour)
-    $hours_sql = "SELECT COUNT(*) as hours_count FROM course_instructor WHERE faculty_id = ?";
-    $stmt = $mysqli->prepare($hours_sql);
-    $stmt->bind_param("i", $faculty_id);
-    $stmt->execute();
-    $hours_result = $stmt->get_result();
-    $hours_data = $hours_result->fetch_assoc();
-    $hours_count = $hours_data['hours_count'] ?? 0;
-    $stmt->close();
-    
-    // Rating (static for now as there's no rating system in the database)
-    $rating = 4.8;
 }
 
 $mysqli->close();
@@ -196,7 +130,6 @@ $mysqli->close();
     <title>Faculty Portal - SKST University</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* All the existing CSS styles remain exactly the same */
         * {
             margin: 0;
             padding: 0;
@@ -811,69 +744,6 @@ $mysqli->close();
             text-align: center;
         }
         
-        /* Edit Form Styles */
-        .edit-form {
-            display: none;
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        .edit-form h2 {
-            color: #2b5876;
-            margin-bottom: 20px;
-            font-size: 24px;
-        }
-        
-        .form-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .form-col {
-            flex: 1;
-            min-width: 250px;
-        }
-        
-        .form-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        
-        .btn-cancel {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: opacity 0.3s;
-        }
-        
-        .btn-cancel:hover {
-            opacity: 0.9;
-        }
-        
-        .btn-save {
-            background: linear-gradient(135deg, #2b5876, #4e4376);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: opacity 0.3s;
-        }
-        
-        .btn-save:hover {
-            opacity: 0.9;
-        }
-        
         /* ================ Responsive Design ============ */
         @media (max-width: 1024px) {
             .info-cards {
@@ -947,14 +817,6 @@ $mysqli->close();
             .login-form {
                 padding: 20px;
             }
-            
-            .form-row {
-                flex-direction: column;
-            }
-            
-            .form-col {
-                width: 100%;
-            }
         }
     </style>
 </head>
@@ -987,11 +849,6 @@ $mysqli->close();
                     <div class="error-msg"><?php echo $error; ?></div>
                 <?php endif; ?>
                 
-                <div class="demo-credentials">
-                    <p><strong>Demo Credentials:</strong></p>
-                    <p>Email: 23303105@iubat.edu</p>
-                    <p>Password: kawsar</p>
-                </div>
             </form>
         </div>
     </div>
@@ -1022,32 +879,33 @@ $mysqli->close();
                     </a>
                 </li>
                 <li>
-                    <a href="courses.php">
+                    <a href="../working.html">
                         <i class="fas fa-book"></i> Courses
                     </a>
                 </li>
                 <li>
-                    <a href="schedule.php">
+                    <a href="../working.html">
                         <i class="fas fa-calendar-alt"></i> Schedule
                     </a>
                 </li>
                 <li>
-                    <a href="students.php">
+                    <a href="../working.html">
                         <i class="fas fa-users"></i> Students
                     </a>
                 </li>
                 <li>
-                    <a href="classes.php">
+                    <a href="../working.html">
                         <i class="fas fa-chalkboard"></i> Classes
                     </a>
                 </li>
+
                 <li>
-                    <a href="attendance.php">
+                    <a href="attendance.html">
                         <i class="fas fa-user-check"></i> Attendance
                     </a>
                 </li>
                 <li>
-                    <a href="reports.php">
+                    <a href="../working.html">
                         <i class="fas fa-file-alt"></i> Reports
                     </a>
                 </li>
@@ -1062,13 +920,13 @@ $mysqli->close();
         <div class="content-area">
             <div class="page-header">
                 <h1 class="page-title"><i class="fas fa-chalkboard-teacher"></i> Faculty Dashboard</h1>
-                <button class="btn-edit" id="toggleEditBtn">
+                <button class="btn-edit">
                     <i class="fas fa-edit"></i> Edit Profile
                 </button>
             </div>
 
             <!-- Profile Card with Picture Upload -->
-            <div class="profile-card" id="profileView">
+            <div class="profile-card">
                 <div class="profile-img-container">
                     <?php if (!empty($faculty['profile_picture'])): ?>
                         <img id="profile-image" class="profile-img" src="<?php echo htmlspecialchars($faculty['profile_picture']); ?>" alt="Profile Image">
@@ -1095,55 +953,6 @@ $mysqli->close();
                     <p><i class="fas fa-phone"></i> <?php echo htmlspecialchars($faculty['phone'] ?? 'Not provided'); ?></p>
                     <p><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($faculty['address'] ?? 'Not provided'); ?></p>
                 </div>
-            </div>
-            
-            <!-- Edit Profile Form -->
-            <div class="edit-form" id="profileEdit">
-                <h2><i class="fas fa-edit"></i> Edit Profile</h2>
-                <form method="post">
-                    <input type="hidden" name="update_profile" value="1">
-                    
-                    <div class="form-row">
-                        <div class="form-col">
-                            <div class="form-group">
-                                <label for="name">Full Name</label>
-                                <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($faculty['name']); ?>" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="email">Email Address</label>
-                                <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($faculty['email']); ?>" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="phone">Phone Number</label>
-                                <input type="text" id="phone" name="phone" value="<?php echo htmlspecialchars($faculty['phone'] ?? ''); ?>">
-                            </div>
-                        </div>
-                        
-                        <div class="form-col">
-                            <div class="form-group">
-                                <label for="address">Address</label>
-                                <input type="text" id="address" name="address" value="<?php echo htmlspecialchars($faculty['address'] ?? ''); ?>">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="room_number">Room Number</label>
-                                <input type="text" id="room_number" name="room_number" value="<?php echo htmlspecialchars($faculty['room_number'] ?? ''); ?>">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="department">Department</label>
-                                <input type="text" id="department" name="department" value="<?php echo htmlspecialchars($faculty['department'] ?? ''); ?>">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="form-actions">
-                        <button type="button" class="btn-cancel" id="cancelEditBtn">Cancel</button>
-                        <button type="submit" class="btn-save">Save Changes</button>
-                    </div>
-                </form>
             </div>
             
             <?php if (!empty($error)): ?>
@@ -1226,7 +1035,7 @@ $mysqli->close();
                     <div class="stat-icon">
                         <i class="fas fa-book"></i>
                     </div>
-                    <div class="stat-number"><?php echo $course_count; ?></div>
+                    <div class="stat-number">5</div>
                     <div class="stat-label">Courses</div>
                 </div>
                 
@@ -1234,7 +1043,7 @@ $mysqli->close();
                     <div class="stat-icon">
                         <i class="fas fa-users"></i>
                     </div>
-                    <div class="stat-number"><?php echo $student_count; ?></div>
+                    <div class="stat-number">142</div>
                     <div class="stat-label">Students</div>
                 </div>
                 
@@ -1242,7 +1051,7 @@ $mysqli->close();
                     <div class="stat-icon">
                         <i class="fas fa-clock"></i>
                     </div>
-                    <div class="stat-number"><?php echo $hours_count; ?></div>
+                    <div class="stat-number">18</div>
                     <div class="stat-label">Hours/Week</div>
                 </div>
                 
@@ -1250,7 +1059,7 @@ $mysqli->close();
                     <div class="stat-icon">
                         <i class="fas fa-star"></i>
                     </div>
-                    <div class="stat-number"><?php echo $rating; ?></div>
+                    <div class="stat-number">4.8</div>
                     <div class="stat-label">Rating</div>
                 </div>
             </div>
@@ -1288,40 +1097,6 @@ $mysqli->close();
                         document.getElementById('upload-form').submit();
                     }
                 });
-            }
-            
-            // Toggle edit profile form
-            const toggleEditBtn = document.getElementById('toggleEditBtn');
-            const cancelEditBtn = document.getElementById('cancelEditBtn');
-            const profileView = document.getElementById('profileView');
-            const profileEdit = document.getElementById('profileEdit');
-            
-            if (toggleEditBtn && profileView && profileEdit) {
-                toggleEditBtn.addEventListener('click', function() {
-                    profileView.style.display = 'none';
-                    profileEdit.style.display = 'block';
-                    this.innerHTML = '<i class="fas fa-eye"></i> View Profile';
-                    this.setAttribute('data-editing', 'true');
-                });
-                
-                // If cancel button exists, handle it
-                if (cancelEditBtn) {
-                    cancelEditBtn.addEventListener('click', function() {
-                        profileView.style.display = 'flex';
-                        profileEdit.style.display = 'none';
-                        toggleEditBtn.innerHTML = '<i class="fas fa-edit"></i> Edit Profile';
-                        toggleEditBtn.setAttribute('data-editing', 'false');
-                    });
-                }
-                
-                // Check if we're returning from a form submission with errors
-                const urlParams = new URLSearchParams(window.location.search);
-                if (urlParams.has('edit')) {
-                    profileView.style.display = 'none';
-                    profileEdit.style.display = 'block';
-                    toggleEditBtn.innerHTML = '<i class="fas fa-eye"></i> View Profile';
-                    toggleEditBtn.setAttribute('data-editing', 'true');
-                }
             }
         });
     </script>
