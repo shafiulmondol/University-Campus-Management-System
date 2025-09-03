@@ -118,8 +118,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $request_time = date('Y-m-d H:i:s');
 
             // Fixed query to match your database structure
-            $query = "INSERT INTO update_requests (admin_email,category, update_type, current_value, new_value, comments, request_time, action) 
-                      VALUES ('$admin_email','$category', '$update_type', '$current_value', '$new_value', '$comments', '$request_time', '$action')";
+            $query = "INSERT INTO update_requests (admin_email,applicant_id,category, update_type, current_value, new_value, comments, request_time, action) 
+                      VALUES ('$admin_email','$id','$category', '$update_type', '$current_value', '$new_value', '$comments', '$request_time', '$action')";
 
             if (mysqli_query($conn, $query)) {
                 $success = "Your update request has been submitted successfully.";
@@ -1710,6 +1710,11 @@ if (mysqli_num_rows($check_column) == 0) {
     background: #62cee9ff; /* light gray for read */
     border-left: 5px solid #ccc;
 }
+.notice-card.update {
+    background: #f5d878ff; /* light yellow */
+    border-left: 5px solid #ff9800;
+}
+
 
 </style>
 </head>
@@ -2412,52 +2417,108 @@ if (isset($_POST['search_course']) && !empty($selected_semester)) {
             </div>
 <?php elseif ($show_routine_section || isset($_POST['ssubmit'])):
 
-     $query = "SELECT * FROM notice WHERE section='Student' AND id=$id ORDER BY created_at DESC";
-    $result = mysqli_query($con, $query);
+  
 
-    if (mysqli_num_rows($result) > 0) {
-        echo "<div class='notices-container'>";
-        echo "<h2 class='notices-heading'><i class='fas fa-bullhorn'></i> Latest Notices</h2>";
+    echo "<div class='notices-container'>";
+    echo "<h2 class='notices-heading'><i class='fas fa-bullhorn'></i> Latest Notifications</h2>";
 
-        while ($row = mysqli_fetch_assoc($result)) {
-            // Add class based on viewed status
-            $noticeClass = ($row['viewed'] == 0) ? "notice-card unread" : "notice-card read";
+    // -------------------
+    // 1. Fetch Notices
+    // -------------------
+    $query1 = "SELECT id, title, content, author, created_at, viewed, 'notice' AS source 
+               FROM notice 
+               WHERE section='Student' AND id=$id
+               ORDER BY created_at DESC";
+    $result1 = mysqli_query($con, $query1);
 
-            echo "<div class='{$noticeClass}'>";
-            echo "<div class='notice-header'>";
-            echo "<h3 class='notice-title'><i class='fas fa-chevron-circle-right'></i> " . htmlspecialchars($row['title']) . "</h3>";
-            echo "<span class='notice-section'>" . htmlspecialchars($row['section']) . "</span>";
-            echo "</div>";
+    $notices = [];
+    if ($result1) {
+        while ($row = mysqli_fetch_assoc($result1)) {
+            $notices[] = $row;
+        }
+    }
 
-            echo "<div class='notice-content'>" . nl2br(htmlspecialchars($row['content'])) . "</div>";
+    // -------------------
+    // 2. Fetch Update Requests (action != 0)
+    // -------------------
+    $query2 = "SELECT id,applicant_id admin_email, category, update_type, current_value, new_value, comments, request_time, action, 'update' AS source 
+               FROM update_requests 
+               WHERE action != 0 AND applicant_id=$id
+               ORDER BY request_time DESC";
+    $result2 = mysqli_query($con, $query2);
 
-            echo "<div class='notice-footer'>";
-            echo "<span class='notice-author'><i class='fas fa-user'></i> " . htmlspecialchars($row['author']) . "</span>";
-            echo "<span class='notice-date'><i class='far fa-calendar-alt'></i> " . date('F j, Y h:i A', strtotime($row['created_at'])) . "</span>";
-            echo "</div>";
-            echo "</div>"; // Close notice-card
-             $update = "UPDATE notice SET viewed = 1 WHERE section='Student' AND viewed = 0";
-    mysqli_query($con, $update);
+    if ($result2) {
+        while ($row = mysqli_fetch_assoc($result2)) {
+            $notices[] = $row;
+        }
+    }
+
+    // -------------------
+    // 3. Sort All Notifications by Date (newest first)
+    // -------------------
+    usort($notices, function($a, $b) {
+        $timeA = isset($a['created_at']) ? strtotime($a['created_at']) : strtotime($a['request_time']);
+        $timeB = isset($b['created_at']) ? strtotime($b['created_at']) : strtotime($b['request_time']);
+        return $timeB - $timeA;
+    });
+
+    // -------------------
+    // 4. Display Combined Notifications
+    // -------------------
+    if (count($notices) > 0) {
+        foreach ($notices as $row) {
+            if ($row['source'] == 'notice') {
+                // Student Notices
+                $noticeClass = ($row['viewed'] == 0) ? "notice-card unread" : "notice-card read";
+                echo "<div class='{$noticeClass}'>";
+                echo "<div class='notice-header'>";
+                echo "<h3 class='notice-title'><i class='fas fa-chevron-circle-right'></i> " . htmlspecialchars($row['title']) . "</h3>";
+                echo "<span class='notice-section'>Notice</span>";
+                echo "</div>";
+                echo "<div class='notice-content'>" . nl2br(htmlspecialchars($row['content'])) . "</div>";
+                echo "<div class='notice-footer'>";
+                echo "<span class='notice-author'><i class='fas fa-user'></i> " . htmlspecialchars($row['author']) . "</span>";
+                echo "<span class='notice-date'><i class='far fa-calendar-alt'></i> " . date('F j, Y h:i A', strtotime($row['created_at'])) . "</span>";
+                echo "</div></div>";
+            } else {
+                // Update Requests
+                $statusText = ($row['action'] == 1 AND $row['applicant_id']=$id) ? "✅ Your update request has been Approved." : "❌ Your update request has been Rejected.";
+                echo "<div class='notice-card update'>";
+                echo "<div class='notice-header'>";
+                echo "<h3 class='notice-title'><i class='fas fa-edit'></i> Update Request (" . htmlspecialchars($row['update_type']) . ")</h3>";
+                echo "<span class='notice-section'>Profile Update</span>";
+                echo "</div>";
+                echo "<div class='notice-content'>" . $statusText . "<br>";
+                echo "<b>Old Value:</b> " . htmlspecialchars($row['current_value']) . "<br>";
+                echo "<b>New Value:</b> " . htmlspecialchars($row['new_value']) . "</div>";
+                echo "<div class='notice-footer'>";
+                echo "<span class='notice-author'><i class='fas fa-user'></i> Admin: " . htmlspecialchars($row['admin_email']) . "</span>";
+                echo "<span class='notice-date'><i class='far fa-calendar-alt'></i> " . date('F j, Y h:i A', strtotime($row['request_time'])) . "</span>";
+                echo "</div></div>";
+            }
         }
 
-        echo "<div class='back-button-container'>";?>
-        <form method="post">
-                <button type="submit" name="dashboard" class="btn-back">
-                    <i class="fas fa-arrow-left"></i> Back to Dashboard
-                </button>
-            </form>
-            
-            <?php
+        echo "<div class='back-button-container'>";
+        echo "<a href='javascript:history.back()' class='back-button'><i class='fas fa-arrow-left'></i> Back</a>";
         echo "</div>";
 
-        echo "</div>"; // Close notices-container
     } else {
         echo "<div class='no-notices'>";
         echo "<i class='far fa-folder-open'></i>";
-        echo "<p>No notices found at this time</p>";
+        echo "<p>No notifications found at this time</p>";
         echo "<a href='javascript:history.back()' class='back-button'><i class='fas fa-arrow-left'></i> Back</a>";
         echo "</div>";
     }
+
+    echo "</div>"; // Close notices-container
+
+    // -------------------
+    // 5. Mark Student Notices as Read
+    // -------------------
+    $update = "UPDATE notice SET viewed = 1 WHERE section='Student' AND viewed = 0";
+    mysqli_query($con, $update);
+
+
     
     elseif ($show_routine_section || isset($_POST['routine'])): ?>
     <!-- Routine Section -->
