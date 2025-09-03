@@ -450,6 +450,14 @@
             font-weight: bold;
         }
         
+        /* Error message styling */
+        .error-message {
+            color: var(--accent);
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        
         @media (max-width: 768px) {
             .login-container {
                 flex-direction: column;
@@ -531,11 +539,13 @@
                     <div class="form-group">
                         <label for="username"><i class="fas fa-user"></i> Username</label>
                         <input type="text" id="username" class="form-control" placeholder="Enter your username" required>
+                        <div class="error-message" id="usernameError"></div>
                     </div>
                     
                     <div class="form-group">
                         <label for="password"><i class="fas fa-key"></i> Password</label>
                         <input type="password" id="password" class="form-control" placeholder="Enter your password" required>
+                        <div class="error-message" id="passwordError"></div>
                     </div>
                     
                     <button type="submit" class="btn"><i class="fas fa-sign-in-alt"></i> Login to Dashboard</button>
@@ -543,6 +553,12 @@
                     <div class="login-links">
                         <a href="#"><i class="fas fa-question-circle"></i> Forgot Password?</a>
                         <a href="#"><i class="fas fa-user-plus"></i> Request Account Access</a>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding: 10px; background: #f8f9fa; border-radius: 5px; font-size: 13px;">
+                        <p><strong>Demo Credentials:</strong></p>
+                        <p>Username: <code>accountofficer</code></p>
+                        <p>Password: <code>university123</code></p>
                     </div>
                 </form>
             </div>
@@ -945,44 +961,87 @@
     </div>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const usernameError = document.getElementById('usernameError');
+            const passwordError = document.getElementById('passwordError');
+            const loginScreen = document.getElementById('loginScreen');
+            const dashboard = document.getElementById('dashboard');
+            const logoutBtn = document.getElementById('logoutBtn');
             
-            // Simple validation
-            if(username === 'accountofficer' && password === 'university123') {
-                document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'block';
-            } else {
-                alert('Invalid credentials. Please use username: accountofficer and password: university123');
-            }
-        });
-        
-        document.getElementById('logoutBtn').addEventListener('click', function() {
-            document.getElementById('dashboard').style.display = 'none';
-            document.getElementById('loginScreen').style.display = 'flex';
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
-        });
-        
-        // Tab switching functionality
-        const tabs = document.querySelectorAll('.tab');
-        tabs.forEach(tab => {
-            tab.addEventListener('click', function() {
-                // Remove active class from all tabs
-                tabs.forEach(t => t.classList.remove('active'));
-                // Add active class to clicked tab
-                this.classList.add('active');
+            // Login form submission
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
                 
-                // Hide all tab panes
-                document.querySelectorAll('.tab-pane').forEach(pane => {
-                    pane.classList.remove('active');
+                // Reset error messages
+                usernameError.style.display = 'none';
+                passwordError.style.display = 'none';
+                
+                const username = usernameInput.value.trim();
+                const password = passwordInput.value.trim();
+                
+                let isValid = true;
+                
+                // Validate username
+                if (username === '') {
+                    usernameError.textContent = 'Username is required';
+                    usernameError.style.display = 'block';
+                    isValid = false;
+                }
+                
+                // Validate password
+                if (password === '') {
+                    passwordError.textContent = 'Password is required';
+                    passwordError.style.display = 'block';
+                    isValid = false;
+                }
+                
+                if (!isValid) return;
+                
+                // Check credentials
+                if (username === 'accountofficer' && password === 'university123') {
+                    // Successful login
+                    loginScreen.style.display = 'none';
+                    dashboard.style.display = 'block';
+                } else {
+                    // Failed login
+                    usernameError.textContent = 'Invalid username or password';
+                    usernameError.style.display = 'block';
+                }
+            });
+            
+            // Logout functionality
+            logoutBtn.addEventListener('click', function() {
+                dashboard.style.display = 'none';
+                loginScreen.style.display = 'flex';
+                usernameInput.value = '';
+                passwordInput.value = '';
+                
+                // Reset any error messages
+                usernameError.style.display = 'none';
+                passwordError.style.display = 'none';
+            });
+            
+            // Tab switching functionality
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Remove active class from all tabs
+                    tabs.forEach(t => t.classList.remove('active'));
+                    // Add active class to clicked tab
+                    this.classList.add('active');
+                    
+                    // Hide all tab panes
+                    document.querySelectorAll('.tab-pane').forEach(pane => {
+                        pane.classList.remove('active');
+                    });
+                    
+                    // Show the corresponding tab pane
+                    const tabName = this.getAttribute('data-tab');
+                    document.getElementById(tabName + 'Tab').classList.add('active');
                 });
-                
-                // Show the corresponding tab pane
-                const tabName = this.getAttribute('data-tab');
-                document.getElementById(tabName + 'Tab').classList.add('active');
             });
         });
     </script>
