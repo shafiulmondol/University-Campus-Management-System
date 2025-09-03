@@ -18,9 +18,9 @@ if ($mysqli->connect_error) {
 
 // Handle admission officer login
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
-    $email = isset($_POST['email']) ? trim($_POST['email']) : '';
-    $password = isset($_POST['password']) ? $_POST['password'] : '';
-    
+    $email = $_POST['email'] ?? '';
+    $password = $_POST['password'] ?? '';
+
     // Input validation
     if (empty($email) || empty($password)) {
         $error = "Please enter both email and password.";
@@ -31,45 +31,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
         $sql = "SELECT id, full_name, username, password, email, phone, profile_picture, `key` 
                 FROM admin_users 
                 WHERE email = ?";
-        
         if ($stmt = $mysqli->prepare($sql)) {
             $stmt->bind_param("s", $email);
-            
             if ($stmt->execute()) {
                 $stmt->store_result();
-                
                 if ($stmt->num_rows == 1) {
-                    $stmt->bind_result($id, $full_name, $username, $hashed_password, $email, $phone, $profile_picture, $key);
+                    $stmt->bind_result($id, $full_name, $username, $db_password, $email, $phone, $profile_picture, $key);
                     if ($stmt->fetch()) {
-                        // Check if password is hashed or plain text (for migration)
-                        if (password_verify($password, $hashed_password)) {
-                            // Password is correct (hashed)
-                            loginUser($id, $full_name, $username, $email, $phone, $profile_picture, $mysqli);
-                        } elseif ($hashed_password === $password) {
-                            // Password is correct (plain text - needs migration)
-                            // Hash the password and update database
-                            $password = $_POST['password']; // stores plain text (unsafe!)
-                            $update_sql = "UPDATE admin_users SET password = ? WHERE id = ?";
-                            if ($update_stmt = $mysqli->prepare($update_sql)) {
-                                $update_stmt->bind_param("si", $new_hashed_password, $id);
-                                $update_stmt->execute();
-                                $update_stmt->close();
-                            }
+                        if ($password === $db_password) {
                             loginUser($id, $full_name, $username, $email, $phone, $profile_picture, $mysqli);
                         } else {
                             $error = "Invalid email or password.";
                         }
                     }
                 } else {
-                    // Use generic error message to prevent user enumeration
                     $error = "Invalid email or password.";
                 }
             } else {
                 $error = "Oops! Something went wrong. Please try again later.";
-                // Log the error for debugging
                 error_log("Login query failed: " . $stmt->error);
             }
-            
             $stmt->close();
         } else {
             $error = "Database error. Please try again later.";
@@ -270,47 +251,7 @@ if ($is_logged_in) {
     $officer = $result->fetch_assoc();
     $stmt->close();
 }
-/*
-// Get admission statistics
-$total_applications = 0;
-$pending_applications = 0;
-$approved_applications = 0;
-$rejected_applications = 0;
 
-if ($is_logged_in) {
-    // Total applications
-    $sql = "SELECT COUNT(*) as total FROM applications";
-    $result = $mysqli->query($sql);
-    if ($result) {
-        $row = $result->fetch_assoc();
-        $total_applications = $row['total'];
-    }
-    
-    // Pending applications
-    $sql = "SELECT COUNT(*) as total FROM applications WHERE status = 'pending'";
-    $result = $mysqli->query($sql);
-    if ($result) {
-        $row = $result->fetch_assoc();
-        $pending_applications = $row['total'];
-    }
-    
-    // Approved applications
-    $sql = "SELECT COUNT(*) as total FROM applications WHERE status = 'approved'";
-    $result = $mysqli->query($sql);
-    if ($result) {
-        $row = $result->fetch_assoc();
-        $approved_applications = $row['total'];
-    }
-    
-    // Rejected applications
-    $sql = "SELECT COUNT(*) as total FROM applications WHERE status = 'rejected'";
-    $result = $mysqli->query($sql);
-    if ($result) {
-        $row = $result->fetch_assoc();
-        $rejected_applications = $row['total'];
-    }
-}
-*/
 $mysqli->close();
 ?>
 
@@ -1181,9 +1122,12 @@ $mysqli->close();
                 </div>
                 
                 <button type="submit" class="login-btn">Login to Admission Portal</button>
+                <button type="button" class="login-btn" onclick="window.location.href='admission.html'">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
                 
                 <div class="login-links">
-                    <a href="#" id="forgotPasswordLink"><i class="fas fa-unlock-alt"></i> Forgot Password?</a>
+                    <a href="../admin/forgot_password.php" id="forgotPasswordLink"><i class="fas fa-unlock-alt"></i> Forgot Password?</a>
                     <a href="#" id="helpLink"><i class="fas fa-question-circle"></i> Help</a>
                 </div>
                 
@@ -1191,38 +1135,19 @@ $mysqli->close();
                     <div class="error-msg"><?php echo $error; ?></div>
                 <?php endif; ?>
                 
-                <div class="demo-credentials">
-                    <p><strong>Demo Credentials:</strong></p>
-                    <p>Email: admission@skstuniversity.edu</p>
-                    <p>Password: admission123</p>
-                </div>
             </form>
         </div>
     </div>
 
-    <!-- Forgot Password Modal -->
-    <div id="forgotPasswordModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span class="close">&times;</span>
-                <h2 class="modal-title"><i class="fas fa-unlock-alt"></i> Reset Password</h2>
-            </div>
-            <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="reset_email">Email Address</label>
-                        <input type="email" id="reset_email" name="email" required>
-                    </div>
-                    <p>Enter your email address and we'll send you instructions to reset your password.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn-cancel" id="cancelReset">Cancel</button>
-                    <button type="submit" name="reset_password" class="btn-save">Reset Password</button>
-                </div>
-            </form>
-        </div>
+    <!-- Forgot Password Button -->
+    <!-- Forgot Password Modal Trigger (button) -->
+    <div style="text-align: center; margin-top: 20px;"></div>
+        <button type="button" class="login-btn" id="forgotPasswordLink" style="display:inline-block;">
+            <i class="fas fa-unlock-alt"></i> Forgot Password
+        </button>
     </div>
 
+   
     <!-- Help Modal -->
     <div id="helpModal" class="modal">
         <div class="modal-content">
@@ -1263,12 +1188,11 @@ $mysqli->close();
         </div>
         
         <div class="nav-buttons">
-            <span class="welcome"><i class="fas fa-user-circle"></i> Welcome, <?php echo htmlspecialchars($_SESSION['admission_officer_name']); ?></span>
             <button onclick="location.href='../index.html'">
                 <i class="fas fa-home"></i> Home
             </button>
-            <button onclick="location.href='?logout=1'">
-                <i class="fas fa-sign-out-alt"></i> Logout
+            <button onclick="location.href='../working.html'">
+                <i class="fas fa-bell"></i> Notifications
             </button>
         </div>
     </div>
@@ -1311,6 +1235,10 @@ $mysqli->close();
                         <i class="fas fa-key"></i> Change Password
                     </a>
                 </li>
+                <li>
+                    <button onclick="location.href='?logout=1'">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
             </ul>
         </div>
         
