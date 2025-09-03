@@ -118,13 +118,13 @@
             border-radius: 10px;
         }
         
-        .notice-card {
+        /* .notice-card {
             padding: 30px;
             border-bottom: 1px solid black;
             position: relative;
             overflow: hidden;
             transition: all 0.3s ease;
-        }
+        } */
         
         .notice-card:last-child {
             border-bottom: none;
@@ -503,6 +503,25 @@
                 border-radius: 8px;
                 box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
             }
+.notice-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin: 12px 0;
+    padding: 15px;
+    transition: 0.3s;
+}
+
+.notice-card.unread {
+    background: #ed7513ff; /* light blue for unread */
+    border-left: 5px solid #007bff;
+}
+
+.notice-card.read {
+    background: #76939cff; /* light gray for read */
+    border-left: 5px solid #ccc;
+}
+
+
 </style>
  </head>
  <body>
@@ -578,47 +597,68 @@ ORDER BY created_at DESC";
     echo "</div>";
 }
 }
-
+function get_unread_student_notification_count() {
+    global $con;
+    $query = "SELECT COUNT(*) as count FROM notice WHERE viewed = 0 AND section='Student'";
+    $result = mysqli_query($con, $query);
+    if ($result) {
+        $row = mysqli_fetch_assoc($result);
+        return $row['count'] ?? 0;
+    }
+    return 0;
+}
 
 function see_student_notice(){
     global $con;
-          $query ="SELECT * FROM notice 
-WHERE section='Student' ORDER BY created_at DESC";
-          $result = mysqli_query($con, $query);
-          
-          if (mysqli_num_rows($result) > 0) {
-    echo "<div class='notices-container'>";
-    echo "<h2 class='notices-heading'><i class='fas fa-bullhorn'></i> Latest Notices</h2>";
-    
-      while($row = mysqli_fetch_assoc($result)){
-        echo "<div class='notice-card'>";
-        echo "<div class='notice-header'>";
-        echo "<h3 class='notice-title'><i class='fas fa-chevron-circle-right'></i> " . htmlspecialchars($row['title']) . "</h3>";
-        echo "<span class='notice-section'>" . htmlspecialchars($row['section']) . "</span>";
+
+    // Mark all student notices as read when opened
+    $update = "UPDATE notice SET viewed = 1 WHERE section='Student' AND viewed = 0";
+    mysqli_query($con, $update);
+
+    $query = "SELECT * FROM notice WHERE section='Student' ORDER BY created_at DESC";
+    $result = mysqli_query($con, $query);
+
+    if (mysqli_num_rows($result) > 0) {
+        echo "<div class='notices-container'>";
+        echo "<h2 class='notices-heading'><i class='fas fa-bullhorn'></i> Latest Notices</h2>";
+
+        while ($row = mysqli_fetch_assoc($result)) {
+            // Add class based on viewed status
+            $noticeClass = ($row['viewed'] == 0) ? "notice-card unread" : "notice-card read";
+
+            echo "<div class='{$noticeClass}'>";
+            echo "<div class='notice-header'>";
+            echo "<h3 class='notice-title'><i class='fas fa-chevron-circle-right'></i> " . htmlspecialchars($row['title']) . "</h3>";
+            echo "<span class='notice-section'>" . htmlspecialchars($row['section']) . "</span>";
+            echo "</div>";
+
+            echo "<div class='notice-content'>" . nl2br(htmlspecialchars($row['content'])) . "</div>";
+
+            echo "<div class='notice-footer'>";
+            echo "<span class='notice-author'><i class='fas fa-user'></i> " . htmlspecialchars($row['author']) . "</span>";
+            echo "<span class='notice-date'><i class='far fa-calendar-alt'></i> " . date('F j, Y h:i A', strtotime($row['created_at'])) . "</span>";
+            echo "</div>";
+            echo "</div>"; // Close notice-card
+        }
+
+        echo "<div class='back-button-container'>";
+        echo "<a href='javascript:history.back()' class='back-button'><i class='fas fa-arrow-left'></i> Back</a>";
         echo "</div>";
-        
-        echo "<div class='notice-content'>" . nl2br(htmlspecialchars($row['content'])) . "</div>";
-        
-        echo "<div class='notice-footer'>";
-        echo "<span class='notice-author'><i class='fas fa-user'></i> " . htmlspecialchars($row['author']) . "</span>";
-        echo "<span class='notice-date'><i class='far fa-calendar-alt'></i> " . date('F j, Y h:i A', strtotime($row['created_at'])) . "</span>";
+
+        echo "</div>"; // Close notices-container
+    } else {
+        echo "<div class='no-notices'>";
+        echo "<i class='far fa-folder-open'></i>";
+        echo "<p>No notices found at this time</p>";
+        echo "<a href='javascript:history.back()' class='back-button'><i class='fas fa-arrow-left'></i> Back</a>";
         echo "</div>";
-        echo "</div>"; // Close notice-card
     }
-    
-    echo "<div class='back-button-container'>";
-    echo "<a href='javascript:history.back()' class='back-button'><i class='fas fa-arrow-left'></i> Back</a>";
-    echo "</div>";
-    
-    echo "</div>"; // Close notices-container
-} else {
-    echo "<div class='no-notices'>";
-    echo "<i class='far fa-folder-open'></i>";
-    echo "<p>No notices found at this time</p>";
-     echo "<a href='javascript:history.back()' class='back-button'><i class='fas fa-arrow-left'></i> Back</a>";
-    echo "</div>";
 }
-}
+
+
+
+
+
 function see_faculty_notice(){
     global $con;
            $query ="SELECT * FROM notice 
@@ -735,7 +775,8 @@ WHERE section='Library' ORDER BY created_at DESC";
     echo "<a href='javascript:history.back()' class='back-button'><i class='fas fa-arrow-left'></i> Back</a>";
     echo "</div>";
 }
-}function get_unread_notification_count() {
+}
+function get_unread_notification_count() {
     global $con;
     $query = "SELECT COUNT(*) as count FROM notice WHERE viewed = 0 AND section='Staff'";
     $result = mysqli_query($con, $query);

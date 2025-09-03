@@ -7,7 +7,7 @@ if (!isset($_SESSION['student_data'])) {
     header("Location: studentlogin.php");
     exit();
 }
-
+require_once '../library/notice.php';
 // Get the student data from session
 $stdata = $_SESSION['student_data'];
 
@@ -1656,6 +1656,61 @@ if (mysqli_num_rows($check_column) == 0) {
             align-items: center;
             gap: 5px;
         }
+        .bell-btn {
+    position: relative;
+    background: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 22px;
+    color: #333;
+    padding: 10px 15px;
+    border-radius: 50%;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: 0.3s;
+}
+
+.bell-btn:hover {
+    background: #f5f5f5;
+    color: #007bff;
+    transform: scale(1.05);
+}
+
+.bell-btn i {
+    font-size: 26px;
+}
+
+.badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #ff3b3b;
+    color: #fff !important;
+    font-size: 13px;
+    font-weight: bold;
+    border-radius: 50%;
+    padding: 4px 7px;
+    min-width: 20px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+.notice-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin: 12px 0;
+    padding: 15px;
+    transition: 0.3s;
+}
+
+.notice-card.unread {
+    background: #911631ff; /* light blue for unread */
+    border-left: 5px solid #007bff;
+}
+
+.notice-card.read {
+    background: #62cee9ff; /* light gray for read */
+    border-left: 5px solid #ccc;
+}
+
 </style>
 </head>
 
@@ -1670,7 +1725,9 @@ if (mysqli_num_rows($check_column) == 0) {
 
         <div class="nav-buttons">
             <button><i class="fas fa-home"></i><a style="text-decoration: none;color:aliceblue" href="student.html">Home</a></button>
-            <button><i class="fas fa-bell"></i> Notifications</button>
+            <!-- Bell Button -->
+
+
         </div>
     </div>
 
@@ -1686,13 +1743,24 @@ if (mysqli_num_rows($check_column) == 0) {
                     <li><button type="submit" name="enrolment"><i class="fas fa-user-plus"></i> Enrollment</button></li>
                     <li><button type="submit" name="routine"><i class="fas fa-calendar-alt"></i> Routine</button></li>
                     <li><button type="submit" name="account"><i class="fas fa-exchange-alt"></i> Transaction</button></li>
+    <div class="notification-bell">
+      <li>  <button type="submit" name="ssubmit" class="bell-btn">
+            <i class="fas fa-bell"></i>Notification
+            <?php 
+            $unread = get_unread_student_notification_count(); 
+            if($unread > 0): ?>
+                <span class="badge"><?= htmlspecialchars($unread) ?></span>
+            <?php endif; ?>
+        </button></li>
+    </div>
+
                 </form>
                 <li><a href="studentlogin.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
         </div>
-
-        <!-- Main content -->
-        <?php if (isset($_POST['biodata']) || $show_request_form || isset($_GET['action'])): ?>
+      <?php
+        // <!-- Main content -->
+         if (isset($_POST['biodata']) || $show_request_form || isset($_GET['action'])): ?>
             <?php if ($show_request_form): ?>
                 <!-- Request Form -->
                 <div class="content-area">
@@ -1778,6 +1846,7 @@ if (mysqli_num_rows($check_column) == 0) {
                 </div>
             <?php else: ?>
                 <!-- Student Profile Section -->
+                 
                 <div class="content-area">
                     <div class="page-header">
                         <h2 class="page-title"><i class="fas fa-user-circle"></i> Student Profile</h2>
@@ -2341,7 +2410,56 @@ if (isset($_POST['search_course']) && !empty($selected_semester)) {
                     <?php endif; ?>
                 </div>
             </div>
-<?php elseif ($show_routine_section || isset($_POST['routine'])): ?>
+<?php elseif ($show_routine_section || isset($_POST['ssubmit'])):
+
+     $query = "SELECT * FROM notice WHERE section='Student' AND id=$id ORDER BY created_at DESC";
+    $result = mysqli_query($con, $query);
+
+    if (mysqli_num_rows($result) > 0) {
+        echo "<div class='notices-container'>";
+        echo "<h2 class='notices-heading'><i class='fas fa-bullhorn'></i> Latest Notices</h2>";
+
+        while ($row = mysqli_fetch_assoc($result)) {
+            // Add class based on viewed status
+            $noticeClass = ($row['viewed'] == 0) ? "notice-card unread" : "notice-card read";
+
+            echo "<div class='{$noticeClass}'>";
+            echo "<div class='notice-header'>";
+            echo "<h3 class='notice-title'><i class='fas fa-chevron-circle-right'></i> " . htmlspecialchars($row['title']) . "</h3>";
+            echo "<span class='notice-section'>" . htmlspecialchars($row['section']) . "</span>";
+            echo "</div>";
+
+            echo "<div class='notice-content'>" . nl2br(htmlspecialchars($row['content'])) . "</div>";
+
+            echo "<div class='notice-footer'>";
+            echo "<span class='notice-author'><i class='fas fa-user'></i> " . htmlspecialchars($row['author']) . "</span>";
+            echo "<span class='notice-date'><i class='far fa-calendar-alt'></i> " . date('F j, Y h:i A', strtotime($row['created_at'])) . "</span>";
+            echo "</div>";
+            echo "</div>"; // Close notice-card
+             $update = "UPDATE notice SET viewed = 1 WHERE section='Student' AND viewed = 0";
+    mysqli_query($con, $update);
+        }
+
+        echo "<div class='back-button-container'>";?>
+        <form method="post">
+                <button type="submit" name="dashboard" class="btn-back">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </button>
+            </form>
+            
+            <?php
+        echo "</div>";
+
+        echo "</div>"; // Close notices-container
+    } else {
+        echo "<div class='no-notices'>";
+        echo "<i class='far fa-folder-open'></i>";
+        echo "<p>No notices found at this time</p>";
+        echo "<a href='javascript:history.back()' class='back-button'><i class='fas fa-arrow-left'></i> Back</a>";
+        echo "</div>";
+    }
+    
+    elseif ($show_routine_section || isset($_POST['routine'])): ?>
     <!-- Routine Section -->
     <div class="content-area">
         <div class="page-header">
@@ -2393,8 +2511,10 @@ if (isset($_POST['search_course']) && !empty($selected_semester)) {
             <?php endif; ?>
         </div>
     </div>
+<?php 
 
-        <?php else: ?>
+ else: ?>
+ 
             <!-- Default Dashboard View -->
             <div class="content-area">
                 <div class="page-header">
