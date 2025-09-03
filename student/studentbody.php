@@ -2498,15 +2498,24 @@ if (isset($_POST['search_course']) && !empty($selected_semester)) {
             }
         }
 
-        echo "<div class='back-button-container'>";
-        echo "<a href='javascript:history.back()' class='back-button'><i class='fas fa-arrow-left'></i> Back</a>";
+        echo "<div class='back-button-container'>";?>
+        <form method="post">
+                <button type="submit" name="dashboard" class="btn-back">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+            </form> <?php
         echo "</div>";
 
     } else {
         echo "<div class='no-notices'>";
         echo "<i class='far fa-folder-open'></i>";
         echo "<p>No notifications found at this time</p>";
-        echo "<a href='javascript:history.back()' class='back-button'><i class='fas fa-arrow-left'></i> Back</a>";
+        ?>
+        <form method="post">
+                <button type="submit" name="dashboard" class="btn-back">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+            </form> <?php
         echo "</div>";
     }
 
