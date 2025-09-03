@@ -312,8 +312,8 @@ if (isset($_POST['logout'])) {
                     <a href="#" class="library-logo">
                         <nav class="library-navbars">
                             <a href="#" class="library-logo">
-                                <i class="fas fa-book-open"></i><br>
-                                <span>Dashboard </span> 
+                                
+                                <span><form action="" method="post" style="margin: 5px;width:100%"><button name="dashboard"><i class="fas fa-book-open"></i> Dashboard</button></form>  </span> 
                             </a>
                             <input type="checkbox" id="nav-toggle" class="nav-toggle">
                             <label for="nav-toggle" class="hamburger">&#9776;</label>
@@ -350,33 +350,53 @@ if (isset($_POST['logout'])) {
     </div>';
 <?php
  }
- elseif (isset($_POST['borrow_book'])){
+ elseif (isset($_POST['borrow_book'])) {
     ?>
     <div class='dashboard-box'>
         <h2>📚 Borrow Book</h2>
         <form method="post">
             <label>Book ID:</label><br>
             <input type="number" name="book_id" required><br><br>
+
             <label>User ID:</label><br>
             <input type="number" name="user_id" required><br><br>
+
+            <label>Due Date:</label><br>
+            <!-- prevent past dates -->
+            <input type="date" name="due" min="<?php echo date('Y-m-d'); ?>" required><br><br>
+
             <button type="submit" name="confirm_borrow">Confirm Borrow</button>
         </form>
     </div>
     <?php
 
- }
-                       elseif (isset($_POST['confirm_borrow'])) {
-    $book_id = intval($_POST['book_id']);
-    $user_id = intval($_POST['user_id']);
-    $sql = "INSERT INTO borrow_books (book_id, user_id, borrow_date, due_date) 
-            VALUES ($book_id, $user_id, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 7 DAY))";
-    if (mysqli_query($con, $sql)) {
-        echo "<p style='color:green;'>✅ Book borrowed successfully!</p>";
-        
+} elseif (isset($_POST['confirm_borrow'])) {
+    $book_id  = (int)$_POST['book_id'];
+    $user_id  = (int)$_POST['user_id'];
+    $due_date = $_POST['due']; // expected format YYYY-MM-DD from <input type="date">
+
+    // Validate date format safely
+    $dt = DateTime::createFromFormat('Y-m-d', $due_date);
+    $isValid = $dt && $dt->format('Y-m-d') === $due_date;
+
+    if (!$isValid) {
+        echo "<p style='color:red;'>❌ Invalid due date.</p>";
     } else {
-        echo "<p style='color:red;'>❌ Error: " . mysqli_error($con) . "</p>";
+        $due_date = $dt->format('Y-m-d');
+
+        // Use prepared statement to avoid SQL issues
+        $stmt = mysqli_prepare($con, "INSERT INTO borrow_books (book_id, user_id, borrow_date, due_date) VALUES (?, ?, CURDATE(), ?)");
+        mysqli_stmt_bind_param($stmt, 'iis', $book_id, $user_id, $due_date);
+
+        if (mysqli_stmt_execute($stmt)) {
+            echo "<p style='color:green;'>✅ Book borrowed successfully!</p>";
+        } else {
+            echo "<p style='color:red;'>❌ Error: " . mysqli_error($con) . "</p>";
+        }
+        mysqli_stmt_close($stmt);
     }
 }
+
 
 // ✅ Borrow Details Dashboard
 elseif (isset($_POST['details_book'])) {
@@ -576,6 +596,178 @@ elseif (isset($_POST['confirm_renew'])) {
                             $query = "UPDATE notice SET viewed =0  WHERE section = 'Staff'";
                              $stmt = mysqli_prepare($con, $query);
                         }
+                        elseif (isset($_POST['dashboard'])){ 
+ ?>
+                         <div class="dashboard-container">
+    <!-- Notification Bell -->
+    <div class="dashboard-container">
+    <!-- Notification Bell - Improved Version -->
+    <div class="notification-wrapper">
+        <form action="library.php" method="post">
+            <div class="notification-bell">
+                <button type="submit" name="ssubmit" class="bell-btn">
+                    <i class="fas fa-bell"></i>
+                    <?php 
+                    $unread = get_unread_notification_count(); 
+                    if($unread > 0): ?>
+                        <span class="badge"><?= htmlspecialchars($unread) ?></span>
+                    <?php endif; ?>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+    <div class="welcome-header">
+        <div class="bot-logo-container">
+            <div class="bot-logo">
+                <img src="https://cdn-icons-png.flaticon.com/512/3344/3344372.png" alt="Library Bot" class="bot-img">
+                <div class="bot-tooltip">Hi! I'm your library assistant</div>
+            </div>
+            <p class="bot-title">LibraryAI Assistant</p>
+        </div>
+        <div class="welcome-message">
+            <h2>Welcome Back to Your Library Dashboard!</h2>
+            <p>We're glad to see you again. Here's what's happening today.</p>
+        </div>
+    </div>
+
+    <div class="staff-bio">
+        <div class="bio-card">
+            <h3><i class="fas fa-user"></i> Staff Information</h3>
+            <div class="bio-details">
+                <div class="detail-item">
+                    <span class="detail-label">Full Name:</span>
+                    <span class="detail-value"><?php echo htmlspecialchars( $_SESSION['name'] ?? 'Not available'); ?></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Staff ID:</span>
+                    <span class="detail-value"><?php echo htmlspecialchars($_SESSION['id'] ?? 'Not available'); ?></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Position:</span>
+                    <span class="detail-value"><?php echo htmlspecialchars( $_SESSION['position'] ?? 'Not available'); ?></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Department:</span>
+                    <span class="detail-value"><?php echo htmlspecialchars($_SESSION['department'] ?? 'Not available'); ?></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Email:</span>
+                    <span class="detail-value"><?php echo htmlspecialchars($_SESSION['email'] ?? 'Not available'); ?></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="quick-stats">
+        <?php
+         // Execute query
+                            $query = "SELECT COUNT(*) as total FROM books";
+                            $execute = mysqli_query($con, $query);
+                            
+        
+                            if ($execute) {
+                                $row = mysqli_fetch_assoc($execute);
+       echo '<div class="stat-card">';
+     echo '<div class="stat-number">';
+    
+                                echo number_format($row['total']);
+                            }
+echo "</div>";
+      ?> 
+      <div class="stat-label">Books Available</div>
+    </div>
+    <div class="stat-card">
+        <?php
+        $query = "SELECT COUNT(*) as total FROM ebook";
+                            $execute = mysqli_query($con, $query);
+                            
+        
+                            if ($execute) {
+                                $row = mysqli_fetch_assoc($execute);
+      echo '<div class="stat-number">';
+     echo number_format($row['total']);
+                            }
+echo "</div>";
+      ?> 
+      <div class="stat-label">E-Journals</div>
+    </div>
+        <div class="stat-card">
+             <?php
+             $query = "SELECT COUNT(*) as today_borrows FROM borrow_books
+                                     WHERE DATE(borrow_date) = CURDATE()";
+                            $execute = mysqli_query($con, $query);
+                             if ($execute) {
+                                $row = mysqli_fetch_assoc($execute);
+                                
+           echo '<i class="fas fa-book-open">'.'</i>';
+          echo  '<h4>'.'Books Checked Out Today'.'</h4>';
+           echo '<p>';
+           echo number_format($row['today_borrows']);
+                            }
+                            echo '</p>'.'</div>'; ?>
+        
+        <div class="stat-card">
+           
+            <i class="fas fa-users"></i>
+            <h4>New Patrons This Week</h4>
+              <?php
+             $query = "SELECT COUNT(*) as today_borrows FROM users
+                                     WHERE DATE(created_at) = CURDATE()";
+                            $execute = mysqli_query($con, $query);
+                             if ($execute) {
+                                $row = mysqli_fetch_assoc($execute);
+            echo '<p>';
+           echo number_format($row['today_borrows']);
+                            }
+                            echo '</p>'.'</div>'; ?>
+        <div class="stat-card">
+            <?php
+    if(isset($_POST['item'])){
+        $query = "SELECT *  
+              FROM borrow_books
+              WHERE DATE(due_date) < CURDATE() and status != 'returned'";
+    
+    $execute = mysqli_query($con, $query);
+
+    if ($execute) {
+        $row = mysqli_fetch_assoc($execute);
+        echo '<p>'.'USER ID:' . number_format($row['user_id']) . '</p>';
+    } else {
+        echo '<p>0</p>';
+    }
+    }
+    else {?>
+    <i class="fas fa-clock"></i>
+    <form action="" method="post">
+    <button name="item"><h4>Overdue Items</h4></button></form>
+    <?php
+    $query = "SELECT COUNT(*) AS overdue_count 
+              FROM borrow_books
+              WHERE DATE(due_date) < CURDATE() and status !='returned'";
+    
+    $execute = mysqli_query($con, $query);
+
+    if ($execute) {
+        $row = mysqli_fetch_assoc($execute);
+        echo '<p>' . number_format($row['overdue_count']) . '</p>';
+    } else {
+        echo '<p>0</p>';
+    }
+    }
+    ?>
+</div>
+
+
+        <div class="stat-card">
+            <i class="fas fa-calendar-alt"></i>
+            <h4>Upcoming Events</h4>
+            <p>3</p>
+        </div>
+    </div>
+</div>
+<?php
+                        }
                         else {
                             ?>
                          <div class="dashboard-container">
@@ -702,12 +894,29 @@ echo "</div>";
                             }
                             echo '</p>'.'</div>'; ?>
         <div class="stat-card">
+            <?php
+    if(isset($_POST['item'])){
+        $query = "SELECT *  
+              FROM borrow_books
+              WHERE DATE(due_date) < CURDATE() and status != 'returned'";
+    
+    $execute = mysqli_query($con, $query);
+
+    if ($execute) {
+        $row = mysqli_fetch_assoc($execute);
+        echo '<p>'.'USER ID:' . number_format($row['user_id']) . '</p>';
+    } else {
+        echo '<p>0</p>';
+    }
+    }
+    else {?>
     <i class="fas fa-clock"></i>
-    <h4>Overdue Items</h4>
+    <form action="" method="post">
+    <button name="item"><h4>Overdue Items</h4></button></form>
     <?php
     $query = "SELECT COUNT(*) AS overdue_count 
               FROM borrow_books
-              WHERE DATE(due_date) < CURDATE()";
+              WHERE DATE(due_date) < CURDATE() and status !='returned'";
     
     $execute = mysqli_query($con, $query);
 
@@ -717,8 +926,10 @@ echo "</div>";
     } else {
         echo '<p>0</p>';
     }
+    }
     ?>
 </div>
+
 
         <div class="stat-card">
             <i class="fas fa-calendar-alt"></i>
