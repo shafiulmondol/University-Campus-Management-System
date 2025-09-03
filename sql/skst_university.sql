@@ -47,7 +47,7 @@ CREATE TABLE `admin_users` (
 
 INSERT INTO `admin_users` (`id`, `full_name`, `username`, `password`, `email`, `phone`, `key`, `profile_picture`, `registration_date`, `last_login`, `is_active`) VALUES
 (1, 'Admin User', 'admin', 'admin123', 'admin@university.edu', '123-456-7890', 123, '', '2025-09-01 21:21:06', '2025-09-01 21:16:08.636532', 1),
-(23303106, 'Md. Shafiul Islam', 'Admin-1', '$2y$10$DbqNzQvmDEzO.rnJ44KZXuthl/U73yiq1PGtqT09DBh', '23303106@iubat.edu', '01701535780', 123, 'uploads/admin_pictures/1756740221_{E41600A5-6F2F-477B-A387-7B418585B689}.png', '2025-09-01 21:21:06', '2025-09-02 01:08:20.000000', 1);
+(23303106, 'Md. Shafiul Islam', 'Admin-1', 'kawsar1234', '23303106@iubat.edu', '01701535780', 123, 'uploads/admin_pictures/1756740221_{E41600A5-6F2F-477B-A387-7B418585B689}.png', '2025-09-01 21:21:06', '2025-09-02 01:08:20.000000', 1);
 
 -- --------------------------------------------------------
 

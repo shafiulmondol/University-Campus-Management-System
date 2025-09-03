@@ -16,7 +16,7 @@ if ($mysqli->connect_error) {
     die("Connection failed: " . $mysqli->connect_error);
 }
 
-// Handle admin login
+// Handle admission officer login
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
     $email = isset($_POST['email']) ? trim($_POST['email']) : '';
     $password = isset($_POST['password']) ? $_POST['password'] : '';
@@ -83,12 +83,12 @@ function loginUser($id, $full_name, $username, $email, $phone, $profile_picture,
     // Regenerate session ID to prevent session fixation
     session_regenerate_id(true);
     
-    $_SESSION['admin_id'] = $id;
-    $_SESSION['admin_name'] = $full_name;
-    $_SESSION['admin_username'] = $username;
-    $_SESSION['admin_email'] = $email;
-    $_SESSION['admin_phone'] = $phone;
-    $_SESSION['admin_profile_picture'] = $profile_picture;
+    $_SESSION['admission_officer_id'] = $id;
+    $_SESSION['admission_officer_name'] = $full_name;
+    $_SESSION['admission_officer_username'] = $username;
+    $_SESSION['admission_officer_email'] = $email;
+    $_SESSION['admission_officer_phone'] = $phone;
+    $_SESSION['admission_officer_profile_picture'] = $profile_picture;
     
     // Update last login time
     $update_sql = "UPDATE admin_users SET last_login = NOW() WHERE id = ?";
@@ -99,7 +99,7 @@ function loginUser($id, $full_name, $username, $email, $phone, $profile_picture,
     }
     
     // Redirect to prevent form resubmission
-    header("Location: admin.php"); // Redirect to a specific page
+    header("Location: admission_officer.php");
     exit();
 }
 
@@ -111,9 +111,9 @@ if (isset($_GET['logout'])) {
 }
 
 // Handle profile picture upload
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['profile_picture']) && isset($_SESSION['admin_id'])) {
-    $admin_id = $_SESSION['admin_id'];
-    $uploadDir = 'uploads/admin_pictures/';
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['profile_picture']) && isset($_SESSION['admission_officer_id'])) {
+    $officer_id = $_SESSION['admission_officer_id'];
+    $uploadDir = 'uploads/admission_officer_pictures/';
     
     // Create directory if it doesn't exist
     if (!file_exists($uploadDir)) {
@@ -132,12 +132,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['profile_picture']) &&
             // Update database with file path
             $update_sql = "UPDATE admin_users SET profile_picture = ? WHERE id = ?";
             if ($update_stmt = $mysqli->prepare($update_sql)) {
-                $update_stmt->bind_param("si", $targetFilePath, $admin_id);
+                $update_stmt->bind_param("si", $targetFilePath, $officer_id);
                 $update_stmt->execute();
                 $update_stmt->close();
                 
                 // Update session variable
-                $_SESSION['admin_profile_picture'] = $targetFilePath;
+                $_SESSION['admission_officer_profile_picture'] = $targetFilePath;
                 
                 // Refresh page to show new image
                 header("Location: " . $_SERVER['PHP_SELF']);
@@ -152,8 +152,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['profile_picture']) &&
 }
 
 // Handle profile update
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_profile']) && isset($_SESSION['admin_id'])) {
-    $admin_id = $_SESSION['admin_id'];
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_profile']) && isset($_SESSION['admission_officer_id'])) {
+    $officer_id = $_SESSION['admission_officer_id'];
     $full_name = trim($_POST['full_name']);
     $username = trim($_POST['username']);
     $email = trim($_POST['email']);
@@ -162,14 +162,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_profile']) && i
     
     $update_sql = "UPDATE admin_users SET full_name = ?, username = ?, email = ?, phone = ?, `key` = ? WHERE id = ?";
     if ($update_stmt = $mysqli->prepare($update_sql)) {
-        $update_stmt->bind_param("sssssi", $full_name, $username, $email, $phone, $key, $admin_id);
+        $update_stmt->bind_param("sssssi", $full_name, $username, $email, $phone, $key, $officer_id);
         
         if ($update_stmt->execute()) {
             // Update session variables
-            $_SESSION['admin_name'] = $full_name;
-            $_SESSION['admin_username'] = $username;
-            $_SESSION['admin_email'] = $email;
-            $_SESSION['admin_phone'] = $phone;
+            $_SESSION['admission_officer_name'] = $full_name;
+            $_SESSION['admission_officer_username'] = $username;
+            $_SESSION['admission_officer_email'] = $email;
+            $_SESSION['admission_officer_phone'] = $phone;
             
             // Refresh page
             header("Location: " . $_SERVER['PHP_SELF']);
@@ -179,6 +179,50 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_profile']) && i
         }
         
         $update_stmt->close();
+    }
+}
+
+// Handle password change
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['change_password']) && isset($_SESSION['admission_officer_id'])) {
+    $officer_id = $_SESSION['admission_officer_id'];
+    $current_password = $_POST['current_password'];
+    $new_password = $_POST['new_password'];
+    $confirm_password = $_POST['confirm_password'];
+    
+    if ($new_password !== $confirm_password) {
+        $error = "New password and confirmation do not match.";
+    } else {
+        // Get current password from database
+        $sql = "SELECT password FROM admin_users WHERE id = ?";
+        if ($stmt = $mysqli->prepare($sql)) {
+            $stmt->bind_param("i", $officer_id);
+            $stmt->execute();
+            $stmt->bind_result($hashed_password);
+            $stmt->fetch();
+            $stmt->close();
+            
+            // Verify current password
+            if (password_verify($current_password, $hashed_password) || $current_password === $hashed_password) {
+                // Hash new password
+                $new_hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
+                
+                // Update password in database
+                $update_sql = "UPDATE admin_users SET password = ? WHERE id = ?";
+                if ($update_stmt = $mysqli->prepare($update_sql)) {
+                    $update_stmt->bind_param("si", $new_hashed_password, $officer_id);
+                    
+                    if ($update_stmt->execute()) {
+                        $error = "Password changed successfully.";
+                    } else {
+                        $error = "Error changing password: " . $update_stmt->error;
+                    }
+                    
+                    $update_stmt->close();
+                }
+            } else {
+                $error = "Current password is incorrect.";
+            }
+        }
     }
 }
 
@@ -212,30 +256,71 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['reset_password'])) {
     }
 }
 
-// Check if admin is logged in
-$is_logged_in = isset($_SESSION['admin_id']);
+// Check if admission officer is logged in
+$is_logged_in = isset($_SESSION['admission_officer_id']);
 
-// Get admin data if logged in
+// Get admission officer data if logged in
 if ($is_logged_in) {
-    $admin_id = $_SESSION['admin_id'];
+    $officer_id = $_SESSION['admission_officer_id'];
     $sql = "SELECT * FROM admin_users WHERE id = ?";
     $stmt = $mysqli->prepare($sql);
-    $stmt->bind_param("i", $admin_id);
+    $stmt->bind_param("i", $officer_id);
     $stmt->execute();
     $result = $stmt->get_result();
-    $admin = $result->fetch_assoc();
+    $officer = $result->fetch_assoc();
     $stmt->close();
 }
+/*
+// Get admission statistics
+$total_applications = 0;
+$pending_applications = 0;
+$approved_applications = 0;
+$rejected_applications = 0;
 
+if ($is_logged_in) {
+    // Total applications
+    $sql = "SELECT COUNT(*) as total FROM applications";
+    $result = $mysqli->query($sql);
+    if ($result) {
+        $row = $result->fetch_assoc();
+        $total_applications = $row['total'];
+    }
+    
+    // Pending applications
+    $sql = "SELECT COUNT(*) as total FROM applications WHERE status = 'pending'";
+    $result = $mysqli->query($sql);
+    if ($result) {
+        $row = $result->fetch_assoc();
+        $pending_applications = $row['total'];
+    }
+    
+    // Approved applications
+    $sql = "SELECT COUNT(*) as total FROM applications WHERE status = 'approved'";
+    $result = $mysqli->query($sql);
+    if ($result) {
+        $row = $result->fetch_assoc();
+        $approved_applications = $row['total'];
+    }
+    
+    // Rejected applications
+    $sql = "SELECT COUNT(*) as total FROM applications WHERE status = 'rejected'";
+    $result = $mysqli->query($sql);
+    if ($result) {
+        $row = $result->fetch_assoc();
+        $rejected_applications = $row['total'];
+    }
+}
+*/
 $mysqli->close();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Portal - SKST University</title>
+    <title>Admission Officer Portal - SKST University</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -951,6 +1036,7 @@ $mysqli->close();
             text-decoration: none;
             font-size: 14px;
             transition: color 0.3s;
+            cursor: pointer;
         }
         
         .login-links a:hover {
@@ -1050,22 +1136,22 @@ $mysqli->close();
             }
         }
         .password-container {
-    position: relative;
-    width: 100%;
-}
-.password-container input {
-    width: 100%;
-    padding-right: 40px; /* space for eye icon */
-}
-.password-container .toggle-password {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-    font-size: 18px;
-    color: #666;
-}
+            position: relative;
+            width: 100%;
+        }
+        .password-container input {
+            width: 100%;
+            padding-right: 40px; /* space for eye icon */
+        }
+        .password-container .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 18px;
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -1075,8 +1161,8 @@ $mysqli->close();
         <div class="login-box">
             <div class="login-header">
                 <img src="../picture/SKST.png" alt="Logo" style="width: 50px; height: 50px; border-radius: 50%;">
-                <h1>Admin Portal</h1>
-                <p>SKST University - Administrator Access</p>
+                <h1>Admission Officer Portal</h1>
+                <p>SKST University - Admission Officer Access</p>
             </div>
             
             <form class="login-form" method="post">
@@ -1088,13 +1174,16 @@ $mysqli->close();
                 
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input type="password" id="password" name="password" required placeholder="Enter your password">
+                    <div class="password-container">
+                        <input type="password" id="password" name="password" required placeholder="Enter your password">
+                        <i class="fa-solid fa-eye toggle-password" id="togglePassword"></i>
+                    </div>
                 </div>
                 
-                <button type="submit" class="login-btn">Login to Admin Dashboard</button>
+                <button type="submit" class="login-btn">Login to Admission Portal</button>
                 
                 <div class="login-links">
-                    <a href="forgot_password.php" id="forgotPasswordLink"><i class="fas fa-unlock-alt"></i> Forgot Password?</a>
+                    <a href="#" id="forgotPasswordLink"><i class="fas fa-unlock-alt"></i> Forgot Password?</a>
                     <a href="#" id="helpLink"><i class="fas fa-question-circle"></i> Help</a>
                 </div>
                 
@@ -1102,10 +1191,37 @@ $mysqli->close();
                     <div class="error-msg"><?php echo $error; ?></div>
                 <?php endif; ?>
                 
+                <div class="demo-credentials">
+                    <p><strong>Demo Credentials:</strong></p>
+                    <p>Email: admission@skstuniversity.edu</p>
+                    <p>Password: admission123</p>
+                </div>
             </form>
         </div>
     </div>
 
+    <!-- Forgot Password Modal -->
+    <div id="forgotPasswordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close">&times;</span>
+                <h2 class="modal-title"><i class="fas fa-unlock-alt"></i> Reset Password</h2>
+            </div>
+            <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="reset_email">Email Address</label>
+                        <input type="email" id="reset_email" name="email" required>
+                    </div>
+                    <p>Enter your email address and we'll send you instructions to reset your password.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" id="cancelReset">Cancel</button>
+                    <button type="submit" name="reset_password" class="btn-save">Reset Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Help Modal -->
     <div id="helpModal" class="modal">
@@ -1115,7 +1231,7 @@ $mysqli->close();
                 <h2 class="modal-title"><i class="fas fa-question-circle"></i> Help & Support</h2>
             </div>
             <div class="modal-body">
-                <h3>Administrator Login Assistance</h3>
+                <h3>Admission Officer Login Assistance</h3>
                 <p>If you're having trouble accessing your account, please follow these steps:</p>
                 <ol>
                     <li style="margin-left: 20px;">Ensure you're using the correct email and password (case sensitive)</li>
@@ -1143,15 +1259,16 @@ $mysqli->close();
     <div class="navbar">
         <div class="logo">
             <img src="../picture/SKST.png" alt="Logo" style="width: 50px; height: 50px; border-radius: 50%;">
-            <h1 style="color:white; text-align:center;margin:0px;">SKST University Admin Portal</h1>
+            <h1 style="color:white; text-align:center;margin:0px;">SKST University Admission Portal</h1>
         </div>
         
         <div class="nav-buttons">
+            <span class="welcome"><i class="fas fa-user-circle"></i> Welcome, <?php echo htmlspecialchars($_SESSION['admission_officer_name']); ?></span>
             <button onclick="location.href='../index.html'">
                 <i class="fas fa-home"></i> Home
             </button>
-            <button onclick="location.href='../working.html'">
-                <i class="fas fa-bell"></i> Notifications
+            <button onclick="location.href='?logout=1'">
+                <i class="fas fa-sign-out-alt"></i> Logout
             </button>
         </div>
     </div>
@@ -1165,61 +1282,46 @@ $mysqli->close();
                     </a>
                 </li>
                 <li>
-                    <a href="../student/dev_student.php">
-                        <i class="fas fa-user"></i> Student
-                    </a>
-                </li>
-                <li>
                     <a href="../admission/dev_admission.php">
-                        <i class="fas fa-user"></i> Admission
+                        <i class="fas fa-user-graduate"></i> Manage Admissions
                     </a>
                 </li>
                 <li>
-                    <a href="../alumni/dev_alumni.php">
-                        <i class="fas fa-user-graduate"></i> Alumni
-                    </a>
-                </li>
-                <li>
-                    <a href="../faculty/dev_faculty.php">
-                        <i class="fas fa-chalkboard-teacher"></i> Faculty
+                    <a href="../student/dev_student.php">
+                        <i class="fas fa-user"></i> Students
                     </a>
                 </li>
                 <li>
                     <a href="#">
-                        <i class="fas fa-briefcase"></i> Employee
+                        <i class="fas fa-file-alt"></i> Applications
                     </a>
                 </li>
                 <li>
-                    <a href="../working.html">
-                        <i class="fas fa-users"></i> User Management
+                    <a href="#">
+                        <i class="fas fa-tasks"></i> Review Process
                     </a>
                 </li>
                 <li>
-                    <a href="../working.html">
-                        <i class="fas fa-book"></i> Course
+                    <a href="#">
+                        <i class="fas fa-chart-bar"></i> Reports
                     </a>
                 </li>
                 <li>
-                    <a href="../working.html">
-                        <i class="fas fa-bell"></i> Notifications
+                    <a href="#">
+                        <i class="fas fa-calendar-alt"></i> Schedule
                     </a>
                 </li>
                 <li>
-                    <a href="../working.html">
-                        <i class="fas fa-cog"></i> System Settings
+                    <a href="#" id="changePasswordLink">
+                        <i class="fas fa-key"></i> Change Password
                     </a>
-                </li>
-                <li>
-                    <button onclick="location.href='?logout=1'">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </button>
                 </li>
             </ul>
         </div>
         
         <div class="content-area">
             <div class="page-header">
-                <h1 class="page-title"><i class="fas fa-user-shield"></i> Administrator Dashboard</h1>
+                <h1 class="page-title"><i class="fas fa-user-tie"></i> Admission Officer Dashboard</h1>
                 <button class="btn-edit" id="editProfileBtn">
                     <i class="fas fa-edit"></i> Edit Profile
                 </button>
@@ -1228,11 +1330,11 @@ $mysqli->close();
             <!-- Profile Card with Picture Upload -->
             <div class="profile-card">
                 <div class="profile-img-container">
-                    <?php if (!empty($_SESSION['admin_profile_picture'])): ?>
-                        <img id="profile-image" class="profile-img" src="<?php echo htmlspecialchars($_SESSION['admin_profile_picture']); ?>" alt="Profile Image">
+                    <?php if (!empty($_SESSION['admission_officer_profile_picture'])): ?>
+                        <img id="profile-image" class="profile-img" src="<?php echo htmlspecialchars($_SESSION['admission_officer_profile_picture']); ?>" alt="Profile Image">
                     <?php else: ?>
                         <div id="profile-placeholder" class="profile-placeholder">
-                            <i class="fas fa-user-shield"></i>
+                            <i class="fas fa-user-tie"></i>
                         </div>
                     <?php endif; ?>
                     <div class="edit-overlay" onclick="document.getElementById('file-input').click()">
@@ -1244,10 +1346,10 @@ $mysqli->close();
                 </div>
 
                 <div class="profile-info">
-                    <h2><?php echo htmlspecialchars($_SESSION['admin_name']); ?></h2>
-                    <p><i class="fas fa-user"></i> <?php echo htmlspecialchars($_SESSION['admin_username']); ?></p>
-                    <p><i class="fas fa-envelope"></i> <?php echo htmlspecialchars($_SESSION['admin_email']); ?></p>
-                    <p><i class="fas fa-phone"></i> <?php echo htmlspecialchars($_SESSION['admin_phone']); ?></p>
+                    <h2><?php echo htmlspecialchars($_SESSION['admission_officer_name']); ?></h2>
+                    <p><i class="fas fa-user"></i> <?php echo htmlspecialchars($_SESSION['admission_officer_username']); ?></p>
+                    <p><i class="fas fa-envelope"></i> <?php echo htmlspecialchars($_SESSION['admission_officer_email']); ?></p>
+                    <p><i class="fas fa-phone"></i> <?php echo htmlspecialchars($_SESSION['admission_officer_phone']); ?></p>
                 </div>
             </div>
             
@@ -1259,16 +1361,16 @@ $mysqli->close();
                 <div class="detail-card">
                     <h3><i class="fas fa-info-circle"></i> Account Information</h3>
                     <div class="info-group">
-                        <div class="info-label">Admin ID</div>
-                        <div class="info-value"><?php echo htmlspecialchars($admin['id']); ?></div>
+                        <div class="info-label">Officer ID</div>
+                        <div class="info-value"><?php echo htmlspecialchars($officer['id']); ?></div>
                     </div>
                     <div class="info-group">
                         <div class="info-label">Username</div>
-                        <div class="info-value"><?php echo htmlspecialchars($admin['username']); ?></div>
+                        <div class="info-value"><?php echo htmlspecialchars($officer['username']); ?></div>
                     </div>
                     <div class="info-group">
                         <div class="info-label">Security Key</div>
-                        <div class="info-value"><?php echo htmlspecialchars($admin['key']); ?></div>
+                        <div class="info-value"><?php echo htmlspecialchars($officer['key']); ?></div>
                     </div>
                 </div>
                 
@@ -1276,15 +1378,15 @@ $mysqli->close();
                     <h3><i class="fas fa-user-tie"></i> Personal Information</h3>
                     <div class="info-group">
                         <div class="info-label">Full Name</div>
-                        <div class="info-value"><?php echo htmlspecialchars($admin['full_name']); ?></div>
+                        <div class="info-value"><?php echo htmlspecialchars($officer['full_name']); ?></div>
                     </div>
                     <div class="info-group">
                         <div class="info-label">Email</div>
-                        <div class="info-value"><?php echo htmlspecialchars($admin['email']); ?></div>
+                        <div class="info-value"><?php echo htmlspecialchars($officer['email']); ?></div>
                     </div>
                     <div class="info-group">
                         <div class="info-label">Phone</div>
-                        <div class="info-value"><?php echo htmlspecialchars($admin['phone']); ?></div>
+                        <div class="info-value"><?php echo htmlspecialchars($officer['phone']); ?></div>
                     </div>
                 </div>
                 
@@ -1292,88 +1394,72 @@ $mysqli->close();
                     <h3><i class="fas fa-calendar-alt"></i> Account Activity</h3>
                     <div class="info-group">
                         <div class="info-label">Registration Date</div>
-                        <div class="info-value"><?php echo date('M j, Y', strtotime($admin['registration_date'])); ?></div>
+                        <div class="info-value"><?php echo date('M j, Y', strtotime($officer['registration_date'])); ?></div>
                     </div>
                     <div class="info-group">
                         <div class="info-label">Last Login</div>
-                        <div class="info-value"><?php echo $admin['last_login'] ? date('M j, Y g:i A', strtotime($admin['last_login'])) : 'First login'; ?></div>
+                        <div class="info-value"><?php echo $officer['last_login'] ? date('M j, Y g:i A', strtotime($officer['last_login'])) : 'First login'; ?></div>
                     </div>
                     <div class="info-group">
                         <div class="info-label">Status</div>
-                        <div class="info-value"><span style="color: #00a651;"><?php echo $admin['is_active'] ? 'Active' : 'Inactive'; ?></span></div>
+                        <div class="info-value"><span style="color: #00a651;"><?php echo $officer['is_active'] ? 'Active' : 'Inactive'; ?></span></div>
                     </div>
                 </div>
                 
                 <div class="detail-card">
-                    <h3><i class="fas fa-shield-alt"></i> Admin Privileges</h3>
+                    <h3><i class="fas fa-shield-alt"></i> Officer Privileges</h3>
                     <div class="info-group">
                         <div class="info-label">User Level</div>
-                        <div class="info-value">Super Administrator</div>
+                        <div class="info-value">Admission Officer</div>
                     </div>
                     <div class="info-group">
                         <div class="info-label">Access Rights</div>
-                        <div class="info-value">Full System Access</div>
+                        <div class="info-value">Admission Management</div>
                     </div>
                     <div class="info-group">
                         <div class="info-label">Security</div>
-                        <div class="info-value">Two-Factor Authentication Recommended</div>
+                        <div class="info-value">Standard Authentication</div>
                     </div>
                 </div>
             </div>
             
             <!-- Stats Section -->
             <div class="page-header">
-                <h2 class="page-title"><i class="fas fa-chart-line"></i> System Statistics</h2>
+                <h2 class="page-title"><i class="fas fa-chart-line"></i> Admission Statistics</h2>
             </div>
             
             <div class="stats">
                 <div class="stat-card">
                     <div class="stat-icon">
-                        <i class="fas fa-users"></i>
+                        <i class="fas fa-file-alt"></i>
                     </div>
-                    <div class="stat-number">1,254</div>
-                    <div class="stat-label">Total Users</div>
+                    <div class="stat-number"><?php echo $total_applications; ?></div>
+                    <div class="stat-label">Total Applications</div>
                 </div>
                 
                 <div class="stat-card">
                     <div class="stat-icon">
-                        <i class="fas fa-book"></i>
+                        <i class="fas fa-clock"></i>
                     </div>
-                    <div class="stat-number">78</div>
-                    <div class="stat-label">Courses</div>
+                    <div class="stat-number"><?php echo $pending_applications; ?></div>
+                    <div class="stat-label">Pending Review</div>
                 </div>
                 
                 <div class="stat-card">
                     <div class="stat-icon">
-                        <i class="fas fa-graduation-cap"></i>
+                        <i class="fas fa-check-circle"></i>
                     </div>
-                    <div class="stat-number">542</div>
-                    <div class="stat-label">Students</div>
+                    <div class="stat-number"><?php echo $approved_applications; ?></div>
+                    <div class="stat-label">Approved</div>
                 </div>
                 
-                <?php
-// Database connection
-$mysqli = new mysqli("localhost", "root", "", "skst_university");
-
-// Check connection
-if ($mysqli->connect_error) {
-    die("Connection failed: " . $mysqli->connect_error);
-}
-
-// Count faculty
-$result = $mysqli->query("SELECT COUNT(*) AS total FROM faculty");
-$row = $result->fetch_assoc();
-$faculty_count = $row['total'];
-?>
-
-<div class="stat-card">
-    <div class="stat-icon">
-        <i class="fas fa-chalkboard-teacher"></i>
-    </div>
-    <div class="stat-number"><?php echo $faculty_count; ?></div>
-    <div class="stat-label">Faculty</div>
-</div>
-
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <div class="stat-number"><?php echo $rejected_applications; ?></div>
+                    <div class="stat-label">Rejected</div>
+                </div>
             </div>
         </div>
     </div>
@@ -1391,50 +1477,27 @@ $faculty_count = $row['total'];
                     
                     <div class="form-group">
                         <label for="full_name">Full Name</label>
-                        <input type="text" id="full_name" name="full_name" value="<?php echo htmlspecialchars($admin['full_name']); ?>" required>
+                        <input type="text" id="full_name" name="full_name" value="<?php echo htmlspecialchars($officer['full_name']); ?>" required>
                     </div>
                     
                     <div class="form-group">
                         <label for="username">Username</label>
-                        <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($admin['username']); ?>" required>
+                        <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($officer['username']); ?>" required>
                     </div>
                     
                     <div class="form-group">
                         <label for="email">Email Address</label>
-                        <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($admin['email']); ?>" required>
+                        <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($officer['email']); ?>" required>
                     </div>
-
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <div class="password-container">
-                            <input type="password" id="password" name="password" 
-                                value="<?php echo htmlspecialchars($admin['password']); ?>" required>
-                            <i class="fa-solid fa-eye toggle-password" id="togglePassword"></i>
-                        </div>
-                    </div>
-
-                    <script>
-                    const passwordField = document.getElementById("password");
-                    const togglePassword = document.getElementById("togglePassword");
-
-                    togglePassword.addEventListener("click", function () {
-                        const type = passwordField.type === "password" ? "text" : "password";
-                        passwordField.type = type;
-
-                        // Switch between eye and eye-slash
-                        this.classList.toggle("fa-eye");
-                        this.classList.toggle("fa-eye-slash");
-                    });
-                    </script>
                     
                     <div class="form-group">
                         <label for="phone">Phone Number</label>
-                        <input type="text" id="phone" name="phone" value="<?php echo htmlspecialchars($admin['phone']); ?>">
+                        <input type="text" id="phone" name="phone" value="<?php echo htmlspecialchars($officer['phone']); ?>">
                     </div>
                     
                     <div class="form-group">
                         <label for="key">Security Key</label>
-                        <input type="text" id="key" name="key" value="<?php echo htmlspecialchars($admin['key']); ?>">
+                        <input type="text" id="key" name="key" value="<?php echo htmlspecialchars($officer['key']); ?>">
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -1444,11 +1507,99 @@ $faculty_count = $row['total'];
             </form>
         </div>
     </div>
+
+    <!-- Change Password Modal -->
+    <div id="changePasswordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close">&times;</span>
+                <h2 class="modal-title"><i class="fas fa-key"></i> Change Password</h2>
+            </div>
+            <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+                <div class="modal-body">
+                    <input type="hidden" name="change_password" value="1">
+                    
+                    <div class="form-group">
+                        <label for="current_password">Current Password</label>
+                        <div class="password-container">
+                            <input type="password" id="current_password" name="current_password" required>
+                            <i class="fa-solid fa-eye toggle-password" id="toggleCurrentPassword"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="new_password">New Password</label>
+                        <div class="password-container">
+                            <input type="password" id="new_password" name="new_password" required>
+                            <i class="fa-solid fa-eye toggle-password" id="toggleNewPassword"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirm_password">Confirm New Password</label>
+                        <div class="password-container">
+                            <input type="password" id="confirm_password" name="confirm_password" required>
+                            <i class="fa-solid fa-eye toggle-password" id="toggleConfirmPassword"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" id="cancelPassword">Cancel</button>
+                    <button type="submit" class="btn-save">Change Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
     <?php endif; ?>
 
     <script>
         // JavaScript for interactive elements
         document.addEventListener('DOMContentLoaded', function() {
+            // Password visibility toggles
+            const togglePassword = document.getElementById('togglePassword');
+            if (togglePassword) {
+                togglePassword.addEventListener('click', function() {
+                    const passwordInput = document.getElementById('password');
+                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordInput.setAttribute('type', type);
+                    this.classList.toggle('fa-eye');
+                    this.classList.toggle('fa-eye-slash');
+                });
+            }
+            
+            const toggleCurrentPassword = document.getElementById('toggleCurrentPassword');
+            if (toggleCurrentPassword) {
+                toggleCurrentPassword.addEventListener('click', function() {
+                    const passwordInput = document.getElementById('current_password');
+                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordInput.setAttribute('type', type);
+                    this.classList.toggle('fa-eye');
+                    this.classList.toggle('fa-eye-slash');
+                });
+            }
+            
+            const toggleNewPassword = document.getElementById('toggleNewPassword');
+            if (toggleNewPassword) {
+                toggleNewPassword.addEventListener('click', function() {
+                    const passwordInput = document.getElementById('new_password');
+                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordInput.setAttribute('type', type);
+                    this.classList.toggle('fa-eye');
+                    this.classList.toggle('fa-eye-slash');
+                });
+            }
+            
+            const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+            if (toggleConfirmPassword) {
+                toggleConfirmPassword.addEventListener('click', function() {
+                    const passwordInput = document.getElementById('confirm_password');
+                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordInput.setAttribute('type', type);
+                    this.classList.toggle('fa-eye');
+                    this.classList.toggle('fa-eye-slash');
+                });
+            }
+            
             // Stats panel toggle functionality
             const statsButton = document.querySelector('.stats-button');
             const statsPanel = document.querySelector('.stats-panel');
@@ -1502,10 +1653,36 @@ $faculty_count = $row['total'];
                 }
             }
             
+            // Change Password Modal functionality
+            const changePasswordLink = document.getElementById("changePasswordLink");
+            const changePasswordModal = document.getElementById("changePasswordModal");
+            const cancelPassword = document.getElementById("cancelPassword");
+            const closePassword = changePasswordModal ? changePasswordModal.getElementsByClassName("close")[0] : null;
+            
+            if (changePasswordLink && changePasswordModal) {
+                changePasswordLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    changePasswordModal.style.display = "block";
+                });
+            }
+            
+            if (cancelPassword) {
+                cancelPassword.onclick = function() {
+                    changePasswordModal.style.display = "none";
+                }
+            }
+            
+            if (closePassword) {
+                closePassword.onclick = function() {
+                    changePasswordModal.style.display = "none";
+                }
+            }
+            
             // Forgot Password Modal
             const forgotPasswordLink = document.getElementById("forgotPasswordLink");
             const forgotPasswordModal = document.getElementById("forgotPasswordModal");
             const cancelReset = document.getElementById("cancelReset");
+            const closeForgot = forgotPasswordModal ? forgotPasswordModal.getElementsByClassName("close")[0] : null;
             
             if (forgotPasswordLink && forgotPasswordModal) {
                 forgotPasswordLink.addEventListener('click', function(e) {
@@ -1520,10 +1697,17 @@ $faculty_count = $row['total'];
                 }
             }
             
+            if (closeForgot) {
+                closeForgot.onclick = function() {
+                    forgotPasswordModal.style.display = "none";
+                }
+            }
+            
             // Help Modal
             const helpLink = document.getElementById("helpLink");
             const helpModal = document.getElementById("helpModal");
             const closeHelp = document.getElementById("closeHelp");
+            const closeHelpModal = helpModal ? helpModal.getElementsByClassName("close")[0] : null;
             
             if (helpLink && helpModal) {
                 helpLink.addEventListener('click', function(e) {
@@ -1538,16 +1722,25 @@ $faculty_count = $row['total'];
                 }
             }
             
+            if (closeHelpModal) {
+                closeHelpModal.onclick = function() {
+                    helpModal.style.display = "none";
+                }
+            }
+            
             // Close modals when clicking outside
             window.onclick = function(event) {
-                if (event.target == modal) {
+                if (modal && event.target == modal) {
                     modal.style.display = "none";
                 }
-                if (event.target == forgotPasswordModal) {
+                if (forgotPasswordModal && event.target == forgotPasswordModal) {
                     forgotPasswordModal.style.display = "none";
                 }
-                if (event.target == helpModal) {
+                if (helpModal && event.target == helpModal) {
                     helpModal.style.display = "none";
+                }
+                if (changePasswordModal && event.target == changePasswordModal) {
+                    changePasswordModal.style.display = "none";
                 }
             }
         });
