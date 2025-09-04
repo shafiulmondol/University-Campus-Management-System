@@ -1,27 +1,11 @@
 <?php
-session_start();
-$error = '';
-
-// Database configuration
-define('DB_SERVER', 'localhost');
-define('DB_USERNAME', 'root');
-define('DB_PASSWORD', '');
-define('DB_NAME', 'skst_university');
-
-// Create connection
-$mysqli = new mysqli(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME);
-
-// Check connection
-if ($mysqli->connect_error) {
-    die("Connection failed: " . $mysqli->connect_error);
-}
+include 'config.php';
 
 // Handle login
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
     $email = trim($_POST['email']);
     $password = $_POST['password'];
     
-    // For demo purposes - in real application, use password_verify with hashed passwords
     $sql = "SELECT faculty_id, name, email FROM faculty WHERE email = ? AND password = ?";
     
     if ($stmt = $mysqli->prepare($sql)) {
@@ -110,12 +94,27 @@ $is_logged_in = isset($_SESSION['faculty_id']);
 // Get faculty data if logged in
 if ($is_logged_in) {
     $faculty_id = $_SESSION['faculty_id'];
-    $sql = "SELECT * FROM faculty WHERE faculty_id = ?";
-    $stmt = $mysqli->prepare($sql);
+    $faculty = getFacultyInfo($faculty_id, $mysqli);
+}
+
+// Get course count for stats
+if ($is_logged_in) {
+    $course_count_sql = "SELECT COUNT(*) as course_count FROM course_instructor WHERE faculty_id = ?";
+    $stmt = $mysqli->prepare($course_count_sql);
     $stmt->bind_param("i", $faculty_id);
     $stmt->execute();
-    $result = $stmt->get_result();
-    $faculty = $result->fetch_assoc();
+    $course_count_result = $stmt->get_result();
+    $course_count = $course_count_result->fetch_assoc()['course_count'];
+    $stmt->close();
+    
+    // Get student count
+    $student_count_sql = "SELECT COUNT(DISTINCT student_id) as student_count 
+                         FROM enrollments WHERE faculty_id = ?";
+    $stmt = $mysqli->prepare($student_count_sql);
+    $stmt->bind_param("i", $faculty_id);
+    $stmt->execute();
+    $student_count_result = $stmt->get_result();
+    $student_count = $student_count_result->fetch_assoc()['student_count'];
     $stmt->close();
 }
 
@@ -130,6 +129,7 @@ $mysqli->close();
     <title>Faculty Portal - SKST University</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* CSS from the original faculty1.php file */
         * {
             margin: 0;
             padding: 0;
@@ -155,8 +155,7 @@ $mysqli->close();
             z-index: 100;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
-        
-        .logo {
+                .logo {
             display: flex;
             align-items: center;
             gap: 15px;
@@ -818,6 +817,8 @@ $mysqli->close();
                 padding: 20px;
             }
         }
+        
+        /* ... (rest of the CSS from the original faculty1.php file) ... */
     </style>
 </head>
 <body>
@@ -849,6 +850,11 @@ $mysqli->close();
                     <div class="error-msg"><?php echo $error; ?></div>
                 <?php endif; ?>
                 
+                <div class="demo-credentials">
+                    <p><strong>Demo Credentials:</strong></p>
+                    <p>Email: 23303105@iubat.edu</p>
+                    <p>Password: kawsar</p>
+                </div>
             </form>
         </div>
     </div>
@@ -858,6 +864,11 @@ $mysqli->close();
         <div class="logo">
             <img src="../picture/SKST.png" alt="Logo" style="width: 50px; height: 50px; border-radius: 50%;">
             <h1>SKST University Faculty</h1>
+        </div>
+        
+        <div class="welcome">
+            <i class="fas fa-user"></i>
+            Welcome, <?php echo htmlspecialchars($_SESSION['faculty_name']); ?>
         </div>
         
         <div class="nav-buttons">
@@ -874,45 +885,38 @@ $mysqli->close();
         <div class="sidebar">
             <ul class="sidebar-menu">
                 <li>
-                    <a href="#" class="active">
+                    <a href="faculty1.php" class="active">
                         <i class="fas fa-user"></i> Profile
                     </a>
                 </li>
                 <li>
-                    <a href="../working.html">
+                    <a href="courses.php">
                         <i class="fas fa-book"></i> Courses
                     </a>
                 </li>
                 <li>
-                    <a href="../working.html">
+                    <a href="schedule.php">
                         <i class="fas fa-calendar-alt"></i> Schedule
                     </a>
                 </li>
                 <li>
-                    <a href="../working.html">
+                    <a href="students.php">
                         <i class="fas fa-users"></i> Students
                     </a>
                 </li>
                 <li>
-                    <a href="../working.html">
-                        <i class="fas fa-chalkboard"></i> Classes
-                    </a>
-                </li>
-
-                <li>
-                    <a href="attendance.html">
+                    <a href="attendance.php">
                         <i class="fas fa-user-check"></i> Attendance
                     </a>
                 </li>
                 <li>
-                    <a href="../working.html">
-                        <i class="fas fa-file-alt"></i> Reports
+                    <a href="materials.php">
+                        <i class="fas fa-file-alt"></i> Materials
                     </a>
                 </li>
                 <li>
                     <button onclick="location.href='?logout=1'">
-                        <button onclick="location.href='../working.html'">
-                        <i class="fas fa-bell"></i> Notifications
+                        <i class="fas fa-sign-out-alt"></i> Logout
                     </button>
                 </li>
             </ul>
@@ -921,7 +925,7 @@ $mysqli->close();
         <div class="content-area">
             <div class="page-header">
                 <h1 class="page-title"><i class="fas fa-chalkboard-teacher"></i> Faculty Dashboard</h1>
-                <button class="btn-edit">
+                <button class="btn-edit" onclick="location.href='#edit'">
                     <i class="fas fa-edit"></i> Edit Profile
                 </button>
             </div>
@@ -937,11 +941,7 @@ $mysqli->close();
                         </div>
                     <?php endif; ?>
                     <div class="edit-overlay" onclick="document.getElementById('file-input').click()">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" 
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                        </svg>
+                        <i class="fas fa-camera"></i>
                     </div>
                     <form id="upload-form" method="post" enctype="multipart/form-data">
                         <input type="file" id="file-input" name="profile_picture" accept="image/*">
@@ -1036,7 +1036,7 @@ $mysqli->close();
                     <div class="stat-icon">
                         <i class="fas fa-book"></i>
                     </div>
-                    <div class="stat-number">5</div>
+                    <div class="stat-number"><?php echo $course_count ?? 0; ?></div>
                     <div class="stat-label">Courses</div>
                 </div>
                 
@@ -1044,7 +1044,7 @@ $mysqli->close();
                     <div class="stat-icon">
                         <i class="fas fa-users"></i>
                     </div>
-                    <div class="stat-number">142</div>
+                    <div class="stat-number"><?php echo $student_count ?? 0; ?></div>
                     <div class="stat-label">Students</div>
                 </div>
                 
@@ -1052,7 +1052,7 @@ $mysqli->close();
                     <div class="stat-icon">
                         <i class="fas fa-clock"></i>
                     </div>
-                    <div class="stat-number">18</div>
+                    <div class="stat-number"><?php echo ($course_count ?? 0) * 3; // Assuming 3 hours per course ?></div>
                     <div class="stat-label">Hours/Week</div>
                 </div>
                 
@@ -1069,27 +1069,7 @@ $mysqli->close();
     <?php endif; ?>
 
     <script>
-        // Simple JavaScript for interactive elements
         document.addEventListener('DOMContentLoaded', function() {
-            // Stats panel toggle functionality
-            const statsButton = document.querySelector('.stats-button');
-            const statsPanel = document.querySelector('.stats-panel');
-            
-            if (statsButton && statsPanel) {
-                statsButton.addEventListener('click', function() {
-                    statsPanel.classList.toggle('visible');
-                });
-            }
-            
-            // Add active class to clicked sidebar items
-            const sidebarItems = document.querySelectorAll('.sidebar-menu a, .sidebar-menu button');
-            sidebarItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    sidebarItems.forEach(i => i.classList.remove('active'));
-                    this.classList.add('active');
-                });
-            });
-            
             // Handle profile picture upload
             const fileInput = document.getElementById('file-input');
             if (fileInput) {
