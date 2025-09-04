@@ -805,7 +805,7 @@ $mysqli->close();
                 </li>
                 <li>
                     <a href="dev_ebook.php">
-                        <i class="fas fa-chart-bar"></i> Manage Ebook
+                        <i class="fas fa-book"></i> Manage Ebook
                     </a>
                 </li>
                 <li>
