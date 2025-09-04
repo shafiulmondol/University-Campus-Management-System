@@ -59,8 +59,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
     }
 }
 
-
-//check
 // Handle logout
 if (isset($_GET['logout'])) {
     session_destroy();
@@ -912,7 +910,8 @@ $mysqli->close();
                     </a>
                 </li>
                 <li>
-                    <button onclick="location.href='../working.html'">
+                    <button onclick="location.href='?logout=1'">
+                        <button onclick="location.href='../working.html'">
                         <i class="fas fa-bell"></i> Notifications
                     </button>
                 </li>
@@ -922,7 +921,9 @@ $mysqli->close();
         <div class="content-area">
             <div class="page-header">
                 <h1 class="page-title"><i class="fas fa-chalkboard-teacher"></i> Faculty Dashboard</h1>
-                
+                <button class="btn-edit">
+                    <i class="fas fa-edit"></i> Edit Profile
+                </button>
             </div>
 
             <!-- Profile Card with Picture Upload -->
