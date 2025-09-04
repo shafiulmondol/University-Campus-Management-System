@@ -879,7 +879,7 @@ $mysqli->close();
                     </a>
                 </li>
                 <li>
-                    <a href="../working.html">
+                    <a href="courses.php">
                         <i class="fas fa-book"></i> Courses
                     </a>
                 </li>
