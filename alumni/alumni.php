@@ -883,7 +883,7 @@ $mysqli->close();
                     </a>
                 </li>
                 <li>
-                    <a href="#">
+                    <a href="../student/transaction.php">
                         <i class="fas fa-book"></i> Courses
                     </a>
                 </li>
