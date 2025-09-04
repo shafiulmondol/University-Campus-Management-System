@@ -1,6 +1,9 @@
 <?php
+ob_start(); // Start output buffering to avoid header issues
 session_start();
+
 $error = '';
+require_once '../library/notice.php';
 
 // Database configuration
 define('DB_SERVER', 'localhost');
@@ -16,31 +19,55 @@ if ($mysqli->connect_error) {
     die("Connection failed: " . $mysqli->connect_error);
 }
 
+// ------------------- Handle Add Notice Submission -------------------
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_notice'])) {
+    $title = $_POST['title'] ?? '';
+    $id = $_POST['id'] ?? '';
+    $section = $_POST['section_notice'] ?? '';
+    $content = $_POST['content'] ?? '';
+    $author = $_POST['author'] ?? '';
+    $created_at = date('Y-m-d H:i:s');
+    $viewed = 0;
 
-// Handle login
+    // Use the existing $mysqli connection instead of creating a new one
+    $stmt = $mysqli->prepare("INSERT INTO notice (title, id, section, content, author, created_at, viewed) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    if ($stmt) {
+        $stmt->bind_param("ssssssi", $title, $id, $section, $content, $author, $created_at, $viewed);
+        if ($stmt->execute()) {
+            echo "<p style='color:green;'>Notice added successfully!</p>";
+        } else {
+            echo "<p style='color:red;'>Execute error: " . $stmt->error . "</p>";
+        }
+        $stmt->close();
+    } else {
+        echo "<p style='color:red;'>Prepare error: " . $mysqli->error . "</p>";
+    }
+}
+// -----------------------
+// Handle Login
+// -----------------------
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
     $email = trim($_POST['email']);
     $password = $_POST['password'];
 
-    // ✅ Use correct columns (full_name, username, email)
-    $sql = "SELECT id, full_name, email, phone FROM admin_users WHERE email = ? AND password = ? LIMIT 1";
-
+    $sql = "SELECT id, full_name, username, email, phone FROM admin_users WHERE email = ? AND password = ? LIMIT 1";
     $stmt = $mysqli->prepare($sql);
 
     if ($stmt) {
         $stmt->bind_param("ss", $email, $password);
         $stmt->execute();
         $stmt->store_result();
-        
+
         if ($stmt->num_rows == 1) {
-            $stmt->bind_result($id, $full_name, $email, $phone);
+            $stmt->bind_result($id, $full_name, $username, $email, $phone);
             if ($stmt->fetch()) {
                 $_SESSION['admin_id'] = $id;
-                $_SESSION['admin_name'] = $full_name;  // use full_name from DB
+                $_SESSION['admin_name'] = $full_name;
+                $_SESSION['admin_username'] = $username;
                 $_SESSION['admin_email'] = $email;
                 $_SESSION['admin_phone'] = $phone;
 
-                // Update last login time
+                // Update last login
                 $update_sql = "UPDATE admin_users SET last_login = NOW() WHERE id = ?";
                 $update_stmt = $mysqli->prepare($update_sql);
                 if ($update_stmt) {
@@ -55,65 +82,60 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
         } else {
             $error = "Invalid email or password.";
         }
-
         $stmt->close();
     } else {
         $error = "SQL Prepare failed: " . $mysqli->error;
     }
 }
-
-
-
-
-// Handle logout
+// -----------------------
+// Handle Logout
+// -----------------------
 if (isset($_GET['logout'])) {
     session_destroy();
     header("Location: " . $_SERVER['PHP_SELF']);
     exit();
 }
 
-// Handle profile picture upload
+// -----------------------
+// Handle Profile Picture Upload
+// -----------------------
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['profile_picture']) && isset($_SESSION['admin_id'])) {
     $admin_id = $_SESSION['admin_id'];
     $uploadDir = 'uploads/admin_pictures/';
-    
-    // Create directory if it doesn't exist
+
     if (!file_exists($uploadDir)) {
         mkdir($uploadDir, 0777, true);
     }
-    
+
     $fileName = time() . '_' . basename($_FILES['profile_picture']['name']);
     $targetFilePath = $uploadDir . $fileName;
     $fileType = pathinfo($targetFilePath, PATHINFO_EXTENSION);
-    
-    // Allow certain file formats
     $allowTypes = array('jpg', 'png', 'jpeg', 'gif');
-    if (in_array($fileType, $allowTypes)) {
-        // Upload file to server
+
+    if (in_array(strtolower($fileType), $allowTypes)) {
         if (move_uploaded_file($_FILES['profile_picture']['tmp_name'], $targetFilePath)) {
-            // Update database with file path
             $update_sql = "UPDATE admin_users SET profile_picture = ? WHERE id = ?";
             if ($update_stmt = $mysqli->prepare($update_sql)) {
                 $update_stmt->bind_param("si", $targetFilePath, $admin_id);
                 $update_stmt->execute();
                 $update_stmt->close();
-                
-                // Update session variable
+
                 $_SESSION['admin_profile_picture'] = $targetFilePath;
-                
-                // Refresh page to show new image
+
                 header("Location: " . $_SERVER['PHP_SELF']);
                 exit();
             }
         } else {
-            $error = "Sorry, there was an error uploading your file.";
+            $error = "Error uploading your file.";
         }
     } else {
-        $error = "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
+        $error = "Only JPG, JPEG, PNG & GIF files are allowed.";
     }
 }
 
-// Handle profile update
+// -----------------------
+// Handle Profile Update
+// -----------------------
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_profile']) && isset($_SESSION['admin_id'])) {
     $admin_id = $_SESSION['admin_id'];
     $full_name = trim($_POST['full_name']);
@@ -121,60 +143,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_profile']) && i
     $email = trim($_POST['email']);
     $phone = trim($_POST['phone']);
     $key = trim($_POST['key']);
-    
+
     $update_sql = "UPDATE admin_users SET full_name = ?, username = ?, email = ?, phone = ?, `key` = ? WHERE id = ?";
     if ($update_stmt = $mysqli->prepare($update_sql)) {
         $update_stmt->bind_param("sssssi", $full_name, $username, $email, $phone, $key, $admin_id);
-        
+
         if ($update_stmt->execute()) {
-            // Update session variables
             $_SESSION['admin_name'] = $full_name;
             $_SESSION['admin_username'] = $username;
             $_SESSION['admin_email'] = $email;
             $_SESSION['admin_phone'] = $phone;
-            
-            // Refresh page
+
             header("Location: " . $_SERVER['PHP_SELF']);
             exit();
         } else {
             $error = "Error updating profile: " . $update_stmt->error;
         }
-        
+
         $update_stmt->close();
     }
 }
 
-// Handle password reset request
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['reset_password'])) {
-    $email = trim($_POST['email']);
-    
-    // Check if email exists
-    $sql = "SELECT id, username FROM admin_users WHERE email = ?";
-    if ($stmt = $mysqli->prepare($sql)) {
-        $stmt->bind_param("s", $email);
-        
-        if ($stmt->execute()) {
-            $stmt->store_result();
-            
-            if ($stmt->num_rows == 1) {
-                $stmt->bind_result($id, $username);
-                $stmt->fetch();
-                
-                // In a real application, you would generate a reset token and send an email
-                // For demo purposes, we'll just show a success message
-                $error = "Password reset instructions have been sent to your email.";
-            } else {
-                $error = "No account found with that email address.";
-            }
-        } else {
-            $error = "Oops! Something went wrong. Please try again later.";
-        }
-        
-        $stmt->close();
-    }
-}
-
+// -----------------------
 // Check if admin is logged in
+// -----------------------
 $is_logged_in = isset($_SESSION['admin_id']);
 
 // Get admin data if logged in
@@ -188,14 +180,12 @@ if ($is_logged_in) {
     $admin = $result->fetch_assoc();
     $stmt->close();
 
-    // Update session phone number if available
     if (!empty($admin['phone'])) {
         $_SESSION['admin_phone'] = $admin['phone'];
     }
 }
-
-$mysqli->close();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -876,6 +866,7 @@ $mysqli->close();
         
         .modal-title i {
             margin-right: 10px;
+            font-size: 18px;
         }
         
         .modal-body {
@@ -1033,6 +1024,160 @@ $mysqli->close();
     font-size: 18px;
     color: #666;
 }
+.notices-container { max-width: 900px; margin:20px auto; padding:20px;background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+.notices-heading { font-size:22px; margin-bottom:15px; color:#333; }
+.filter-form { margin-bottom:15px; }
+.filter-form select, .filter-form input { padding:6px; border-radius:5px; border:1px solid #ccc; }
+.filter-form button { padding:6px 12px; border:none; background:#007bff; color:#fff; border-radius:5px; cursor:pointer; }
+.notice-card { padding:15px; margin:12px 0; border-radius:10px; border:1px solid #eee; background:#fafafa; }
+.notice-card.unread { border-left:5px solid #007bff; }
+.notice-card.read { border-left:5px solid #ccc; }
+.notice-card.update { border-left:5px solid #ff9800; background:#fff8e1; }
+.notice-footer { display:flex; justify-content:space-between; font-size:13px; margin-top:8px; color:#666; }
+.no-notices { text-align:center; padding:20px; color:#777; }
+.btn-approve { background:#28a745; color:white; padding:6px 10px; border:none; border-radius:5px; cursor:pointer; }
+.btn-reject { background:#dc3545; color:white; padding:6px 10px; border:none; border-radius:5px; cursor:pointer; }
+.btn-back { background:#6c757d; color:white; padding:6px 14px; border:none; border-radius:5px; cursor:pointer; margin-top:10px; }
+
+/* Course Container */
+.course-container {
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin-top: 20px;
+}
+
+.course-heading {
+    font-size: 1.8rem;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-add-course, .btn-back, .btn-submit-course, .btn-cancel {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: 0.3s;
+}
+
+.btn-add-course {
+    background: #3498db;
+    color: #fff;
+}
+.btn-add-course:hover {
+    background: #2980b9;
+}
+
+.btn-back {
+    background: #7f8c8d;
+    color: #fff;
+}
+.btn-back:hover {
+    background: #636e72;
+}
+
+.btn-submit-course {
+    background: #27ae60;
+    color: #fff;
+}
+.btn-submit-course:hover {
+    background: #219150;
+}
+
+.btn-cancel {
+    background: #e74c3c;
+    color: #fff;
+}
+.btn-cancel:hover {
+    background: #c0392b;
+}
+
+/* Course Table */
+.course-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+
+.course-table th, .course-table td {
+    padding: 12px 15px;
+    text-align: center;
+    font-size: 0.95rem;
+}
+
+.course-table th {
+    background: #34495e;
+    color: #fff;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}
+
+.course-table tr:nth-child(even) {
+    background: #f2f2f2;
+}
+
+.course-table tr:hover {
+    background: #ecf0f1;
+    transition: 0.2s;
+}
+
+/* Search Form */
+.search-form {
+    margin: 10px 0 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.search-form input[type="text"] {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    width: 250px;
+    font-size: 0.95rem;
+}
+
+.search-form button {
+    background: #2ecc71;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.search-form button:hover {
+    background: #27ae60;
+}
+
+/* Messages */
+.success-msg, .error-msg {
+    padding: 12px 16px;
+    margin: 15px 0;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+.success-msg {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+.error-msg {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
     </style>
 </head>
 <body>
@@ -1060,9 +1205,10 @@ $mysqli->close();
                 
                 <button type="submit" class="login-btn">Login to Admin Dashboard</button>
                 
+                
                 <div class="login-links">
                     <a href="forgot_password.php" id="forgotPasswordLink"><i class="fas fa-unlock-alt"></i> Forgot Password?</a>
-                    <a href="#" id="helpLink"><i class="fas fa-question-circle"></i> Help</a>
+                    <a href="help.php" id="helpLink"><i class="fas fa-question-circle"></i> Help</a>
                 </div>
                 
                 <?php if (!empty($error)): ?>
@@ -1073,37 +1219,6 @@ $mysqli->close();
         </div>
     </div>
 
-
-    <!-- Help Modal -->
-    <div id="helpModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span class="close">&times;</span>
-                <h2 class="modal-title"><i class="fas fa-question-circle"></i> Help & Support</h2>
-            </div>
-            <div class="modal-body">
-                <h3>Administrator Login Assistance</h3>
-                <p>If you're having trouble accessing your account, please follow these steps:</p>
-                <ol>
-                    <li style="margin-left: 20px;">Ensure you're using the correct email and password (case sensitive)</li>
-                    <li style="margin-left: 20px;">Try resetting your password using the "Forgot Password" link</li>
-                    <li style="margin-left: 20px;">Clear your browser cache and cookies</li>
-                    <li style="margin-left: 20px;">Try using a different browser</li>
-                </ol>
-                
-                <h3>Contact Support</h3>
-                <p>If you continue to experience issues, please contact the SKST University IT support team:</p>
-                <ul>
-                    <li style="margin-left: 20px;"><strong>Email:</strong> support@skstuniversity.edu</li>
-                    <li style="margin-left: 20px;"><strong>Phone:</strong> 01884273156; 01610343595</li>
-                    <li style="margin-left: 20px;"><strong>Hours:</strong> Saturday-Wednesday, 8:00 AM - 5:00 PM</li>
-                </ul>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn-cancel" id="closeHelp">Close</button>
-            </div>
-        </div>
-    </div>
     <?php else: ?>
 
     <!-- Dashboard -->
@@ -1114,12 +1229,21 @@ $mysqli->close();
         </div>
         
         <div class="nav-buttons">
-            <button onclick="location.href='../index.html'">
-                <i class="fas fa-home"></i> Home
-            </button>
-            <button onclick="location.href='../working.html'">
-                <i class="fas fa-bell"></i> Notifications
-            </button>
+            <a href="../index.html" style="text-decoration: none;">
+                <button>
+                    <i class="fas fa-home"></i> Home
+                </button>
+            </a>
+            <a href="../working.html" style="text-decoration: none;">
+                <button>
+                    <i class="fas fa-bell"></i> Notifications
+                    <?php 
+            $unread = get_unread_admin_notification_count(); 
+            if($unread > 0): ?>
+                <span class="badge"><?= htmlspecialchars($unread) ?></span>
+            <?php endif; ?>
+                </button>
+            </a>
         </div>
     </div>
     
@@ -1127,7 +1251,7 @@ $mysqli->close();
         <div class="sidebar">
             <ul class="sidebar-menu">
                 <li>
-                    <a href="#" class="active">
+                    <a href="admin.php" class="active">
                         <i class="fas fa-th-large"></i> Dashboard
                     </a>
                 </li>
@@ -1162,14 +1286,14 @@ $mysqli->close();
                     </a>
                 </li>
                 <li>
-                    <a href="../working.html">
-                        <i class="fas fa-book"></i> Course
-                    </a>
+                     <form action="" method="post">
+                        <button name="course"><i class="fas fa-bell"></i> Course</button>
+                    </form>
                 </li>
                 <li>
-                    <a href="../working.html">
-                        <i class="fas fa-bell"></i> Notifications
-                    </a>
+                    <form action="" method="post">
+                        <button name="notification"><i class="fas fa-bell"></i> Notifications</button>
+                    </form>
                 </li>
                 <li>
                     <a href="../working.html">
@@ -1177,19 +1301,473 @@ $mysqli->close();
                     </a>
                 </li>
                 <li>
-                    <button onclick="location.href='?logout=1'">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </button>
+                    <a href="?logout=1">
+                        <button>
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </a>
                 </li>
             </ul>
         </div>
         
         <div class="content-area">
+         <?php
+
+// ------------------- Handle Add Notice Form Display -------------------
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['show_add_notice_form'])) {
+    echo "<div class='add-notice-container'>";
+    echo "<h3><i class='fas fa-plus-circle'></i> Add Notice</h3>";
+    echo "<form method='post'>";
+    echo "<label>Title:</label><br>";
+    echo "<input type='text' name='title' required><br><br>";
+    echo "<label>ID:</label><br>";
+    echo "<input type='text' name='id' required><br><br>";
+
+    echo "<label>Section:</label><br>";
+    echo "<select name='section_notice' required>";
+    $sections_notice = ['Student', 'Staff', 'Department', 'Faculty', 'Library', 'Account', 'Admin'];
+    foreach ($sections_notice as $sec) {
+        echo "<option value='{$sec}'>{$sec}</option>";
+    }
+    echo "</select><br><br>";
+
+    echo "<label>Content:</label><br>";
+    echo "<textarea name='content' rows='4' required></textarea><br><br>";
+
+    echo "<label>Author:</label><br>";
+    echo "<input type='text' name='author' required><br><br>";
+
+    echo "<button type='submit' name='submit_notice'>Add Notice</button>";
+    echo "</form>";
+    echo "</div><hr>";
+}
+
+
+// ------------------- Handle Accept/Reject Update Requests -------------------
+elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    if (isset($_POST['accept_update']) || isset($_POST['reject_update'])) {
+        $applicant_id = intval($_POST['applicant_id']);
+        $action = isset($_POST['accept_update']) ? 1 : 2;
+
+        $stmt = $con->prepare("UPDATE update_requests SET action = ? WHERE applicant_id = ? AND action = 0");
+        if ($stmt) {
+            $stmt->bind_param("ii", $action, $applicant_id);
+            $stmt->execute();
+            $stmt->close();
+            header("Location: " . $_SERVER['PHP_SELF']);
+            exit();
+        }
+    }
+}
+
+// ------------------- Show Notifications -------------------
+if (isset($_POST['notification']) || isset($_POST['show_add_notice_form']) || isset($_POST['submit_notice'])) {
+    echo "<div class='notices-container'>";
+    echo "<h2 class='notices-heading'><i class='fas fa-bullhorn'></i> Latest Notifications</h2>";
+
+    // Section selection and search
+    $selected_section = $_POST['section'] ?? 'Admin';
+    $search_applicant = $_POST['search_applicant'] ?? '';
+
+    // ------------------- Filter Form -------------------
+    echo "<form method='post' class='filter-form'>";
+    echo "<label for='section'>Select Section: </label>";
+    echo "<select name='section'>";
+    $sections = ['Student', 'Faculty', 'Staff', 'Admin', 'AO', 'update_request'];
+    foreach ($sections as $sec) {
+        $selected = ($sec == $selected_section) ? "selected" : "";
+        echo "<option value='{$sec}' {$selected}>{$sec}</option>";
+    }
+    echo "</select>";
+    echo " <input type='text' name='search_applicant' placeholder='Search by Applicant ID' value='" . htmlspecialchars($search_applicant) . "'>";
+    echo " <button type='submit' name='notification'>Filter</button>";
+    echo "</form><br>";
+
+    // ------------------- Add Notice Button -------------------
+    echo "<form method='post'>";
+    echo "<button type='submit' name='show_add_notice_form'>➕ Add Notice</button>";
+    echo "</form><br>";
+
+    // ------------------- Fetch Notices & Update Requests -------------------
+    $notices = [];
+
+    // Fetch notices
+    if ($selected_section != 'update_request') {
+        $query1 = "SELECT id, title, content, author, created_at, viewed, section 
+                   FROM notice 
+                   WHERE section = '" . mysqli_real_escape_string($con, $selected_section) . "' 
+                   ORDER BY created_at DESC";
+        $result1 = mysqli_query($con, $query1);
+        if ($result1) {
+            while ($row = mysqli_fetch_assoc($result1)) {
+                $row['source'] = 'notice';
+                $notices[] = $row;
+            }
+        }
+    }
+
+    // Fetch update requests
+    if ($selected_section == 'update_request') {
+        $query2 = "SELECT id, applicant_id, admin_email, category, update_type, current_value, new_value, comments, request_time, action 
+                   FROM update_requests WHERE 1";
+        if (!empty($search_applicant)) {
+            $query2 .= " AND applicant_id LIKE '%" . mysqli_real_escape_string($con, $search_applicant) . "%'";
+        }
+        $query2 .= " ORDER BY request_time DESC";
+        $result2 = mysqli_query($con, $query2);
+        if ($result2) {
+            while ($row = mysqli_fetch_assoc($result2)) {
+                $row['source'] = 'update';
+                $notices[] = $row;
+            }
+        }
+    }
+
+    // ------------------- Display Notifications -------------------
+    if (count($notices) > 0) {
+        foreach ($notices as $row) {
+            if ($row['source'] == 'notice') {
+                $noticeClass = ($row['viewed'] == 0) ? "notice-card unread" : "notice-card read";
+                echo "<div class='{$noticeClass}'>";
+                echo "<div class='notice-header'>";
+                echo "<h3 class='notice-title'>" . htmlspecialchars($row['title']) . "</h3>";
+                echo "<span class='notice-section'>" . htmlspecialchars($row['section']) . "</span>";
+                echo "</div>";
+                echo "<div class='notice-content'>" . nl2br(htmlspecialchars($row['content'])) . "</div>";
+                echo "<div class='notice-footer'>";
+                echo "<span class='notice-author'>" . htmlspecialchars($row['author']) . "</span>";
+                echo "<span class='notice-date'>" . date('F j, Y h:i A', strtotime($row['created_at'])) . "</span>";
+                echo "</div></div>";
+            } else {
+                // Update requests
+                echo "<div class='notice-card update'>";
+                echo "<div class='notice-header'>";
+                echo "<h3 class='notice-title'>Update Request (" . htmlspecialchars($row['update_type']) . ")</h3>";
+                echo "<span class='notice-section'>Profile Update</span>";
+                echo "</div>";
+                echo "<div class='notice-content'>";
+                echo "<b>Applicant ID:</b> " . htmlspecialchars($row['applicant_id']) . "<br>";
+                echo "<b>Category:</b> " . htmlspecialchars($row['category']) . "<br>";
+                echo "<b>Old Value:</b> " . htmlspecialchars($row['current_value']) . "<br>";
+                echo "<b>New Value:</b> " . htmlspecialchars($row['new_value']) . "<br>";
+                if (!empty($row['comments'])) {
+                    echo "<b>Reason / Comment:</b> " . htmlspecialchars($row['comments']) . "<br>";
+                }
+                if ($row['action'] == 0) {
+                    echo "<b>Status:</b> ⏳ Pending<br>";
+                    echo "<form action='' method='post'>";
+                    echo "<input type='hidden' name='applicant_id' value='" . $row['applicant_id'] . "'>";
+                    echo "<button type='submit' name='accept_update'>✅ Accept</button> ";
+                    echo "<button type='submit' name='reject_update'>❌ Reject</button>";
+                    echo "</form>";
+                } elseif ($row['action'] == 1) {
+                    echo "<b>Status:</b> ✅ Request Accepted<br>";
+                } else {
+                    echo "<b>Status:</b> ❌ Request Rejected<br>";
+                }
+                echo "</div>";
+                echo "</div>";
+            }
+        }
+    } else {
+        echo "<div class='no-notices'><p>No notifications found.</p></div>";
+    }
+
+    // Mark Admin notices as read
+    if ($selected_section == 'Admin') {
+        $update = "UPDATE notice SET viewed = 1 WHERE viewed = 0 AND section='Admin'";
+        mysqli_query($con, $update);
+    }
+
+    echo "</div>"; // notices-container
+}
+
+// ------------------- Course Management -------------------
+elseif (isset($_POST['course'])) {
+    echo "<div class='course-container'>";
+    echo "<h2 class='course-heading'><i class='fas fa-book'></i> Course Management</h2>";
+
+    // Back button
+    echo "<form method='post' style='margin-bottom: 20px;'>";
+    echo "<button type='submit' name='dashboard' class='btn-back'>";
+    echo "<i class='fas fa-arrow-left'></i> Back to Dashboard";
+    echo "</button></br></br>";
+    
+   
+    echo '<button type="submit" name="show_instructors" class="btn-add-course">'.'👨‍🏫 Show Instructors';
+    echo '</button></br></br>';
+    echo '<button type="submit" name="show_add_instructor_form" class="btn-add-course">'.'➕ Add Instructor';
+    echo '</button>';
+echo "</form>";
+
+    // Search bar
+    $search_code = $_POST['search_code'] ?? '';
+
+    echo "<form method='post' class='search-form'>";
+    echo "<input type='hidden' name='course' value='1'>";
+    echo "<input type='text' name='search_code' placeholder='Search by Course Code' value='" . htmlspecialchars($search_code) . "'>";
+    echo "<button type='submit'>Search</button>";
+    echo "</form><br>";
+
+    // Add course button
+    if (!isset($_POST['show_add_course_form'])) {
+        echo "<form method='post'>";
+        echo "<button type='submit' name='show_add_course_form' class='btn-add-course'>";
+        echo "<i class='fas fa-plus'></i> Add Course";
+        echo "</button>";
+        echo "</form><br>";
+    }
+
+    // Fetch and display courses
+    $mysqli = new mysqli(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME);
+    if ($mysqli->connect_error) {
+        die("Connection failed: " . $mysqli->connect_error);
+    }
+
+    $query = "SELECT course_id, course_code, course_name, credit_hours, department, semester, created_at, updated_at 
+              FROM course WHERE 1";
+
+    if (!empty($search_code)) {
+        $query .= " AND course_code LIKE '%" . $mysqli->real_escape_string($search_code) . "%'";
+    }
+
+    $query .= " ORDER BY created_at DESC";
+    $result = $mysqli->query($query);
+
+    if ($result && $result->num_rows > 0) {
+        echo "<table class='course-table'>";
+        echo "<tr>
+                <th>ID</th>
+                <th>Code</th>
+                <th>Name</th>
+                <th>Credit Hours</th>
+                <th>Department</th>
+                <th>Semester</th>
+                <th>Created At</th>
+                <th>Updated At</th>
+              </tr>";
+        while ($row = $result->fetch_assoc()) {
+            echo "<tr>";
+            echo "<td>" . htmlspecialchars($row['course_id']) . "</td>";
+            echo "<td>" . htmlspecialchars($row['course_code']) . "</td>";
+            echo "<td>" . htmlspecialchars($row['course_name']) . "</td>";
+            echo "<td>" . htmlspecialchars($row['credit_hours']) . "</td>";
+            echo "<td>" . htmlspecialchars($row['department']) . "</td>";
+            echo "<td>" . htmlspecialchars($row['semester']) . "</td>";
+            echo "<td>" . htmlspecialchars($row['created_at']) . "</td>";
+            echo "<td>" . htmlspecialchars($row['updated_at']) . "</td>";
+            echo "</tr>";
+        }
+        echo "</table>";
+    } else {
+        echo "<div class='no-courses'><p>No courses found.</p></div>";
+    }
+
+    $mysqli->close();
+}
+
+// ------------------- Show Add Course Form -------------------
+elseif (isset($_POST['show_add_course_form'])) {
+    echo "<div class='add-course-form'>";
+    echo "<h3><i class='fas fa-plus-circle'></i> Add New Course</h3>";
+    echo "<form method='post'>";
+
+    echo "<div class='form-group'>";
+    echo "<label>Course ID: *</label>";
+    echo "<input type='text' name='course_id' required>";
+    echo "</div>";
+
+    echo "<div class='form-group'>";
+    echo "<label>Course Code: *</label>";
+    echo "<input type='text' name='course_code' required>";
+    echo "</div>";
+
+    echo "<div class='form-group'>";
+    echo "<label>Course Name: *</label>";
+    echo "<input type='text' name='course_name' required>";
+    echo "</div>";
+
+    echo "<div class='form-group'>";
+    echo "<label>Credit Hours: *</label>";
+    echo "<input type='number' name='credit_hours' required>";
+    echo "</div>";
+
+    echo "<div class='form-group'>";
+    echo "<label>Department: *</label>";
+    echo "<input type='text' name='department' required>";
+    echo "</div>";
+
+    echo "<div class='form-group'>";
+    echo "<label>Semester: *</label>";
+    echo "<input type='text' name='semester' required>";
+    echo "</div>";
+
+    echo "<button type='submit' name='submit_course' class='btn-submit-course'>Add Course</button>";
+    echo " <button type='submit' name='course' class='btn-cancel'>Cancel</button>";
+    echo "</form>";
+    echo "</div><hr>";
+}
+
+// ------------------- Handle Submit Course -------------------
+elseif (isset($_POST['submit_course'])) {
+    $course_id = $_POST['course_id'];
+    $course_code = $_POST['course_code'];
+    $course_name = $_POST['course_name'];
+    $credit_hours = $_POST['credit_hours'];
+    $department = $_POST['department'];
+    $semester = $_POST['semester'];
+
+    $mysqli = new mysqli(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME);
+    if ($mysqli->connect_error) {
+        die("Connection failed: " . $mysqli->connect_error);
+    }
+
+    $stmt = $mysqli->prepare("INSERT INTO course (course_id, course_code, course_name, credit_hours, department, semester, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())");
+    $stmt->bind_param("sssiss", $course_id, $course_code, $course_name, $credit_hours, $department, $semester);
+
+    if ($stmt->execute()) {
+        echo "<div class='success-msg'>✅ Course added successfully!</div>";
+    } else {
+        echo "<div class='error-msg'>❌ Failed to add course. Error: " . $mysqli->error . "</div>";
+    }
+
+    $stmt->close();
+    $mysqli->close();
+
+    echo "<form method='post'><button type='submit' name='course'>Back to Courses</button></form>";
+}
+if (isset($_POST['show_instructors'])) {
+    echo "<div class='course-container'>";
+    echo "<h2 class='course-heading'>👨‍🏫 Course Instructors</h2>";
+
+    $mysqli = new mysqli(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME);
+    $query = "SELECT ci.faculty_id, f.name AS faculty_name, ci.course_id, c.course_name, 
+                     ci.class_day, ci.class_time, ci.room_number
+              FROM course_instructor ci
+              JOIN faculty f ON ci.faculty_id = f.faculty_id
+              JOIN course c ON ci.course_id = c.course_id
+              ORDER BY ci.class_day, ci.class_time";
+    $result = $mysqli->query($query);
+
+    if ($result->num_rows > 0) {
+        echo "<table class='course-table'>";
+        echo "<tr><th>Faculty</th><th>Course</th><th>Day</th><th>Time</th><th>Room</th></tr>";
+        while ($row = $result->fetch_assoc()) {
+            echo "<tr>";
+            echo "<td>" . htmlspecialchars($row['faculty_name']) . " (ID: " . $row['faculty_id'] . ")</td>";
+            echo "<td>" . htmlspecialchars($row['course_name']) . " (ID: " . $row['course_id'] . ")</td>";
+            echo "<td>" . htmlspecialchars($row['class_day']) . "</td>";
+            echo "<td>" . htmlspecialchars($row['class_time']) . "</td>";
+            echo "<td>" . htmlspecialchars($row['room_number']) . "</td>";
+            echo "</tr>";
+        }
+        echo "</table>";
+    } else {
+        echo "<div class='no-notices'><p>No instructors assigned yet.</p></div>";
+    }
+
+    $mysqli->close();
+    echo "</div>";
+}
+if (isset($_POST['show_add_instructor_form'])) {
+    echo "<div class='course-container'>";
+    echo "<h2 class='course-heading'>➕ Assign Instructor to Course</h2>";
+
+    $mysqli = new mysqli(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME);
+
+    // Faculty dropdown
+    $faculty_result = $mysqli->query("SELECT faculty_id, name FROM faculty");
+    $course_result = $mysqli->query("SELECT course_id, course_name FROM course");
+
+    echo "<form method='post'>";
+    
+    echo "<div class='form-group'>";
+    echo "<label>Faculty: *</label>";
+    echo "<select name='faculty_id' required>";
+    while ($f = $faculty_result->fetch_assoc()) {
+        echo "<option value='{$f['faculty_id']}'>{$f['name']} (ID: {$f['faculty_id']})</option>";
+    }
+    echo "</select></div>";
+
+    echo "<div class='form-group'>";
+    echo "<label>Course: *</label>";
+    echo "<select name='course_id' required>";
+    while ($c = $course_result->fetch_assoc()) {
+        echo "<option value='{$c['course_id']}'>{$c['course_name']} (ID: {$c['course_id']})</option>";
+    }
+    echo "</select></div>";
+
+    echo "<div class='form-group'>";
+    echo "<label>Class Day: *</label>";
+    echo "<select name='class_day' required>
+            <option>Sunday</option><option>Monday</option><option>Tuesday</option>
+            <option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option>
+          </select></div>";
+
+    echo "<div class='form-group'>";
+    echo "<label>Class Time: *</label>";
+    echo "<select name='class_time' required>
+            <option>8:30-9:30</option><option>9:35-10:35</option>
+            <option>10:40-11:40</option><option>11:45-12:45</option>
+            <option>1:10-2:10</option><option>2:15-3:15</option>
+            <option>4:20-5:20</option>
+          </select></div>";
+
+    echo "<div class='form-group'>";
+    echo "<label>Room Number: *</label>";
+    echo "<input type='text' name='room_number' required>";
+    echo "</div>";
+
+    echo "<button type='submit' name='add_instructor' class='btn-submit-course'>Save</button>";
+    echo " <button type='submit' name='show_instructors' class='btn-cancel'>Cancel</button>";
+    echo "</form></div>";
+
+    $mysqli->close();
+}
+if (isset($_POST['add_instructor'])) {
+    $faculty_id = $_POST['faculty_id'];
+    $course_id = $_POST['course_id'];
+    $class_day = $_POST['class_day'];
+    $class_time = $_POST['class_time'];
+    $room_number = $_POST['room_number'];
+
+    $mysqli = new mysqli(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME);
+
+    // Check for duplicate slot
+    $check = $mysqli->prepare("SELECT * FROM course_instructor 
+                               WHERE course_id = ? AND class_day = ? 
+                               AND class_time = ? AND room_number = ?");
+    $check->bind_param("isss", $course_id, $class_day, $class_time, $room_number);
+    $check->execute();
+    $result = $check->get_result();
+
+    if ($result->num_rows > 0) {
+        echo "<div class='error-msg'>❌ This course already has an instructor at this time and room.</div>";
+    } else {
+        $stmt = $mysqli->prepare("INSERT INTO course_instructor 
+            (faculty_id, course_id, class_day, class_time, room_number) 
+            VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param("iisss", $faculty_id, $course_id, $class_day, $class_time, $room_number);
+        
+        if ($stmt->execute()) {
+            echo "<div class='success-msg'>✅ Instructor assigned successfully!</div>";
+        } else {
+            echo "<div class='error-msg'>❌ Error: " . $mysqli->error . "</div>";
+        }
+        $stmt->close();
+    }
+    $check->close();
+    $mysqli->close();
+}
+
+
+
+else{ ?>
             <div class="page-header">
                 <h1 class="page-title"><i class="fas fa-user-shield"></i> Administrator Dashboard</h1>
-                <button class="btn-edit" id="editProfileBtn">
+                <a href="#edit-form"><button class="btn-edit">
                     <i class="fas fa-edit"></i> Edit Profile
-                </button>
+                </button></a>
             </div>
 
             <!-- Profile Card with Picture Upload -->
@@ -1202,11 +1780,12 @@ $mysqli->close();
                             <i class="fas fa-user-shield"></i>
                         </div>
                     <?php endif; ?>
-                    <div class="edit-overlay" onclick="document.getElementById('file-input').click()">
-                        <i class="fas fa-camera"></i>
-                    </div>
-                    <form id="upload-form" method="post" enctype="multipart/form-data">
+                    <form id="upload-form" method="post" enctype="multipart/form-data" style="margin-top: 10px;">
+                        <label for="file-input" class="edit-overlay">
+                            <i class="fas fa-camera"></i>
+                        </label>
                         <input type="file" id="file-input" name="profile_picture" accept="image/*">
+                        <button type="submit" style="margin-top: 10px; padding: 5px 10px;">Upload Photo</button>
                     </form>
                 </div>
 
@@ -1218,7 +1797,8 @@ $mysqli->close();
                 </div>
             </div>
             
-            <?php if (!empty($error)): ?>
+            <?php
+            if (!empty($error)): ?>
                 <div class="error-msg"><?php echo $error; ?></div>
             <?php endif; ?>
             
@@ -1318,42 +1898,34 @@ $mysqli->close();
                     <div class="stat-label">Students</div>
                 </div>
                 
-                <?php
-// Database connection
-$mysqli = new mysqli("localhost", "root", "", "skst_university");
+                <?php 
+                // Database connection
+                $mysqli = new mysqli("localhost", "root", "", "skst_university");
 
-// Check connection
-if ($mysqli->connect_error) {
-    die("Connection failed: " . $mysqli->connect_error);
-}
+                // Check connection
+                if ($mysqli->connect_error) {
+                    die("Connection failed: " . $mysqli->connect_error);
+                }
 
-// Count faculty
-$result = $mysqli->query("SELECT COUNT(*) AS total FROM faculty");
-$row = $result->fetch_assoc();
-$faculty_count = $row['total'];
-?>
+                // Count faculty
+                $result = $mysqli->query("SELECT COUNT(*) AS total FROM faculty");
+                $row = $result->fetch_assoc();
+                $faculty_count = $row['total'];
+                ?>
 
-<div class="stat-card">
-    <div class="stat-icon">
-        <i class="fas fa-chalkboard-teacher"></i>
-    </div>
-    <div class="stat-number"><?php echo $faculty_count; ?></div>
-    <div class="stat-label">Faculty</div>
-</div>
-
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    <div class="stat-number"><?php echo $faculty_count; ?></div>
+                    <div class="stat-label">Faculty</div>
+                </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Edit Profile Modal -->
-    <div id="editModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span class="close">&times;</span>
-                <h2 class="modal-title"><i class="fas fa-user-edit"></i> Edit Profile</h2>
-            </div>
-            <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
-                <div class="modal-body">
+            
+            <!-- Edit Profile Form (always visible) -->
+            <div id="edit-form" class="detail-card" style="margin-top: 30px;">
+                <h3><i class="fas fa-user-edit"></i> Edit Profile</h3>
+                <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
                     <input type="hidden" name="update_profile" value="1">
                     
                     <div class="form-group">
@@ -1370,29 +1942,6 @@ $faculty_count = $row['total'];
                         <label for="email">Email Address</label>
                         <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($admin['email']); ?>" required>
                     </div>
-
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <div class="password-container">
-                            <input type="password" id="password" name="password" 
-                                value="<?php echo htmlspecialchars($admin['password']); ?>" required>
-                            <i class="fa-solid fa-eye toggle-password" id="togglePassword"></i>
-                        </div>
-                    </div>
-
-                    <script>
-                    const passwordField = document.getElementById("password");
-                    const togglePassword = document.getElementById("togglePassword");
-
-                    togglePassword.addEventListener("click", function () {
-                        const type = passwordField.type === "password" ? "text" : "password";
-                        passwordField.type = type;
-
-                        // Switch between eye and eye-slash
-                        this.classList.toggle("fa-eye");
-                        this.classList.toggle("fa-eye-slash");
-                    });
-                    </script>
                     
                     <div class="form-group">
                         <label for="phone">Phone Number</label>
@@ -1403,121 +1952,15 @@ $faculty_count = $row['total'];
                         <label for="key">Security Key</label>
                         <input type="text" id="key" name="key" value="<?php echo htmlspecialchars($admin['key']); ?>">
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn-cancel" id="cancelEdit">Cancel</button>
-                    <button type="submit" class="btn-save">Save Changes</button>
-                </div>
-            </form>
+                    
+                    <div class="form-group">
+                        <button type="submit" class="btn-save">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+            <?php }?>
         </div>
     </div>
     <?php endif; ?>
-
-    <script>
-        // JavaScript for interactive elements
-        document.addEventListener('DOMContentLoaded', function() {
-            // Stats panel toggle functionality
-            const statsButton = document.querySelector('.stats-button');
-            const statsPanel = document.querySelector('.stats-panel');
-            
-            if (statsButton && statsPanel) {
-                statsButton.addEventListener('click', function() {
-                    statsPanel.classList.toggle('visible');
-                });
-            }
-            
-            // Add active class to clicked sidebar items
-            const sidebarItems = document.querySelectorAll('.sidebar-menu a, .sidebar-menu button');
-            sidebarItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    sidebarItems.forEach(i => i.classList.remove('active'));
-                    this.classList.add('active');
-                });
-            });
-            
-            // Handle profile picture upload
-            const fileInput = document.getElementById('file-input');
-            if (fileInput) {
-                fileInput.addEventListener('change', function() {
-                    if (this.files && this.files[0]) {
-                        document.getElementById('upload-form').submit();
-                    }
-                });
-            }
-            
-            // Edit Profile Modal functionality
-            const modal = document.getElementById("editModal");
-            const btn = document.getElementById("editProfileBtn");
-            const span = document.getElementsByClassName("close")[0];
-            const cancelBtn = document.getElementById("cancelEdit");
-            
-            if (btn) {
-                btn.onclick = function() {
-                    modal.style.display = "block";
-                }
-            }
-            
-            if (span) {
-                span.onclick = function() {
-                    modal.style.display = "none";
-                }
-            }
-            
-            if (cancelBtn) {
-                cancelBtn.onclick = function() {
-                    modal.style.display = "none";
-                }
-            }
-            
-            // Forgot Password Modal
-            const forgotPasswordLink = document.getElementById("forgotPasswordLink");
-            const forgotPasswordModal = document.getElementById("forgotPasswordModal");
-            const cancelReset = document.getElementById("cancelReset");
-            
-            if (forgotPasswordLink && forgotPasswordModal) {
-                forgotPasswordLink.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    forgotPasswordModal.style.display = "block";
-                });
-            }
-            
-            if (cancelReset) {
-                cancelReset.onclick = function() {
-                    forgotPasswordModal.style.display = "none";
-                }
-            }
-            
-            // Help Modal
-            const helpLink = document.getElementById("helpLink");
-            const helpModal = document.getElementById("helpModal");
-            const closeHelp = document.getElementById("closeHelp");
-            
-            if (helpLink && helpModal) {
-                helpLink.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    helpModal.style.display = "block";
-                });
-            }
-            
-            if (closeHelp) {
-                closeHelp.onclick = function() {
-                    helpModal.style.display = "none";
-                }
-            }
-            
-            // Close modals when clicking outside
-            window.onclick = function(event) {
-                if (event.target == modal) {
-                    modal.style.display = "none";
-                }
-                if (event.target == forgotPasswordModal) {
-                    forgotPasswordModal.style.display = "none";
-                }
-                if (event.target == helpModal) {
-                    helpModal.style.display = "none";
-                }
-            }
-        });
-    </script>
 </body>
 </html>

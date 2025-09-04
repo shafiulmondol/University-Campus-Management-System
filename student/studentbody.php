@@ -8,6 +8,7 @@ if (!isset($_SESSION['student_data'])) {
     exit();
 }
 require_once '../library/notice.php';
+
 // Get the student data from session
 $stdata = $_SESSION['student_data'];
 
@@ -197,7 +198,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-
 // Fetch admin emails for dropdown
 $admin_emails = [];
 $admin_query = "SELECT email FROM admin_users";
