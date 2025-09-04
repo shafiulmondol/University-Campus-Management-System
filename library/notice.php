@@ -607,6 +607,22 @@ function get_unread_student_notification_count() {
     }
     return 0;
 }
+function get_unread_admin_notification_count() {
+    global $con;
+    $query = "SELECT COUNT(*) as count 
+              FROM notice 
+              WHERE viewed = 0 
+              AND section IN ('Admin', 'AO')";
+    
+    $result = mysqli_query($con, $query);
+    
+    if ($result) {
+        $row = mysqli_fetch_assoc($result);
+        return $row['count'] ?? 0;
+    }
+    return 0;
+}
+
 
 function see_student_notice(){
     global $con;

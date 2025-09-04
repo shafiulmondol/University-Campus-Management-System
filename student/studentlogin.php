@@ -287,12 +287,12 @@ if (isset($_POST['login'])) {
                     <i class="fas fa-sign-in-alt"></i> Login to Dashboard
                 </button>
                 <button style="margin-top:10px" type="submit" name="login" class="login-btn">
-                    <i class="fas fa-sign-in-alt"></i> <a style="text-decoration: none;color:aliceblue;" href="student.html">Sign Out</a>
+             <i class="fas fa-sign-in-alt"></i> <a style="text-decoration: none;color:aliceblue;" href="student.html">Sign Out</a>
                 </button>
             </form>
             <div class="footer-links"> 
+                <p><a  href="forget_password.php"><i class="fas fa-key"></i> Forgot Password?</a> •
                
-                <p><a  href="forgert_pass.php"><i class="fas fa-key"></i> Forgot Password?</a> •
                  <a href="#"><i class="fas fa-question-circle"></i> Help</a></p>
             </div>
             
