@@ -235,6 +235,62 @@
       object-fit: cover;
       border-radius: 8px;
     }
+      .sidebar {
+      flex: 0 0 240px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 20px;
+      height: fit-content;
+    }
+
+  .sidebar a {
+      display: block;
+      padding: 12px 15px;
+      margin-bottom: 10px;
+      background: purple;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+  .sidebar a:hover {
+        background: linear-gradient(90deg, darkred);
+      transform: translateY(-3px);
+    }
+
+  .content-container {
+      display: flex;
+      gap: 20px;
+    }
+
+  .column {
+      flex: 1;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .section {
+      margin-bottom: 30px;
+    }
+
+  .section h3 {
+      color: #0073e6;
+      margin-bottom: 10px;
+    }
+
+  .section p {
+      line-height: 1.6;
+      font-size: 16px;
+      color: #555;
+    }
 
 
   </style>
@@ -281,6 +337,63 @@
       <p>"Where Knowledge Takes Shape"</p>
     </div>
 
+    <div style="display:flex; gap:30px; max-width:1200px; margin:0 auto; margin-top: 15px;">
+
+          <!-- Sidebar -->
+      <div class="sidebar">
+      <p style="font-weight:bold; font-size:18px; margin-bottom:15px; text-align:center;">Quick Links</p>
+        <a href="#Table">About Library</a>
+        <a href="#Table2">Library Hours</a>
+        <a href="#Table3">Rules and Regulations</a>
+        <a href="#Table4">Borrowing Guidelines</a>
+        <a href="#Table5">Extra Details</a>
+        <a href="library.php">Library Login</a>
+      </div>
+
+
+      <!-- Content Area Split into Two Columns -->
+        <div class="content-container">
+
+          <!-- Left Column -->
+          <div class="column">
+            <div id="network" class="section">
+              <h3>about Network</h3>
+              <p>Connect with a strong community of graduates for collaboration and opportunities.</p>
+            </div>
+
+            <div id="events" class="section">
+              <h3>Reunions & Events</h3>
+              <p>Exclusive invitations to annual reunions, seminars, and special gatherings.</p>
+            </div>
+
+            <div id="about" class="section">
+              <h3>about & Resources</h3>
+              <p>Continued access to selected digital and printed resources for about.</p>
+            </div>
+          </div>
+
+          <!-- Right Column -->
+          <div class="column">
+            <div id="recognition" class="section">
+              <h3>Awards & Recognition</h3>
+              <p>Celebrating the achievements and contributions of distinguished about.</p>
+            </div>
+
+            <div id="career" class="section">
+              <h3>Career Support</h3>
+              <p>Career counseling, job postings, and networking opportunities for about growth.</p>
+            </div>
+
+            <div id="about-login" class="section">
+              <h3>about Login</h3>
+              <p>Access exclusive resources and connect with fellow about.</p>
+            </div>
+          </div>
+          </div>
+        </div>
+
+        <section id="Table">
+        <!-- About SKST Library -->
     <h2 class="line-through">-----About SKST Library-----</h2>
 
       <div class="library-container">
@@ -305,7 +418,9 @@
           barcode-printed ID cards in everyday.</div>
 
       </div>
+      </section>
 
+      <section id="Table2">
       <!-- Library Hours and Floor Plan -->
           <h2 class="line-through">-----Library Hours and Floor Plan-----</h2>
 
@@ -323,8 +438,9 @@
           <img src="../picture/library tag.png" alt="SKST University Library">
         </div>
       </div>
+      </section>
 
-      
+      <section id="Table3"></section>
       <!-- Rules and Regulations for Library -->
       <h2 class="line-through">-----Library Rules and Regulations-----</h2>
         <div class="library-container">
@@ -346,7 +462,9 @@
       <img src="../picture/library rules.png" alt="SKST University Library">
     </div>
   </div>
+  </section>
 
+      <section id="Table4">
         <!-- Borrowing Guidelines for Library Users -->
       <h2 class="line-through">-----Borrowing Guidelines for Library Users-----</h2>
         <div class="library-container">
@@ -363,8 +481,9 @@
       <img src="../picture/borrow.png" alt="SKST University Library">
     </div>
   </div>
+  </section>
 
-
+       <section id="Table5"></section>
           <!-- Replacement and Cost of Damaging Library Resources -->
       <h2 class="line-through">-----Replacement and Cost of Damaging Library Resources-----</h2>
         <div class="library-container">
@@ -390,6 +509,7 @@
        including supervisor signature must be submitted to the library for library clearance.
     </div>
   </div>
+  </section>
 
       <div class="buttom_bar">
       <img src="../picture/SKST.png" alt="Logo" style="height:80px; width:auto;">

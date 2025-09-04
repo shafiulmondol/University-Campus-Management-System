@@ -220,6 +220,27 @@
         padding: 0 20px;
         font-family: Arial, sans-serif;
       }
+          .background-image img {
+      border: 1px solid black;
+      border-radius: 10px;
+      margin-top: 10px;
+      width: 100%;
+      height: auto;
+      display: block;
+      animation: fadeInUp 2s ease-in-out;
+    }
+
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -253,6 +274,10 @@
       <a href="../about/about.html"><button class="btn">About Us</button></a>
     </div>
   </div>
+
+  <div class="background-image">
+      <img src="../picture/account background.gif" alt="Background Image">
+    </div>
 
   <div>
   <div class="future-students-container">
