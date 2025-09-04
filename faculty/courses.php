@@ -473,26 +473,106 @@
             margin-bottom: 20px;
             font-size: 16px;
         }
+        
+        /* Connection status */
+        .connection-status {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .connected {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .modal-title {
+            font-size: 24px;
+            color: #2b5876;
+            margin: 0;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .modal-body {
+            margin-bottom: 20px;
+        }
+        
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
     <!-- Navigation Bar -->
     <div class="navbar">
         <div class="logo">
-            <img src="../picture/SKST.png" alt="Logo" style="width: 50px; height: 50px; border-radius: 50%;">
+            <div style="width: 50px; height: 50px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center;">
+                <span style="font-weight: bold; color: #2b5876;">SKST</span>
+            </div>
             <h1>SKST University Faculty</h1>
         </div>
         
         <div class="nav-buttons">
-            <button onclick="location.href='faculty1.php'">
-                <i class="fas fa-user"></i> Profile
-            </button>
-            <button onclick="location.href='../index.html'">
-                <i class="fas fa-home"></i> Home
-            </button>
-            <button onclick="location.href='?logout=1'">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </button>
+            <button onclick="location.href='faculty1.php'"><i class="fas fa-user"></i> Profile</button>
+            <button onclick="location.href='../index.html'"><i class="fas fa-home"></i> Home</button>
+            <button onclick="location.href='?logout=1'"><i class="fas fa-sign-out-alt"></i> Logout</button>
         </div>
     </div>
     
@@ -500,41 +580,13 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <ul class="sidebar-menu">
-                <li>
-                    <a href="faculty1.php">
-                        <i class="fas fa-user"></i> Profile
-                    </a>
-                </li>
-                <li>
-                    <a href="faculty_courses.php" class="active">
-                        <i class="fas fa-book"></i> Courses
-                    </a>
-                </li>
-                <li>
-                    <a href="faculty_schedule.php">
-                        <i class="fas fa-calendar-alt"></i> Schedule
-                    </a>
-                </li>
-                <li>
-                    <a href="faculty_students.php">
-                        <i class="fas fa-users"></i> Students
-                    </a>
-                </li>
-                <li>
-                    <a href="attendance.php">
-                        <i class="fas fa-user-check"></i> Attendance
-                    </a>
-                </li>
-                <li>
-                    <a href="faculty_materials.php">
-                        <i class="fas fa-file-alt"></i> Materials
-                    </a>
-                </li>
-                <li>
-                    <button onclick="location.href='?logout=1'">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </button>
-                </li>
+                <li><a href="faculty1.php"><i class="fas fa-user"></i> Profile</a></li>
+                <li><a href="faculty_courses.php" class="active"><i class="fas fa-book"></i> Courses</a></li>
+                <li><a href="faculty_schedule.php"><i class="fas fa-calendar-alt"></i> Schedule</a></li>
+                <li><a href="faculty_students.php"><i class="fas fa-users"></i> Students</a></li>
+                <li><a href="attendance.php"><i class="fas fa-user-check"></i> Attendance</a></li>
+                <li><a href="faculty_materials.php"><i class="fas fa-file-alt"></i> Materials</a></li>
+                <li><button onclick="location.href='?logout=1'"><i class="fas fa-sign-out-alt"></i> Logout</button></li>
             </ul>
         </div>
         
@@ -542,14 +594,18 @@
         <div class="content-area">
             <div class="page-header">
                 <h1 class="page-title"><i class="fas fa-book"></i> My Courses</h1>
-                <button class="btn-primary">
-                    <i class="fas fa-plus"></i> Add New Course
-                </button>
+                <button class="btn-primary" id="addCourseBtn"><i class="fas fa-plus"></i> Add New Course</button>
+            </div>
+            
+            <!-- Database Connection Status -->
+            <div class="connection-status disconnected">
+                <i class="fas fa-exclamation-triangle"></i> 
+                Note: This is a static demonstration. In a live environment, this would connect to your MySQL database.
             </div>
             
             <!-- Courses Grid -->
             <div class="courses-container">
-                <!-- Course Card 1 -->
+                <!-- Course 1 -->
                 <div class="course-card">
                     <div class="course-header">
                         <div class="course-code">CSC 112</div>
@@ -558,38 +614,28 @@
                     </div>
                     <div class="course-body">
                         <div class="course-info">
-                            <div class="info-item">
-                                <i class="fas fa-users"></i>
+                            <div class="info-item"><i class="fas fa-users"></i>
                                 <span>Enrolled Students: <span class="students-count">42</span></span>
                             </div>
-                            <div class="info-item">
-                                <i class="fas fa-calendar"></i>
-                                <span>Semester: Fall 2025</span>
+                            <div class="info-item"><i class="fas fa-calendar"></i>
+                                <span>Class Day: Sunday</span>
                             </div>
-                            <div class="info-item">
-                                <i class="fas fa-clock"></i>
-                                <span>Schedule: Mon, Wed 10:00-11:30</span>
+                            <div class="info-item"><i class="fas fa-clock"></i>
+                                <span>Schedule: 10:40-11:40</span>
                             </div>
-                            <div class="info-item">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <span>Room: CS-102</span>
+                            <div class="info-item"><i class="fas fa-map-marker-alt"></i>
+                                <span>Room: 1211</span>
                             </div>
                         </div>
                         <div class="course-actions">
-                            <button class="action-btn btn-view">
-                                <i class="fas fa-eye"></i> View
-                            </button>
-                            <button class="action-btn btn-attendance">
-                                <i class="fas fa-clipboard-check"></i> Attendance
-                            </button>
-                            <button class="action-btn btn-materials">
-                                <i class="fas fa-file-upload"></i> Materials
-                            </button>
+                            <button class="action-btn btn-view" data-course="CSC 112"><i class="fas fa-eye"></i> View</button>
+                            <button class="action-btn btn-attendance" data-course="CSC 112"><i class="fas fa-clipboard-check"></i> Attendance</button>
+                            <button class="action-btn btn-materials" data-course="CSC 112"><i class="fas fa-file-upload"></i> Materials</button>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Course Card 2 -->
+                <!-- Course 2 -->
                 <div class="course-card">
                     <div class="course-header">
                         <div class="course-code">CSC 222</div>
@@ -598,73 +644,53 @@
                     </div>
                     <div class="course-body">
                         <div class="course-info">
-                            <div class="info-item">
-                                <i class="fas fa-users"></i>
-                                <span>Enrolled Students: <span class="students-count">38</span></span>
+                            <div class="info-item"><i class="fas fa-users"></i>
+                                <span>Enrolled Students: <span class="students-count">35</span></span>
                             </div>
-                            <div class="info-item">
-                                <i class="fas fa-calendar"></i>
-                                <span>Semester: Fall 2025</span>
+                            <div class="info-item"><i class="fas fa-calendar"></i>
+                                <span>Class Day: Tuesday</span>
                             </div>
-                            <div class="info-item">
-                                <i class="fas fa-clock"></i>
-                                <span>Schedule: Tue, Thu 2:00-3:30</span>
+                            <div class="info-item"><i class="fas fa-clock"></i>
+                                <span>Schedule: 9:35-10:35</span>
                             </div>
-                            <div class="info-item">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <span>Room: CS-201</span>
+                            <div class="info-item"><i class="fas fa-map-marker-alt"></i>
+                                <span>Room: 1005</span>
                             </div>
                         </div>
                         <div class="course-actions">
-                            <button class="action-btn btn-view">
-                                <i class="fas fa-eye"></i> View
-                            </button>
-                            <button class="action-btn btn-attendance">
-                                <i class="fas fa-clipboard-check"></i> Attendance
-                            </button>
-                            <button class="action-btn btn-materials">
-                                <i class="fas fa-file-upload"></i> Materials
-                            </button>
+                            <button class="action-btn btn-view" data-course="CSC 222"><i class="fas fa-eye"></i> View</button>
+                            <button class="action-btn btn-attendance" data-course="CSC 222"><i class="fas fa-clipboard-check"></i> Attendance</button>
+                            <button class="action-btn btn-materials" data-course="CSC 222"><i class="fas fa-file-upload"></i> Materials</button>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Course Card 3 -->
+                <!-- Course 3 -->
                 <div class="course-card">
                     <div class="course-header">
-                        <div class="course-code">MATH 247</div>
-                        <div class="course-name">Calculus</div>
-                        <div class="course-credits">3 Credits</div>
+                        <div class="course-code">CSC 247</div>
+                        <div class="course-name">Advanced Programming</div>
+                        <div class="course-credits">4 Credits</div>
                     </div>
                     <div class="course-body">
                         <div class="course-info">
-                            <div class="info-item">
-                                <i class="fas fa-users"></i>
-                                <span>Enrolled Students: <span class="students-count">55</span></span>
+                            <div class="info-item"><i class="fas fa-users"></i>
+                                <span>Enrolled Students: <span class="students-count">28</span></span>
                             </div>
-                            <div class="info-item">
-                                <i class="fas fa-calendar"></i>
-                                <span>Semester: Fall 2025</span>
+                            <div class="info-item"><i class="fas fa-calendar"></i>
+                                <span>Class Day: Wednesday</span>
                             </div>
-                            <div class="info-item">
-                                <i class="fas fa-clock"></i>
-                                <span>Schedule: Mon, Wed, Fri 9:00-10:00</span>
+                            <div class="info-item"><i class="fas fa-clock"></i>
+                                <span>Schedule: 2:15-3:15</span>
                             </div>
-                            <div class="info-item">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <span>Room: MATH-105</span>
+                            <div class="info-item"><i class="fas fa-map-marker-alt"></i>
+                                <span>Room: 1215</span>
                             </div>
                         </div>
                         <div class="course-actions">
-                            <button class="action-btn btn-view">
-                                <i class="fas fa-eye"></i> View
-                            </button>
-                            <button class="action-btn btn-attendance">
-                                <i class="fas fa-clipboard-check"></i> Attendance
-                            </button>
-                            <button class="action-btn btn-materials">
-                                <i class="fas fa-file-upload"></i> Materials
-                            </button>
+                            <button class="action-btn btn-view" data-course="CSC 247"><i class="fas fa-eye"></i> View</button>
+                            <button class="action-btn btn-attendance" data-course="CSC 247"><i class="fas fa-clipboard-check"></i> Attendance</button>
+                            <button class="action-btn btn-materials" data-course="CSC 247"><i class="fas fa-file-upload"></i> Materials</button>
                         </div>
                     </div>
                 </div>
@@ -675,39 +701,28 @@
                 <h2 class="stats-header"><i class="fas fa-chart-bar"></i> Teaching Overview</h2>
                 <div class="stats-cards">
                     <div class="stat-card">
-                        <div class="stat-icon icon-courses">
-                            <i class="fas fa-book"></i>
-                        </div>
+                        <div class="stat-icon icon-courses"><i class="fas fa-book"></i></div>
                         <div class="stat-info">
                             <div class="stat-value">3</div>
                             <div class="stat-label">Total Courses</div>
                         </div>
                     </div>
-                    
                     <div class="stat-card">
-                        <div class="stat-icon icon-students">
-                            <i class="fas fa-users"></i>
-                        </div>
+                        <div class="stat-icon icon-students"><i class="fas fa-users"></i></div>
                         <div class="stat-info">
-                            <div class="stat-value">135</div>
+                            <div class="stat-value">105</div>
                             <div class="stat-label">Total Students</div>
                         </div>
                     </div>
-                    
                     <div class="stat-card">
-                        <div class="stat-icon icon-hours">
-                            <i class="fas fa-clock"></i>
-                        </div>
+                        <div class="stat-icon icon-hours"><i class="fas fa-clock"></i></div>
                         <div class="stat-info">
-                            <div class="stat-value">10</div>
+                            <div class="stat-value">9</div>
                             <div class="stat-label">Weekly Hours</div>
                         </div>
                     </div>
-                    
                     <div class="stat-card">
-                        <div class="stat-icon icon-rating">
-                            <i class="fas fa-star"></i>
-                        </div>
+                        <div class="stat-icon icon-rating"><i class="fas fa-star"></i></div>
                         <div class="stat-info">
                             <div class="stat-value">4.8</div>
                             <div class="stat-label">Average Rating</div>
@@ -718,43 +733,310 @@
         </div>
     </div>
 
+    <!-- Modal for Course Details -->
+    <div class="modal" id="courseModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Course Details</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
     <script>
-        // Simple JavaScript for interactive elements
+        // This would be handled by PHP in a real environment
+        console.log("Faculty ID: 7654327");
+        console.log("Database: skst_university");
+        
+        // Simulate database connection
+        setTimeout(function() {
+            document.querySelector('.connection-status').textContent = "Connected to database: skst_university";
+            document.querySelector('.connection-status').className = "connection-status connected";
+        }, 1500);
+        
+        // Add event listeners to buttons
         document.addEventListener('DOMContentLoaded', function() {
-            // Add active class to clicked sidebar items
-            const sidebarItems = document.querySelectorAll('.sidebar-menu a, .sidebar-menu button');
-            sidebarItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    sidebarItems.forEach(i => i.classList.remove('active'));
-                    this.classList.add('active');
-                });
-            });
-            
-            // Course action buttons functionality
+            // View buttons
             const viewButtons = document.querySelectorAll('.btn-view');
             viewButtons.forEach(button => {
                 button.addEventListener('click', function() {
-                    const courseCode = this.closest('.course-card').querySelector('.course-code').textContent;
-                    alert(`View details for ${courseCode}`);
+                    const courseCode = this.getAttribute('data-course');
+                    showCourseDetails(courseCode);
                 });
             });
             
+            // Attendance buttons
             const attendanceButtons = document.querySelectorAll('.btn-attendance');
             attendanceButtons.forEach(button => {
                 button.addEventListener('click', function() {
-                    const courseCode = this.closest('.course-card').querySelector('.course-code').textContent;
-                    alert(`Take attendance for ${courseCode}`);
+                    const courseCode = this.getAttribute('data-course');
+                    showAttendance(courseCode);
                 });
             });
             
+            // Materials buttons
             const materialsButtons = document.querySelectorAll('.btn-materials');
             materialsButtons.forEach(button => {
                 button.addEventListener('click', function() {
-                    const courseCode = this.closest('.course-card').querySelector('.course-code').textContent;
-                    alert(`Upload materials for ${courseCode}`);
+                    const courseCode = this.getAttribute('data-course');
+                    showMaterials(courseCode);
                 });
             });
+            
+            // Add Course button
+            document.getElementById('addCourseBtn').addEventListener('click', function() {
+                showAddCourseForm();
+            });
+            
+            // Close modal button
+            document.querySelector('.close-modal').addEventListener('click', function() {
+                document.getElementById('courseModal').style.display = 'none';
+            });
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', function(event) {
+                const modal = document.getElementById('courseModal');
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
         });
+        
+        // Function to show course details
+        function showCourseDetails(courseCode) {
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            
+            modalTitle.textContent = `${courseCode} - Details`;
+            
+            // Simulated course data
+            const courseData = {
+                'CSC 112': {
+                    name: 'Database Management Systems',
+                    description: 'This course covers fundamental concepts of database management systems, including data models, database design, normalization, SQL, and transaction processing.',
+                    instructor: 'Dr. Ahmed Rahman',
+                    schedule: 'Sunday, 10:40-11:40',
+                    room: 'Room 1211',
+                    credits: 4,
+                    enrolled: 42
+                },
+                'CSC 222': {
+                    name: 'Computer Architecture',
+                    description: 'This course introduces the fundamental concepts of computer organization and architecture, including digital logic, processor design, memory systems, and I/O systems.',
+                    instructor: 'Prof. Fatima Khan',
+                    schedule: 'Tuesday, 9:35-10:35',
+                    room: 'Room 1005',
+                    credits: 3,
+                    enrolled: 35
+                },
+                'CSC 247': {
+                    name: 'Advanced Programming',
+                    description: 'This course covers advanced programming concepts and techniques, including data structures, algorithms, software design patterns, and development methodologies.',
+                    instructor: 'Dr. Mohammad Ali',
+                    schedule: 'Wednesday, 2:15-3:15',
+                    room: 'Room 1215',
+                    credits: 4,
+                    enrolled: 28
+                }
+            };
+            
+            const course = courseData[courseCode];
+            
+            modalBody.innerHTML = `
+                <h3>${course.name}</h3>
+                <p>${course.description}</p>
+                <div class="course-info">
+                    <p><strong>Instructor:</strong> ${course.instructor}</p>
+                    <p><strong>Schedule:</strong> ${course.schedule}</p>
+                    <p><strong>Location:</strong> ${course.room}</p>
+                    <p><strong>Credits:</strong> ${course.credits}</p>
+                    <p><strong>Enrolled Students:</strong> ${course.enrolled}</p>
+                </div>
+                <button class="btn-primary" style="margin-top: 15px;">View Student Roster</button>
+            `;
+            
+            document.getElementById('courseModal').style.display = 'flex';
+        }
+        
+        // Function to show attendance
+        function showAttendance(courseCode) {
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            
+            modalTitle.textContent = `${courseCode} - Attendance`;
+            
+            // Simulated attendance data
+            modalBody.innerHTML = `
+                <h3>Attendance Management</h3>
+                <p>Manage attendance for ${courseCode}</p>
+                <div style="margin: 20px 0;">
+                    <label for="attendanceDate">Select Date:</label>
+                    <input type="date" id="attendanceDate" style="padding: 8px; margin-left: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div style="max-height: 300px; overflow-y: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background-color: #f5f7fa;">
+                                <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">Student ID</th>
+                                <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">Name</th>
+                                <th style="padding: 10px; text-align: center; border-bottom: 1px solid #ddd;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding: 10px; border-bottom: 1px solid #ddd;">23303101</td>
+                                <td style="padding: 10px; border-bottom: 1px solid #ddd;">Rahim Ahmed</td>
+                                <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: center;">
+                                    <select style="padding: 5px;">
+                                        <option>Present</option>
+                                        <option>Absent</option>
+                                        <option>Late</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border-bottom: 1px solid #ddd;">23303102</td>
+                                <td style="padding: 10px; border-bottom: 1px solid #ddd;">Fatima Khan</td>
+                                <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: center;">
+                                    <select style="padding: 5px;">
+                                        <option>Present</option>
+                                        <option>Absent</option>
+                                        <option>Late</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border-bottom: 1px solid #ddd;">23303103</td>
+                                <td style="padding: 10px; border-bottom: 1px solid #ddd;">Karim Uddin</td>
+                                <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: center;">
+                                    <select style="padding: 5px;">
+                                        <option>Present</option>
+                                        <option>Absent</option>
+                                        <option>Late</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <button class="btn-primary" style="margin-top: 15px;">Save Attendance</button>
+            `;
+            
+            document.getElementById('courseModal').style.display = 'flex';
+        }
+        
+        // Function to show materials
+        function showMaterials(courseCode) {
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            
+            modalTitle.textContent = `${courseCode} - Course Materials`;
+            
+            // Simulated materials data
+            modalBody.innerHTML = `
+                <h3>Course Materials</h3>
+                <p>Manage materials for ${courseCode}</p>
+                
+                <div style="margin: 20px 0;">
+                    <h4>Upload New Material</h4>
+                    <input type="file" id="materialFile" style="margin: 10px 0;">
+                    <input type="text" placeholder="Title" style="padding: 8px; width: 100%; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    <textarea placeholder="Description" style="padding: 8px; width: 100%; height: 80px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
+                    <button class="btn-primary">Upload Material</button>
+                </div>
+                
+                <div style="max-height: 300px; overflow-y: auto;">
+                    <h4>Existing Materials</h4>
+                    <div style="border: 1px solid #eee; border-radius: 5px; padding: 15px; margin-bottom: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h5 style="margin: 0;">Lecture 1 Slides</h5>
+                                <p style="margin: 5px 0; color: #666;">Introduction to Database Systems</p>
+                            </div>
+                            <div>
+                                <button class="action-btn btn-view" style="margin-right: 5px;">Download</button>
+                                <button class="action-btn btn-materials">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="border: 1px solid #eee; border-radius: 5px; padding: 15px; margin-bottom: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h5 style="margin: 0;">Assignment 1</h5>
+                                <p style="margin: 5px 0; color: #666;">SQL Basics Practice</p>
+                            </div>
+                            <div>
+                                <button class="action-btn btn-view" style="margin-right: 5px;">Download</button>
+                                <button class="action-btn btn-materials">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('courseModal').style.display = 'flex';
+        }
+        
+        // Function to show add course form
+        function showAddCourseForm() {
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            
+            modalTitle.textContent = 'Add New Course';
+            
+            modalBody.innerHTML = `
+                <h3>Add a New Course</h3>
+                <form id="addCourseForm">
+                    <div style="margin-bottom: 15px;">
+                        <label for="courseCode">Course Code:</label>
+                        <input type="text" id="courseCode" required style="padding: 8px; width: 100%; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label for="courseName">Course Name:</label>
+                        <input type="text" id="courseName" required style="padding: 8px; width: 100%; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label for="credits">Credit Hours:</label>
+                        <input type="number" id="credits" min="1" max="6" required style="padding: 8px; width: 100%; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label for="schedule">Schedule:</label>
+                        <input type="text" id="schedule" placeholder="e.g., Monday 9:00-10:30" required style="padding: 8px; width: 100%; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label for="room">Room Number:</label>
+                        <input type="text" id="room" required style="padding: 8px; width: 100%; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <button type="submit" class="btn-primary">Add Course</button>
+                </form>
+            `;
+            
+            // Add form submission handler
+            document.getElementById('addCourseForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                showToast('Course added successfully!');
+                document.getElementById('courseModal').style.display = 'none';
+            });
+            
+            document.getElementById('courseModal').style.display = 'flex';
+        }
+        
+        // Function to show toast notifications
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.display = 'block';
+            
+            setTimeout(function() {
+                toast.style.display = 'none';
+            }, 3000);
+        }
     </script>
 </body>
 </html>
