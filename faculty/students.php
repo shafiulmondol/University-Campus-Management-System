@@ -1,3 +1,77 @@
+<?php
+// Include configuration and authentication
+require_once 'config.php';
+checkFacultyLogin();
+
+// Get faculty ID from session
+$faculty_id = $_SESSION['faculty_id'];
+
+// Initialize variables
+$courses = [];
+$students = [];
+$selected_course = null;
+
+// Database connection
+$mysqli = new mysqli(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME);
+
+// Check connection
+if ($mysqli->connect_error) {
+    die("Connection failed: " . $mysqli->connect_error);
+}
+
+// Get courses taught by this faculty
+$sql = "SELECT c.course_id, c.course_code, c.course_name 
+        FROM course c 
+        INNER JOIN enrollments e ON c.course_id = e.course_id 
+        WHERE e.faculty_id = ? 
+        GROUP BY c.course_id
+        ORDER BY c.course_code";
+$stmt = $mysqli->prepare($sql);
+$stmt->bind_param("i", $faculty_id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+while ($row = $result->fetch_assoc()) {
+    $courses[] = $row;
+}
+
+// Check if a course is selected
+if (isset($_GET['course_id']) && !empty($_GET['course_id'])) {
+    $course_id = $_GET['course_id'];
+    
+    // Verify the course belongs to this faculty
+    $sql = "SELECT course_id, course_code, course_name 
+            FROM course 
+            WHERE course_id = ? AND course_id IN (
+                SELECT course_id FROM enrollments WHERE faculty_id = ?
+            )";
+    $stmt = $mysqli->prepare($sql);
+    $stmt->bind_param("ii", $course_id, $faculty_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $selected_course = $result->fetch_assoc();
+    
+    if ($selected_course) {
+        // Get students enrolled in this course
+        $sql = "SELECT s.id, s.first_name, s.last_name, s.email, s.student_phone 
+                FROM student_registration s 
+                INNER JOIN enrollments e ON s.id = e.student_id 
+                WHERE e.course_id = ? 
+                ORDER BY s.last_name, s.first_name";
+        $stmt = $mysqli->prepare($sql);
+        $stmt->bind_param("i", $course_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        while ($row = $result->fetch_assoc()) {
+            $students[] = $row;
+        }
+    }
+}
+
+$mysqli->close();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>

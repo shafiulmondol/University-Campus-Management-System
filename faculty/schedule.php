@@ -1,22 +1,58 @@
-
 <?php
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+session_start();
+
 include 'config.php';
-checkFacultyLogin();
+
+// Check if faculty is logged in
+if (!isset($_SESSION['faculty_id'])) {
+    header("Location: faculty_login.php"); // Create this file if it doesn't exist
+    exit();
+}
 
 $faculty_id = $_SESSION['faculty_id'];
 
-// Get faculty schedule
+// Debug: Check if faculty_id is set
+if (empty($faculty_id)) {
+    die("Faculty ID not found in session. Please log in again.");
+}
+
+// Get faculty schedule with error handling
 $schedule_sql = "SELECT c.course_code, c.course_name, ci.class_day, ci.class_time, ci.room_number
                  FROM course_instructor ci
                  JOIN course c ON ci.course_id = c.course_id
                  WHERE ci.faculty_id = ?
                  ORDER BY FIELD(ci.class_day, 'Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'),
                  ci.class_time";
+                 
+// Debug: Check connection
+if ($mysqli->connect_error) {
+    die("Database connection failed: " . $mysqli->connect_error);
+}
+
 $stmt = $mysqli->prepare($schedule_sql);
+if (!$stmt) {
+    die("Error in prepared statement: " . $mysqli->error);
+}
+
 $stmt->bind_param("i", $faculty_id);
-$stmt->execute();
+if (!$stmt->execute()) {
+    die("Execute failed: " . $stmt->error);
+}
+
 $schedule_result = $stmt->get_result();
-$schedule = $schedule_result->fetch_all(MYSQLI_ASSOC);
+$schedule = [];
+
+if ($schedule_result) {
+    $schedule = $schedule_result->fetch_all(MYSQLI_ASSOC);
+} else {
+    // No error, just no schedule data
+    $schedule = [];
+}
+
 $stmt->close();
 
 // Organize schedule by day
@@ -31,7 +67,9 @@ $schedule_by_day = [
 ];
 
 foreach ($schedule as $class) {
-    $schedule_by_day[$class['class_day']][] = $class;
+    if (isset($class['class_day']) && array_key_exists($class['class_day'], $schedule_by_day)) {
+        $schedule_by_day[$class['class_day']][] = $class;
+    }
 }
 
 $mysqli->close();
@@ -45,7 +83,7 @@ $mysqli->close();
     <title>Faculty Schedule - SKST University</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Reuse the CSS from faculty1.php with some additions */
+        /* Your CSS styles here (same as before) */
         * {
             margin: 0;
             padding: 0;
@@ -71,7 +109,100 @@ $mysqli->close();
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
         
-        /* ... (other styles from faculty1.php) ... */
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .nav-buttons button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .nav-buttons button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .main-layout {
+            display: flex;
+            min-height: calc(100vh - 80px);
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px 0;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+        }
+        
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+        
+        .sidebar-menu a, .sidebar-menu button {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            text-decoration: none;
+            color: #333;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .sidebar-menu a:hover, .sidebar-menu button:hover {
+            background: #f0f5ff;
+        }
+        
+        .sidebar-menu a.active {
+            background: linear-gradient(135deg, #2b5876, #4e4376);
+            color: white;
+        }
+        
+        .content-area {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .page-title {
+            font-size: 28px;
+            color: #2b5876;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
         
         .schedule-container {
             background: white;
@@ -148,6 +279,14 @@ $mysqli->close();
             margin-top: 20px;
         }
         
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        
         @media print {
             .navbar, .sidebar, .page-header button, .print-btn {
                 display: none;
@@ -209,33 +348,39 @@ $mysqli->close();
                 <h2>Weekly Class Schedule</h2>
                 <p>This is your teaching schedule for the current semester.</p>
                 
-                <div class="schedule-grid">
-                    <?php foreach ($schedule_by_day as $day => $classes): ?>
-                        <div class="schedule-day">
-                            <div class="day-header">
-                                <i class="fas fa-calendar-day"></i> <?php echo $day; ?>
+                <?php if (empty($schedule)): ?>
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-circle"></i> No schedule found for your faculty ID.
+                    </div>
+                <?php else: ?>
+                    <div class="schedule-grid">
+                        <?php foreach ($schedule_by_day as $day => $classes): ?>
+                            <div class="schedule-day">
+                                <div class="day-header">
+                                    <i class="fas fa-calendar-day"></i> <?php echo $day; ?>
+                                </div>
+                                
+                                <?php if (count($classes) > 0): ?>
+                                    <?php foreach ($classes as $class): ?>
+                                        <div class="class-item">
+                                            <div class="class-time">
+                                                <i class="fas fa-clock"></i> <?php echo $class['class_time']; ?>
+                                            </div>
+                                            <div class="class-course">
+                                                <?php echo $class['course_code'] . ' - ' . $class['course_name']; ?>
+                                            </div>
+                                            <div class="class-details">
+                                                <span><i class="fas fa-map-marker-alt"></i> <?php echo $class['room_number']; ?></span>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <div class="no-classes">No classes scheduled</div>
+                                <?php endif; ?>
                             </div>
-                            
-                            <?php if (count($classes) > 0): ?>
-                                <?php foreach ($classes as $class): ?>
-                                    <div class="class-item">
-                                        <div class="class-time">
-                                            <i class="fas fa-clock"></i> <?php echo $class['class_time']; ?>
-                                        </div>
-                                        <div class="class-course">
-                                            <?php echo $class['course_code'] . ' - ' . $class['course_name']; ?>
-                                        </div>
-                                        <div class="class-details">
-                                            <span><i class="fas fa-map-marker-alt"></i> <?php echo $class['room_number']; ?></span>
-                                        </div>
-                                    </div>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <div class="no-classes">No classes scheduled</div>
-                            <?php endif; ?>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
                 
                 <button class="print-btn" onclick="window.print()">
                     <i class="fas fa-print"></i> Print Schedule
