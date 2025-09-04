@@ -59,6 +59,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
     }
 }
 
+
+//check
 // Handle logout
 if (isset($_GET['logout'])) {
     session_destroy();
