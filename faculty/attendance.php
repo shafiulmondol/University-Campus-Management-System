@@ -19,6 +19,7 @@ $stmt->close();
 $selected_course = null;
 $students = [];
 $attendance_date = date('Y-m-d');
+$attendance_statuses = []; // To store existing attendance status
 
 // If a course is selected, get the students
 if (isset($_GET['course_id']) && !empty($_GET['course_id'])) {
@@ -47,6 +48,25 @@ if (isset($_GET['course_id']) && !empty($_GET['course_id'])) {
     // Get existing attendance for selected date if provided
     if (isset($_GET['attendance_date']) && !empty($_GET['attendance_date'])) {
         $attendance_date = $_GET['attendance_date'];
+    }
+    
+    // Precompute existing attendance status for each student
+    if ($selected_course && count($students) > 0) {
+        foreach ($students as $student) {
+            $check_sql = "SELECT status FROM attendance WHERE student_id = ? AND course_code = ? AND date = ?";
+            $check_stmt = $mysqli->prepare($check_sql);
+            $check_stmt->bind_param("iss", $student['id'], $selected_course['course_id'], $attendance_date);
+            $check_stmt->execute();
+            $check_result = $check_stmt->get_result();
+            
+            $existing_status = '';
+            if ($check_result->num_rows > 0) {
+                $existing_status = $check_result->fetch_assoc()['status'];
+            }
+            
+            $attendance_statuses[$student['id']] = $existing_status;
+            $check_stmt->close();
+        }
     }
 }
 
@@ -84,8 +104,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_attendance'])) 
     }
     
     $success_message = "Attendance recorded successfully for " . date('F j, Y', strtotime($attendance_date));
+    
+    // Refresh attendance statuses after submission
+    if ($selected_course && count($students) > 0) {
+        $attendance_statuses = [];
+        foreach ($students as $student) {
+            $check_sql = "SELECT status FROM attendance WHERE student_id = ? AND course_code = ? AND date = ?";
+            $check_stmt = $mysqli->prepare($check_sql);
+            $check_stmt->bind_param("iss", $student['id'], $selected_course['course_id'], $attendance_date);
+            $check_stmt->execute();
+            $check_result = $check_stmt->get_result();
+            
+            $existing_status = '';
+            if ($check_result->num_rows > 0) {
+                $existing_status = $check_result->fetch_assoc()['status'];
+            }
+            
+            $attendance_statuses[$student['id']] = $existing_status;
+            $check_stmt->close();
+        }
+    }
 }
 
+// Close connection only after all database operations are complete
 $mysqli->close();
 ?>
 
@@ -97,6 +138,7 @@ $mysqli->close();
     <title>Attendance Management - SKST University</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* ... (keep all existing styles) ... */
         * {
             margin: 0;
             padding: 0;
@@ -597,19 +639,7 @@ $mysqli->close();
                                     </thead>
                                     <tbody>
                                         <?php foreach ($students as $student): 
-                                            // Get existing attendance status if available
-                                            $existing_status = '';
-                                            if (isset($attendance_date)) {
-                                                $check_sql = "SELECT status FROM attendance WHERE student_id = ? AND course_code = ? AND date = ?";
-                                                $check_stmt = $mysqli->prepare($check_sql);
-                                                $check_stmt->bind_param("iss", $student['id'], $selected_course['course_id'], $attendance_date);
-                                                $check_stmt->execute();
-                                                $check_result = $check_stmt->get_result();
-                                                if ($check_result->num_rows > 0) {
-                                                    $existing_status = $check_result->fetch_assoc()['status'];
-                                                }
-                                                $check_stmt->close();
-                                            }
+                                            $existing_status = isset($attendance_statuses[$student['id']]) ? $attendance_statuses[$student['id']] : '';
                                         ?>
                                         <tr>
                                             <td><?php echo $student['id']; ?></td>

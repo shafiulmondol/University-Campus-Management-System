@@ -620,6 +620,9 @@ if (isset($_GET['view_profile']) && $_GET['view_profile']) {
             }
         }
 
+   
     </script>
+
 </body>
+
 </html>

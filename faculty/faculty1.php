@@ -1078,7 +1078,11 @@ $mysqli->close();
                     }
                 });
             }
+       
         });
+    
     </script>
+
 </body>
+
 </html>

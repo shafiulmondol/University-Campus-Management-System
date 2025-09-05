@@ -452,6 +452,9 @@ $mysqli->close();
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Schedule page loaded successfully');
         });
+    
     </script>
+
 </body>
+
 </html>
