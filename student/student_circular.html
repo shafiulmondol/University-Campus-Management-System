@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Show Image Example</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+
+    .background-image {
+      display: flex;
+      width: 100%;
+      overflow: hidden;
+      justify-content: center;
+    }
+
+    .background-image img {
+      border: 1px solid black;
+      border-radius: 10px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-top: 15px;
+      animation: fadeInUp 2s ease-in-out;
+    }
+
+    .apply-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background-color: maroon;
+      color: white;
+      padding: 10px 20px;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: bold;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    .apply-btn:hover {
+      background-color: #0056b3;
+      transform: scale(1.05);
+    }
+
+    .tuition-fee-table {
+      width: 90%;
+      margin: 20px auto;
+      border-collapse: collapse;
+    }
+
+    .tuition-fee-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .tuition-fee-table th,
+    .tuition-fee-table td {
+      border: 1px solid #ccc;
+      padding: 10px 12px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .tuition-fee-table th {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .tuition-fee-table tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    .tuition-fee-table tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    .nav_bar {
+      background-color: #004080;
+      color: #ffffff;
+      padding: 15px 20px;
+      text-align: center;
+      font-family: Arial, sans-serif;
+      border-radius: 8px 8px 0 0;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      margin-top: 30px;
+    }
+
+    .nav_bar h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <a href="../admission/admission.php" class="apply-btn">Apply Now</a>
+
+  <div class="background-image">
+    <img src="../picture/student_circular.gif" alt="Background Image">
+  </div>
+
+  <section id="Table">
+    <div class="nav_bar">
+      <h1>Tuition Fee Table</h1>
+    </div>
+
+    <div class="tuition-fee-table">
+      <table border="1" cellpadding="8" cellspacing="0">
+        <thead>
+          <tr>
+            <th>Program</th>
+            <th>Duration</th>
+            <th>Credit Hours</th>
+            <th>Semester Fee (BDT)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>BBA</td>
+            <td>4 years</td>
+            <td>133</td>
+            <td>69,353</td>
+          </tr>
+          <tr>
+            <td>BCSE</td>
+            <td>4 years</td>
+            <td>147</td>
+            <td>75,480</td>
+          </tr>
+          <tr>
+            <td>BSCE</td>
+            <td>4 years</td>
+            <td>157</td>
+            <td>77,716</td>
+          </tr>
+          <tr>
+            <td>BSEEE</td>
+            <td>4 years</td>
+            <td>156</td>
+            <td>78,680</td>
+          </tr>
+          <tr>
+            <td>BSME</td>
+            <td>4 years</td>
+            <td>153.5</td>
+            <td>77,135</td>
+          </tr>
+          <tr>
+            <td>BSAg</td>
+            <td>4 years</td>
+            <td>155</td>
+            <td>64,889</td>
+          </tr>
+          <tr>
+            <td>BSN</td>
+            <td>4 years</td>
+            <td>157</td>
+            <td>37,930</td>
+          </tr>
+          <tr>
+            <td>BAEcon</td>
+            <td>4 years</td>
+            <td>127</td>
+            <td>50,189</td>
+          </tr>
+          <tr>
+            <td>BA Eng</td>
+            <td>4 years</td>
+            <td>130</td>
+            <td>57,453</td>
+          </tr>
+          <tr>
+            <td>BATHM</td>
+            <td>4 years</td>
+            <td>131</td>
+            <td>56,226</td>
+          </tr>
+          <tr>
+            <td>MBA (BBA holders)</td>
+            <td>1.5 years</td>
+            <td>40</td>
+            <td>41,453</td>
+          </tr>
+          <tr>
+            <td>MBA (Non-BBA holders)</td>
+            <td>2 years</td>
+            <td>61</td>
+            <td>44,245</td>
+          </tr>
+          <tr>
+            <td>MPH</td>
+            <td>2 years</td>
+            <td>60</td>
+            <td>25,345</td>
+          </tr>
+          <tr>
+            <td>MSc in CSE</td>
+            <td>1.5 years</td>
+            <td>40</td>
+            <td>44,960</td>
+          </tr>
+          <tr>
+            <td>MSc in CE</td>
+            <td>1.5 years</td>
+            <td>40</td>
+            <td>44,960</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</body>
+</html>
