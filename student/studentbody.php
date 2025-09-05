@@ -1702,7 +1702,7 @@ if (mysqli_num_rows($check_column) == 0) {
 }
 
 .notice-card.unread {
-    background: #911631ff; /* light blue for unread */
+    background: #91f13cff; /* light blue for unread */
     border-left: 5px solid #007bff;
 }
 
@@ -1749,7 +1749,7 @@ if (mysqli_num_rows($check_column) == 0) {
                     <li><button type="submit" name="routine"><i class="fas fa-calendar-alt"></i> Routine</button></li>
                     <li><button type="submit" name="account"><i class="fas fa-exchange-alt"></i> Transaction</button></li>
     <div class="notification-bell">
-      <li>  <button type="submit" name="ssubmit" class="bell-btn">
+      <li>  <button type="submit" name="notice" class="bell-btn">
             <i class="fas fa-bell"></i>Notification
             <?php 
             $unread = get_unread_student_notification_count(); 
@@ -2415,7 +2415,7 @@ if (isset($_POST['search_course']) && !empty($selected_semester)) {
                     <?php endif; ?>
                 </div>
             </div>
-<?php elseif ($show_routine_section || isset($_POST['ssubmit'])):
+<?php elseif (isset($_POST['notice'])):
 
   
 
