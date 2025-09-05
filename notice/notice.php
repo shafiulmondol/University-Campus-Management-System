@@ -332,7 +332,9 @@ $stmt->close();
                 SKST University
             </h1>
             <p class="page-subtitle">Official Notice Board</p>
-           
+            <a href="notice.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
         </div>
         
         <form method="GET" class="filters">
