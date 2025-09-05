@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 05, 2025 at 08:02 AM
+-- Generation Time: Sep 05, 2025 at 08:11 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -592,6 +592,7 @@ CREATE TABLE `student_result` (
   `semister` int(100) NOT NULL,
   `course` varchar(50) NOT NULL,
   `grade` varchar(20) DEFAULT NULL,
+  `marks` float NOT NULL,
   `cgpa` float DEFAULT NULL,
   `sgpa` float DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -600,9 +601,9 @@ CREATE TABLE `student_result` (
 -- Dumping data for table `student_result`
 --
 
-INSERT INTO `student_result` (`st_id`, `semister`, `course`, `grade`, `cgpa`, `sgpa`) VALUES
-(23303106, 1, 'csc 112', '4', 3.2, 3.98),
-(23303106, 2, 'csc 112', '3.7', 3.2, 3.98);
+INSERT INTO `student_result` (`st_id`, `semister`, `course`, `grade`, `marks`, `cgpa`, `sgpa`) VALUES
+(23303106, 1, 'csc 112', '4', 40, 3.2, 3.98),
+(23303106, 2, 'csc 112', '3.7', 70, 3.2, 3.98);
 
 -- --------------------------------------------------------
 
