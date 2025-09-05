@@ -478,6 +478,7 @@ $status_stats = $status_stmt->fetchAll(PDO::FETCH_ASSOC);
             <h1>Book Borrowings Management</h1>
             <p class="subtitle">Developer View - SKST University Library</p>
         </header>
+        <button style="margin-bottom: 10px;" class="btn btn-secondary" onclick="window.location.href='http://localhost:8080/University-Campus-Management-System/library/librarylogin.php'">⬅ Back</button>
         
         <!-- Statistics Section -->
         <div class="stats-container">
@@ -589,6 +590,19 @@ $status_stats = $status_stmt->fetchAll(PDO::FETCH_ASSOC);
                         </select>
                     </div>
                 </div>
+                
+                <!-- Fine Amount Field (Visible only when editing) -->
+                <?php if ($edit_borrowing): ?>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fine_amount">Fine Amount (৳)</label>
+                        <input type="number" id="fine_amount" name="fine_amount" step="0.01" min="0" 
+                            value="<?php echo $edit_borrowing ? number_format($edit_borrowing['fine_amount'], 2) : '0.00'; ?>" 
+                            readonly style="background-color: #f8f9fa;">
+                        <small>Calculated automatically based on return date and due date</small>
+                    </div>
+                </div>
+                <?php endif; ?>
                 
                 <div class="action-buttons">
                     <button type="submit" class="btn btn-success"><?php echo $edit_borrowing ? 'Update Record' : 'Add Borrowing'; ?></button>

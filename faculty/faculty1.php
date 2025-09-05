@@ -983,7 +983,7 @@ $mysqli->close();
                 </div>
                 
                 <button type="submit" class="login-btn">Login to Dashboard</button>
-                
+                <button class= "login-btn" onclick="location.href='../index.html'"> Sign Out</button>                
                 <?php if (!empty($error)): ?>
                     <div class="error-msg"><?php echo $error; ?></div>
                 <?php endif; ?>
@@ -995,12 +995,7 @@ $mysqli->close();
     <div class="navbar">
         <div class="logo">
             <img src="../picture/SKST.png" alt="Logo" style="width: 50px; height: 50px; border-radius: 50%;">
-            <h1>SKST University Faculty</h1>
-        </div>
-        
-        <div class="welcome">
-            <i class="fas fa-user"></i>
-            Welcome, <?php echo htmlspecialchars($_SESSION['faculty_name']); ?>
+            <h1 style="color: white;">SKST University Faculty</h1>
         </div>
         
         <div class="nav-buttons">

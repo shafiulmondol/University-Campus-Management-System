@@ -408,7 +408,7 @@ if (isset($_GET['view_ebook']) && $_GET['view_ebook']) {
         
         <!-- Trigger button -->
         <button id="toggleFormBtn" class="btn btn-success" style="margin-bottom: 10px;">+ Add Ebook</button>
-        <button class="btn btn-secondary" onclick="history.back()">⬅ Back</button>
+        <button class="btn btn-secondary" onclick="window.location.href='http://localhost:8080/University-Campus-Management-System/library/librarylogin.php'">⬅ Back</button>
 
         <!-- Hidden Ebook Form -->
         <div id="ebookForm" class="card" style="display: none;">

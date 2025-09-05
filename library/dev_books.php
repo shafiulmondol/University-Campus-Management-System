@@ -380,6 +380,7 @@ $stats = $stats_stmt->fetch(PDO::FETCH_ASSOC);
                 margin-bottom: 10px;
             }
         }
+        
     </style>
 </head>
 <body>
@@ -388,6 +389,8 @@ $stats = $stats_stmt->fetch(PDO::FETCH_ASSOC);
             <h1>Books Management System</h1>
             <p class="subtitle">Developer View - SKST University Library</p>
         </header>
+
+        
         
         <!-- Statistics Section -->
         <div class="stats-container">
@@ -423,7 +426,7 @@ $stats = $stats_stmt->fetch(PDO::FETCH_ASSOC);
         
         <!-- Trigger button -->
         <button id="toggleFormBtn" class="btn btn-success" style="margin-bottom: 10px;">+ Add Book</button>
-        <button class="btn btn-secondary" onclick="history.back()">⬅ Back</button>
+        <button class="btn btn-secondary" onclick="window.location.href='http://localhost:8080/University-Campus-Management-System/library/librarylogin.php'">⬅ Back</button>
 
         <?php if (isset($error)): ?>
             <div class="error-message">

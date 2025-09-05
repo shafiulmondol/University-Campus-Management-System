@@ -442,7 +442,9 @@ $type_stats = $type_stmt->fetchAll(PDO::FETCH_ASSOC);
             <h1>Library Member Management</h1>
             <p class="subtitle">Developer View - SKST University Library</p>
         </header>
-        
+            <button style="margin-bottom: 10px;" class="btn btn-secondary" onclick="window.location.href='../index.html'"><i class="fas fa-home"></i> Home</button>        
+            <button style="margin-bottom: 10px;" class="btn btn-secondary" onclick="window.location.href='http://localhost:8080/University-Campus-Management-System/library/librarylogin.php'">⬅ Back</button>
+
         <!-- Statistics Section -->
         <div class="stats-container">
             <div class="stat-card">
