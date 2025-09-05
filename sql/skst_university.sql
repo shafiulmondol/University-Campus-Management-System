@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 05, 2025 at 08:11 AM
+-- Generation Time: Sep 05, 2025 at 11:09 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -47,7 +47,7 @@ CREATE TABLE `admin_users` (
 
 INSERT INTO `admin_users` (`id`, `full_name`, `username`, `password`, `email`, `phone`, `key`, `profile_picture`, `registration_date`, `last_login`, `is_active`) VALUES
 (1, 'Admin User', 'admin', 'shafiul', '23303105@iubat.edu', '123-456-7890', 123, '', '2025-09-01 21:21:06', '2025-09-03 15:25:11.000000', 1),
-(1490, 'shafiul islam', 'Admission Officer', 'shafiul', '23303106@iubat.edu', '01884273156', 123, '', '2025-09-03 15:04:27', '2025-09-05 12:01:28.000000', 1);
+(1490, 'shafiul islam', 'Admission Officer', 'shafiul', '23303106@iubat.edu', '01884273156', 123, '', '2025-09-03 15:04:27', '2025-09-05 12:27:18.000000', 1);
 
 -- --------------------------------------------------------
 
@@ -169,8 +169,8 @@ CREATE TABLE `bank_officers` (
 --
 
 INSERT INTO `bank_officers` (`officer_id`, `name`, `email`, `password`, `phone`, `department`, `position`, `status`, `hire_date`, `last_login`, `created_at`, `updated_at`) VALUES
-(1, 'Md. Kawsar Miah', '23303105@iubat.edu', 'kawsar', '01710000001', 'Loans', 'Senior Officer', 'active', '2020-03-15', '2025-09-04 21:36:32', '2025-09-04 15:23:50', '2025-09-04 16:01:53'),
-(2, 'Md. Shafiul Islam', '23303106@iubat.edu', 'shafiul', '01710000002', 'Accounts', 'Manager', 'active', '2018-07-10', '2025-09-05 11:59:32', '2025-09-04 15:23:50', '2025-09-05 05:59:32'),
+(1, 'Md. Kawsar Miah', '23303105@iubat.edu', 'kawsar', '01710000001', 'Loans', 'Senior Officer', 'active', '2020-03-15', '2025-09-05 06:51:25', '2025-09-04 15:23:50', '2025-09-05 00:51:25'),
+(2, 'Md. Shafiul Islam', '23303106@iubat.edu', 'shafiul', '01710000002', 'Accounts', 'Manager', 'active', '2018-07-10', '2025-09-04 21:23:50', '2025-09-04 15:23:50', '2025-09-04 16:02:12'),
 (3, 'Toymoon Islam Estia', '23303116@iubat.edu', 'toymoon', '01710000003', 'Customer Service', 'Junior Officer', 'inactive', '2022-01-20', '2025-09-04 21:23:50', '2025-09-04 15:23:50', '2025-09-04 16:03:04');
 
 -- --------------------------------------------------------
@@ -405,6 +405,49 @@ INSERT INTO `faculty` (`faculty_id`, `name`, `email`, `password`, `department`, 
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `faculty_payments`
+--
+
+CREATE TABLE `faculty_payments` (
+  `payment_id` int(11) NOT NULL,
+  `faculty_id` int(11) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `payment_type` enum('salary','bonus','allowance','reimbursement','other') NOT NULL,
+  `payment_month` varchar(20) NOT NULL,
+  `payment_year` year(4) NOT NULL,
+  `description` text DEFAULT NULL,
+  `status` enum('pending','processed','failed') NOT NULL DEFAULT 'pending',
+  `bank_transaction_id` varchar(100) DEFAULT NULL,
+  `processed_by` int(11) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `processed_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `faculty_payments`
+--
+
+INSERT INTO `faculty_payments` (`payment_id`, `faculty_id`, `amount`, `payment_type`, `payment_month`, `payment_year`, `description`, `status`, `bank_transaction_id`, `processed_by`, `created_at`, `processed_at`) VALUES
+(1, 1, 50000.00, 'salary', 'September', '2025', 'Have a good Day', 'processed', 'BX 122030 YZ', NULL, '2025-09-04 23:46:13', NULL);
+
+--
+-- Triggers `faculty_payments`
+--
+DELIMITER $$
+CREATE TRIGGER `after_faculty_payments_insert` AFTER INSERT ON `faculty_payments` FOR EACH ROW BEGIN
+  INSERT INTO transaction_history 
+    (transaction_type, source_table, source_id, amount, transaction_date, description, related_user_type, related_user_id)
+  VALUES 
+    ('outgoing', 'faculty_payments', NEW.payment_id, NEW.amount, DATE(NEW.created_at),
+     CONCAT('Faculty Payment: ', NEW.payment_type, ' - ', NEW.amount, ' Taka'),
+     'faculty', NEW.faculty_id);
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `notice`
 --
 
@@ -424,95 +467,47 @@ CREATE TABLE `notice` (
 --
 
 INSERT INTO `notice` (`id`, `title`, `section`, `sub_section`, `content`, `author`, `created_at`, `viewed`) VALUES
-(23303106, 'off day', '', NULL, 'for my weekness today is off', 'shafiul', '2025-07-30 17:06:21', 0),
-(23303106, 'peragraph', 'Bcse', NULL, 'A paragraph is a series of sentences that are organized and coherent, and are all related to a single topic.', 'Md shafiul Islam', '2025-07-31 07:49:23', 0),
-(23303106, 'library notice check', 'Library', NULL, 'library notice section works successfully', 'Md Shafiul Islam', '2025-08-06 11:03:52', 0),
+(23303106, 'off day', '', NULL, 'for my weekness today is off', 'shafiul', '2025-07-30 17:06:21', 1),
+(23303106, 'peragraph', 'Bcse', NULL, 'A paragraph is a series of sentences that are organized and coherent, and are all related to a single topic.', 'Md shafiul Islam', '2025-07-31 07:49:23', 1),
+(23303106, 'library notice check', 'Library', NULL, 'library notice section works successfully', 'Md Shafiul Islam', '2025-08-06 11:03:52', 1),
 (0, '234444', 'Alumni', NULL, 'inseert alumni data notice', 'shafiul', '2025-08-06 16:56:33', 1),
 (0, '23444455', 'Alumni', NULL, 'inseert alumni data notice', 'shafiul', '2025-08-06 16:57:00', 1),
-(23303106, 'for stuf checking', 'stuf', NULL, 'this is correct successfully', 'shafiul', '2025-08-16 10:47:08', 0),
+(23303106, 'for stuf checking', 'stuf', NULL, 'this is correct successfully', 'shafiul', '2025-08-16 10:47:08', 1),
 (23303106, 'for stuf checking', 'stuf', NULL, 'this is correct successfully', 'shafiul', '2025-08-16 10:48:16', 1),
-(23303106, 'sdftgsdff', 'staf', NULL, 'sdfgsd 2nd', 'shafiul', '2025-08-16 11:01:44', 0),
+(23303106, 'sdftgsdff', 'staf', NULL, 'sdfgsd 2nd', 'shafiul', '2025-08-16 11:01:44', 1),
 (23303106, 'sdftgsdff', 'Staff', NULL, 'sdfgsd 2nd', 'shafiul', '2025-08-16 11:10:07', 1),
 (23303106, 'sdfgjkhjksd ', 'Staff', NULL, 'jkhkjhsjkdf ', 'shafiul ', '2025-08-26 12:57:53', 1),
 (23303106, 'sdfgsdf', 'Staff', NULL, 'sdfgsd', 'sdfg', '2025-08-26 14:40:26', 1),
-(23303106, 'sdfgsdf', 'Staf', NULL, 'sdfgsd', 'sdfg', '2025-08-26 14:40:44', 0),
-(23303106, 'off day', '', NULL, 'for my weekness today is off', 'shafiul', '2025-07-30 17:06:21', 0),
-(23303106, 'peragraph', 'Bcse', NULL, 'A paragraph is a series of sentences that are organized and coherent, and are all related to a single topic.', 'Md shafiul Islam', '2025-07-31 07:49:23', 0),
-(23303106, 'library notice check', 'Library', NULL, 'library notice section works successfully', 'Md Shafiul Islam', '2025-08-06 11:03:52', 0),
+(23303106, 'sdfgsdf', 'Staf', NULL, 'sdfgsd', 'sdfg', '2025-08-26 14:40:44', 1),
+(23303106, 'off day', '', NULL, 'for my weekness today is off', 'shafiul', '2025-07-30 17:06:21', 1),
+(23303106, 'peragraph', 'Bcse', NULL, 'A paragraph is a series of sentences that are organized and coherent, and are all related to a single topic.', 'Md shafiul Islam', '2025-07-31 07:49:23', 1),
+(23303106, 'library notice check', 'Library', NULL, 'library notice section works successfully', 'Md Shafiul Islam', '2025-08-06 11:03:52', 1),
 (0, '234444', 'Alumni', NULL, 'inseert alumni data notice', 'shafiul', '2025-08-06 16:56:33', 1),
 (0, '23444455', 'Alumni', NULL, 'inseert alumni data notice', 'shafiul', '2025-08-06 16:57:00', 1),
-(23303106, 'for stuf checking', 'stuf', NULL, 'this is correct successfully', 'shafiul', '2025-08-16 10:47:08', 0),
+(23303106, 'for stuf checking', 'stuf', NULL, 'this is correct successfully', 'shafiul', '2025-08-16 10:47:08', 1),
 (23303106, 'for stuf checking', 'stuf', NULL, 'this is correct successfully', 'shafiul', '2025-08-16 10:48:16', 1),
-(23303106, 'sdftgsdff', 'staf', NULL, 'sdfgsd 2nd', 'shafiul', '2025-08-16 11:01:44', 0),
+(23303106, 'sdftgsdff', 'staf', NULL, 'sdfgsd 2nd', 'shafiul', '2025-08-16 11:01:44', 1),
 (23303106, 'sdftgsdff', 'Staff', NULL, 'sdfgsd 2nd', 'shafiul', '2025-08-16 11:10:07', 1),
 (23303106, 'sdfgjkhjksd ', 'Staff', NULL, 'jkhkjhsjkdf ', 'shafiul ', '2025-08-26 12:57:53', 1),
 (23303106, 'sdfgsdf', 'Staff', NULL, 'sdfgsd', 'sdfg', '2025-08-26 14:40:26', 1),
-(23303106, 'sdfgsdf', 'Staf', NULL, 'sdfgsd', 'sdfg', '2025-08-26 14:40:44', 0),
+(23303106, 'sdfgsdf', 'Staf', NULL, 'sdfgsd', 'sdfg', '2025-08-26 14:40:44', 1),
 (23303106, 'test student notice', 'Student', NULL, 'correctly worked', 'shafiul', '2025-09-03 14:07:26', 1),
 (23303106, 'nothing', 'Student', NULL, 'dfgsdgdf', 'shafi', '2025-09-03 17:42:24', 1),
 (23303106, 'nothing', 'Student', NULL, 'dfgsdgdf', 'shafi', '2025-09-03 17:53:42', 1),
 (23303106, 'color check', 'Student', NULL, 'dfgsdgdf', 'shafi', '2025-09-03 17:59:16', 1),
 (23303106, 'color check', 'Student', NULL, 'dfgsdgdf', 'shafi', '2025-09-03 18:03:06', 1),
 (23303106, 'check', 'Admin', NULL, 'dfd', 'shafiul', '2025-09-04 04:39:01', 1),
-(23303106, 'check', 'Student', NULL, 'nothing', 'William Starlings ', '2025-09-04 07:11:06', 1),
-(1, 'check', 'Student', NULL, 'dfgdfdf dfd ', 'William Starlings ', '2025-09-04 07:24:10', 1),
-(1, 's', 'Student', NULL, 'dsfg', 'William Starlings ', '2025-09-04 07:44:48', 1),
-(111111111, 'check', 'Account', NULL, 'dfgdsf ', 'William Starlings ', '2025-09-04 07:47:35', 1),
-(111111111, 'check', 'Account', NULL, 'dfgdsf ', 'William Starlings ', '2025-09-04 07:55:43', 1),
-(222, '233', 'Student', NULL, 'dfdsfds', 'William Starlings ', '2025-09-04 08:08:06', 1),
-(2147483647, 'sdss', 'Student', NULL, 'sdfsdfsfs', 'William Starlings ', '2025-09-04 08:08:50', 1),
-(2147483647, 'sdss', 'Student', NULL, 'sdfsdfsfs', 'William Starlings ', '2025-09-04 08:09:54', 1),
-(11111111, 'hhjjjj', 'Student', NULL, 'hjghfggghfhj', 'William Starlings ', '2025-09-04 08:10:17', 1),
-(11111111, 'dfdfd', 'Library', NULL, 'sdfsdf dsfds ', 'shafiul islam', '2025-09-04 08:27:06', 0),
-(11111111, '33333', 'Student', NULL, 'dfdfdf fdsd', 'William Starlings ', '2025-09-04 08:37:47', 1),
-(333333, '333', 'Student', NULL, 'vffffff', 'William Starlings ', '2025-09-04 08:57:52', 1),
-(333333, '333', 'Student', NULL, 'vffffff', 'William Starlings ', '2025-09-04 08:59:07', 1),
-(2222, '222', 'Student', NULL, 'ddddd', 'William Starlings ', '2025-09-04 08:59:33', 1),
-(2222, '222', 'Student', NULL, 'ddddd', 'William Starlings ', '2025-09-04 09:01:22', 1),
-(2222, '222', 'Student', NULL, 'ddddd', 'William Starlings ', '2025-09-04 09:02:26', 1),
-(2222, '222', 'Student', NULL, 'ddddd', 'William Starlings ', '2025-09-04 09:03:05', 1),
-(2222, '222', 'Student', NULL, 'ddddd', 'William Starlings ', '2025-09-04 09:03:10', 1),
-(222, '2222', 'Student', NULL, 'ddddddd', 'William Starlings ', '2025-09-04 09:04:40', 1),
-(222, '2222', 'Student', NULL, 'ddddddd', 'William Starlings ', '2025-09-04 09:04:50', 1),
-(222, '2222', 'Student', NULL, 'ddddddd', 'William Starlings ', '2025-09-04 09:05:26', 1),
-(222, '2222', 'Student', NULL, 'ddddddd', 'William Starlings ', '2025-09-04 09:08:57', 1),
-(222, '2222', 'Student', NULL, 'ddddddd', 'William Starlings ', '2025-09-04 09:09:07', 1),
-(222, '2222', 'Student', NULL, 'ddddddd', 'William Starlings ', '2025-09-04 09:17:28', 1),
-(2222, '2222', 'Student', NULL, 'ffdddd', 'William Starlings ', '2025-09-04 09:18:02', 1),
-(1111111, '111111', 'Student', NULL, 'ddddddd', 'William Starlings ', '2025-09-04 10:32:12', 1),
-(1111111, '111111', 'Student', NULL, 'ddddddd', 'William Starlings ', '2025-09-04 10:33:27', 1),
-(111111, '11111', 'Student', NULL, 'ssssss', 'William Starlings ', '2025-09-04 10:43:12', 1),
-(0, '11111', 'Student', NULL, 'ssssss', 'William Starlings ', '2025-09-04 10:52:14', 1),
-(0, '343', 'Student', NULL, '3434', 'William Starlings ', '2025-09-04 10:52:36', 1),
-(222222, '22222222', 'Student', NULL, 'fffrrrrff', 'William Starlings ', '2025-09-04 11:17:52', 1),
-(222222, '22222222', 'Student', NULL, 'fffrrrrff', 'William Starlings ', '2025-09-04 11:17:52', 1),
-(222222, '22222222', 'Student', NULL, 'fffrrrrff', 'William Starlings ', '2025-09-04 11:17:57', 1),
-(222222, '22222222', 'Student', NULL, 'fffrrrrff', 'William Starlings ', '2025-09-04 11:17:57', 1),
-(2, 'e', 'Student', NULL, 'ed', 'William Starlings ', '2025-09-04 11:20:39', 1),
-(2, 'e', 'Student', NULL, 'ed', 'William Starlings ', '2025-09-04 11:21:41', 1),
-(2, 'e', 'Student', NULL, 'ed', 'William Starlings ', '2025-09-04 11:36:11', 1),
-(2, 'e', 'Student', NULL, 'ed', 'William Starlings ', '2025-09-04 11:43:25', 1),
-(2, 'e', 'Student', NULL, 'ed', 'William Starlings ', '2025-09-04 11:43:37', 1),
-(2, 'e', 'Student', NULL, 'ed', 'William Starlings ', '2025-09-04 11:43:44', 1),
-(2, 'e', 'Student', NULL, 'ed', 'William Starlings ', '2025-09-04 11:43:57', 1),
-(2, 'e', 'Student', NULL, 'ed', 'William Starlings ', '2025-09-04 11:44:05', 1),
-(2, 'e', 'Student', NULL, 'ed', 'William Starlings ', '2025-09-04 11:44:16', 1),
-(2, 'e', 'Student', NULL, 'ed', 'William Starlings ', '2025-09-04 12:47:56', 1),
+(11111111, 'dfdfd', 'Library', NULL, 'sdfsdf dsfds ', 'shafiul islam', '2025-09-04 08:27:06', 1),
 (23303106, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'Student', NULL, 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'ccccccccccccccccccccccccccccc', '2025-09-04 12:55:37', 1),
-(2, 'e', 'Student', NULL, 'ed', 'William Starlings ', '2025-09-04 12:59:28', 1),
 (222, 'hijibiji', 'Faculty', NULL, 'fgfdfdffd', 'ccccccccccccccccccccccccccccc', '2025-09-04 13:02:12', 1),
 (222, 'hijibiji', 'Faculty', NULL, 'fgfdfdffd', 'ccccccccccccccccccccccccccccc', '2025-09-04 13:04:47', 1),
 (23303106, '56666', 'Admin', NULL, 'jghhjj', 'ghj', '2025-09-04 16:13:27', 1),
-(88787878, '787778', 'Admin', NULL, 'hjhghg', 'hhj', '2025-09-04 16:13:56', 1),
 (0, '000000000000000000000000000000000000000', 'Bank', NULL, 'dsadffdsfdsfds', 'shafiul', '2025-09-04 18:55:17', 1),
 (0, '000000000000000000000000000000000000000', 'Bank', NULL, 'dsadffdsfdsfds', 'shafiul', '2025-09-04 19:00:53', 1),
-(1, 'b', 'Student', NULL, 'sesew', 'William Starlings', '2025-09-04 19:01:42', 1),
-(1, 'b', 'Student', NULL, 'sesew', 'William Starlings', '2025-09-04 19:05:19', 1),
 (1, 'dfgd', 'Student', NULL, 'fdgfd', 'shafiul', '2025-09-05 02:58:07', 1),
 (1, 'come', 'Student', NULL, 'fdgfd', 'shafiul', '2025-09-05 02:59:15', 1),
 (23303106, 'come', 'Student', NULL, 'fdgfd', 'shafiul', '2025-09-05 03:00:44', 1),
-(123, 'check department', 'Department', 'BCSE', 'nothing', 'admin', '2025-09-05 03:53:33', 1),
-(23303105, 'go', 'Student', '', 'nothing', 'admin', '2025-09-05 04:45:55', 1);
+(123, 'check department', 'Department', 'BCSE', 'nothing', 'admin', '2025-09-05 03:53:33', 1);
 
 -- --------------------------------------------------------
 
@@ -534,6 +529,49 @@ CREATE TABLE `scholarship_application` (
   `scholarship_percentage` decimal(5,2) NOT NULL,
   `application_date` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `staff_payments`
+--
+
+CREATE TABLE `staff_payments` (
+  `payment_id` int(11) NOT NULL,
+  `staff_id` int(11) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `payment_type` enum('salary','bonus','allowance','reimbursement','other') NOT NULL,
+  `payment_month` varchar(20) NOT NULL,
+  `payment_year` year(4) NOT NULL,
+  `description` text DEFAULT NULL,
+  `status` enum('pending','processed','failed') NOT NULL DEFAULT 'pending',
+  `bank_transaction_id` varchar(100) DEFAULT NULL,
+  `processed_by` int(11) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `processed_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `staff_payments`
+--
+
+INSERT INTO `staff_payments` (`payment_id`, `staff_id`, `amount`, `payment_type`, `payment_month`, `payment_year`, `description`, `status`, `bank_transaction_id`, `processed_by`, `created_at`, `processed_at`) VALUES
+(1, 1, 5000.00, 'salary', 'September', '2025', 'Have a good day.', 'pending', 'NO 12345 YT', NULL, '2025-09-05 00:00:51', NULL);
+
+--
+-- Triggers `staff_payments`
+--
+DELIMITER $$
+CREATE TRIGGER `after_staff_payments_insert` AFTER INSERT ON `staff_payments` FOR EACH ROW BEGIN
+  INSERT INTO transaction_history 
+    (transaction_type, source_table, source_id, amount, transaction_date, description, related_user_type, related_user_id)
+  VALUES 
+    ('outgoing', 'staff_payments', NEW.payment_id, NEW.amount, DATE(NEW.created_at),
+     CONCAT('Staff Payment: ', NEW.payment_type, ' - ', NEW.amount, ' Taka'),
+     'staff', NEW.staff_id);
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -649,6 +687,74 @@ CREATE TABLE `stuf` (
 
 INSERT INTO `stuf` (`id`, `sector`, `first_name`, `last_name`, `father_name`, `mother_name`, `date_of_birth`, `guardian_phone`, `stuff_phone`, `email`, `password`, `position`, `last_exam`, `board`, `other_board`, `year_of_passing`, `institution_name`, `result`, `subject_group`, `gender`, `blood_group`, `nationality`, `religion`, `present_address`, `permanent_address`, `department`, `photo_path`, `signature_path`, `submission_date`) VALUES
 (1, '', 'shafiul ', 'islam', 'Robert Doe', 'Mary Doe', '1990-05-15', '+8801712345678', '+8801812345678', '23303106@iubat.edu', 'shafiul', 'Menager', 'Bachelor of Science', 'Dhaka', NULL, 2012, 'University of Dhaka', 3.75, 'Science', 'Male', 'B+', 'Bangladeshi', 'Islam', '123 Main Road, Dhaka', '456 Village Street, Faridpur', 'Computer Science', '/uploads/photos/john_doe.jpg', '/uploads/signatures/john_doe_sig.png', '2025-07-31 10:04:12');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `transaction_history`
+--
+
+CREATE TABLE `transaction_history` (
+  `history_id` int(11) NOT NULL,
+  `transaction_type` enum('incoming','outgoing') NOT NULL,
+  `source_table` varchar(50) NOT NULL,
+  `source_id` int(11) NOT NULL,
+  `amount` decimal(10,2) NOT NULL COMMENT 'Amount in Taka',
+  `transaction_date` date NOT NULL,
+  `description` text DEFAULT NULL,
+  `related_user_type` enum('student','staff','faculty') DEFAULT NULL,
+  `related_user_id` int(11) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `transaction_history`
+--
+
+INSERT INTO `transaction_history` (`history_id`, `transaction_type`, `source_table`, `source_id`, `amount`, `transaction_date`, `description`, `related_user_type`, `related_user_id`, `created_at`) VALUES
+(1, 'incoming', 'university_bank_payments', 3, 5000.00, '2025-09-05', 'Student Payment: library - 5000.00 Taka', 'student', 23303106, '2025-09-05 01:14:11');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `university_bank_payments`
+--
+
+CREATE TABLE `university_bank_payments` (
+  `bank_payment_id` int(11) NOT NULL,
+  `student_id` int(11) NOT NULL,
+  `transaction_id` varchar(100) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `payment_type` enum('registration','tuition','exam','library','hostel','other') NOT NULL,
+  `semester` varchar(20) NOT NULL,
+  `academic_year` year(4) NOT NULL,
+  `status` enum('pending','verified','rejected') NOT NULL DEFAULT 'pending',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `university_bank_payments`
+--
+
+INSERT INTO `university_bank_payments` (`bank_payment_id`, `student_id`, `transaction_id`, `amount`, `payment_type`, `semester`, `academic_year`, `status`, `created_at`) VALUES
+(1, 23303106, 'TXNS00123456', 5000.00, 'registration', 'Fall 2025', '2025', 'verified', '2025-09-04 17:28:05'),
+(2, 23303137, 'TXNS00123458', 5000.00, 'registration', 'Fall 2025', '2025', 'verified', '2025-09-04 19:10:22'),
+(3, 23303106, '23303106', 5000.00, 'library', 'Fall 2025', '2025', 'verified', '2025-09-05 01:14:11');
+
+--
+-- Triggers `university_bank_payments`
+--
+DELIMITER $$
+CREATE TRIGGER `after_university_bank_payments_insert` AFTER INSERT ON `university_bank_payments` FOR EACH ROW BEGIN
+  INSERT INTO transaction_history 
+    (transaction_type, source_table, source_id, amount, transaction_date, description, related_user_type, related_user_id)
+  VALUES 
+    ('incoming', 'university_bank_payments', NEW.bank_payment_id, NEW.amount, DATE(NEW.created_at),
+     CONCAT('Student Payment: ', NEW.payment_type, ' - ', NEW.amount, ' Taka'),
+     'student', NEW.student_id);
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -846,11 +952,27 @@ ALTER TABLE `faculty`
   ADD UNIQUE KEY `email` (`email`);
 
 --
+-- Indexes for table `faculty_payments`
+--
+ALTER TABLE `faculty_payments`
+  ADD PRIMARY KEY (`payment_id`),
+  ADD KEY `processed_by` (`processed_by`),
+  ADD KEY `faculty_id` (`faculty_id`);
+
+--
 -- Indexes for table `scholarship_application`
 --
 ALTER TABLE `scholarship_application`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `application_id` (`application_id`);
+
+--
+-- Indexes for table `staff_payments`
+--
+ALTER TABLE `staff_payments`
+  ADD PRIMARY KEY (`payment_id`),
+  ADD KEY `staff_id` (`staff_id`),
+  ADD KEY `processed_by` (`processed_by`);
 
 --
 -- Indexes for table `student_registration`
@@ -872,6 +994,23 @@ ALTER TABLE `stuf`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `email` (`email`);
 ALTER TABLE `stuf` ADD FULLTEXT KEY `first_name` (`first_name`,`last_name`,`father_name`,`mother_name`,`email`,`institution_name`,`present_address`,`permanent_address`);
+
+--
+-- Indexes for table `transaction_history`
+--
+ALTER TABLE `transaction_history`
+  ADD PRIMARY KEY (`history_id`),
+  ADD KEY `transaction_date` (`transaction_date`),
+  ADD KEY `source_table_source_id` (`source_table`,`source_id`);
+
+--
+-- Indexes for table `university_bank_payments`
+--
+ALTER TABLE `university_bank_payments`
+  ADD PRIMARY KEY (`bank_payment_id`),
+  ADD KEY `student_id` (`student_id`),
+  ADD KEY `transaction_id` (`transaction_id`),
+  ADD KEY `status` (`status`);
 
 --
 -- Indexes for table `update_requests`
@@ -960,10 +1099,22 @@ ALTER TABLE `faculty`
   MODIFY `faculty_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7654329;
 
 --
+-- AUTO_INCREMENT for table `faculty_payments`
+--
+ALTER TABLE `faculty_payments`
+  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT for table `scholarship_application`
 --
 ALTER TABLE `scholarship_application`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `staff_payments`
+--
+ALTER TABLE `staff_payments`
+  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `student_registration`
@@ -976,6 +1127,18 @@ ALTER TABLE `student_registration`
 --
 ALTER TABLE `stuf`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `transaction_history`
+--
+ALTER TABLE `transaction_history`
+  MODIFY `history_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `university_bank_payments`
+--
+ALTER TABLE `university_bank_payments`
+  MODIFY `bank_payment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `update_requests`
@@ -1029,11 +1192,23 @@ ALTER TABLE `enrollments`
   ADD CONSTRAINT `fk_student` FOREIGN KEY (`student_id`) REFERENCES `student_registration` (`id`);
 
 --
+-- Constraints for table `staff_payments`
+--
+ALTER TABLE `staff_payments`
+  ADD CONSTRAINT `staff_payments_ibfk_1` FOREIGN KEY (`staff_id`) REFERENCES `stuf` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
 -- Constraints for table `student_result`
 --
 ALTER TABLE `student_result`
   ADD CONSTRAINT `student_result_ibfk_1` FOREIGN KEY (`st_id`) REFERENCES `student_registration` (`id`),
   ADD CONSTRAINT `student_result_ibfk_2` FOREIGN KEY (`course`) REFERENCES `course` (`course_code`);
+
+--
+-- Constraints for table `university_bank_payments`
+--
+ALTER TABLE `university_bank_payments`
+  ADD CONSTRAINT `university_bank_payments_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student_registration` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
