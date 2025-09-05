@@ -32,6 +32,7 @@ $books = $conn->query($query);
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../picture/SKST.png" type="image/png" />
 <title>E-Book Library Management System</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
@@ -50,13 +51,12 @@ $books = $conn->query($query);
     }
     
     .container {
-        max-width: 1200px;
         margin: 0 auto;
         padding: 20px;
     }
     
     header {
-        background: linear-gradient(to right, #800000, #a52a2a);
+        background: linear-gradient(135deg, #2b5876, #4e4376);
         color: white;
         padding: 1rem 2rem;
         border-radius: 10px;
@@ -99,7 +99,7 @@ $books = $conn->query($query);
     
     .search-container {
         display: flex;
-        justify-content: center;
+        justify-content: left;
         margin-bottom: 20px;
         gap: 10px;
     }
@@ -107,7 +107,7 @@ $books = $conn->query($query);
     .search-box {
         display: flex;
         width: 100%;
-        max-width: 600px;
+        
     }
     
     .search-box input {
@@ -204,7 +204,7 @@ $books = $conn->query($query);
     }
     
     .book-table th {
-        background-color: #800000;
+        background: maroon;
         color: white;
         cursor: pointer;
         font-weight: 600;
@@ -269,8 +269,6 @@ $books = $conn->query($query);
     
     footer {
         text-align: center;
-        margin-top: 40px;
-        padding: 20px;
         color: #666;
     }
     
@@ -338,8 +336,6 @@ $books = $conn->query($query);
             </div>
             <nav>
                 <a href="../index.html"><i class="fas fa-home"></i> Home</a>
-                <a href="../about.html"><i class="fas fa-info-circle"></i> About</a>
-                <a href="../working.html"><i class="fas fa-phone"></i> Contact</a>
             </nav>
         </div>
     </header>
@@ -384,7 +380,7 @@ $books = $conn->query($query);
                 <th onclick="sortTable('title')">Title <i class="fas fa-sort"></i></th>
                 <th onclick="sortTable('author')">Author <i class="fas fa-sort"></i></th>
                 <th onclick="sortTable('publish_year')">Year <i class="fas fa-sort"></i></th>
-                <th>Actions</th>
+                <th style="text-align: center;">Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -411,7 +407,7 @@ $books = $conn->query($query);
     <?php endif; ?>
 
     <footer>
-        <p>&copy; 2025 SKST University E-Library Management System. All rights reserved.</p>
+        <p style="padding: 0px; margin-top: -10px;">&copy; 2025 SKST University E-Library Management System. All rights reserved.</p>
     </footer>
 </div>
 

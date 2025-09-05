@@ -15,64 +15,76 @@ try {
 
 // Handle form actions
 $action = $_POST['action'] ?? '';
-$ebook_id = $_POST['ebook_id'] ?? '';
+$book_id = $_POST['book_id'] ?? '';
 
-// Add or Update ebook
+// Add or Update book
 if ($action === 'save') {
-    $book_name = $_POST['book_name'] ?? '';
     $title = $_POST['title'] ?? '';
     $author = $_POST['author'] ?? '';
-    $publish_year = $_POST['publish_year'] ?? '';
-    $link = $_POST['link'] ?? '';
+    $isbn = $_POST['isbn'] ?? '';
+    $publication_year = $_POST['publication_year'] ?? '';
+    $category = $_POST['category'] ?? '';
+    $total_copies = $_POST['total_copies'] ?? 1;
+    $shelf_location = $_POST['shelf_location'] ?? '';
     
-    if ($ebook_id) {
-        // Update existing ebook
-        $sql = "UPDATE ebook SET book_name=?, title=?, author=?, publish_year=?, link=? WHERE id=?";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$book_name, $title, $author, $publish_year, $link, $ebook_id]);
+    // Check for duplicate ISBN
+    $check_sql = "SELECT COUNT(*) FROM books WHERE isbn = ? AND book_id != ?";
+    $check_stmt = $pdo->prepare($check_sql);
+    $check_stmt->execute([$isbn, $book_id ?: 0]);
+    $isbn_exists = $check_stmt->fetchColumn();
+    
+    if ($isbn_exists) {
+        $error = "A book with this ISBN already exists in the system.";
     } else {
-        // Insert new ebook
-        $sql = "INSERT INTO ebook (book_name, title, author, publish_year, link) VALUES (?, ?, ?, ?, ?)";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$book_name, $title, $author, $publish_year, $link]);
+        if ($book_id) {
+            // Update existing book
+            $sql = "UPDATE books SET title=?, author=?, isbn=?, publication_year=?, category=?, total_copies=?, shelf_location=?, available_copies=available_copies + (? - total_copies) WHERE book_id=?";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$title, $author, $isbn, $publication_year, $category, $total_copies, $shelf_location, $total_copies, $book_id]);
+        } else {
+            // Insert new book
+            $sql = "INSERT INTO books (title, author, isbn, publication_year, category, total_copies, available_copies, shelf_location) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$title, $author, $isbn, $publication_year, $category, $total_copies, $total_copies, $shelf_location]);
+        }
     }
 }
 
-// Delete ebook
-if ($action === 'delete' && $ebook_id) {
-    $sql = "DELETE FROM ebook WHERE id=?";
+// Delete book
+if ($action === 'delete' && $book_id) {
+    $sql = "DELETE FROM books WHERE book_id=?";
     $stmt = $pdo->prepare($sql);
-    $stmt->execute([$ebook_id]);
+    $stmt->execute([$book_id]);
 }
 
 // Search and filter parameters
 $search = $_GET['search'] ?? '';
-$sort = $_GET['sort'] ?? 'id';
+$sort = $_GET['sort'] ?? 'book_id';
 $order = $_GET['order'] ?? 'ASC';
 
 // Build query with search and sort
-$sql = "SELECT * FROM ebook WHERE book_name LIKE :search OR title LIKE :search OR author LIKE :search ORDER BY $sort $order";
+$sql = "SELECT * FROM books WHERE title LIKE :search OR author LIKE :search OR isbn LIKE :search OR category LIKE :search ORDER BY $sort $order";
 $stmt = $pdo->prepare($sql);
 $stmt->execute(['search' => "%$search%"]);
-$ebooks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$books = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Get ebook data for editing
-$edit_ebook = null;
-if ($action === 'edit' && $ebook_id) {
-    $sql = "SELECT * FROM ebook WHERE id=?";
+// Get book data for editing
+$edit_book = null;
+if ($action === 'edit' && $book_id) {
+    $sql = "SELECT * FROM books WHERE book_id=?";
     $stmt = $pdo->prepare($sql);
-    $stmt->execute([$ebook_id]);
-    $edit_ebook = $stmt->fetch(PDO::FETCH_ASSOC);
+    $stmt->execute([$book_id]);
+    $edit_book = $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
-// Handle view ebook link
-$view_ebook = null;
-if (isset($_GET['view_ebook']) && $_GET['view_ebook']) {
-    $sql = "SELECT * FROM ebook WHERE id=?";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([$_GET['view_ebook']]);
-    $view_ebook = $stmt->fetch(PDO::FETCH_ASSOC);
-}
+// Calculate statistics
+$stats_sql = "SELECT 
+    COUNT(*) as total_books, 
+    SUM(total_copies) as total_copies, 
+    SUM(available_copies) as available_copies 
+    FROM books";
+$stats_stmt = $pdo->query($stats_sql);
+$stats = $stats_stmt->fetch(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -81,7 +93,7 @@ if (isset($_GET['view_ebook']) && $_GET['view_ebook']) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="../picture/SKST.png" type="image/png" />
-    <title>Ebook Management System - Developer View</title>
+    <title>Books Management System - Developer View</title>
     <style>
         * {
             box-sizing: border-box;
@@ -292,84 +304,55 @@ if (isset($_GET['view_ebook']) && $_GET['view_ebook']) {
             display: inline-block;
         }
         
-        .link-cell {
-            max-width: 200px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
         }
         
-        .link-cell a {
-            color: #3498db;
-            text-decoration: none;
-        }
-        
-        .link-cell a:hover {
-            text-decoration: underline;
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.8);
-        }
-        
-        .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 700px;
+        .stat-card {
+            background: white;
             border-radius: 8px;
-            position: relative;
-        }
-        
-        .close {
-            position: absolute;
-            top: 10px;
-            right: 20px;
-            color: #aaa;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        
-        .close:hover {
-            color: #000;
-        }
-        
-        .ebook-view {
             padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
         
-        .ebook-view h3 {
-            margin-bottom: 15px;
-            color: #2c3e50;
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #3498db;
+            margin: 10px 0;
         }
         
-        .ebook-view p {
-            margin-bottom: 10px;
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 1rem;
         }
         
-        .ebook-view a {
-            display: inline-block;
-            margin-top: 15px;
-            padding: 10px 20px;
-            background: #3498db;
-            color: white;
-            text-decoration: none;
+        .availability-high {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        
+        .availability-medium {
+            color: #f39c12;
+            font-weight: bold;
+        }
+        
+        .availability-low {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .error-message {
+            background-color: #ffe6e6;
+            color: #e74c3c;
+            padding: 10px;
             border-radius: 4px;
-        }
-        
-        .ebook-view a:hover {
-            background: #2980b9;
+            margin-bottom: 20px;
+            border-left: 4px solid #e74c3c;
         }
         
         @media (max-width: 768px) {
@@ -402,55 +385,105 @@ if (isset($_GET['view_ebook']) && $_GET['view_ebook']) {
 <body>
     <div class="container">
         <header>
-            <h1>Ebook Management System</h1>
-            <p class="subtitle">Developer View - SKST University</p>
+            <h1>Books Management System</h1>
+            <p class="subtitle">Developer View - SKST University Library</p>
         </header>
         
+        <!-- Statistics Section -->
+        <div class="stats-container">
+          <section id="Table">
+            <div class="stat-card">
+                <div class="stat-label">Total Books</div>
+                <div class="stat-value"><?php echo $stats['total_books']; ?></div>
+                <div class="stat-label">Unique Titles</div>
+            </div>
+            </section>
+            
+            <div class="stat-card">
+                <div class="stat-label">Total Copies</div>
+                <div class="stat-value"><?php echo $stats['total_copies']; ?></div>
+                <div class="stat-label">All Books</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Available Copies</div>
+                <div class="stat-value"><?php echo $stats['available_copies']; ?></div>
+                <div class="stat-label">Ready for Checkout</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Availability Rate</div>
+                <div class="stat-value">
+                    <?php 
+                    $rate = $stats['total_copies'] > 0 ? round(($stats['available_copies'] / $stats['total_copies']) * 100) : 0;
+                    echo $rate . '%';
+                    ?>
+                </div>
+                <div class="stat-label">of All Copies</div>
+            </div>
+        </div>
+        
         <!-- Trigger button -->
-        <button id="toggleFormBtn" class="btn btn-success" style="margin-bottom: 10px;">+ Add Ebook</button>
+        <button id="toggleFormBtn" class="btn btn-success" style="margin-bottom: 10px;">+ Add Book</button>
         <button class="btn btn-secondary" onclick="history.back()">⬅ Back</button>
 
-        <!-- Hidden Ebook Form -->
-        <div id="ebookForm" class="card" style="display: none;">
+        <?php if (isset($error)): ?>
+            <div class="error-message">
+                <?php echo $error; ?>
+            </div>
+        <?php endif; ?>
+
+        <!-- Hidden Book Form -->
+        <div id="bookForm" class="card" style="display: none;">
             <h2 class="card-title">
-                <?php echo $edit_ebook ? 'Edit Ebook Record' : 'Add New Ebook'; ?>
+                <?php echo $edit_book ? 'Edit Book Record' : 'Add New Book'; ?>
             </h2>
             <form method="POST">
                 <input type="hidden" name="action" value="save">
-                <input type="hidden" name="ebook_id" value="<?php echo $edit_ebook ? $edit_ebook['id'] : ''; ?>">
+                <input type="hidden" name="book_id" value="<?php echo $edit_book ? $edit_book['book_id'] : ''; ?>">
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="book_name">Book Name *</label>
-                        <input type="text" id="book_name" name="book_name" value="<?php echo $edit_ebook ? htmlspecialchars($edit_ebook['book_name']) : ''; ?>" required>
-                    </div>
-                    
-                    <div class="form-group">
                         <label for="title">Title *</label>
-                        <input type="text" id="title" name="title" value="<?php echo $edit_ebook ? htmlspecialchars($edit_ebook['title']) : ''; ?>" required>
+                        <input type="text" id="title" name="title" value="<?php echo $edit_book ? htmlspecialchars($edit_book['title']) : ''; ?>" required>
                     </div>
                     
                     <div class="form-group">
                         <label for="author">Author *</label>
-                        <input type="text" id="author" name="author" value="<?php echo $edit_ebook ? htmlspecialchars($edit_ebook['author']) : ''; ?>" required>
+                        <input type="text" id="author" name="author" value="<?php echo $edit_book ? htmlspecialchars($edit_book['author']) : ''; ?>" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="isbn">ISBN *</label>
+                        <input type="text" id="isbn" name="isbn" value="<?php echo $edit_book ? htmlspecialchars($edit_book['isbn']) : ''; ?>" required>
                     </div>
                 </div>
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="publish_year">Publish Year *</label>
-                        <input type="number" id="publish_year" name="publish_year" min="1000" max="<?php echo date('Y'); ?>" value="<?php echo $edit_ebook ? $edit_ebook['publish_year'] : ''; ?>" required>
+                        <label for="publication_year">Publication Year *</label>
+                        <input type="number" id="publication_year" name="publication_year" min="1000" max="<?php echo date('Y'); ?>" value="<?php echo $edit_book ? $edit_book['publication_year'] : ''; ?>" required>
                     </div>
                     
-                    <div class="form-group form-group-full">
-                        <label for="link">Link *</label>
-                        <input type="url" id="link" name="link" value="<?php echo $edit_ebook ? htmlspecialchars($edit_ebook['link']) : ''; ?>" required>
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <input type="text" id="category" name="category" value="<?php echo $edit_book ? htmlspecialchars($edit_book['category']) : ''; ?>">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="total_copies">Total Copies *</label>
+                        <input type="number" id="total_copies" name="total_copies" min="1" value="<?php echo $edit_book ? $edit_book['total_copies'] : 1; ?>" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="shelf_location">Shelf Location</label>
+                        <input type="text" id="shelf_location" name="shelf_location" value="<?php echo $edit_book ? htmlspecialchars($edit_book['shelf_location']) : ''; ?>">
                     </div>
                 </div>
                 
                 <div class="action-buttons">
-                    <button type="submit" class="btn btn-success"><?php echo $edit_ebook ? 'Update Record' : 'Add Ebook'; ?></button>
-                    <?php if ($edit_ebook): ?>
+                    <button type="submit" class="btn btn-success"><?php echo $edit_book ? 'Update Record' : 'Add Book'; ?></button>
+                    <?php if ($edit_book): ?>
                         <a href="?" class="btn btn-secondary">Cancel</a>
                     <?php endif; ?>
                 </div>
@@ -458,13 +491,13 @@ if (isset($_GET['view_ebook']) && $_GET['view_ebook']) {
         </div>
         
         <div class="card">
-            <h2 class="card-title">Ebook Records</h2>
+            <h2 class="card-title">Book Records</h2>
             
             <div class="search-sort">
                 <div class="search-box">
                     <form method="GET">
-                        <label for="search">Search Ebooks</label>
-                        <input type="text" id="search" name="search" placeholder="Search by book name, title, or author..." value="<?php echo htmlspecialchars($search); ?>">
+                        <label for="search">Search Books</label>
+                        <input type="text" id="search" name="search" placeholder="Search by title, author, ISBN, or category..." value="<?php echo htmlspecialchars($search); ?>">
                         <button type="submit" style="display:none;">Search</button>
                     </form>
                 </div>
@@ -472,9 +505,10 @@ if (isset($_GET['view_ebook']) && $_GET['view_ebook']) {
                 <div class="sort-options">
                     <label for="sort">Sort by:</label>
                     <select id="sort" onchange="window.location.href='?search=<?php echo urlencode($search); ?>&sort='+this.value+'&order=<?php echo $order === 'ASC' ? 'DESC' : 'ASC'; ?>'">
-                        <option value="book_name" <?php echo $sort === 'book_name' ? 'selected' : ''; ?>>Book Name</option>
+                        <option value="title" <?php echo $sort === 'title' ? 'selected' : ''; ?>>Title</option>
                         <option value="author" <?php echo $sort === 'author' ? 'selected' : ''; ?>>Author</option>
-                        <option value="publish_year" <?php echo $sort === 'publish_year' ? 'selected' : ''; ?>>Publish Year</option>
+                        <option value="publication_year" <?php echo $sort === 'publication_year' ? 'selected' : ''; ?>>Publication Year</option>
+                        <option value="category" <?php echo $sort === 'category' ? 'selected' : ''; ?>>Category</option>
                     </select>
 
                     <button class="btn btn-primary" onclick="window.location.href='?search=<?php echo urlencode($search); ?>&sort=<?php echo $sort; ?>&order=<?php echo $order === 'ASC' ? 'DESC' : 'ASC'; ?>'">
@@ -487,46 +521,54 @@ if (isset($_GET['view_ebook']) && $_GET['view_ebook']) {
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Book Name</th>
                         <th>Title</th>
                         <th>Author</th>
+                        <th>ISBN</th>
                         <th>Year</th>
-                        <th style="text-align:center">Link</th>
+                        <th>Category</th>
+                        <th>Total</th>
+                        <th>Available</th>
+                        <th>Location</th>
                         <th style="text-align:center">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if (count($ebooks) > 0): ?>
-                        <?php foreach ($ebooks as $ebook): ?>
+                    <?php if (count($books) > 0): ?>
+                        <?php foreach ($books as $book): 
+                            $availability_class = 'availability-high';
+                            if ($book['available_copies'] == 0) {
+                                $availability_class = 'availability-low';
+                            } elseif ($book['available_copies'] < $book['total_copies'] / 2) {
+                                $availability_class = 'availability-medium';
+                            }
+                        ?>
                             <tr>
-                                <td><?php echo $ebook['id']; ?></td>
-                                <td><?php echo htmlspecialchars($ebook['book_name']); ?></td>
-                                <td><?php echo htmlspecialchars($ebook['title']); ?></td>
-                                <td><?php echo htmlspecialchars($ebook['author']); ?></td>
-                                <td><?php echo $ebook['publish_year']; ?></td>
-                                <td class="link-cell">
-                                    <a href="<?php echo htmlspecialchars($ebook['link']); ?>" target="_blank" title="<?php echo htmlspecialchars($ebook['link']); ?>">
-                                        View eBook
-                                    </a>
-                                </td>
+                                <td><?php echo $book['book_id']; ?></td>
+                                <td><?php echo htmlspecialchars($book['title']); ?></td>
+                                <td><?php echo htmlspecialchars($book['author']); ?></td>
+                                <td><?php echo htmlspecialchars($book['isbn']); ?></td>
+                                <td><?php echo $book['publication_year']; ?></td>
+                                <td><?php echo htmlspecialchars($book['category']); ?></td>
+                                <td><?php echo $book['total_copies']; ?></td>
+                                <td class="<?php echo $availability_class; ?>"><?php echo $book['available_copies']; ?></td>
+                                <td><?php echo htmlspecialchars($book['shelf_location']); ?></td>
                                 <td class="actions-cell">
                                     <form method="POST">
-                                        <input type="hidden" name="ebook_id" value="<?php echo $ebook['id']; ?>">
+                                        <input type="hidden" name="book_id" value="<?php echo $book['book_id']; ?>">
                                         <input type="hidden" name="action" value="edit">
                                         <button type="submit" class="btn btn-primary">Edit</button>
                                     </form>
-                                    <form method="POST" onsubmit="return confirm('Are you sure you want to delete this ebook?');">
-                                        <input type="hidden" name="ebook_id" value="<?php echo $ebook['id']; ?>">
+                                    <form method="POST" onsubmit="return confirm('Are you sure you want to delete this book?');">
+                                        <input type="hidden" name="book_id" value="<?php echo $book['book_id']; ?>">
                                         <input type="hidden" name="action" value="delete">
                                         <button type="submit" class="btn btn-danger">Delete</button>
                                     </form>
-                                    <button class="btn btn-info" onclick="viewEbook(<?php echo $ebook['id']; ?>)">View</button>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="7" style="text-align: center;">No ebook records found.</td>
+                            <td colspan="10" style="text-align: center;">No book records found.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
@@ -534,18 +576,10 @@ if (isset($_GET['view_ebook']) && $_GET['view_ebook']) {
         </div>
     </div>
 
-    <!-- Ebook View Modal -->
-    <div id="ebookModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <div id="ebookDetails" class="ebook-view"></div>
-        </div>
-    </div>
-
     <script>
         // Toggle form functionality
         document.getElementById("toggleFormBtn").addEventListener("click", function() {
-            var form = document.getElementById("ebookForm");
+            var form = document.getElementById("bookForm");
             if (form.style.display === "none") {
                 form.style.display = "block";
             } else {
@@ -561,49 +595,12 @@ if (isset($_GET['view_ebook']) && $_GET['view_ebook']) {
             }.bind(this), 800);
         });
 
-        // View ebook details
-        function viewEbook(ebookId) {
-            fetch('?view_ebook=' + ebookId)
-                .then(response => response.text())
-                .then(data => {
-                    // This would normally be done with AJAX, but for simplicity we'll redirect
-                    window.location.href = '?view_ebook=' + ebookId;
-                })
-                .catch(error => console.error('Error:', error));
-        }
-
-        // Show modal if view_ebook parameter is set
-        <?php if ($view_ebook): ?>
+        // Auto-show form if editing
+        <?php if ($edit_book): ?>
         document.addEventListener('DOMContentLoaded', function() {
-            var modal = document.getElementById('ebookModal');
-            var detailsDiv = document.getElementById('ebookDetails');
-            
-            detailsDiv.innerHTML = `
-                <h3><?php echo htmlspecialchars($view_ebook['book_name']); ?></h3>
-                <p><strong>Title:</strong> <?php echo htmlspecialchars($view_ebook['title']); ?></p>
-                <p><strong>Author:</strong> <?php echo htmlspecialchars($view_ebook['author']); ?></p>
-                <p><strong>Publish Year:</strong> <?php echo $view_ebook['publish_year']; ?></p>
-                <p><strong>Link:</strong> <a href="<?php echo htmlspecialchars($view_ebook['link']); ?>" target="_blank"><?php echo htmlspecialchars($view_ebook['link']); ?></a></p>
-                <a href="<?php echo htmlspecialchars($view_ebook['link']); ?>" target="_blank" class="btn btn-primary">Read eBook</a>
-            `;
-            
-            modal.style.display = 'block';
+            document.getElementById('bookForm').style.display = 'block';
         });
         <?php endif; ?>
-
-        function closeModal() {
-            document.getElementById('ebookModal').style.display = 'none';
-            // Remove view_ebook parameter from URL
-            window.history.replaceState({}, document.title, window.location.pathname);
-        }
-
-        // Close modal when clicking outside the content
-        window.onclick = function(event) {
-            var modal = document.getElementById('ebookModal');
-            if (event.target == modal) {
-                closeModal();
-            }
-        }
     </script>
 </body>
 </html>
