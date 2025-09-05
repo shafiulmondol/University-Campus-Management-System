@@ -904,6 +904,11 @@ $mysqli->close();
                     </a>
                 </li>
                 <li>
+                    <a href="attendance.php">
+                        <i class="fas fa-user-check"></i> Result
+                    </a>
+                </li>
+                <li>
                     <a href="materials.php">
                         <i class="fas fa-file-alt"></i> Materials
                     </a>
