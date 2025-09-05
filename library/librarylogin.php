@@ -790,12 +790,12 @@ $mysqli->close();
                     </a>
                 </li>
                 <li>
-                    <a href="../working.html">
+                    <a href="dev_library_management.php">
                         <i class="fas fa-users"></i> Member Management
                     </a>
                 </li>
                 <li>
-                    <a href="../working.html">
+                    <a href="dev_books_borrowing.php">
                         <i class="fas fa-exchange-alt"></i> Issue/Return
                     </a>
                 </li>
