@@ -252,6 +252,13 @@ if ($is_logged_in) {
     $stmt->close();
 }
 
+$pending_count = 0;
+$res = mysqli_query($mysqli, "SELECT COUNT(*) AS cnt FROM update_requests WHERE action = 1");
+if ($res) {
+    $pending_count = (int) mysqli_fetch_assoc($res)['cnt'];
+}
+
+
 $mysqli->close();
 ?>
 
@@ -1191,9 +1198,8 @@ $mysqli->close();
             <button onclick="location.href='../index.html'">
                 <i class="fas fa-home"></i> Home
             </button>
-            <button onclick="location.href='../working.html'">
-                <i class="fas fa-bell"></i> Notifications
-            </button>
+           
+               
         </div>
     </div>
     
@@ -1211,7 +1217,7 @@ $mysqli->close();
                     </a>
                 </li>
                 <li>
-                    <a href="../student/dev_student.php">
+                    <a href="../admin/student_dev.php">
                         <i class="fas fa-user"></i> Students
                     </a>
                 </li>
@@ -1221,12 +1227,25 @@ $mysqli->close();
                     </a>
                 </li>
                 <li>
-                    <a href="#">
-                        <i class="fas fa-chart-bar"></i> Reports
-                    </a>
-                </li>
+    <a href="update_request.php">
+        <i class="fas fa-chart-bar"></i> Update Request
+        <?php if ($pending_count > 0): ?>
+            <span style="
+                background:#dc3545;
+                color:#fff;
+                padding:2px 8px;
+                border-radius:12px;
+                font-size:12px;
+                margin-left:6px;
+                font-weight:bold;">
+                <?php echo $pending_count; ?>
+            </span>
+        <?php endif; ?>
+    </a>
+</li>
+
                 <li>
-                    <a href="#">
+                    <a href="exam_routine.php">
                         <i class="fas fa-calendar-alt"></i> Schedule
                     </a>
                 </li>
