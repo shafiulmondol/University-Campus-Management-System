@@ -19,11 +19,11 @@ if ($mysqli->connect_error) {
     die("Connection failed: " . $mysqli->connect_error);
 }
 
-// Get courses taught by this faculty
+// Get courses taught by this faculty - FIXED QUERY
 $sql = "SELECT c.course_id, c.course_code, c.course_name 
         FROM course c 
-        INNER JOIN enrollments e ON c.course_id = e.course_id 
-        WHERE e.faculty_id = ? 
+        INNER JOIN course_instructor ci ON c.course_id = ci.course_id 
+        WHERE ci.faculty_id = ? 
         GROUP BY c.course_id
         ORDER BY c.course_code";
 $stmt = $mysqli->prepare($sql);
@@ -39,11 +39,11 @@ while ($row = $result->fetch_assoc()) {
 if (isset($_GET['course_id']) && !empty($_GET['course_id'])) {
     $course_id = $_GET['course_id'];
     
-    // Verify the course belongs to this faculty
+    // Verify the course belongs to this faculty - FIXED QUERY
     $sql = "SELECT course_id, course_code, course_name 
             FROM course 
             WHERE course_id = ? AND course_id IN (
-                SELECT course_id FROM enrollments WHERE faculty_id = ?
+                SELECT course_id FROM course_instructor WHERE faculty_id = ?
             )";
     $stmt = $mysqli->prepare($sql);
     $stmt->bind_param("ii", $course_id, $faculty_id);
@@ -52,7 +52,7 @@ if (isset($_GET['course_id']) && !empty($_GET['course_id'])) {
     $selected_course = $result->fetch_assoc();
     
     if ($selected_course) {
-        // Get students enrolled in this course
+        // Get students enrolled in this course - FIXED QUERY
         $sql = "SELECT s.id, s.first_name, s.last_name, s.email, s.student_phone 
                 FROM student_registration s 
                 INNER JOIN enrollments e ON s.id = e.student_id 
@@ -81,6 +81,7 @@ $mysqli->close();
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* ... (keep all existing CSS styles) ... */
         :root {
             --primary: #4361ee;
             --secondary: #3f37c9;

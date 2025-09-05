@@ -3,7 +3,10 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-session_start();
+// Only start session if not already started
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 
 include 'config.php';
 
@@ -83,7 +86,6 @@ $mysqli->close();
     <title>Faculty Schedule - SKST University</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Your CSS styles here (same as before) */
         * {
             margin: 0;
             padding: 0;
@@ -194,6 +196,8 @@ $mysqli->close();
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
         
         .page-title {
@@ -264,6 +268,7 @@ $mysqli->close();
         .no-classes {
             color: #888;
             font-style: italic;
+            padding: 10px;
         }
         
         .print-btn {
@@ -285,6 +290,50 @@ $mysqli->close();
             padding: 15px;
             border-radius: 5px;
             margin: 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .success-message {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+            }
+            
+            .main-layout {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                order: 2;
+            }
+            
+            .content-area {
+                order: 1;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .schedule-grid {
+                grid-template-columns: 1fr;
+            }
         }
         
         @media print {
@@ -300,6 +349,15 @@ $mysqli->close();
             .schedule-container {
                 box-shadow: none;
                 padding: 0;
+            }
+            
+            .schedule-grid {
+                display: block;
+            }
+            
+            .schedule-day {
+                page-break-inside: avoid;
+                margin-bottom: 20px;
             }
         }
     </style>
@@ -388,5 +446,12 @@ $mysqli->close();
             </div>
         </div>
     </div>
+    
+    <script>
+        // Add any JavaScript functionality you might need
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Schedule page loaded successfully');
+        });
+    </script>
 </body>
 </html>
