@@ -849,12 +849,6 @@ $mysqli->close();
                 <?php if (!empty($error)): ?>
                     <div class="error-msg"><?php echo $error; ?></div>
                 <?php endif; ?>
-                
-                <div class="demo-credentials">
-                    <p><strong>Demo Credentials:</strong></p>
-                    <p>Email: 23303105@iubat.edu</p>
-                    <p>Password: kawsar</p>
-                </div>
             </form>
         </div>
     </div>

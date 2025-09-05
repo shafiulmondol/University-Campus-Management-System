@@ -844,18 +844,18 @@ $mysqli->close();
                     </a>
                 </li>
                 <li>
-                    <a href="../../working.html">
+                    <a href="dev_faculty_payments.php">
                         <i class="fas fa-chalkboard-teacher"></i> Faculty Accounts
                     </a>
                 </li>
                 <li>
-                    <a href="../../working.html">
+                    <a href="dev_stuff_account.php">
                         <i class="fas fa-user-tie"></i> Employee Accounts
                     </a>
                 </li>
                 <li>
-                    <a href="../../working.html">
-                        <i class="fas fa-cog"></i> Settings
+                    <a href="dev_bank_account.php">
+                        <i class="fas fa-bank"></i> Bank Management
                     </a>
                 </li>
                 <li>

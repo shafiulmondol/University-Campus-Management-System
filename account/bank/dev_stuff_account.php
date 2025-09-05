@@ -18,48 +18,49 @@ try {
 
 // Handle form actions
 $action = $_POST['action'] ?? '';
-$bank_payment_id = $_POST['bank_payment_id'] ?? '';
-$student_id = $_POST['student_id'] ?? '';
+$payment_id = $_POST['payment_id'] ?? '';
+$staff_id = $_POST['staff_id'] ?? '';
 
 // Add or Update payment
 if ($action === 'save') {
-    $transaction_id = $_POST['transaction_id'] ?? '';
     $amount = $_POST['amount'] ?? '';
     $payment_type = $_POST['payment_type'] ?? '';
-    $semester = $_POST['semester'] ?? '';
-    $academic_year = $_POST['academic_year'] ?? '';
+    $payment_month = $_POST['payment_month'] ?? '';
+    $payment_year = $_POST['payment_year'] ?? '';
+    $description = $_POST['description'] ?? '';
     $status = $_POST['status'] ?? '';
+    $bank_transaction_id = $_POST['bank_transaction_id'] ?? '';
     
-    if ($bank_payment_id) {
+    if ($payment_id) {
         // Update existing payment
-        $sql = "UPDATE university_bank_payments SET student_id=?, transaction_id=?, amount=?, payment_type=?, semester=?, academic_year=?, status=? WHERE bank_payment_id=?";
+        $sql = "UPDATE staff_payments SET staff_id=?, amount=?, payment_type=?, payment_month=?, payment_year=?, description=?, status=?, bank_transaction_id=? WHERE payment_id=?";
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$student_id, $transaction_id, $amount, $payment_type, $semester, $academic_year, $status, $bank_payment_id]);
+        $stmt->execute([$staff_id, $amount, $payment_type, $payment_month, $payment_year, $description, $status, $bank_transaction_id, $payment_id]);
     } else {
         // Insert new payment
-        $sql = "INSERT INTO university_bank_payments (student_id, transaction_id, amount, payment_type, semester, academic_year, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO staff_payments (staff_id, amount, payment_type, payment_month, payment_year, description, status, bank_transaction_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$student_id, $transaction_id, $amount, $payment_type, $semester, $academic_year, $status]);
+        $stmt->execute([$staff_id, $amount, $payment_type, $payment_month, $payment_year, $description, $status, $bank_transaction_id]);
     }
 }
 
 // Delete payment
-if ($action === 'delete' && $bank_payment_id) {
-    $sql = "DELETE FROM university_bank_payments WHERE bank_payment_id=?";
+if ($action === 'delete' && $payment_id) {
+    $sql = "DELETE FROM staff_payments WHERE payment_id=?";
     $stmt = $pdo->prepare($sql);
-    $stmt->execute([$bank_payment_id]);
+    $stmt->execute([$payment_id]);
 }
 
 // Search and filter parameters
 $search = $_GET['search'] ?? '';
-$sort = $_GET['sort'] ?? 'bank_payment_id';
+$sort = $_GET['sort'] ?? 'payment_id';
 $order = $_GET['order'] ?? 'DESC';
 
 // Build query with search and sort
-$sql = "SELECT ubp.*, sr.first_name, sr.last_name 
-        FROM university_bank_payments ubp 
-        JOIN student_registration sr ON ubp.student_id = sr.id 
-        WHERE ubp.transaction_id LIKE :search OR sr.first_name LIKE :search OR sr.last_name LIKE :search 
+$sql = "SELECT sp.*, s.first_name, s.last_name 
+        FROM staff_payments sp 
+        JOIN stuf s ON sp.staff_id = s.id 
+        WHERE sp.payment_id LIKE :search OR s.first_name LIKE :search OR s.last_name LIKE :search OR sp.bank_transaction_id LIKE :search 
         ORDER BY $sort $order";
 $stmt = $pdo->prepare($sql);
 $stmt->execute(['search' => "%$search%"]);
@@ -67,17 +68,17 @@ $payments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Get payment data for editing
 $edit_payment = null;
-if ($action === 'edit' && $bank_payment_id) {
-    $sql = "SELECT * FROM university_bank_payments WHERE bank_payment_id=?";
+if ($action === 'edit' && $payment_id) {
+    $sql = "SELECT * FROM staff_payments WHERE payment_id=?";
     $stmt = $pdo->prepare($sql);
-    $stmt->execute([$bank_payment_id]);
+    $stmt->execute([$payment_id]);
     $edit_payment = $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
-// Get student data for dropdown
-$students_sql = "SELECT id, first_name, last_name FROM student_registration ORDER BY first_name, last_name";
-$students_stmt = $pdo->query($students_sql);
-$students = $students_stmt->fetchAll(PDO::FETCH_ASSOC);
+// Get staff data for dropdown
+$staff_sql = "SELECT id, first_name, last_name FROM stuf ORDER BY first_name, last_name";
+$staff_stmt = $pdo->query($staff_sql);
+$staff_members = $staff_stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -85,7 +86,7 @@ $students = $students_stmt->fetchAll(PDO::FETCH_ASSOC);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bank Payments Management - Developer View</title>
+    <title>Staff Payments Management - SKST University</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -103,7 +104,7 @@ $students = $students_stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
         header {
-            background: linear-gradient(135deg, #1a237e, #3949ab);
+            background: linear-gradient(135deg, #2b5876, #4e4376);
             color: white;
             padding: 20px 0;
             text-align: center;
@@ -234,7 +235,7 @@ $students = $students_stmt->fetchAll(PDO::FETCH_ASSOC);
         }
         
         label {
-            color: #1a237e;
+            color: #2b5876;
             font-weight: bold;
             margin-bottom: 5px;
             display: block;
@@ -254,7 +255,7 @@ $students = $students_stmt->fetchAll(PDO::FETCH_ASSOC);
         
         th {
             font-weight: 600;
-            color: #1a237e;
+            color: #2b5876;
             cursor: pointer;
         }
         
@@ -286,14 +287,46 @@ $students = $students_stmt->fetchAll(PDO::FETCH_ASSOC);
             color: #856404;
         }
         
-        .status-verified {
+        .status-processed {
             background-color: #d4edda;
             color: #155724;
         }
         
-        .status-rejected {
+        .status-failed {
             background-color: #f8d7da;
             color: #721c24;
+        }
+        
+        .payment-type-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .type-salary {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .type-bonus {
+            background-color: #fff3e0;
+            color: #ef6c00;
+        }
+        
+        .type-allowance {
+            background-color: #e3f2fd;
+            color: #1565c0;
+        }
+        
+        .type-reimbursement {
+            background-color: #f3e5f5;
+            color: #7b1fa2;
+        }
+        
+        .type-other {
+            background-color: #f5f5f5;
+            color: #424242;
         }
         
         @media (max-width: 768px) {
@@ -330,27 +363,25 @@ $students = $students_stmt->fetchAll(PDO::FETCH_ASSOC);
 <body>
     <div class="container">
         <header>
-            <h1>University Bank Payments Management</h1>
-            <p class="subtitle">Developer View - SKST University</p>
+            <h1>Staff Payments Management</h1>
+            <p class="subtitle">SKST University - Administrator View</p>
         </header>
 
+        <!-- Back Button -->
+        <button class="btn btn-secondary" type="button" style="margin-bottom: 10px;" onclick="goBack()">
+            <i class="fas fa-arrow-left"></i> Back
+        </button>
 
-                    <!-- Back Button -->
-                  <button class="btn btn-secondary" type="button" style="margin-bottom: 10px;" onclick="goBack()">
-                      Back
-                  </button>
+        <!-- Home Button as a link styled like button -->
+        <a href="../index.html" class="btn btn-secondary" style="margin-bottom: 10px;">
+            <i class="fas fa-home"></i> Home
+        </a>
 
-                  <script>
-                  function goBack() {
-                      window.history.back();
-                  }
-                  </script>
-
-                  <!-- Home Button as a link styled like button -->
-                  <a href="../index.html" class="btn btn-secondary" style="margin-bottom: 10px;">
-                      <i class="fas fa-home"></i> Home
-                  </a>
-
+        <script>
+        function goBack() {
+            window.history.back();
+        }
+        </script>
 
         <!-- Payment Form -->
         <div class="card">
@@ -359,76 +390,95 @@ $students = $students_stmt->fetchAll(PDO::FETCH_ASSOC);
             </h2>
             <form method="POST">
                 <input type="hidden" name="action" value="save">
-                <input type="hidden" name="bank_payment_id" value="<?php echo $edit_payment ? $edit_payment['bank_payment_id'] : ''; ?>">
+                <input type="hidden" name="payment_id" value="<?php echo $edit_payment ? $edit_payment['payment_id'] : ''; ?>">
                 
                 <div class="form-row">
-                    <div class="form-group">
-                      <label for="student_id">Student ID *</label>
-                      <input list="students_list" id="student_id" name="student_id" placeholder="Select or type Student ID" required class="form-control"
-                          value="<?php echo ($edit_payment) ? $edit_payment['student_id'] : ''; ?>">
+    <div class="form-group">
+        <label for="staff_id">Staff Member *</label>
+        <input list="staff_list" id="staff_id" name="staff_id" placeholder="Select or type Staff ID" required class="form-control"
+            value="<?php echo ($edit_payment) ? $edit_payment['staff_id'] : ''; ?>">
 
-                      <datalist id="students_list">
-                          <?php foreach ($students as $student): ?>
-                              <option value="<?php echo $student['id']; ?>">
-                                  <?php echo $student['id'] . ' - ' . $student['first_name'] . ' ' . $student['last_name']; ?>
-                              </option>
-                          <?php endforeach; ?>
-                      </datalist>
-                  </div>
+        <datalist id="staff_list">
+            <?php foreach ($staff_members as $staff): ?>
+                <option value="<?php echo $staff['id']; ?>">
+                    <?php echo $staff['id'] . ' - ' . $staff['first_name'] . ' ' . $staff['last_name']; ?>
+                </option>
+            <?php endforeach; ?>
+        </datalist>
+    </div>
+
+
 
                     <div class="form-group">
-                        <label for="transaction_id">Transaction ID *</label>
-                        <input type="text" id="transaction_id" name="transaction_id" 
-                               value="<?php echo $edit_payment ? $edit_payment['transaction_id'] : ''; ?>" required>
+                        <label for="amount">Amount (৳) *</label>
+                        <input type="number" step="0.01" id="amount" name="amount" 
+                               value="<?php echo $edit_payment ? $edit_payment['amount'] : ''; ?>" required>
                     </div>
                     
                     <div class="form-group">
-                        <label for="amount">Amount *</label>
-                        <input type="number" step="0.01" id="amount" name="amount" 
-                               value="<?php echo $edit_payment ? $edit_payment['amount'] : ''; ?>" required>
+                        <label for="payment_type">Payment Type *</label>
+                        <select id="payment_type" name="payment_type" required>
+                            <option value="salary" <?php echo ($edit_payment && $edit_payment['payment_type'] == 'salary') ? 'selected' : ''; ?>>Salary</option>
+                            <option value="bonus" <?php echo ($edit_payment && $edit_payment['payment_type'] == 'bonus') ? 'selected' : ''; ?>>Bonus</option>
+                            <option value="allowance" <?php echo ($edit_payment && $edit_payment['payment_type'] == 'allowance') ? 'selected' : ''; ?>>Allowance</option>
+                            <option value="reimbursement" <?php echo ($edit_payment && $edit_payment['payment_type'] == 'reimbursement') ? 'selected' : ''; ?>>Reimbursement</option>
+                            <option value="other" <?php echo ($edit_payment && $edit_payment['payment_type'] == 'other') ? 'selected' : ''; ?>>Other</option>
+                        </select>
                     </div>
                 </div>
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="payment_type">Payment Type *</label>
-                        <select id="payment_type" name="payment_type" required>
-                            <option value="registration" <?php echo ($edit_payment && $edit_payment['payment_type'] == 'registration') ? 'selected' : ''; ?>>Registration</option>
-                            <option value="tuition" <?php echo ($edit_payment && $edit_payment['payment_type'] == 'tuition') ? 'selected' : ''; ?>>Tuition</option>
-                            <option value="exam" <?php echo ($edit_payment && $edit_payment['payment_type'] == 'exam') ? 'selected' : ''; ?>>Exam</option>
-                            <option value="library" <?php echo ($edit_payment && $edit_payment['payment_type'] == 'library') ? 'selected' : ''; ?>>Library</option>
-                            <option value="hostel" <?php echo ($edit_payment && $edit_payment['payment_type'] == 'hostel') ? 'selected' : ''; ?>>Hostel</option>
-                            <option value="other" <?php echo ($edit_payment && $edit_payment['payment_type'] == 'other') ? 'selected' : ''; ?>>Other</option>
+                        <label for="payment_month">Payment Month *</label>
+                        <select id="payment_month" name="payment_month" required>
+                            <option value="January" <?php echo ($edit_payment && $edit_payment['payment_month'] == 'January') ? 'selected' : ''; ?>>January</option>
+                            <option value="February" <?php echo ($edit_payment && $edit_payment['payment_month'] == 'February') ? 'selected' : ''; ?>>February</option>
+                            <option value="March" <?php echo ($edit_payment && $edit_payment['payment_month'] == 'March') ? 'selected' : ''; ?>>March</option>
+                            <option value="April" <?php echo ($edit_payment && $edit_payment['payment_month'] == 'April') ? 'selected' : ''; ?>>April</option>
+                            <option value="May" <?php echo ($edit_payment && $edit_payment['payment_month'] == 'May') ? 'selected' : ''; ?>>May</option>
+                            <option value="June" <?php echo ($edit_payment && $edit_payment['payment_month'] == 'June') ? 'selected' : ''; ?>>June</option>
+                            <option value="July" <?php echo ($edit_payment && $edit_payment['payment_month'] == 'July') ? 'selected' : ''; ?>>July</option>
+                            <option value="August" <?php echo ($edit_payment && $edit_payment['payment_month'] == 'August') ? 'selected' : ''; ?>>August</option>
+                            <option value="September" <?php echo ($edit_payment && $edit_payment['payment_month'] == 'September') ? 'selected' : ''; ?>>September</option>
+                            <option value="October" <?php echo ($edit_payment && $edit_payment['payment_month'] == 'October') ? 'selected' : ''; ?>>October</option>
+                            <option value="November" <?php echo ($edit_payment && $edit_payment['payment_month'] == 'November') ? 'selected' : ''; ?>>November</option>
+                            <option value="December" <?php echo ($edit_payment && $edit_payment['payment_month'] == 'December') ? 'selected' : ''; ?>>December</option>
                         </select>
                     </div>
                     
                     <div class="form-group">
-                        <label for="semester">Semester *</label>
-                        <input type="text" id="semester" name="semester" 
-                               value="<?php echo $edit_payment ? $edit_payment['semester'] : 'Fall 2025'; ?>" required>
+                        <label for="payment_year">Payment Year *</label>
+                        <input type="number" id="payment_year" name="payment_year" min="2020" max="2030"
+                               value="<?php echo $edit_payment ? $edit_payment['payment_year'] : date('Y'); ?>" required>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="academic_year">Academic Year *</label>
-                        <input type="number" id="academic_year" name="academic_year" 
-                               value="<?php echo $edit_payment ? $edit_payment['academic_year'] : '2025'; ?>" required>
-                    </div>
-                </div>
-                
-                <div class="form-row">
                     <div class="form-group">
                         <label for="status">Status *</label>
                         <select id="status" name="status" required>
                             <option value="pending" <?php echo ($edit_payment && $edit_payment['status'] == 'pending') ? 'selected' : ''; ?>>Pending</option>
-                            <option value="verified" <?php echo ($edit_payment && $edit_payment['status'] == 'verified') ? 'selected' : ''; ?>>Verified</option>
-                            <option value="rejected" <?php echo ($edit_payment && $edit_payment['status'] == 'rejected') ? 'selected' : ''; ?>>Rejected</option>
+                            <option value="processed" <?php echo ($edit_payment && $edit_payment['status'] == 'processed') ? 'selected' : ''; ?>>Processed</option>
+                            <option value="failed" <?php echo ($edit_payment && $edit_payment['status'] == 'failed') ? 'selected' : ''; ?>>Failed</option>
                         </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="bank_transaction_id">Bank Transaction ID</label>
+                        <input type="text" id="bank_transaction_id" name="bank_transaction_id" 
+                               value="<?php echo $edit_payment ? $edit_payment['bank_transaction_id'] : ''; ?>">
+                    </div>
+                    
+                    <div class="form-group" style="flex: 2;">
+                        <label for="description">Description</label>
+                        <textarea id="description" name="description" rows="3"><?php echo $edit_payment ? $edit_payment['description'] : ''; ?></textarea>
                     </div>
                 </div>
                 
                 <div class="action-buttons">
                     <button type="submit" class="btn btn-success">
                         <i class="fas fa-save"></i> <?php echo $edit_payment ? 'Update Payment' : 'Add Payment'; ?>
+                    </button>
                     
                     <?php if ($edit_payment): ?>
                         <a href="?" class="btn btn-secondary">Cancel</a>
@@ -445,7 +495,7 @@ $students = $students_stmt->fetchAll(PDO::FETCH_ASSOC);
                 <div class="search-box">
                     <form method="GET">
                         <label for="search">Search Payments</label>
-                        <input type="text" id="search" name="search" placeholder="Search by transaction ID or student name..." value="<?php echo htmlspecialchars($search); ?>">
+                        <input type="text" id="search" name="search" placeholder="Search by payment ID, staff name, or transaction ID..." value="<?php echo htmlspecialchars($search); ?>">
                         <button type="submit" style="display:none;">Search</button>
                     </form>
                 </div>
@@ -453,8 +503,8 @@ $students = $students_stmt->fetchAll(PDO::FETCH_ASSOC);
                 <div class="sort-options">
                     <label for="sort">Sort by:</label>
                     <select id="sort" onchange="window.location.href='?search=<?php echo urlencode($search); ?>&sort='+this.value+'&order=<?php echo $order === 'ASC' ? 'DESC' : 'ASC'; ?>'">
-                        <option value="bank_payment_id" <?php echo $sort === 'bank_payment_id' ? 'selected' : ''; ?>>Payment ID</option>
-                        <option value="student_id" <?php echo $sort === 'student_id' ? 'selected' : ''; ?>>Student ID</option>
+                        <option value="payment_id" <?php echo $sort === 'payment_id' ? 'selected' : ''; ?>>Payment ID</option>
+                        <option value="staff_id" <?php echo $sort === 'staff_id' ? 'selected' : ''; ?>>Staff ID</option>
                         <option value="amount" <?php echo $sort === 'amount' ? 'selected' : ''; ?>>Amount</option>
                         <option value="created_at" <?php echo $sort === 'created_at' ? 'selected' : ''; ?>>Date</option>
                     </select>
@@ -470,14 +520,13 @@ $students = $students_stmt->fetchAll(PDO::FETCH_ASSOC);
                     <thead>
                         <tr>
                             <th>Payment ID</th>
-                            <th>Student ID</th>
-                            <th>Student Name</th>
-                            <th>Transaction ID</th>
+                            <th>Staff ID</th>
+                            <th>Staff Name</th>
                             <th>Amount</th>
                             <th>Payment Type</th>
-                            <th>Semester</th>
-                            <th>Academic Year</th>
+                            <th>Period</th>
                             <th>Status</th>
+                            <th>Transaction ID</th>
                             <th>Date</th>
                             <th style="text-align: center;">Actions</th>
                         </tr>
@@ -486,30 +535,33 @@ $students = $students_stmt->fetchAll(PDO::FETCH_ASSOC);
                         <?php if (count($payments) > 0): ?>
                             <?php foreach ($payments as $payment): ?>
                                 <tr>
-                                    <td><?php echo $payment['bank_payment_id']; ?></td>
-                                    <td><?php echo $payment['student_id']; ?></td>
+                                    <td><?php echo $payment['payment_id']; ?></td>
+                                    <td><?php echo $payment['staff_id']; ?></td>
                                     <td><?php echo htmlspecialchars($payment['first_name'] . ' ' . $payment['last_name']); ?></td>
-                                    <td><?php echo htmlspecialchars($payment['transaction_id']); ?></td>
                                     <td>৳<?php echo number_format($payment['amount'], 2); ?></td>
-                                    <td><?php echo ucfirst($payment['payment_type']); ?></td>
-                                    <td><?php echo htmlspecialchars($payment['semester']); ?></td>
-                                    <td><?php echo $payment['academic_year']; ?></td>
+                                    <td>
+                                        <span class="payment-type-badge type-<?php echo $payment['payment_type']; ?>">
+                                            <?php echo ucfirst($payment['payment_type']); ?>
+                                        </span>
+                                    </td>
+                                    <td><?php echo htmlspecialchars($payment['payment_month']); ?> <?php echo $payment['payment_year']; ?></td>
                                     <td>
                                         <span class="status-badge status-<?php echo $payment['status']; ?>">
                                             <?php echo ucfirst($payment['status']); ?>
                                         </span>
                                     </td>
+                                    <td><?php echo $payment['bank_transaction_id'] ? htmlspecialchars($payment['bank_transaction_id']) : 'N/A'; ?></td>
                                     <td><?php echo date('M j, Y', strtotime($payment['created_at'])); ?></td>
                                     <td class="actions-cell">
                                         <form method="POST">
-                                            <input type="hidden" name="bank_payment_id" value="<?php echo $payment['bank_payment_id']; ?>">
+                                            <input type="hidden" name="payment_id" value="<?php echo $payment['payment_id']; ?>">
                                             <input type="hidden" name="action" value="edit">
                                             <button type="submit" class="btn btn-primary">
                                                 <i class="fas fa-edit"></i> Edit
                                             </button>
                                         </form>
                                         <form method="POST" onsubmit="return confirm('Are you sure you want to delete this payment record?');">
-                                            <input type="hidden" name="bank_payment_id" value="<?php echo $payment['bank_payment_id']; ?>">
+                                            <input type="hidden" name="payment_id" value="<?php echo $payment['payment_id']; ?>">
                                             <input type="hidden" name="action" value="delete">
                                             <button type="submit" class="btn btn-danger">
                                                 <i class="fas fa-trash"></i> Delete
@@ -520,7 +572,7 @@ $students = $students_stmt->fetchAll(PDO::FETCH_ASSOC);
                             <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="11" style="text-align: center;">No payment records found.</td>
+                                <td colspan="10" style="text-align: center;">No payment records found.</td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
