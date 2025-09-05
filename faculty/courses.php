@@ -635,11 +635,7 @@ $mysqli->close();
                 <h1 class="page-title"><i class="fas fa-book"></i> My Courses</h1>
             </div>
             
-            <!-- Database Connection Status -->
-            <div class="connection-status connected">
-                <i class="fas fa-check-circle"></i> 
-                Connected to database: skst_university
-            </div>
+            
             
             <!-- Courses Grid -->
             <div class="courses-container">

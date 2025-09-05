@@ -12,7 +12,7 @@ include 'config.php';
 
 // Check if faculty is logged in
 if (!isset($_SESSION['faculty_id'])) {
-    header("Location: faculty_login.php"); // Create this file if it doesn't exist
+    header("Location: faculty_login.php");
     exit();
 }
 
@@ -28,7 +28,17 @@ $schedule_sql = "SELECT c.course_code, c.course_name, ci.class_day, ci.class_tim
                  FROM course_instructor ci
                  JOIN course c ON ci.course_id = c.course_id
                  WHERE ci.faculty_id = ?
-                 ORDER BY FIELD(ci.class_day, 'Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'),
+                 ORDER BY 
+                   CASE 
+                     WHEN LOWER(ci.class_day) = 'saturday' THEN 1
+                     WHEN LOWER(ci.class_day) = 'sunday' THEN 2
+                     WHEN LOWER(ci.class_day) = 'monday' THEN 3
+                     WHEN LOWER(ci.class_day) = 'tuesday' THEN 4
+                     WHEN LOWER(ci.class_day) = 'wednesday' THEN 5
+                     WHEN LOWER(ci.class_day) = 'thursday' THEN 6
+                     WHEN LOWER(ci.class_day) = 'friday' THEN 7
+                     ELSE 8
+                   END,
                  ci.class_time";
                  
 // Debug: Check connection
@@ -58,7 +68,7 @@ if ($schedule_result) {
 
 $stmt->close();
 
-// Organize schedule by day
+// Organize schedule by day (case-insensitive)
 $schedule_by_day = [
     'Saturday' => [],
     'Sunday' => [],
@@ -70,8 +80,15 @@ $schedule_by_day = [
 ];
 
 foreach ($schedule as $class) {
-    if (isset($class['class_day']) && array_key_exists($class['class_day'], $schedule_by_day)) {
-        $schedule_by_day[$class['class_day']][] = $class;
+    if (isset($class['class_day'])) {
+        // Normalize day name to match our keys
+        $normalized_day = ucfirst(strtolower($class['class_day']));
+        
+        if (array_key_exists($normalized_day, $schedule_by_day)) {
+            // Update the class day to normalized version
+            $class['class_day'] = $normalized_day;
+            $schedule_by_day[$normalized_day][] = $class;
+        }
     }
 }
 
@@ -306,6 +323,15 @@ $mysqli->close();
             gap: 10px;
         }
         
+        .debug-info {
+            background: #e3f2fd;
+            color: #1565c0;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        
         @media (max-width: 768px) {
             .navbar {
                 flex-direction: column;
@@ -408,7 +434,9 @@ $mysqli->close();
                 
                 <?php if (empty($schedule)): ?>
                     <div class="error-message">
-                        <i class="fas fa-exclamation-circle"></i> No schedule found for your faculty ID.
+                        <i class="fas fa-exclamation-circle"></i> 
+                        No schedule found for Faculty ID: <?php echo $faculty_id; ?>.
+                        Please contact administration if this is incorrect.
                     </div>
                 <?php else: ?>
                     <div class="schedule-grid">
@@ -448,13 +476,9 @@ $mysqli->close();
     </div>
     
     <script>
-        // Add any JavaScript functionality you might need
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Schedule page loaded successfully');
         });
-    
     </script>
-
 </body>
-
 </html>

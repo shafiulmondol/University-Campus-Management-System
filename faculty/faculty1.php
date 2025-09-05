@@ -88,6 +88,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['profile_picture']) &&
     }
 }
 
+// Handle profile update
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_profile']) && isset($_SESSION['faculty_id'])) {
+    $faculty_id = $_SESSION['faculty_id'];
+    $phone = $_POST['phone'];
+    $address = $_POST['address'];
+    $room_number = $_POST['room_number'];
+    
+    $update_sql = "UPDATE faculty SET phone = ?, address = ?, room_number = ? WHERE faculty_id = ?";
+    if ($update_stmt = $mysqli->prepare($update_sql)) {
+        $update_stmt->bind_param("sssi", $phone, $address, $room_number, $faculty_id);
+        if ($update_stmt->execute()) {
+            $success = "Profile updated successfully!";
+        } else {
+            $error = "Error updating profile: " . $update_stmt->error;
+        }
+        $update_stmt->close();
+        
+        // Refresh page to show updated data
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();
+    }
+}
+
 // Check if user is logged in
 $is_logged_in = isset($_SESSION['faculty_id']);
 
@@ -743,6 +766,114 @@ $mysqli->close();
             text-align: center;
         }
         
+        /* ================ Modal Styles ============ */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            animation: modalFadeIn 0.3s;
+        }
+        
+        @keyframes modalFadeIn {
+            from {opacity: 0; transform: translateY(-50px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+        
+        .close-modal {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            right: 20px;
+            top: 15px;
+        }
+        
+        .close-modal:hover {
+            color: #000;
+        }
+        
+        .modal-title {
+            color: #2b5876;
+            margin-bottom: 20px;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .modal-form .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .modal-form label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2b5876;
+        }
+        
+        .modal-form input, .modal-form textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .modal-form input:focus, .modal-form textarea:focus {
+            border-color: #2b5876;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(43, 88, 118, 0.2);
+        }
+        
+        .modal-btn {
+            background: linear-gradient(135deg, #2b5876, #4e4376);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .modal-btn:hover {
+            opacity: 0.9;
+        }
+        
+        .success-msg {
+            color: #2e7d32;
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            background: #e8f5e9;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
         /* ================ Responsive Design ============ */
         @media (max-width: 1024px) {
             .info-cards {
@@ -774,6 +905,11 @@ $mysqli->close();
             .profile-img-container {
                 margin-right: 0;
                 margin-bottom: 20px;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
             }
         }
         
@@ -816,9 +952,11 @@ $mysqli->close();
             .login-form {
                 padding: 20px;
             }
+            
+            .modal-content {
+                padding: 20px;
+            }
         }
-        
-        /* ... (rest of the CSS from the original faculty1.php file) ... */
     </style>
 </head>
 <body>
@@ -924,10 +1062,18 @@ $mysqli->close();
         <div class="content-area">
             <div class="page-header">
                 <h1 class="page-title"><i class="fas fa-chalkboard-teacher"></i> Faculty Dashboard</h1>
-                <button class="btn-edit" onclick="location.href='#edit'">
+                <button class="btn-edit" onclick="openEditModal()">
                     <i class="fas fa-edit"></i> Edit Profile
                 </button>
             </div>
+
+            <?php if (!empty($error)): ?>
+                <div class="error-msg"><?php echo $error; ?></div>
+            <?php endif; ?>
+            
+            <?php if (!empty($success)): ?>
+                <div class="success-msg"><?php echo $success; ?></div>
+            <?php endif; ?>
 
             <!-- Profile Card with Picture Upload -->
             <div class="profile-card">
@@ -954,10 +1100,6 @@ $mysqli->close();
                     <p><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($faculty['address'] ?? 'Not provided'); ?></p>
                 </div>
             </div>
-            
-            <?php if (!empty($error)): ?>
-                <div class="error-msg"><?php echo $error; ?></div>
-            <?php endif; ?>
             
             <div class="info-cards">
                 <div class="detail-card">
@@ -1065,6 +1207,35 @@ $mysqli->close();
             </div>
         </div>
     </div>
+    
+    <!-- Edit Profile Modal -->
+    <div id="editProfileModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeEditModal()">&times;</span>
+            <h2 class="modal-title"><i class="fas fa-user-edit"></i> Edit Profile Information</h2>
+            
+            <form class="modal-form" method="post" action="">
+                <input type="hidden" name="update_profile" value="1">
+                
+                <div class="form-group">
+                    <label for="edit-phone">Phone Number</label>
+                    <input type="text" id="edit-phone" name="phone" value="<?php echo htmlspecialchars($faculty['phone'] ?? ''); ?>" placeholder="Enter phone number">
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-address">Address</label>
+                    <textarea id="edit-address" name="address" rows="3" placeholder="Enter your address"><?php echo htmlspecialchars($faculty['address'] ?? ''); ?></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-room">Room Number</label>
+                    <input type="text" id="edit-room" name="room_number" value="<?php echo htmlspecialchars($faculty['room_number'] ?? ''); ?>" placeholder="Enter room number">
+                </div>
+                
+                <button type="submit" class="modal-btn">Update Profile</button>
+            </form>
+        </div>
+    </div>
     <?php endif; ?>
 
     <script>
@@ -1078,9 +1249,24 @@ $mysqli->close();
                     }
                 });
             }
-       
         });
-    
+        
+        // Modal functions
+        function openEditModal() {
+            document.getElementById('editProfileModal').style.display = 'block';
+        }
+        
+        function closeEditModal() {
+            document.getElementById('editProfileModal').style.display = 'none';
+        }
+        
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('editProfileModal');
+            if (event.target == modal) {
+                closeEditModal();
+            }
+        };
     </script>
 
 </body>
