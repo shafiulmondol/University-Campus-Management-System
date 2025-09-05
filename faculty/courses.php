@@ -635,11 +635,7 @@ $mysqli->close();
                 <h1 class="page-title"><i class="fas fa-book"></i> My Courses</h1>
             </div>
             
-            <!-- Database Connection Status -->
-            <div class="connection-status connected">
-                <i class="fas fa-check-circle"></i> 
-                Connected to database: skst_university
-            </div>
+            
             
             <!-- Courses Grid -->
             <div class="courses-container">
@@ -670,8 +666,16 @@ $mysqli->close();
                                 </div>
                                 <div class="course-actions">
                                     <button class="action-btn btn-view" data-course="<?php echo htmlspecialchars($course['course_code']); ?>"><i class="fas fa-eye"></i> View</button>
-                                    <button class="action-btn btn-attendance" data-course="<?php echo htmlspecialchars($course['course_code']); ?>"><i class="fas fa-clipboard-check"></i> Attendance</button>
-                                    <button class="action-btn btn-materials" data-course="<?php echo htmlspecialchars($course['course_code']); ?>"><i class="fas fa-file-upload"></i> Materials</button>
+                                    <a href="attendance.php?course_id=<?php echo $course['course_id']; ?>&attendance_date=<?php echo date('Y-m-d'); ?>" 
+                                     class="action-btn btn-attendance">
+                                     <i class="fas fa-clipboard-check"></i> Attendance
+                                    </a>
+
+                                   <a href="materials.php?course_id=<?php echo $course['course_id']; ?>" 
+                                    class="action-btn btn-materials" title="Materials">
+                                     <i class="fas fa-file-alt"></i> Materials
+                                    </a>
+
                                 </div>
                             </div>
                         </div>

@@ -128,6 +128,7 @@ $mysqli->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="icon" href="../picture/SKST.png" type="image/png" />
     <title>Library Staff Portal - SKST University</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -779,33 +780,23 @@ $mysqli->close();
                     </a>
                 </li>
                 <li>
-                    <a href="../working.html">
-                        <i class="fas fa-book"></i> Books Management
-                    </a>
-                </li>
-                <li>
-                    <a href="../working.html">
-                        <i class="fas fa-users"></i> Member Management
-                    </a>
-                </li>
-                <li>
-                    <a href="../working.html">
-                        <i class="fas fa-exchange-alt"></i> Issue/Return
-                    </a>
-                </li>
-                <li>
-                    <a href="../working.html">
-                        <i class="fas fa-history"></i> Transaction History
-                    </a>
-                </li>
-                <li>
-                    <a href="../working.html">
-                        <i class="fas fa-chart-bar"></i> Reports
+                    <a href="dev_books.php">
+                        <i class="fas fa-book"></i> Manage Books
                     </a>
                 </li>
                 <li>
                     <a href="dev_ebook.php">
-                        <i class="fas fa-book"></i> Manage Ebook
+                        <i class="fas fa-book"></i> Manage E-Books
+                    </a>
+                </li>
+                <li>
+                    <a href="dev_library_management.php">
+                        <i class="fas fa-users"></i> Member Management
+                    </a>
+                </li>
+                <li>
+                    <a href="dev_books_borrowing.php">
+                        <i class="fas fa-exchange-alt"></i> Issue/Return
                     </a>
                 </li>
                 <li>
@@ -937,44 +928,6 @@ $mysqli->close();
                 </div>
             </div>
             
-            <!-- Stats Section -->
-            <div class="page-header">
-                <h2 class="page-title"><i class="fas fa-chart-line"></i> Library Statistics</h2>
-            </div>
-            
-            <div class="stats">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-book"></i>
-                    </div>
-                    <div class="stat-number">5,243</div>
-                    <div class="stat-label">Total Books</div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="stat-number">1,842</div>
-                    <div class="stat-label">Registered Members</div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-exchange-alt"></i>
-                    </div>
-                    <div class="stat-number">327</div>
-                    <div class="stat-label">Books Issued Today</div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <div class="stat-number">43</div>
-                    <div class="stat-label">Overdue Books</div>
-                </div>
-            </div>
         </div>
     </div>
     <?php endif; ?>
