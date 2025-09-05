@@ -567,10 +567,7 @@ $mysqli->close();
                 <h1 class="page-title"><i class="fas fa-user-check"></i> Attendance Management</h1>
             </div>
             
-            <!-- Connection Status -->
-            <div class="connection-status connected">
-                <i class="fas fa-check-circle"></i> Connected to database: skst_university
-            </div>
+           
             
             <?php if (isset($success_message)): ?>
                 <div class="notification notification-success">
