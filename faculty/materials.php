@@ -177,7 +177,7 @@ $mysqli->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Course Materials - SKST University</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;6 00;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #4361ee;
@@ -473,6 +473,7 @@ $mysqli->close();
             box-shadow: var(--card-shadow);
             transition: all 0.3s;
             border-left: 4px solid var(--primary);
+            position: relative;
         }
         
         .material-card:hover {
@@ -553,6 +554,7 @@ $mysqli->close();
             cursor: pointer;
             color: var(--primary);
             transition: all 0.3s;
+            text-decoration: none;
         }
         
         .action-btn:hover {
@@ -623,6 +625,51 @@ $mysqli->close();
             border-left: 4px solid var(--danger);
         }
         
+        /* Image Preview Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            overflow: auto;
+        }
+        
+        .modal-content {
+            margin: auto;
+            display: block;
+            width: 80%;
+            max-width: 700px;
+            animation-name: zoom;
+            animation-duration: 0.6s;
+        }
+        
+        @keyframes zoom {
+            from {transform: scale(0)}
+            to {transform: scale(1)}
+        }
+        
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        
+        .close:hover,
+        .close:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
         /* Responsive */
         @media (max-width: 992px) {
             .sidebar {
@@ -661,6 +708,10 @@ $mysqli->close();
             
             .materials-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                width: 100%;
             }
         }
     </style>
@@ -779,6 +830,7 @@ $mysqli->close();
                             <?php foreach ($materials as $material): 
                                 $file_ext = pathinfo($material['file_path'], PATHINFO_EXTENSION);
                                 $file_icon = "fa-file";
+                                $is_image = false;
                                 
                                 if (in_array($file_ext, ['pdf'])) {
                                     $file_icon = "fa-file-pdf";
@@ -792,6 +844,7 @@ $mysqli->close();
                                     $file_icon = "fa-file-archive";
                                 } elseif (in_array($file_ext, ['jpg', 'jpeg', 'png', 'gif', 'bmp'])) {
                                     $file_icon = "fa-file-image";
+                                    $is_image = true;
                                 } elseif (in_array($file_ext, ['mp4', 'mov', 'avi', 'wmv'])) {
                                     $file_icon = "fa-file-video";
                                 } elseif (in_array($file_ext, ['mp3', 'wav', 'ogg'])) {
@@ -823,13 +876,16 @@ $mysqli->close();
                                 </div>
                                 
                                 <div class="material-actions">
-                                    <a href="<?php echo $material['file_path']; ?>" class="action-btn" download title="Download">
-                                        <i class="fas fa-download"></i>
-                                    </a>
-                                    <a href="materials.php?delete_id=<?php echo $material['id']; ?>&course_id=<?php echo $selected_course['course_id']; ?>" 
-                                       class="action-btn delete" title="Delete" onclick="return confirm('Are you sure you want to delete this material?')">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
+                                    <?php if ($is_image): ?>
+                                        <a href="#" class="action-btn view-image" 
+                                           data-image="<?php echo $material['file_path']; ?>" 
+                                           title="View Image">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    <?php else: ?>
+                                        
+                                    <?php endif; ?>
+                                    
                                 </div>
                             </div>
                             <?php endforeach; ?>
@@ -847,6 +903,12 @@ $mysqli->close();
         </div>
     </div>
 
+    <!-- Image Preview Modal -->
+    <div id="imageModal" class="modal">
+        <span class="close">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+
     <script>
         // Simple file type validation
         document.getElementById('material_file').addEventListener('change', function(e) {
@@ -860,10 +922,37 @@ $mysqli->close();
                     e.target.value = '';
                 }
             }
-         });
-    
+        });
+        
+        // Image preview modal functionality
+        const modal = document.getElementById("imageModal");
+        const modalImg = document.getElementById("modalImage");
+        const closeBtn = document.getElementsByClassName("close")[0];
+        
+        // Get all view image buttons
+        const viewButtons = document.querySelectorAll('.view-image');
+        
+        viewButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const imagePath = this.getAttribute('data-image');
+                modal.style.display = "block";
+                modalImg.src = imagePath;
+            });
+        });
+        
+        // Close the modal when the close button is clicked
+        closeBtn.onclick = function() {
+            modal.style.display = "none";
+        }
+        
+        // Close the modal when clicking outside the image
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
     </script>
 
 </body>
-
 </html>
