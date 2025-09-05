@@ -1,74 +1,67 @@
 <?php
-// Database configuration
-define('DB_HOST', '127.0.0.1');
-define('DB_NAME', 'skst_university');
-define('DB_USER', 'root'); // Change as needed
-define('DB_PASS', ''); // Change as needed
+// Database connection
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "skst_university";
 
-// Create database connection
-try {
-    $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch(PDOException $e) {
-    die("ERROR: Could not connect. " . $e->getMessage());
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 
-// Handle form submissions
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['add_transaction'])) {
-        addTransaction($pdo);
-    }
+// Initialize variables
+$search = "";
+$page = 1;
+$limit = 20;
+
+// Handle search
+if (isset($_GET['search'])) {
+    $search = $conn->real_escape_string($_GET['search']);
 }
 
-// Add a new transaction
-function addTransaction($pdo) {
-    $transaction_type = $_POST['transaction_type'];
-    $amount = $_POST['amount'];
-    $description = $_POST['description'];
-    $reference_id = $_POST['reference_id'] ?? null;
-    $reference_table = $_POST['reference_table'] ?? null;
-    $processed_by = $_POST['processed_by'] ?? null;
-    
-    // Calculate current balance
-    $current_balance = getCurrentBalance($pdo);
-    if ($transaction_type === 'credit') {
-        $current_balance += $amount;
-    } else {
-        $current_balance -= $amount;
-    }
-    
-    // Insert transaction
-    $sql = "INSERT INTO university_bank_holdings 
-            (transaction_type, amount, current_balance, description, reference_id, reference_table, processed_by) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)";
-    
-    try {
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$transaction_type, $amount, $current_balance, $description, $reference_id, $reference_table, $processed_by]);
-        
-        $_SESSION['message'] = "Transaction added successfully!";
-        header("Location: " . $_SERVER['PHP_SELF']);
-        exit();
-    } catch(PDOException $e) {
-        die("ERROR: Could not execute $sql. " . $e->getMessage());
-    }
+// Handle pagination
+if (isset($_GET['page']) && is_numeric($_GET['page'])) {
+    $page = max(1, intval($_GET['page']));
 }
 
-// Get current balance
-function getCurrentBalance($pdo) {
-    $sql = "SELECT current_balance FROM university_bank_holdings ORDER BY holding_id DESC LIMIT 1";
-    $stmt = $pdo->query($sql);
-    $result = $stmt->fetch(PDO::FETCH_ASSOC);
-    
-    return $result ? $result['current_balance'] : 0;
-}
+// Calculate offset
+$offset = ($page - 1) * $limit;
 
-// Get all transactions
-function getTransactions($pdo) {
-    $sql = "SELECT * FROM university_bank_holdings ORDER BY created_at DESC";
-    $stmt = $pdo->query($sql);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Get total transactions count
+$count_sql = "SELECT COUNT(*) as total FROM transaction_history";
+if (!empty($search)) {
+    $count_sql .= " WHERE description LIKE '%$search%' OR amount LIKE '%$search%'";
 }
+$count_result = $conn->query($count_sql);
+$total_records = $count_result->fetch_assoc()['total'];
+$total_pages = ceil($total_records / $limit);
+
+// Get transaction data with pagination
+$sql = "SELECT * FROM transaction_history";
+if (!empty($search)) {
+    $sql .= " WHERE description LIKE '%$search%' OR amount LIKE '%$search%'";
+}
+$sql .= " ORDER BY created_at DESC LIMIT $limit OFFSET $offset";
+$result = $conn->query($sql);
+
+// Get statistics
+$stats_sql = "SELECT 
+    SUM(CASE WHEN transaction_type = 'incoming' THEN amount ELSE 0 END) as total_credit,
+    SUM(CASE WHEN transaction_type = 'outgoing' THEN amount ELSE 0 END) as total_debit,
+    COUNT(*) as total_transactions
+    FROM transaction_history";
+$stats_result = $conn->query($stats_sql);
+$stats = $stats_result->fetch_assoc();
+$total_credit = $stats['total_credit'] ?? 0;
+$total_debit = $stats['total_debit'] ?? 0;
+$total_balance = $total_credit - $total_debit;
+$total_transactions = $stats['total_transactions'] ?? 0;
+
+$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -76,161 +69,398 @@ function getTransactions($pdo) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>University Bank Holdings</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>SKST University - Payment Transactions</title>
+    <link rel="icon" href="../../picture/SKST.png" type="image/png" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .transaction-credit {
-            background-color: #d4edda;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        .transaction-debit {
-            background-color: #f8d7da;
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
         }
-        .current-balance {
-            font-size: 1.5rem;
-            font-weight: bold;
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #2b5876, #4e4376);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo i {
+            font-size: 32px;
+        }
+
+        .logo h1 {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        nav a:hover {
+            color: #ffd43b;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .stat-box {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-box.credit {
+            border-top: 5px solid #2ec27e;
+        }
+
+        .stat-box.debit {
+            border-top: 5px solid #e01b24;
+        }
+
+        .stat-box.balance {
+            border-top: 5px solid #1c71d8;
+        }
+
+        .stat-title {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .stat-value.credit {
+            color: #2ec27e;
+        }
+
+        .stat-value.debit {
+            color: #e01b24;
+        }
+
+        .stat-value.balance {
+            color: #1c71d8;
+        }
+
+        .search-container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 15px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e6e9ef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #1c71d8;
+        }
+
+        .search-btn {
+            background: #1c71d8;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .search-btn:hover {
+            background: #1a5fb4;
+        }
+
+        .history-container {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .history-header {
+            padding: 20px;
+            background: #f8f9fc;
+            border-bottom: 1px solid #e6e9ef;
+        }
+
+        .history-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 16px 20px;
+            text-align: left;
+            border-bottom: 1px solid #e6e9ef;
+        }
+
+        th {
+            background: #f8f9fc;
+            font-weight: 600;
+            color: #4e4e4e;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: #f8f9fc;
+        }
+
+        .transaction-type {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .incoming {
+            background: #e4f5ee;
+            color: #2ec27e;
+        }
+
+        .outgoing {
+            background: #fbe6e7;
+            color: #e01b24;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            gap: 10px;
+        }
+
+        .pagination a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: white;
+            color: #1c71d8;
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .pagination a:hover, .pagination a.active {
+            background: #1c71d8;
+            color: white;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            nav ul {
+                gap: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            table {
+                display: block;
+                overflow-x: auto;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container-fluid py-4">
-        <div class="row">
-            <div class="col-12">
-                <h1 class="text-center mb-4">University Bank Holdings Management</h1>
-                
-                <!-- Balance Summary -->
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">Current Balance</h5>
-                    </div>
-                    <div class="card-body text-center">
-                        <span class="current-balance text-<?php echo (getCurrentBalance($pdo) >= 0) ? 'success' : 'danger'; ?>">
-                            $<?php echo number_format(getCurrentBalance($pdo), 2); ?>
-                        </span>
-                    </div>
-                </div>
-                
-                <!-- Add Transaction Form -->
-                <div class="card mb-4">
-                    <div class="card-header bg-secondary text-white">
-                        <h5 class="mb-0">Add New Transaction</h5>
-                    </div>
-                    <div class="card-body">
-                        <form method="POST" action="">
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <div class="mb-3">
-                                        <label for="transaction_type" class="form-label">Transaction Type</label>
-                                        <select class="form-select" id="transaction_type" name="transaction_type" required>
-                                            <option value="credit">Credit</option>
-                                            <option value="debit">Debit</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="mb-3">
-                                        <label for="amount" class="form-label">Amount</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text">$</span>
-                                            <input type="number" class="form-control" id="amount" name="amount" step="0.01" min="0.01" required>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="description" class="form-label">Description</label>
-                                        <input type="text" class="form-control" id="description" name="description" required>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="mb-3">
-                                        <label for="reference_id" class="form-label">Reference ID (Optional)</label>
-                                        <input type="text" class="form-control" id="reference_id" name="reference_id">
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="mb-3">
-                                        <label for="reference_table" class="form-label">Reference Table (Optional)</label>
-                                        <input type="text" class="form-control" id="reference_table" name="reference_table">
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="mb-3">
-                                        <label for="processed_by" class="form-label">Processed By (Optional)</label>
-                                        <input type="number" class="form-control" id="processed_by" name="processed_by">
-                                    </div>
-                                </div>
-                            </div>
-                            <button type="submit" name="add_transaction" class="btn btn-success">
-                                <i class="fas fa-plus-circle me-1"></i> Add Transaction
-                            </button>
-                        </form>
-                    </div>
-                </div>
-                
-                <!-- Transaction History -->
-                <div class="card">
-                    <div class="card-header bg-dark text-white">
-                        <h5 class="mb-0">Transaction History</h5>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Date</th>
-                                        <th>Type</th>
-                                        <th>Amount</th>
-                                        <th>Balance</th>
-                                        <th>Description</th>
-                                        <th>Reference</th>
-                                        <th>Processed By</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php $transactions = getTransactions($pdo); ?>
-                                    <?php if (count($transactions) > 0): ?>
-                                        <?php foreach ($transactions as $transaction): ?>
-                                            <tr class="transaction-<?php echo $transaction['transaction_type']; ?>">
-                                                <td><?php echo $transaction['holding_id']; ?></td>
-                                                <td><?php echo date('M j, Y g:i A', strtotime($transaction['created_at'])); ?></td>
-                                                <td>
-                                                    <span class="badge bg-<?php echo $transaction['transaction_type'] === 'credit' ? 'success' : 'danger'; ?>">
-                                                        <?php echo ucfirst($transaction['transaction_type']); ?>
-                                                    </span>
-                                                </td>
-                                                <td class="fw-bold">$<?php echo number_format($transaction['amount'], 2); ?></td>
-                                                <td class="fw-bold">$<?php echo number_format($transaction['current_balance'], 2); ?></td>
-                                                <td><?php echo htmlspecialchars($transaction['description']); ?></td>
-                                                <td>
-                                                    <?php if ($transaction['reference_id'] && $transaction['reference_table']): ?>
-                                                        <?php echo $transaction['reference_table'] . ' #' . $transaction['reference_id']; ?>
-                                                    <?php else: ?>
-                                                        <span class="text-muted">N/A</span>
-                                                    <?php endif; ?>
-                                                </td>
-                                                <td>
-                                                    <?php echo $transaction['processed_by'] ? 'User #' . $transaction['processed_by'] : '<span class="text-muted">N/A</span>'; ?>
-                                                </td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    <?php else: ?>
-                                        <tr>
-                                            <td colspan="8" class="text-center py-4">No transactions found.</td>
-                                        </tr>
-                                    <?php endif; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+    <header>
+        <div class="nav-container">
+            <div class="logo">
+             <img src="../../picture/SKST.png" alt="SKST Logo" style="height: 60px; border-radius: 50%;">
+             <h1>SKST University</h1>
+            </div>
+
+            <nav>
+                <ul>
+                    <li><a href="../../index.html"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="http://localhost:8080/University-Campus-Management-System/account/bank/account_officer.php"><i class="fas fa-arrow-left"></i> Back</a></li>
+
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Statistics Boxes -->
+        <div class="stats-container">
+            <div class="stat-box credit">
+                <div class="stat-title">Total Credit (Incoming)</div>
+                <div class="stat-value credit"><?php echo number_format($total_credit, 2); ?> Taka</div>
+            </div>
+            <div class="stat-box debit">
+                <div class="stat-title">Total Debit (Outgoing)</div>
+                <div class="stat-value debit"><?php echo number_format($total_debit, 2); ?> Taka</div>
+            </div>
+            <div class="stat-box balance">
+                <div class="stat-title">Net Balance</div>
+                <div class="stat-value balance"><?php echo number_format($total_balance, 2); ?> Taka</div>
             </div>
         </div>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <form method="GET" class="search-form">
+                <input type="text" name="search" class="search-input" placeholder="Search transactions..." value="<?php echo htmlspecialchars($search); ?>">
+                <button type="submit" class="search-btn"><i class="fas fa-search"></i> Search</button>
+            </form>
+        </div>
+
+        <!-- Transaction History -->
+        <div class="history-container">
+            <div class="history-header">
+                <h2 class="history-title">Transaction History</h2>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th>Type</th>
+                        <th>Amount (Taka)</th>
+                        <th>User Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if ($result->num_rows > 0): ?>
+                        <?php while($row = $result->fetch_assoc()): ?>
+                            <tr>
+                                <td><?php echo date('M j, Y', strtotime($row['transaction_date'])); ?></td>
+                                <td><?php echo htmlspecialchars($row['description']); ?></td>
+                                <td>
+                                    <span class="transaction-type <?php echo $row['transaction_type']; ?>">
+                                        <?php echo ucfirst($row['transaction_type']); ?>
+                                    </span>
+                                </td>
+                                <td><strong><?php echo number_format($row['amount'], 2); ?></strong></td>
+                                <td><?php echo ucfirst($row['related_user_type']); ?></td>
+                            </tr>
+                        <?php endwhile; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="5" style="text-align: center;">No transactions found.</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <?php if ($total_pages > 1): ?>
+        <div class="pagination">
+            <?php if ($page > 1): ?>
+                <a href="?page=<?php echo $page-1; ?><?php echo !empty($search) ? '&search='.urlencode($search) : ''; ?>"><i class="fas fa-chevron-left"></i></a>
+            <?php endif; ?>
+
+            <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                <a href="?page=<?php echo $i; ?><?php echo !empty($search) ? '&search='.urlencode($search) : ''; ?>" class="<?php echo $i == $page ? 'active' : ''; ?>"><?php echo $i; ?></a>
+            <?php endfor; ?>
+
+            <?php if ($page < $total_pages): ?>
+                <a href="?page=<?php echo $page+1; ?><?php echo !empty($search) ? '&search='.urlencode($search) : ''; ?>"><i class="fas fa-chevron-right"></i></a>
+            <?php endif; ?>
+        </div>
+        <?php endif; ?>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <footer>
+        <p>&copy; 2025 SKST University. All rights reserved.</p>
+    </footer>
 </body>
 </html>
