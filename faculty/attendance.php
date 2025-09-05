@@ -695,7 +695,11 @@ $mysqli->close();
                         break;
                 }
             }
+      
         });
+    
     </script>
+
 </body>
+
 </html>

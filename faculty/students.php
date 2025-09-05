@@ -605,6 +605,9 @@ $mysqli->close();
             
             document.body.appendChild(modal);
         }
+    
     </script>
+
 </body>
+
 </html>

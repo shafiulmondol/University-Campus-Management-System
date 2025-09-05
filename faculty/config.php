@@ -35,5 +35,7 @@ function getFacultyInfo($faculty_id, $mysqli) {
     $stmt->execute();
     $result = $stmt->get_result();
     return $result->fetch_assoc();
+
 }
+
 ?>

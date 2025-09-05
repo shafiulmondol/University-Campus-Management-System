@@ -913,7 +913,11 @@ $mysqli->close();
             setTimeout(function() {
                 toast.style.display = 'none';
             }, 3000);
+       
         }
+    
     </script>
+
 </body>
+
 </html>
