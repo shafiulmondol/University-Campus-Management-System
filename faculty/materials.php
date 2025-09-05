@@ -24,13 +24,23 @@ $create_table_sql = "CREATE TABLE IF NOT EXISTS course_materials (
     title VARCHAR(255) NOT NULL,
     description TEXT,
     file_path VARCHAR(500) NOT NULL,
-    file_type VARCHAR(50) DEFAULT 'document',
-    file_size VARCHAR(20) DEFAULT '0 KB',
     upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (faculty_id) REFERENCES faculty(faculty_id),
     FOREIGN KEY (course_id) REFERENCES course(course_id)
 )";
 $mysqli->query($create_table_sql);
+
+// Check if file_type column exists, if not add it
+$check_column = $mysqli->query("SHOW COLUMNS FROM course_materials LIKE 'file_type'");
+if ($check_column->num_rows == 0) {
+    $mysqli->query("ALTER TABLE course_materials ADD COLUMN file_type VARCHAR(50) DEFAULT 'document'");
+}
+
+// Check if file_size column exists, if not add it
+$check_column = $mysqli->query("SHOW COLUMNS FROM course_materials LIKE 'file_size'");
+if ($check_column->num_rows == 0) {
+    $mysqli->query("ALTER TABLE course_materials ADD COLUMN file_size VARCHAR(20) DEFAULT '0 KB'");
+}
 
 $selected_course = null;
 $materials = [];
@@ -317,6 +327,7 @@ $mysqli->close();
         .nav-buttons {
             display: flex;
             gap: 12px;
+            align-items: center;
         }
         
         .nav-buttons button {

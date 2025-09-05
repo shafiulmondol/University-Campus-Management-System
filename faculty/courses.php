@@ -675,7 +675,11 @@ $mysqli->close();
                                      <i class="fas fa-clipboard-check"></i> Attendance
                                     </a>
 
-                                    <button class="action-btn btn-materials" data-course="<?php echo htmlspecialchars($course['course_code']); ?>"><i class="fas fa-file-upload"></i> Materials</button>
+                                   <a href="materials.php?course_id=<?php echo $course['course_id']; ?>" 
+                                    class="action-btn btn-materials" title="Materials">
+                                     <i class="fas fa-file-alt"></i> Materials
+                                    </a>
+
                                 </div>
                             </div>
                         </div>
