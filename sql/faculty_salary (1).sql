@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 03, 2025 at 06:22 PM
+-- Generation Time: Sep 05, 2025 at 05:25 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -59,9 +59,7 @@ CREATE TABLE `faculty_salary` (
 --
 
 INSERT INTO `faculty_salary` (`salary_id`, `faculty_id`, `name`, `email`, `department`, `current_salary`, `ytd_earnings`, `ytd_deductions`, `ytd_net`, `total_earnings`, `total_deductions`, `net_salary`, `basic_salary`, `hra`, `da`, `travel_allowance`, `research_grant`, `provident_fund`, `professional_tax`, `income_tax`, `insurance`, `payment_date`, `salary_month`, `status`) VALUES
-(1, 101, 'Dr. Tanjila Islam', 'tanjila@skst.edu', 'Computer Science', 102600.00, 1179000.00, 137400.00, 1041600.00, 126000.00, 23400.00, 102600.00, 78000.00, 19500.00, 14820.00, 6480.00, 7200.00, 9360.00, 3000.00, 9840.00, 1200.00, '2023-10-05', 'September 2023', 'Paid'),
-(2, 101, 'Dr. Tanjila Islam', 'tanjila@skst.edu', 'Computer Science', 102600.00, 1179000.00, 137400.00, 1041600.00, 126000.00, 23400.00, 102600.00, 78000.00, 19500.00, 14820.00, 6480.00, 7200.00, 9360.00, 3000.00, 9840.00, 1200.00, '2023-09-05', 'August 2023', 'Paid'),
-(3, 101, 'Dr. Tanjila Islam', 'tanjila@skst.edu', 'Computer Science', 102600.00, 1179000.00, 137400.00, 1041600.00, 126000.00, 23400.00, 102600.00, 78000.00, 19500.00, 14820.00, 6480.00, 7200.00, 9360.00, 3000.00, 9840.00, 1200.00, '2023-08-05', 'July 2023', 'Paid');
+(1, 123456, 'Dr. Tanjila Islam', 'tanjila@skst.edu', 'Computer Science', 102600.00, 1179000.00, 137400.00, 1041600.00, 126000.00, 23400.00, 102600.00, 78000.00, 19500.00, 14820.00, 6480.00, 7200.00, 9360.00, 3000.00, 9840.00, 1200.00, '2023-10-05', 'September 2023', 'Paid');
 
 --
 -- Indexes for dumped tables
@@ -71,7 +69,8 @@ INSERT INTO `faculty_salary` (`salary_id`, `faculty_id`, `name`, `email`, `depar
 -- Indexes for table `faculty_salary`
 --
 ALTER TABLE `faculty_salary`
-  ADD PRIMARY KEY (`salary_id`);
+  ADD PRIMARY KEY (`salary_id`),
+  ADD KEY `fk_faculty_salary` (`faculty_id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -82,6 +81,16 @@ ALTER TABLE `faculty_salary`
 --
 ALTER TABLE `faculty_salary`
   MODIFY `salary_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `faculty_salary`
+--
+ALTER TABLE `faculty_salary`
+  ADD CONSTRAINT `fk_faculty_salary` FOREIGN KEY (`faculty_id`) REFERENCES `faculty` (`faculty_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
