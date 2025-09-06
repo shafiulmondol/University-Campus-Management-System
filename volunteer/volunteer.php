@@ -688,6 +688,8 @@ $mysqli->close();
                 </div>
                 
                 <button type="submit" class="login-btn">Login to Dashboard</button>
+                <button class= "login-btn" onclick="location.href='http://localhost:8080/University-Campus-Management-System/volunteer/volunteer.html'"> Sign Out</button>                
+
                 
                 <?php if (!empty($error)): ?>
                     <div class="error-msg"><?php echo $error; ?></div>
@@ -730,6 +732,7 @@ $mysqli->close();
                     <button onclick="location.href='?logout=1'">
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </button>
+
                 </li>
             </ul>
         </div>

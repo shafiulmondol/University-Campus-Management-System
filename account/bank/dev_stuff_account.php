@@ -372,11 +372,7 @@ $staff_members = $staff_stmt->fetchAll(PDO::FETCH_ASSOC);
         <button class="btn btn-secondary" type="button" style="margin-bottom: 10px;" onclick="goBack()">
             <i class="fas fa-arrow-left"></i> Back
         </button>
-
-        <!-- Home Button as a link styled like button -->
-        <a href="../index.html" class="btn btn-secondary" style="margin-bottom: 10px;">
-            <i class="fas fa-home"></i> Home
-        </a>
+        <a href="http://localhost:8080/University-Campus-Management-System/account/bank/account_officer.php" class="btn btn-secondary" style="margin-bottom: 10px;">Dashboard</a>
 
         <script>
         function goBack() {

@@ -96,6 +96,24 @@
       }
     }
 
+        .admin-login {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      min-width: 120px;
+    }
+
+    .admin-login:hover {
+      transform: translateY(-3px);
+      background: linear-gradient(135deg, #b31217, #e52d27);
+    }
+
     .home-button {
       background: gray;
       color: white;
@@ -138,133 +156,7 @@
       }
     }
 
-  .future-students-title {
-      text-align: center;
-      color: white;
-      background: #800000;
-      font-weight: bold;
-      height: 60px;
-      line-height: 60px;
-      margin-top: 20px;
-      margin-bottom: 20px;
-      border-radius: 10px;
-    }
-
-    .future-students-text {
-      text-align: center;
-      max-width: 1200px;
-      margin: 0 auto 30px auto;
-      color: black;
-      line-height: 1.6;
-      font-size: 16px;
-    }
-
-    
-  .sidebar {
-      flex: 0 0 240px;
-      background: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      position: sticky;
-      top: 20px;
-      height: fit-content;
-    }
-
-  .sidebar a {
-      display: block;
-      padding: 12px 15px;
-      margin-bottom: 10px;
-      background: purple;
-      color: white;
-      text-decoration: none;
-      border-radius: 6px;
-      font-weight: 500;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-
-  .sidebar a:hover {
-        background: linear-gradient(90deg, darkred);
-      transform: translateY(-3px);
-    }
-
-  .content-container {
-      display: flex;
-      gap: 20px;
-    }
-
-  .column {
-      flex: 1;
-      background: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-
-  .section {
-      margin-bottom: 30px;
-    }
-
-  .section h3 {
-      color: #0073e6;
-      margin-bottom: 10px;
-    }
-
-  .section p {
-      line-height: 1.6;
-      font-size: 16px;
-      color: #555;
-    }
-
-  .future-students-container {
-      margin: 30px auto 40px auto;
-      padding: 0 20px;
-      font-family: Arial, sans-serif;
-    }
-
-    .line-through {
-      position: relative;
-      text-align: center;
-      color: #1c6e3c; /* green shade like in your screenshot */
-      font-size: 24px;
-      font-weight: 500;
-      margin-top: 20px;
-      margin-bottom: 30px;
-    }
-
-  .administration-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    max-width: 1100px;
-    margin: 20px auto;
-    font-family: 'Times New Roman', Times, serif;
-  }
-
-  .administration-column {
-    background: #ffffff;
-    padding: 50px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    text-align: justify;
-    line-height: 1.6;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-  }
-
-    .administration-container {
-      display: flex;
-      justify-content: space-between;
-      align-items:center;
-      gap: 20px;
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      max-width: 1200px;
-      margin: 20px auto;
-      font-family: Arial, sans-serif;
-    }
+  
   </style>
 </head>
 <body>
@@ -277,6 +169,13 @@
 
       <!-- administration Login and Home Page Buttons -->
       <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+
+        <a href="../admission/admission_officer.php" class="admin-login">
+          <i class="fas fa-home"></i> A/O Login
+        </a>
+        <a href="admin.php" class="admin-login">
+          <i class="fas fa-home"></i> Admin Login
+        </a>
         <a href="../index.html" class="home-button">
           <i class="fas fa-home"></i> Home
         </a>
@@ -302,96 +201,6 @@
   </div><div class="background-image">
       <img src="../picture/admin background.jpg" alt="Background Image">
     </div>
-
-    <div>
-  <div class="future-students-container">
-
-    <h1 class="future-students-title"> "Welcome To SKST University || Administration Panel"</h1>
-
-    <p class="future-students-text">
-      SKST University offers a number of features and opportunities for its administration to 
-      stay connected and engaged with the institution. Some of those features are as follows:
-    </p>
-
-  </div>
-
-
-  <div style="display:flex; gap:30px; max-width:1200px; margin:0 auto;">
-
-          <!-- Sidebar -->
-      <div class="sidebar">
-      <p style="font-weight:bold; font-size:18px; margin-bottom:15px; text-align:center;">Quick Links</p>
-        
-      <a href="../admission/admission_officer.php">A/O Login</a>
-        <a href="admin.php">Admin Login</a>
-        <a href="../working.html">Event and Memories</a>
-        <a href="../working.html">About Us</a>
-        <a href="../working.html">Contact Us</a>
-
-      </div>
-
-
-      <!-- Content Area Split into Two Columns -->
-        <div class="content-container">
-
-          <!-- Left Column -->
-          <div class="column">
-            <div id="network" class="section">
-              <h3>A/O Login</h3>
-              <p>Secure access for administrative officers.</p>
-            </div>
-
-            <div id="events" class="section">
-              <h3>Admin Login</h3>
-              <p>Dedicated login for administrators to manage university operations.</p>
-            </div>
-
-            <div id="administration" class="section">
-              <h3>Event and Memories</h3>
-              <p>Keep track of past and upcoming events, along with institutional achievements.</p>
-            </div>
-          </div>
-
-          <!-- Right Column -->
-          <div class="column">
-            <div id="recognition" class="section">
-              <h3>About Us</h3>
-              <p>Learn more about the university’s vision, mission, and administrative structure.</p>
-            </div>
-
-            <div id="career" class="section">
-              <h3>Contact Us</h3>
-              <p>Stay connected with the administration for inquiries and support.</p>
-            </div>
-          </div>
-          </div>
-        </div>
-
-        
-
-
-    <h2 class="line-through">-----Objectives and Preamble-----</h2>
-    <div class="administration-container">
-      <div class="administration-column">
-        <p>
-          <strong>Objectives:</strong> <br> <br>
-          SKST University administration Association plays a vital role by assisting the university in 
-          developing linkage with industries, multinational organizations as well as other firms 
-          and companies. Besides that, it assists the interns of SKST University in finding internship 
-          placement in different organizations. It also provides job opportunities to the students of SKST University.
-        </p>
-      </div>
-
-      <div class="administration-column">
-        <p>
-          <strong>Preamble:</strong> <br> <br>
-          We, the administration of the SKST University, develop mutual interest among ourselves, establish mutually
-          beneficial relations between SKST University and its administration, and promote the interests
-          of SKST University, do hereby form into an Association and adopt this constitution.
-        </p>
-      </div>
-    </div>
-
 
       <div class="buttom_bar">
       <img src="../picture/SKST.png" alt="Logo" style="height:80px; width:auto;">

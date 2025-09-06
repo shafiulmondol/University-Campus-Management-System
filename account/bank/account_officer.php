@@ -805,6 +805,8 @@ $mysqli->close();
                 </div>
                 
                 <button type="submit" class="login-btn">Login to Dashboard</button>
+                <button class= "login-btn" onclick="location.href='../../index.html'"> Sign Out</button>                
+
                 
                 <?php if (!empty($error)): ?>
                     <div class="error-msg"><?php echo $error; ?></div>
