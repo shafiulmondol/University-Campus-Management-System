@@ -1222,8 +1222,8 @@ $mysqli->close();
                     </a>
                 </li>
                 <li>
-                    <a href="#">
-                        <i class="fas fa-tasks"></i> Review Process
+                    <a href="../admin/course.php">
+                        <i class="fas fa-tasks"></i> Course Menagement
                     </a>
                 </li>
                 <li>
