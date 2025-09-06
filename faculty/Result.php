@@ -179,6 +179,102 @@ function updateStudentGPA($student_id, $semester) {
     $stmt->close();
 }
 
+// Function to recalculate GPA when enrollment is deleted
+function recalculateGPAOnEnrollmentDeletion($student_id) {
+    global $mysqli;
+    
+    // Get all semesters the student has results for
+    $semesters_sql = "SELECT DISTINCT semister FROM student_result WHERE st_id = ? ORDER BY semister";
+    $stmt = $mysqli->prepare($semesters_sql);
+    $stmt->bind_param("i", $student_id);
+    $stmt->execute();
+    $semesters_result = $stmt->get_result();
+    
+    // Recalculate GPA for each semester
+    while ($semester_row = $semesters_result->fetch_assoc()) {
+        $semester = $semester_row['semister'];
+        
+        // Calculate SGPA for the semester
+        $sgpa_sql = "SELECT marks FROM student_result WHERE st_id = ? AND semister = ?";
+        $stmt2 = $mysqli->prepare($sgpa_sql);
+        $stmt2->bind_param("ii", $student_id, $semester);
+        $stmt2->execute();
+        $sgpa_result = $stmt2->get_result();
+        
+        $total_grade_points = 0;
+        $count = 0;
+        
+        while ($row = $sgpa_result->fetch_assoc()) {
+            $grade_point = calculateGradePoint($row['marks']);
+            $total_grade_points += $grade_point;
+            $count++;
+        }
+        
+        $sgpa = $count > 0 ? $total_grade_points / $count : 0;
+        $stmt2->close();
+        
+        // Update SGPA for this semester
+        $update_sgpa_sql = "UPDATE student_result SET sgpa = ? WHERE st_id = ? AND semister = ?";
+        $stmt2 = $mysqli->prepare($update_sgpa_sql);
+        $stmt2->bind_param("dii", $sgpa, $student_id, $semester);
+        $stmt2->execute();
+        $stmt2->close();
+    }
+    $stmt->close();
+    
+    // Calculate CGPA for the student
+    $cgpa_sql = "SELECT marks FROM student_result WHERE st_id = ?";
+    $stmt = $mysqli->prepare($cgpa_sql);
+    $stmt->bind_param("i", $student_id);
+    $stmt->execute();
+    $cgpa_result = $stmt->get_result();
+    
+    $total_grade_points_all = 0;
+    $count_all = 0;
+    
+    while ($row = $cgpa_result->fetch_assoc()) {
+        $grade_point = calculateGradePoint($row['marks']);
+        $total_grade_points_all += $grade_point;
+        $count_all++;
+    }
+    
+    $cgpa = $count_all > 0 ? $total_grade_points_all / $count_all : 0;
+    $stmt->close();
+    
+    // Update CGPA for all records of the student
+    $update_cgpa_sql = "UPDATE student_result SET cgpa = ? WHERE st_id = ?";
+    $stmt = $mysqli->prepare($update_cgpa_sql);
+    $stmt->bind_param("di", $cgpa, $student_id);
+    $stmt->execute();
+    $stmt->close();
+}
+
+// Handle deletion of student results (if requested)
+if (isset($_GET['delete_result'])) {
+    $student_id = $_GET['student_id'];
+    $course_code = $_GET['course_code'];
+    $semester = $_GET['semester'];
+    
+    // Delete the result
+    $delete_sql = "DELETE FROM student_result WHERE st_id = ? AND course = ? AND semister = ?";
+    $stmt = $mysqli->prepare($delete_sql);
+    $stmt->bind_param("isi", $student_id, $course_code, $semester);
+    
+    if ($stmt->execute()) {
+        // Recalculate GPA after deletion
+        recalculateGPAOnEnrollmentDeletion($student_id);
+        $success_message = "Result deleted successfully and GPA recalculated!";
+    } else {
+        $error = "Failed to delete result: " . $stmt->error;
+    }
+    
+    $stmt->close();
+    
+    // Refresh the page
+    header("Location: result.php?course_id=" . $course_id . "&view=" . $view_type);
+    exit();
+}
+
 // Get all results for a student (for the "View All Results" option)
 $all_student_results = [];
 if ($view_type == 'all' && isset($_GET['student_id'])) {
@@ -212,6 +308,7 @@ $mysqli->close();
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* ... (keep all existing styles) ... */
         :root {
             --primary: #4361ee;
             --secondary: #3f37c9;
@@ -660,6 +757,28 @@ $mysqli->close();
                 flex-direction: column;
             }
         }
+        
+        /* Add styles for delete button */
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger), #d9363e);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(249, 65, 68, 0.3);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
     </style>
 </head>
 <body>
@@ -795,10 +914,18 @@ $mysqli->close();
                                                value="<?php echo isset($result['grade']) ? $result['grade'] : ''; ?>" required>
                                     </td>
                                     <td>
-                                        <button type="button" class="btn-primary" 
-                                                onclick="viewAllResults(<?php echo $student_id; ?>)">
-                                            <i class="fas fa-eye"></i> View All
-                                        </button>
+                                        <div class="action-buttons">
+                                            <button type="button" class="btn-primary" 
+                                                    onclick="viewAllResults(<?php echo $student_id; ?>)">
+                                                <i class="fas fa-eye"></i> View All
+                                            </button>
+                                            <?php if (isset($result['marks'])): ?>
+                                            <button type="button" class="btn-danger" 
+                                                    onclick="deleteResult(<?php echo $student_id; ?>, '<?php echo $selected_course['course_code']; ?>', <?php echo isset($result['semister']) ? $result['semister'] : 0; ?>)">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                            <?php endif; ?>
+                                        </div>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
@@ -869,6 +996,7 @@ $mysqli->close();
                                             <th>Course Name</th>
                                             <th>Marks</th>
                                             <th>Grade</th>
+                                            <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -884,6 +1012,12 @@ $mysqli->close();
                                                 <td><?php echo $course['course_name']; ?></td>
                                                 <td><?php echo $course['marks']; ?></td>
                                                 <td><?php echo $course['grade']; ?></td>
+                                                <td>
+                                                    <button type="button" class="btn-danger" 
+                                                            onclick="deleteResult(<?php echo $student_id; ?>, '<?php echo $course['course']; ?>', <?php echo $semester; ?>)">
+                                                        <i class="fas fa-trash"></i> Delete
+                                                    </button>
+                                                </td>
                                             </tr>
                                         <?php endforeach; ?>
                                     </tbody>
@@ -967,6 +1101,18 @@ $mysqli->close();
             const url = new URL(window.location.href);
             url.searchParams.set('student_id', studentId);
             window.location.href = url.toString();
+        }
+        
+        // Delete a result
+        function deleteResult(studentId, courseCode, semester) {
+            if (confirm('Are you sure you want to delete this result? This will recalculate the student\'s GPA.')) {
+                const url = new URL(window.location.href);
+                url.searchParams.set('delete_result', 'true');
+                url.searchParams.set('student_id', studentId);
+                url.searchParams.set('course_code', courseCode);
+                url.searchParams.set('semester', semester);
+                window.location.href = url.toString();
+            }
         }
     </script>
 
