@@ -12,24 +12,13 @@ try {
     die("Database connection failed: " . $e->getMessage());
 }
 
-// Handle actions (delete, edit, add, search, sort)
-$action = $_GET['action'] ?? '';
-$id = $_GET['id'] ?? '';
-$search = $_GET['search'] ?? '';
-$sort = $_GET['sort'] ?? 'id';
-$order = $_GET['order'] ?? 'ASC';
+// Handle actions
+$action = $_POST['action'] ?? $_GET['action'] ?? '';
+$student_id = $_POST['student_id'] ?? $_GET['id'] ?? '';
 
-// Delete student
-if ($action === 'delete' && !empty($id)) {
-    $stmt = $pdo->prepare("DELETE FROM student_registration WHERE id = ?");
-    $stmt->execute([$id]);
-    header("Location: ".str_replace("&action=delete&id=$id", "", $_SERVER['REQUEST_URI']));
-    exit();
-}
-
-// Handle form submission for add/edit
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $id = $_POST['id'] ?? '';
+// Add or Update student
+if ($action === 'save') {
+    // Collect all form data
     $first_name = $_POST['first_name'] ?? '';
     $last_name = $_POST['last_name'] ?? '';
     $father_name = $_POST['father_name'] ?? '';
@@ -54,65 +43,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $permanent_address = $_POST['permanent_address'] ?? '';
     $department = $_POST['department'] ?? '';
     
-    if (!empty($id)) {
+    if ($student_id) {
         // Update existing student
-        $stmt = $pdo->prepare("UPDATE student_registration SET 
-            first_name=?, last_name=?, father_name=?, mother_name=?, date_of_birth=?, 
-            guardian_phone=?, student_phone=?, email=?, password=?, last_exam=?, 
-            board=?, other_board=?, year_of_passing=?, institution_name=?, result=?, 
-            subject_group=?, gender=?, blood_group=?, nationality=?, religion=?, 
-            present_address=?, permanent_address=?, department=?
-            WHERE id=?
-        ");
-        
+        $sql = "UPDATE student_registration SET 
+                first_name=?, last_name=?, father_name=?, mother_name=?, date_of_birth=?, 
+                guardian_phone=?, student_phone=?, email=?, password=?, 
+                last_exam=?, board=?, other_board=?, year_of_passing=?, institution_name=?, 
+                result=?, subject_group=?, gender=?, blood_group=?, nationality=?, 
+                religion=?, present_address=?, permanent_address=?, department=? 
+                WHERE id=?";
+        $stmt = $pdo->prepare($sql);
         $stmt->execute([
             $first_name, $last_name, $father_name, $mother_name, $date_of_birth,
-            $guardian_phone, $student_phone, $email, $password, $last_exam,
-            $board, $other_board, $year_of_passing, $institution_name, $result,
-            $subject_group, $gender, $blood_group, $nationality, $religion,
-            $present_address, $permanent_address, $department, $id
+            $guardian_phone, $student_phone, $email, $password,
+            $last_exam, $board, $other_board, $year_of_passing, $institution_name,
+            $result, $subject_group, $gender, $blood_group, $nationality,
+            $religion, $present_address, $permanent_address, $department, $student_id
         ]);
     } else {
         // Insert new student
-        $stmt = $pdo->prepare("INSERT INTO student_registration 
-            (first_name, last_name, father_name, mother_name, date_of_birth, 
-            guardian_phone, student_phone, email, password, last_exam, 
-            board, other_board, year_of_passing, institution_name, result, 
-            subject_group, gender, blood_group, nationality, religion, 
-            present_address, permanent_address, department) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ");
-        
+        $sql = "INSERT INTO student_registration (
+                first_name, last_name, father_name, mother_name, date_of_birth, 
+                guardian_phone, student_phone, email, password, 
+                last_exam, board, other_board, year_of_passing, institution_name, 
+                result, subject_group, gender, blood_group, nationality, 
+                religion, present_address, permanent_address, department, submission_date
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+        $stmt = $pdo->prepare($sql);
         $stmt->execute([
             $first_name, $last_name, $father_name, $mother_name, $date_of_birth,
-            $guardian_phone, $student_phone, $email, $password, $last_exam,
-            $board, $other_board, $year_of_passing, $institution_name, $result,
-            $subject_group, $gender, $blood_group, $nationality, $religion,
-            $present_address, $permanent_address, $department
+            $guardian_phone, $student_phone, $email, $password,
+            $last_exam, $board, $other_board, $year_of_passing, $institution_name,
+            $result, $subject_group, $gender, $blood_group, $nationality,
+            $religion, $present_address, $permanent_address, $department
         ]);
     }
     
-    header("Location: student_management.php");
-    exit();
+    // Reset action to prevent form from staying in edit mode
+    $action = '';
+    $student_id = '';
 }
 
-// Fetch student data for editing
-$edit_student = null;
-if ($action === 'edit' && !empty($id)) {
-    $stmt = $pdo->prepare("SELECT * FROM student_registration WHERE id = ?");
-    $stmt->execute([$id]);
-    $edit_student = $stmt->fetch(PDO::FETCH_ASSOC);
+// Delete student
+if ($action === 'delete' && $student_id) {
+    $stmt = $pdo->prepare("DELETE FROM student_registration WHERE id = ?");
+    $stmt->execute([$student_id]);
+    $action = '';
+    $student_id = '';
 }
 
-// Build query for fetching students
-$query = "SELECT * FROM student_registration";
-$params = [];
+// Search and filter parameters
+$search = $_GET['search'] ?? '';
+$sort = $_GET['sort'] ?? 'id';
+$order = $_GET['order'] ?? 'ASC';
 
-if (!empty($search)) {
-    $query .= " WHERE first_name LIKE ? OR last_name LIKE ? OR email LIKE ? OR student_phone LIKE ?";
-    $searchTerm = "%$search%";
-    $params = array_fill(0, 4, $searchTerm);
-}
+// Build query with search and sort
+$query = "SELECT * FROM student_registration 
+        WHERE first_name LIKE ? OR last_name LIKE ? OR email LIKE ? OR student_phone LIKE ?
+        OR father_name LIKE ? OR institution_name LIKE ?";
+$params = array_fill(0, 6, "%$search%");
 
 $query .= " ORDER BY $sort $order";
 
@@ -120,12 +109,20 @@ $stmt = $pdo->prepare($query);
 $stmt->execute($params);
 $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// Get student data for editing
+$edit_student = null;
+if ($action === 'edit' && $student_id) {
+    $stmt = $pdo->prepare("SELECT * FROM student_registration WHERE id = ?");
+    $stmt->execute([$student_id]);
+    $edit_student = $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
 // Function to get sort link
 function getSortLink($column, $label) {
-    global $sort, $order;
+    global $sort, $order, $search;
     $newOrder = ($sort === $column && $order === 'ASC') ? 'DESC' : 'ASC';
     $icon = ($sort === $column) ? ($order === 'ASC' ? ' ▲' : ' ▼') : '';
-    return "<a href='?sort=$column&order=$newOrder&search=" . urlencode($_GET['search'] ?? '') . "'>$label$icon</a>";
+    return "<a href='?sort=$column&order=$newOrder&search=" . urlencode($search) . "' style='color: white; text-decoration: none;'>$label$icon</a>";
 }
 ?>
 
@@ -134,29 +131,22 @@ function getSortLink($column, $label) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Registration Management</title>
+    <title>Student Management System - Developer View</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
-        body {
-            background-color: #f5f7fa;
-            color: #333;
-            line-height: 1.6;
-        }
-        
+
         .container {
-            width: 100%;
-            max-width: 1800px;
             margin: 0 auto;
             padding: 20px;
+            max-width: 1800px;
         }
-        
+
         header {
             background: linear-gradient(135deg, #2c3e50, #1a2530);
             color: white;
@@ -164,7 +154,7 @@ function getSortLink($column, $label) {
             text-align: center;
             border-radius: 8px;
             margin-bottom: 30px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         
         h1 {
@@ -172,543 +162,606 @@ function getSortLink($column, $label) {
             margin-bottom: 10px;
         }
         
-        .controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
             margin-bottom: 20px;
+            color: #2c3e50;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .form-row {
+            display: flex;
             flex-wrap: wrap;
-            gap: 15px;
-        }
-        
-        .search-box {
-            display: flex;
-            flex: 1;
-            max-width: 500px;
-        }
-        
-        .search-box input {
-            flex: 1;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px 0 0 4px;
-            font-size: 16px;
-        }
-        
-        .search-box button {
-            padding: 12px 20px;
-            background: #2c3e50;
-            color: white;
-            border: none;
-            border-radius: 0 4px 4px 0;
-            cursor: pointer;
-        }
-        
-        .btn {
-            padding: 12px 25px;
-            background: #27ae60;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: background 0.3s;
-            border: none;
-            cursor: pointer;
-        }
-        
-        .btn:hover {
-            background: #219653;
-        }
-        
-        .btn i {
-            font-size: 14px;
-        }
-        
-        .student-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        }
-        
-        .student-table th, .student-table td {
-            padding: 16px;
-            text-align: left;
-            border-bottom: 1px solid #e8e8e8;
-        }
-        
-        .student-table th {
-            background: #2c3e50;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        
-        .student-table th:hover {
-            background: #1a2530;
-        }
-        
-        .student-table tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        
-        .student-table tr:hover {
-            background-color: #f1f7ff;
-        }
-        
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .action-btn {
-            padding: 8px 12px;
-            border-radius: 4px;
-            text-decoration: none;
-            font-size: 14px;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .edit-btn {
-            background: #3498db;
-            color: white;
-        }
-        
-        .edit-btn:hover {
-            background: #2980b9;
-        }
-        
-        .delete-btn {
-            background: #e74c3c;
-            color: white;
-        }
-        
-        .delete-btn:hover {
-            background: #c0392b;
-        }
-        
-        .no-results {
-            text-align: center;
-            padding: 40px;
-            background: white;
-            border-radius: 8px;
-            margin-top: 20px;
-            font-size: 18px;
-            color: #7f8c8d;
-        }
-        
-        @media (max-width: 1200px) {
-            .container {
-                overflow-x: auto;
-            }
-            
-            .student-table {
-                min-width: 1000px;
-            }
-        }
-        
-        .table-container {
-            overflow-x: auto;
-            border-radius: 8px;
-        }
-        
-        /* Modal styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.5);
-        }
-        
-        .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 5px 25px rgba(0,0,0,0.3);
-            width: 90%;
-            max-width: 1000px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        
-        .close:hover {
-            color: #000;
-        }
-        
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
+            margin: 0 -10px;
         }
         
         .form-group {
-            margin-bottom: 20px;
+            flex: 1 0 calc(33.333% - 20px);
+            margin: 0 10px 20px;
         }
         
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #2c3e50;
+        .form-group-full {
+            flex: 1 0 calc(100% - 20px);
         }
         
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
+        input, select, textarea {
             width: 100%;
             padding: 12px;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 16px;
+            transition: border 0.3s;
         }
         
-        .form-group textarea {
+        input:focus, select:focus, textarea:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        textarea {
             min-height: 100px;
             resize: vertical;
         }
         
-        .form-title {
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.3s;
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background: #3498db;
+        }
+        
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+        
+        .btn-danger {
+            background: #e74c3c;
+        }
+        
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+        
+        .btn-success {
+            background: #2ecc71;
+        }
+        
+        .btn-success:hover {
+            background: #27ae60;
+        }
+        
+        .btn-secondary {
+            background: #95a5a6;
+        }
+        
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .search-sort {
+            display: flex;
+            justify-content: space-between;
             margin-bottom: 20px;
+            flex-wrap: wrap;
+            column-gap: 50px;
+        }
+        
+        .search-box {
+            flex: 1;
+            min-width: 300px;
+            margin-right: 20px;
+        }
+        
+        .sort-options {
+            display: flex;
+            align-items: self-end;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        label {
             color: #2c3e50;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            font-weight: 600;
+            background: #2c3e50;
+            color: white;
+            cursor: pointer;
+            position: sticky;
+            top: 0;
+        }
+        
+        th:hover {
+            background-color: #1a2530;
+        }
+        
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .actions-cell {
+            white-space: nowrap;
+            text-align: center;
+        }
+        
+        .actions-cell form {
+            display: inline-block;
+        }
+        
+        .message {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .section-title {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            margin: 20px 0 15px;
+            border-left: 4px solid #3498db;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            max-height: 600px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        @media (max-width: 1024px) {
+            .form-group {
+                flex: 1 0 calc(50% - 20px);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .form-group {
+                flex: 1 0 100%;
+            }
+            
+            .search-sort {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .search-box {
+                margin-right: 0;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Student Registration Management</h1>
-            <p>Developer Admin Panel - SKST University</p>
+            <h1>Student Management System</h1>
+            <p class="subtitle">Developer View - SKST University</p>
         </header>
         
-        <div class="controls">
-            <div class="search-box">
-                <form method="GET" action="">
-                    <input type="text" name="search" placeholder="Search students..." value="<?php echo htmlspecialchars($search); ?>">
-                    <button type="submit"><i class="fas fa-search"></i> Search</button>
-                </form>
-            </div>
-            
-            <button class="btn" onclick="openModal()">
+        <!-- Control buttons -->
+        <div style="margin-bottom: 20px;">
+            <button id="toggleFormBtn" class="btn btn-success">
                 <i class="fas fa-plus"></i> Add New Student
+            </button>
+            <button class="btn btn-secondary" onclick="window.location.href='admission_officer.php'">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
             </button>
         </div>
         
-        <?php if (count($students) > 0): ?>
-        <div class="table-container">
-            <table class="student-table">
-                <thead>
-                    <tr>
-                        <th><?php echo getSortLink('id', 'ID'); ?></th>
-                        <th><?php echo getSortLink('first_name', 'First Name'); ?></th>
-                        <th><?php echo getSortLink('last_name', 'Last Name'); ?></th>
-                        <th>Father's Name</th>
-                        <th>Mother's Name</th>
-                        <th><?php echo getSortLink('date_of_birth', 'DOB'); ?></th>
-                        <th>Guardian Phone</th>
-                        <th>Student Phone</th>
-                        <th>Email</th>
-                        <th>Last Exam</th>
-                        <th>Board</th>
-                        <th>Year of Passing</th>
-                        <th>Institution</th>
-                        <th>Result</th>
-                        <th>Subject Group</th>
-                        <th>Gender</th>
-                        <th>Blood Group</th>
-                        <th>Department</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($students as $student): ?>
-                    <tr>
-                        <td><?php echo $student['id']; ?></td>
-                        <td><?php echo htmlspecialchars($student['first_name']); ?></td>
-                        <td><?php echo htmlspecialchars($student['last_name']); ?></td>
-                        <td><?php echo htmlspecialchars($student['father_name']); ?></td>
-                        <td><?php echo htmlspecialchars($student['mother_name']); ?></td>
-                        <td><?php echo $student['date_of_birth']; ?></td>
-                        <td><?php echo htmlspecialchars($student['guardian_phone']); ?></td>
-                        <td><?php echo htmlspecialchars($student['student_phone']); ?></td>
-                        <td><?php echo htmlspecialchars($student['email']); ?></td>
-                        <td><?php echo htmlspecialchars($student['last_exam']); ?></td>
-                        <td><?php echo htmlspecialchars($student['board']); ?></td>
-                        <td><?php echo $student['year_of_passing']; ?></td>
-                        <td><?php echo htmlspecialchars($student['institution_name']); ?></td>
-                        <td><?php echo htmlspecialchars($student['result']); ?></td>
-                        <td><?php echo htmlspecialchars($student['subject_group']); ?></td>
-                        <td><?php echo ucfirst($student['gender']); ?></td>
-                        <td><?php echo $student['blood_group']; ?></td>
-                        <td><?php echo htmlspecialchars($student['department']); ?></td>
-                        <td class="action-buttons">
-                            <a href="?action=edit&id=<?php echo $student['id']; ?>" class="action-btn edit-btn">
-                                <i class="fas fa-edit"></i> Edit
-                            </a>
-                            <a href="?action=delete&id=<?php echo $student['id']; ?>" class="action-btn delete-btn" onclick="return confirm('Are you sure you want to delete this student?');">
-                                <i class="fas fa-trash"></i> Delete
-                            </a>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
-        <?php else: ?>
-        <div class="no-results">
-            <i class="fas fa-user-slash" style="font-size: 48px; margin-bottom: 20px;"></i>
-            <p>No students found. <?php if (!empty($search)) echo 'Try a different search term.'; ?></p>
-        </div>
-        <?php endif; ?>
-    </div>
-
-    <!-- Add/Edit Student Modal -->
-    <div id="studentModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h2 class="form-title"><?php echo $edit_student ? 'Edit Student' : 'Add New Student'; ?></h2>
-            
-            <form method="POST" action="">
-                <input type="hidden" name="id" value="<?php echo $edit_student['id'] ?? ''; ?>">
+        <!-- Student Form -->
+        <div id="studentForm" class="card <?php echo !$edit_student ? 'hidden' : ''; ?>">
+            <h2 class="card-title">
+                <?php echo $edit_student ? 'Edit Student Record' : 'Add New Student'; ?>
+            </h2>
+            <form method="POST">
+                <input type="hidden" name="action" value="save">
+                <input type="hidden" name="student_id" value="<?php echo $edit_student ? $edit_student['id'] : ''; ?>">
                 
-                <div class="form-grid">
+                <div class="section-title">Personal Information</div>
+                <div class="form-row">
                     <div class="form-group">
-                        <label for="first_name">First Name</label>
-                        <input type="text" id="first_name" name="first_name" value="<?php echo $edit_student['first_name'] ?? ''; ?>" required>
+                        <label for="first_name">First Name *</label>
+                        <input type="text" id="first_name" name="first_name" value="<?php echo $edit_student ? $edit_student['first_name'] : ''; ?>" required>
                     </div>
                     
                     <div class="form-group">
-                        <label for="last_name">Last Name</label>
-                        <input type="text" id="last_name" name="last_name" value="<?php echo $edit_student['last_name'] ?? ''; ?>" required>
+                        <label for="last_name">Last Name *</label>
+                        <input type="text" id="last_name" name="last_name" value="<?php echo $edit_student ? $edit_student['last_name'] : ''; ?>" required>
                     </div>
                     
                     <div class="form-group">
-                        <label for="father_name">Father's Name</label>
-                        <input type="text" id="father_name" name="father_name" value="<?php echo $edit_student['father_name'] ?? ''; ?>" required>
+                        <label for="father_name">Father's Name *</label>
+                        <input type="text" id="father_name" name="father_name" value="<?php echo $edit_student ? $edit_student['father_name'] : ''; ?>" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="mother_name">Mother's Name *</label>
+                        <input type="text" id="mother_name" name="mother_name" value="<?php echo $edit_student ? $edit_student['mother_name'] : ''; ?>" required>
                     </div>
                     
                     <div class="form-group">
-                        <label for="mother_name">Mother's Name</label>
-                        <input type="text" id="mother_name" name="mother_name" value="<?php echo $edit_student['mother_name'] ?? ''; ?>" required>
+                        <label for="date_of_birth">Date of Birth *</label>
+                        <input type="date" id="date_of_birth" name="date_of_birth" value="<?php echo $edit_student ? $edit_student['date_of_birth'] : ''; ?>" required>
                     </div>
                     
                     <div class="form-group">
-                        <label for="date_of_birth">Date of Birth</label>
-                        <input type="date" id="date_of_birth" name="date_of_birth" value="<?php echo $edit_student['date_of_birth'] ?? ''; ?>" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="guardian_phone">Guardian Phone</label>
-                        <input type="text" id="guardian_phone" name="guardian_phone" value="<?php echo $edit_student['guardian_phone'] ?? ''; ?>" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="student_phone">Student Phone</label>
-                        <input type="text" id="student_phone" name="student_phone" value="<?php echo $edit_student['student_phone'] ?? ''; ?>" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" id="email" name="email" value="<?php echo $edit_student['email'] ?? ''; ?>" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <input type="text" id="password" name="password" value="<?php echo $edit_student['password'] ?? ''; ?>" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="last_exam">Last Exam</label>
-                        <select id="last_exam" name="last_exam" required>
-                            <option value="">Select Exam</option>
-                            <option value="SSC" <?php if (($edit_student['last_exam'] ?? '') === 'SSC') echo 'selected'; ?>>SSC</option>
-                            <option value="HSC" <?php if (($edit_student['last_exam'] ?? '') === 'HSC') echo 'selected'; ?>>HSC</option>
-                            <option value="Diploma" <?php if (($edit_student['last_exam'] ?? '') === 'Diploma') echo 'selected'; ?>>Diploma</option>
-                            <option value="Bachelor" <?php if (($edit_student['last_exam'] ?? '') === 'Bachelor') echo 'selected'; ?>>Bachelor</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="board">Board</label>
-                        <select id="board" name="board" required>
-                            <option value="">Select Board</option>
-                            <option value="Dhaka" <?php if (($edit_student['board'] ?? '') === 'Dhaka') echo 'selected'; ?>>Dhaka</option>
-                            <option value="Rajshahi" <?php if (($edit_student['board'] ?? '') === 'Rajshahi') echo 'selected'; ?>>Rajshahi</option>
-                            <option value="Comilla" <?php if (($edit_student['board'] ?? '') === 'Comilla') echo 'selected'; ?>>Comilla</option>
-                            <option value="Jessore" <?php if (($edit_student['board'] ?? '') === 'Jessore') echo 'selected'; ?>>Jessore</option>
-                            <option value="Chittagong" <?php if (($edit_student['board'] ?? '') === 'Chittagong') echo 'selected'; ?>>Chittagong</option>
-                            <option value="Barisal" <?php if (($edit_student['board'] ?? '') === 'Barisal') echo 'selected'; ?>>Barisal</option>
-                            <option value="Sylhet" <?php if (($edit_student['board'] ?? '') === 'Sylhet') echo 'selected'; ?>>Sylhet</option>
-                            <option value="Dinajpur" <?php if (($edit_student['board'] ?? '') === 'Dinajpur') echo 'selected'; ?>>Dinajpur</option>
-                            <option value="Other" <?php if (($edit_student['board'] ?? '') === 'Other') echo 'selected'; ?>>Other</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group" id="otherBoardGroup" style="display: none;">
-                        <label for="other_board">Other Board</label>
-                        <input type="text" id="other_board" name="other_board" value="<?php echo $edit_student['other_board'] ?? ''; ?>">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="year_of_passing">Year of Passing</label>
-                        <input type="number" id="year_of_passing" name="year_of_passing" min="1900" max="2099" value="<?php echo $edit_student['year_of_passing'] ?? ''; ?>" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="institution_name">Institution Name</label>
-                        <input type="text" id="institution_name" name="institution_name" value="<?php echo $edit_student['institution_name'] ?? ''; ?>" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="result">Result</label>
-                        <input type="text" id="result" name="result" value="<?php echo $edit_student['result'] ?? ''; ?>" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="subject_group">Subject Group</label>
-                        <select id="subject_group" name="subject_group" required>
-                            <option value="">Select Group</option>
-                            <option value="science" <?php if (($edit_student['subject_group'] ?? '') === 'science') echo 'selected'; ?>>Science</option>
-                            <option value="arts" <?php if (($edit_student['subject_group'] ?? '') === 'arts') echo 'selected'; ?>>Arts</option>
-                            <option value="commerce" <?php if (($edit_student['subject_group'] ?? '') === 'commerce') echo 'selected'; ?>>Commerce</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="gender">Gender</label>
+                        <label for="gender">Gender *</label>
                         <select id="gender" name="gender" required>
                             <option value="">Select Gender</option>
-                            <option value="male" <?php if (($edit_student['gender'] ?? '') === 'male') echo 'selected'; ?>>Male</option>
-                            <option value="female" <?php if (($edit_student['gender'] ?? '') === 'female') echo 'selected'; ?>>Female</option>
+                            <option value="male" <?php echo ($edit_student && $edit_student['gender'] == 'male') ? 'selected' : ''; ?>>Male</option>
+                            <option value="female" <?php echo ($edit_student && $edit_student['gender'] == 'female') ? 'selected' : ''; ?>>Female</option>
                         </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="blood_group">Blood Group</label>
-                        <select id="blood_group" name="blood_group" required>
-                            <option value="">Select Blood Group</option>
-                            <option value="A+" <?php if (($edit_student['blood_group'] ?? '') === 'A+') echo 'selected'; ?>>A+</option>
-                            <option value="A-" <?php if (($edit_student['blood_group'] ?? '') === 'A-') echo 'selected'; ?>>A-</option>
-                            <option value="B+" <?php if (($edit_student['blood_group'] ?? '') === 'B+') echo 'selected'; ?>>B+</option>
-                            <option value="B-" <?php if (($edit_student['blood_group'] ?? '') === 'B-') echo 'selected'; ?>>B-</option>
-                            <option value="O+" <?php if (($edit_student['blood_group'] ?? '') === 'O+') echo 'selected'; ?>>O+</option>
-                            <option value="O-" <?php if (($edit_student['blood_group'] ?? '') === 'O-') echo 'selected'; ?>>O-</option>
-                            <option value="AB+" <?php if (($edit_student['blood_group'] ?? '') === 'AB+') echo 'selected'; ?>>AB+</option>
-                            <option value="AB-" <?php if (($edit_student['blood_group'] ?? '') === 'AB-') echo 'selected'; ?>>AB-</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="nationality">Nationality</label>
-                        <input type="text" id="nationality" name="nationality" value="<?php echo $edit_student['nationality'] ?? 'Bangladeshi'; ?>" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="religion">Religion</label>
-                        <select id="religion" name="religion" required>
-                            <option value="">Select Religion</option>
-                            <option value="Islam" <?php if (($edit_student['religion'] ?? '') === 'Islam') echo 'selected'; ?>>Islam</option>
-                            <option value="Hinduism" <?php if (($edit_student['religion'] ?? '') === 'Hinduism') echo 'selected'; ?>>Hinduism</option>
-                            <option value="Christianity" <?php if (($edit_student['religion'] ?? '') === 'Christianity') echo 'selected'; ?>>Christianity</option>
-                            <option value="Buddhism" <?php if (($edit_student['religion'] ?? '') === 'Buddhism') echo 'selected'; ?>>Buddhism</option>
-                            <option value="Other" <?php if (($edit_student['religion'] ?? '') === 'Other') echo 'selected'; ?>>Other</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="present_address">Present Address</label>
-                        <textarea id="present_address" name="present_address" required><?php echo $edit_student['present_address'] ?? ''; ?></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="permanent_address">Permanent Address</label>
-                        <textarea id="permanent_address" name="permanent_address" required><?php echo $edit_student['permanent_address'] ?? ''; ?></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="department">Department</label>
-                        <input type="text" id="department" name="department" value="<?php echo $edit_student['department'] ?? ''; ?>" required>
                     </div>
                 </div>
                 
-                <div style="margin-top: 30px; text-align: center;">
-                    <button type="submit" class="btn">
-                        <i class="fas fa-save"></i> <?php echo $edit_student ? 'Update Student' : 'Add Student'; ?>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="blood_group">Blood Group</label>
+                        <select id="blood_group" name="blood_group">
+                            <option value="">Select Blood Group</option>
+                            <option value="A+" <?php echo ($edit_student && $edit_student['blood_group'] == 'A+') ? 'selected' : ''; ?>>A+</option>
+                            <option value="A-" <?php echo ($edit_student && $edit_student['blood_group'] == 'A-') ? 'selected' : ''; ?>>A-</option>
+                            <option value="B+" <?php echo ($edit_student && $edit_student['blood_group'] == 'B+') ? 'selected' : ''; ?>>B+</option>
+                            <option value="B-" <?php echo ($edit_student && $edit_student['blood_group'] == 'B-') ? 'selected' : ''; ?>>B-</option>
+                            <option value="AB+" <?php echo ($edit_student && $edit_student['blood_group'] == 'AB+') ? 'selected' : ''; ?>>AB+</option>
+                            <option value="AB-" <?php echo ($edit_student && $edit_student['blood_group'] == 'AB-') ? 'selected' : ''; ?>>AB-</option>
+                            <option value="O+" <?php echo ($edit_student && $edit_student['blood_group'] == 'O+') ? 'selected' : ''; ?>>O+</option>
+                            <option value="O-" <?php echo ($edit_student && $edit_student['blood_group'] == 'O-') ? 'selected' : ''; ?>>O-</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="nationality">Nationality *</label>
+                        <input type="text" id="nationality" name="nationality" value="<?php echo $edit_student ? $edit_student['nationality'] : 'Bangladeshi'; ?>" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="religion">Religion *</label>
+                        <select id="religion" name="religion" required>
+                            <option value="">Select Religion</option>
+                            <option value="Islam" <?php echo ($edit_student && $edit_student['religion'] == 'Islam') ? 'selected' : ''; ?>>Islam</option>
+                            <option value="Hinduism" <?php echo ($edit_student && $edit_student['religion'] == 'Hinduism') ? 'selected' : ''; ?>>Hinduism</option>
+                            <option value="Christianity" <?php echo ($edit_student && $edit_student['religion'] == 'Christianity') ? 'selected' : ''; ?>>Christianity</option>
+                            <option value="Buddhism" <?php echo ($edit_student && $edit_student['religion'] == 'Buddhism') ? 'selected' : ''; ?>>Buddhism</option>
+                            <option value="Other" <?php echo ($edit_student && $edit_student['religion'] == 'Other') ? 'selected' : ''; ?>>Other</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="section-title">Contact Information</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" name="email" value="<?php echo $edit_student ? $edit_student['email'] : ''; ?>" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="student_phone">Student Phone *</label>
+                        <input type="text" id="student_phone" name="student_phone" value="<?php echo $edit_student ? $edit_student['student_phone'] : ''; ?>" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="guardian_phone">Guardian Phone *</label>
+                        <input type="text" id="guardian_phone" name="guardian_phone" value="<?php echo $edit_student ? $edit_student['guardian_phone'] : ''; ?>" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group form-group-full">
+                        <label for="present_address">Present Address *</label>
+                        <textarea id="present_address" name="present_address" required><?php echo $edit_student ? $edit_student['present_address'] : ''; ?></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group form-group-full">
+                        <label for="permanent_address">Permanent Address *</label>
+                        <textarea id="permanent_address" name="permanent_address" required><?php echo $edit_student ? $edit_student['permanent_address'] : ''; ?></textarea>
+                    </div>
+                </div>
+                
+                <div class="section-title">Academic Information</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="last_exam">Last Examination Passed *</label>
+                        <select id="last_exam" name="last_exam" required>
+                            <option value="">Select Examination</option>
+                            <option value="SSC" <?php echo ($edit_student && $edit_student['last_exam'] == 'SSC') ? 'selected' : ''; ?>>SSC</option>
+                            <option value="HSC" <?php echo ($edit_student && $edit_student['last_exam'] == 'HSC') ? 'selected' : ''; ?>>HSC</option>
+                            <option value="Diploma" <?php echo ($edit_student && $edit_student['last_exam'] == 'Diploma') ? 'selected' : ''; ?>>Diploma</option>
+                            <option value="Bachelor" <?php echo ($edit_student && $edit_student['last_exam'] == 'Bachelor') ? 'selected' : ''; ?>>Bachelor</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="board">Board *</label>
+                        <select id="board" name="board" required>
+                            <option value="">Select Board</option>
+                            <option value="Dhaka" <?php echo ($edit_student && $edit_student['board'] == 'Dhaka') ? 'selected' : ''; ?>>Dhaka</option>
+                            <option value="Chittagong" <?php echo ($edit_student && $edit_student['board'] == 'Chittagong') ? 'selected' : ''; ?>>Chittagong</option>
+                            <option value="Rajshahi" <?php echo ($edit_student && $edit_student['board'] == 'Rajshahi') ? 'selected' : ''; ?>>Rajshahi</option>
+                            <option value="Comilla" <?php echo ($edit_student && $edit_student['board'] == 'Comilla') ? 'selected' : ''; ?>>Comilla</option>
+                            <option value="Jessore" <?php echo ($edit_student && $edit_student['board'] == 'Jessore') ? 'selected' : ''; ?>>Jessore</option>
+                            <option value="Barisal" <?php echo ($edit_student && $edit_student['board'] == 'Barisal') ? 'selected' : ''; ?>>Barisal</option>
+                            <option value="Sylhet" <?php echo ($edit_student && $edit_student['board'] == 'Sylhet') ? 'selected' : ''; ?>>Sylhet</option>
+                            <option value="Dinajpur" <?php echo ($edit_student && $edit_student['board'] == 'Dinajpur') ? 'selected' : ''; ?>>Dinajpur</option>
+                            <option value="Madrasah" <?php echo ($edit_student && $edit_student['board'] == 'Madrasah') ? 'selected' : ''; ?>>Madrasah</option>
+                            <option value="Technical" <?php echo ($edit_student && $edit_student['board'] == 'Technical') ? 'selected' : ''; ?>>Technical</option>
+                            <option value="Other" <?php echo ($edit_student && $edit_student['board'] == 'Other') ? 'selected' : ''; ?>>Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" id="other-board-group" style="<?php echo ($edit_student && $edit_student['board'] == 'Other') ? '' : 'display: none;'; ?>">
+                        <label for="other_board">Other Board Name</label>
+                        <input type="text" id="other_board" name="other_board" value="<?php echo $edit_student ? $edit_student['other_board'] : ''; ?>">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="year_of_passing">Year of Passing *</label>
+                        <input type="number" id="year_of_passing" name="year_of_passing" min="1990" max="2099" value="<?php echo $edit_student ? $edit_student['year_of_passing'] : ''; ?>" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="institution_name">Institution Name *</label>
+                        <input type="text" id="institution_name" name="institution_name" value="<?php echo $edit_student ? $edit_student['institution_name'] : ''; ?>" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="result">Result (GPA) *</label>
+                        <input type="number" id="result" name="result" step="0.01" min="1" max="5" value="<?php echo $edit_student ? $edit_student['result'] : ''; ?>" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="subject_group">Subject/Group *</label>
+                        <select id="subject_group" name="subject_group" required>
+                            <option value="">Select Group</option>
+                            <option value="Science" <?php echo ($edit_student && $edit_student['subject_group'] == 'Science') ? 'selected' : ''; ?>>Science</option>
+                            <option value="Commerce" <?php echo ($edit_student && $edit_student['subject_group'] == 'Commerce') ? 'selected' : ''; ?>>Commerce</option>
+                            <option value="Arts" <?php echo ($edit_student && $edit_student['subject_group'] == 'Arts') ? 'selected' : ''; ?>>Arts</option>
+                            <option value="Other" <?php echo ($edit_student && $edit_student['subject_group'] == 'Other') ? 'selected' : ''; ?>>Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="department">Department at SKST *</label>
+                        <select id="department" name="department" required>
+                            <option value="">Select a program</option>
+                                    <option value="BBA in Accounting">BBA in Accounting</option>
+                                    <option value="BBA in Finance">BBA in Finance</option>
+                                    <option value="BBA in Human Resource Management">BBA in Human Resource Management</option>
+                                    <option value="BBA in Management">BBA in Management</option>
+                                    <option value="BBA in Marketing">BBA in Marketing</option>
+                                    <option value="BSc in Computer Science and Engineering">BSc in Computer Science and Engineering</option>
+                                    <option value="BSc in Civil Engineering">BSc in Civil Engineering</option>
+                                    <option value="BSc in Electrical and Electronic Engineering">BSc in Electrical and Electronic Engineering</option>
+                                    <option value="BSc in Mechanical Engineering">BSc in Mechanical Engineering</option>
+                                    <option value="BSEEE in Electrical and Electronic Engineering">BSEEE in Electrical and Electronic Engineering</option>
+                                    <option value="BSAg in Agriculture">BSAg in Agriculture</option>
+                                    <option value="BSN in Nursing (Basic)">BSN in Nursing (Basic)</option>
+                                    <option value="BSN in Nursing (Post Basic)">BSN in Nursing (Post Basic)</option>
+                                    <option value="BATHM in Tourism and Hospitality Management">BATHM in Tourism and Hospitality Management</option>
+                                    <option value="BSECO in Economics">BSECO in Economics</option>
+                                    <option value="BA in English">BA in English</option>
+                                    <option value="LLB (Honours)">LLB (Honours)</option>
+
+                            <option value="Economics" <?php echo ($edit_student && $edit_student['department'] == 'Economics') ? 'selected' : ''; ?>>Mechanical Engineering</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password *</label>
+                        <input type="text" id="password" name="password" value="<?php echo $edit_student ? $edit_student['password'] : ''; ?>" required>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i> <?php echo $edit_student ? 'Update Record' : 'Add Student'; ?>
                     </button>
-                    <button type="button" class="btn" style="background: #7f8c8d;" onclick="closeModal()">
-                        <i class="fas fa-times"></i> Cancel
-                    </button>
+                    <?php if ($edit_student): ?>
+                        <a href="?" class="btn btn-secondary">Cancel</a>
+                    <?php endif; ?>
                 </div>
             </form>
+        </div>
+        
+        <div class="card">
+            <h2 class="card-title">Student Records</h2>
+            
+            <div class="search-sort">
+                <div class="search-box">
+                    <form method="GET">
+                        <label for="search">Search Students</label>
+                        <input type="text" id="search" name="search" placeholder="Search by name, email, or phone..." value="<?php echo htmlspecialchars($search); ?>">
+                    </form>
+                </div>
+                
+                <div class="sort-options">
+                    <label for="sort">Sort by:</label>
+                    <select id="sort" onchange="window.location.href='?search=<?php echo urlencode($search); ?>&sort='+this.value+'&order=<?php echo $order === 'ASC' ? 'DESC' : 'ASC'; ?>'">
+                        <option value="id" <?php echo $sort === 'id' ? 'selected' : ''; ?>>ID</option>
+                        <option value="first_name" <?php echo $sort === 'first_name' ? 'selected' : ''; ?>>First Name</option>
+                        <option value="last_name" <?php echo $sort === 'last_name' ? 'selected' : ''; ?>>Last Name</option>
+                        <option value="department" <?php echo $sort === 'department' ? 'selected' : ''; ?>>Department</option>
+                        <option value="submission_date" <?php echo $sort === 'submission_date' ? 'selected' : ''; ?>>Registration Date</option>
+                    </select>
+
+                    <button class="btn btn-primary" onclick="window.location.href='?search=<?php echo urlencode($search); ?>&sort=<?php echo $sort; ?>&order=<?php echo $order === 'ASC' ? 'DESC' : 'ASC'; ?>'">
+                        <?php echo $order === 'ASC' ? 'Ascending' : 'Descending'; ?>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th><?php echo getSortLink('id', 'ID'); ?></th>
+                            <th><?php echo getSortLink('first_name', 'Name'); ?></th>
+                            <th><?php echo getSortLink('email', 'Email'); ?></th>
+                            <th>Phone</th>
+                            <th>Father's Name</th>
+                            <th><?php echo getSortLink('department', 'Department'); ?></th>
+                            <th><?php echo getSortLink('submission_date', 'Registration Date'); ?></th>
+                            <th style="text-align:center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (count($students) > 0): ?>
+                            <?php foreach ($students as $s): ?>
+                                <tr>
+                                    <td><?php echo $s['id']; ?></td>
+                                    <td><?php echo htmlspecialchars($s['first_name'] . ' ' . $s['last_name']); ?></td>
+                                    <td><?php echo htmlspecialchars($s['email']); ?></td>
+                                    <td><?php echo htmlspecialchars($s['student_phone']); ?></td>
+                                    <td><?php echo htmlspecialchars($s['father_name']); ?></td>
+                                    <td><?php echo htmlspecialchars($s['department']); ?></td>
+                                    <td><?php echo date('M j, Y', strtotime($s['submission_date'])); ?></td>
+                                    <td class="actions-cell">
+                                        <form method="POST" style="display: inline;">
+                                            <input type="hidden" name="student_id" value="<?php echo $s['id']; ?>">
+                                            <input type="hidden" name="action" value="edit">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </button>
+                                        </form>
+                                        <form method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this student record?');">
+                                            <input type="hidden" name="student_id" value="<?php echo $s['id']; ?>">
+                                            <input type="hidden" name="action" value="delete">
+                                            <button type="submit" class="btn btn-danger">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="8" style="text-align: center;">No student records found.</td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
     <script>
-        // Modal functions
-        function openModal() {
-            document.getElementById('studentModal').style.display = 'block';
-        }
-        
-        function closeModal() {
-            document.getElementById('studentModal').style.display = 'none';
-            window.location.href = window.location.pathname;
-        }
-        
-        // Close modal if clicked outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('studentModal');
-            if (event.target === modal) {
-                closeModal();
-            }
-        };
-        
-        // Show/hide other board field
-        document.getElementById('board').addEventListener('change', function() {
-            document.getElementById('otherBoardGroup').style.display = this.value === 'Other' ? 'block' : 'none';
-        });
-        
-        // Trigger change event on page load
-        window.onload = function() {
-            document.getElementById('board').dispatchEvent(new Event('change'));
-            
-            <?php if ($action === 'edit' && !empty($id)): ?>
-                openModal();
-            <?php endif; ?>
-        };
-        
-        // Add confirmation for delete actions
-        const deleteButtons = document.querySelectorAll('.delete-btn');
-        deleteButtons.forEach(button => {
-            button.addEventListener('click', function(e) {
-                if (!confirm('Are you sure you want to delete this student?')) {
-                    e.preventDefault();
+        // Toggle form visibility
+        document.getElementById("toggleFormBtn").addEventListener("click", function() {
+            var form = document.getElementById("studentForm");
+            if (form.classList.contains("hidden")) {
+                form.classList.remove("hidden");
+                // Clear form if not in edit mode
+                if (!<?php echo $edit_student ? 'true' : 'false'; ?>) {
+                    document.querySelector('form').reset();
+                    // Reset hidden fields
+                    document.querySelector('input[name="student_id"]').value = '';
+                    document.querySelector('input[name="action"]').value = 'save';
                 }
-            });
+            } else {
+                form.classList.add("hidden");
+            }
         });
+        
+        // Live search functionality
+        document.getElementById('search').addEventListener('input', function() {
+            clearTimeout(this.delay);
+            this.delay = setTimeout(function() {
+                this.form.submit();
+            }.bind(this), 800);
+        });
+        
+        // Show/hide other board field based on selection
+        document.getElementById('board').addEventListener('change', function() {
+            var otherBoardGroup = document.getElementById('other-board-group');
+            otherBoardGroup.style.display = this.value === 'Other' ? 'block' : 'none';
+        });
+        
+        // Auto-show form if editing
+        <?php if ($edit_student): ?>
+            document.getElementById('studentForm').classList.remove('hidden');
+        <?php endif; ?>
     </script>
 </body>
 </html>
