@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 05, 2025 at 11:09 AM
+-- Generation Time: Sep 06, 2025 at 09:47 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -46,8 +46,8 @@ CREATE TABLE `admin_users` (
 --
 
 INSERT INTO `admin_users` (`id`, `full_name`, `username`, `password`, `email`, `phone`, `key`, `profile_picture`, `registration_date`, `last_login`, `is_active`) VALUES
-(1, 'Admin User', 'admin', 'shafiul', '23303105@iubat.edu', '123-456-7890', 123, '', '2025-09-01 21:21:06', '2025-09-03 15:25:11.000000', 1),
-(1490, 'shafiul islam', 'Admission Officer', 'shafiul', '23303106@iubat.edu', '01884273156', 123, '', '2025-09-03 15:04:27', '2025-09-05 12:27:18.000000', 1);
+(1, 'Admin User', 'admin1234', 'shafiul', '23303105@iubat.edu', '123-456-7890', 123, '', '2025-09-01 21:21:06', '2025-09-03 15:25:11.000000', 1),
+(1490, 'shafiul islam', 'Admission Officer', 'shafiul', '23303106@iubat.edu', '01884273156', 123, '', '2025-09-03 15:04:27', '2025-09-06 13:26:27.000000', 1);
 
 -- --------------------------------------------------------
 
@@ -205,6 +205,32 @@ INSERT INTO `books` (`book_id`, `title`, `author`, `isbn`, `publication_year`, `
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `book_borrowings`
+--
+
+CREATE TABLE `book_borrowings` (
+  `borrow_id` int(11) NOT NULL,
+  `member_id` int(11) NOT NULL,
+  `book_id` int(11) NOT NULL,
+  `borrow_date` date NOT NULL,
+  `due_date` date NOT NULL,
+  `return_date` date DEFAULT NULL,
+  `fine_amount` decimal(10,2) DEFAULT 0.00,
+  `status` enum('borrowed','returned','overdue','lost') NOT NULL DEFAULT 'borrowed',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `book_borrowings`
+--
+
+INSERT INTO `book_borrowings` (`borrow_id`, `member_id`, `book_id`, `borrow_date`, `due_date`, `return_date`, `fine_amount`, `status`, `created_at`) VALUES
+(1, 1, 1, '2025-09-05', '2025-09-19', '2025-09-25', 30.00, 'returned', '2025-09-05 13:42:02'),
+(2, 1, 2, '2025-09-05', '2025-09-19', '2025-09-26', 35.00, 'returned', '2025-09-05 16:58:22');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `borrow_books`
 --
 
@@ -253,7 +279,8 @@ INSERT INTO `course` (`course_id`, `course_code`, `course_name`, `credit_hours`,
 (112, 'csc 112', 'DBMS', 4, 'BCSE', 3, '2025-09-01 12:21:45', '2025-09-01 12:21:45'),
 (123, 'csc 123', 'dbms', 5, 'BCSE', 1, '2025-09-01 18:59:59', '2025-09-01 18:59:59'),
 (222, 'csc 222', 'computer archetecture', 3, 'BCSE', 2, '2025-09-01 18:17:02', '2025-09-01 18:17:02'),
-(234, 'TT 234', 'testing', 5, 'TT', 5, '2025-09-04 18:32:04', '2025-09-04 18:32:04');
+(234, 'TT 234', 'testing', 5, 'TT', 5, '2025-09-04 18:32:04', '2025-09-04 18:32:04'),
+(777, 'sss 777', 'sss', 3, 's', 5, '2025-09-05 16:25:24', '2025-09-05 16:25:24');
 
 -- --------------------------------------------------------
 
@@ -275,8 +302,10 @@ CREATE TABLE `course_instructor` (
 
 INSERT INTO `course_instructor` (`faculty_id`, `course_id`, `class_day`, `class_time`, `room_number`) VALUES
 (7654327, 100, 'Sunday', '8:30-9:30', '1001'),
+(7654327, 100, 'Sunday', '8:30-9:30', '555'),
 (7654327, 112, 'Sunday', '10:40-11:40', '1211'),
 (7654327, 123, 'Thursday', '10:40-11:40', '1001'),
+(7654328, 123, 'Sunday', '8:30-9:30', '333'),
 (7654328, 222, 'Tuesday', '8:30-9:30', '999'),
 (7654324, 332, 'Saturday', '9:35-10:35', '1000');
 
@@ -293,8 +322,19 @@ CREATE TABLE `course_materials` (
   `title` varchar(255) NOT NULL,
   `description` text DEFAULT NULL,
   `file_path` varchar(255) DEFAULT NULL,
-  `upload_date` timestamp NOT NULL DEFAULT current_timestamp()
+  `upload_date` timestamp NOT NULL DEFAULT current_timestamp(),
+  `file_type` varchar(50) DEFAULT 'document',
+  `file_size` varchar(20) DEFAULT '0 KB'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `course_materials`
+--
+
+INSERT INTO `course_materials` (`material_id`, `course_id`, `faculty_id`, `title`, `description`, `file_path`, `upload_date`, `file_type`, `file_size`) VALUES
+(1, 112, 7654327, 'picture', 'vv', 'uploads/course_materials/1757064352_Screenshot 2025-09-05 115333.png', '2025-09-05 09:25:52', 'png', '101.95 KB'),
+(2, 112, 7654327, 'picture', 'x', 'uploads/course_materials/1757065994_Screenshot 2025-09-05 123943.png', '2025-09-05 09:53:14', 'png', '1.28 KB'),
+(3, 112, 7654327, 'memory', '2got', 'uploads/course_materials/1757071466_1709488820435.jpg', '2025-09-05 11:24:26', 'jpg', '1.16 MB');
 
 -- --------------------------------------------------------
 
@@ -372,7 +412,38 @@ CREATE TABLE `enrollments` (
 --
 
 INSERT INTO `enrollments` (`enrollment_id`, `student_id`, `course_id`, `faculty_id`, `enrollment_date`, `status`) VALUES
-(1, 23303106, 112, 7654327, '2025-09-05 05:54:22', 'enrolled');
+(3, 23303137, 100, 7654327, '2025-09-06 02:19:10', 'enrolled'),
+(4, 23303105, 777, 7654328, '2025-09-06 02:19:34', 'enrolled'),
+(5, 23303106, 100, 7654328, '2025-09-06 02:27:32', 'enrolled'),
+(6, 23303105, 777, 7654328, '2025-09-06 02:28:45', 'enrolled'),
+(7, 23303105, 100, 7654328, '2025-09-06 03:07:40', 'enrolled');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `exm_routine`
+--
+
+CREATE TABLE `exm_routine` (
+  `student_id` int(11) NOT NULL,
+  `course_id` int(11) NOT NULL,
+  `faculty_id` int(11) NOT NULL,
+  `day` enum('Saturday','Sunday','Monday','Tuesday','Wednesday','Thursday','Friday') NOT NULL,
+  `exam_date` date NOT NULL,
+  `time` time NOT NULL,
+  `room_no` varchar(20) NOT NULL,
+  `set_no` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `exm_routine`
+--
+
+INSERT INTO `exm_routine` (`student_id`, `course_id`, `faculty_id`, `day`, `exam_date`, `time`, `room_no`, `set_no`) VALUES
+(23303105, 100, 7654328, 'Tuesday', '2025-09-23', '09:00:00', '100', 1),
+(23303105, 777, 7654328, 'Thursday', '2025-09-25', '13:00:00', '100', 1),
+(23303106, 100, 7654328, 'Tuesday', '2025-09-23', '09:00:00', '100', 2),
+(23303137, 100, 7654327, 'Tuesday', '2025-09-23', '09:00:00', '100', 3);
 
 -- --------------------------------------------------------
 
@@ -400,7 +471,7 @@ CREATE TABLE `faculty` (
 
 INSERT INTO `faculty` (`faculty_id`, `name`, `email`, `password`, `department`, `address`, `phone`, `room_number`, `salary`, `last_login`, `profile_picture`) VALUES
 (7654327, 'Md. Kawsar Miah', '23303105@iubat.edu', 'kawsar', 'BCSE', 'Uttara, Dhaka-1230', '01884273156', '1010', 1000.00, '2025-09-03 09:56:24', NULL),
-(7654328, 'Md Shafiul Islam', '23303106@iubat.edu', 'shafiul', 'BCSE', 'Bamrar Tech, Chan Miah Vila', '01701535780', '1001', 1000000.00, '2025-09-05 11:19:24', 'uploads/faculty/68b96270b8d12.png');
+(7654328, 'Md Shafiul Islam', '23303106@iubat.edu', 'shafiul', 'BCSE', 'Bamrar Tech, Chan Miah Vila', '01701535780', '1001', 1000000.00, '2025-09-05 21:27:51', 'uploads/faculty/68b96270b8d12.png');
 
 -- --------------------------------------------------------
 
@@ -448,6 +519,36 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `library_members`
+--
+
+CREATE TABLE `library_members` (
+  `member_id` int(11) NOT NULL,
+  `user_type` enum('student','faculty','staff','alumni','bank_officer','admin') NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `full_name` varchar(200) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `department` varchar(100) DEFAULT NULL,
+  `max_books` int(11) NOT NULL DEFAULT 3,
+  `current_books` int(11) NOT NULL DEFAULT 0,
+  `membership_status` enum('active','suspended','graduated','retired') NOT NULL DEFAULT 'active',
+  `membership_start` date NOT NULL,
+  `membership_end` date DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `library_members`
+--
+
+INSERT INTO `library_members` (`member_id`, `user_type`, `user_id`, `full_name`, `email`, `department`, `max_books`, `current_books`, `membership_status`, `membership_start`, `membership_end`, `created_at`, `updated_at`) VALUES
+(1, 'faculty', 7654327, 'Md. Kawsar Miah', '23303105@iubat.edu', 'BCSE', 3, 0, 'active', '2025-09-05', NULL, '2025-09-05 12:30:51', '2025-09-05 12:30:51'),
+(2, 'alumni', 1258, 'Toymoon Islam Estia', '23303116@iubat.edu', 'BCSE', 10, 0, 'graduated', '2025-09-05', NULL, '2025-09-05 16:56:48', '2025-09-05 16:56:48');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `notice`
 --
 
@@ -467,47 +568,20 @@ CREATE TABLE `notice` (
 --
 
 INSERT INTO `notice` (`id`, `title`, `section`, `sub_section`, `content`, `author`, `created_at`, `viewed`) VALUES
-(23303106, 'off day', '', NULL, 'for my weekness today is off', 'shafiul', '2025-07-30 17:06:21', 1),
-(23303106, 'peragraph', 'Bcse', NULL, 'A paragraph is a series of sentences that are organized and coherent, and are all related to a single topic.', 'Md shafiul Islam', '2025-07-31 07:49:23', 1),
-(23303106, 'library notice check', 'Library', NULL, 'library notice section works successfully', 'Md Shafiul Islam', '2025-08-06 11:03:52', 1),
 (0, '234444', 'Alumni', NULL, 'inseert alumni data notice', 'shafiul', '2025-08-06 16:56:33', 1),
 (0, '23444455', 'Alumni', NULL, 'inseert alumni data notice', 'shafiul', '2025-08-06 16:57:00', 1),
-(23303106, 'for stuf checking', 'stuf', NULL, 'this is correct successfully', 'shafiul', '2025-08-16 10:47:08', 1),
-(23303106, 'for stuf checking', 'stuf', NULL, 'this is correct successfully', 'shafiul', '2025-08-16 10:48:16', 1),
-(23303106, 'sdftgsdff', 'staf', NULL, 'sdfgsd 2nd', 'shafiul', '2025-08-16 11:01:44', 1),
-(23303106, 'sdftgsdff', 'Staff', NULL, 'sdfgsd 2nd', 'shafiul', '2025-08-16 11:10:07', 1),
-(23303106, 'sdfgjkhjksd ', 'Staff', NULL, 'jkhkjhsjkdf ', 'shafiul ', '2025-08-26 12:57:53', 1),
-(23303106, 'sdfgsdf', 'Staff', NULL, 'sdfgsd', 'sdfg', '2025-08-26 14:40:26', 1),
-(23303106, 'sdfgsdf', 'Staf', NULL, 'sdfgsd', 'sdfg', '2025-08-26 14:40:44', 1),
-(23303106, 'off day', '', NULL, 'for my weekness today is off', 'shafiul', '2025-07-30 17:06:21', 1),
-(23303106, 'peragraph', 'Bcse', NULL, 'A paragraph is a series of sentences that are organized and coherent, and are all related to a single topic.', 'Md shafiul Islam', '2025-07-31 07:49:23', 1),
-(23303106, 'library notice check', 'Library', NULL, 'library notice section works successfully', 'Md Shafiul Islam', '2025-08-06 11:03:52', 1),
 (0, '234444', 'Alumni', NULL, 'inseert alumni data notice', 'shafiul', '2025-08-06 16:56:33', 1),
 (0, '23444455', 'Alumni', NULL, 'inseert alumni data notice', 'shafiul', '2025-08-06 16:57:00', 1),
-(23303106, 'for stuf checking', 'stuf', NULL, 'this is correct successfully', 'shafiul', '2025-08-16 10:47:08', 1),
-(23303106, 'for stuf checking', 'stuf', NULL, 'this is correct successfully', 'shafiul', '2025-08-16 10:48:16', 1),
-(23303106, 'sdftgsdff', 'staf', NULL, 'sdfgsd 2nd', 'shafiul', '2025-08-16 11:01:44', 1),
-(23303106, 'sdftgsdff', 'Staff', NULL, 'sdfgsd 2nd', 'shafiul', '2025-08-16 11:10:07', 1),
-(23303106, 'sdfgjkhjksd ', 'Staff', NULL, 'jkhkjhsjkdf ', 'shafiul ', '2025-08-26 12:57:53', 1),
-(23303106, 'sdfgsdf', 'Staff', NULL, 'sdfgsd', 'sdfg', '2025-08-26 14:40:26', 1),
-(23303106, 'sdfgsdf', 'Staf', NULL, 'sdfgsd', 'sdfg', '2025-08-26 14:40:44', 1),
-(23303106, 'test student notice', 'Student', NULL, 'correctly worked', 'shafiul', '2025-09-03 14:07:26', 1),
-(23303106, 'nothing', 'Student', NULL, 'dfgsdgdf', 'shafi', '2025-09-03 17:42:24', 1),
-(23303106, 'nothing', 'Student', NULL, 'dfgsdgdf', 'shafi', '2025-09-03 17:53:42', 1),
-(23303106, 'color check', 'Student', NULL, 'dfgsdgdf', 'shafi', '2025-09-03 17:59:16', 1),
-(23303106, 'color check', 'Student', NULL, 'dfgsdgdf', 'shafi', '2025-09-03 18:03:06', 1),
-(23303106, 'check', 'Admin', NULL, 'dfd', 'shafiul', '2025-09-04 04:39:01', 1),
 (11111111, 'dfdfd', 'Library', NULL, 'sdfsdf dsfds ', 'shafiul islam', '2025-09-04 08:27:06', 1),
-(23303106, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'Student', NULL, 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'ccccccccccccccccccccccccccccc', '2025-09-04 12:55:37', 1),
-(222, 'hijibiji', 'Faculty', NULL, 'fgfdfdffd', 'ccccccccccccccccccccccccccccc', '2025-09-04 13:02:12', 1),
-(222, 'hijibiji', 'Faculty', NULL, 'fgfdfdffd', 'ccccccccccccccccccccccccccccc', '2025-09-04 13:04:47', 1),
-(23303106, '56666', 'Admin', NULL, 'jghhjj', 'ghj', '2025-09-04 16:13:27', 1),
 (0, '000000000000000000000000000000000000000', 'Bank', NULL, 'dsadffdsfdsfds', 'shafiul', '2025-09-04 18:55:17', 1),
 (0, '000000000000000000000000000000000000000', 'Bank', NULL, 'dsadffdsfdsfds', 'shafiul', '2025-09-04 19:00:53', 1),
 (1, 'dfgd', 'Student', NULL, 'fdgfd', 'shafiul', '2025-09-05 02:58:07', 1),
 (1, 'come', 'Student', NULL, 'fdgfd', 'shafiul', '2025-09-05 02:59:15', 1),
-(23303106, 'come', 'Student', NULL, 'fdgfd', 'shafiul', '2025-09-05 03:00:44', 1),
-(123, 'check department', 'Department', 'BCSE', 'nothing', 'admin', '2025-09-05 03:53:33', 1);
+(123, 'check department', 'Department', 'BCSE', 'nothing', 'admin', '2025-09-05 03:53:33', 1),
+(23303106, 'ssss', 'Student', '', 'dfd', 'admin', '2025-09-05 17:15:42', 1),
+(0, 'due', 'Library', '', 'dddddd', 'admin', '2025-09-05 17:19:22', 0),
+(23303106, 'sss', 'Library', '', 'dddd', 'shafiul', '2025-09-05 17:21:56', 0),
+(23303106, 'ssss', 'Staff', '', 'ssss', 'shafiul', '2025-09-05 17:23:37', 1);
 
 -- --------------------------------------------------------
 
@@ -615,7 +689,7 @@ CREATE TABLE `student_registration` (
 --
 
 INSERT INTO `student_registration` (`id`, `first_name`, `last_name`, `father_name`, `mother_name`, `date_of_birth`, `guardian_phone`, `student_phone`, `email`, `password`, `key`, `last_exam`, `board`, `other_board`, `year_of_passing`, `institution_name`, `result`, `subject_group`, `gender`, `blood_group`, `nationality`, `religion`, `present_address`, `permanent_address`, `department`, `photo_path`, `signature_path`, `submission_date`) VALUES
-(23303105, 'Md Shafiul', 'Islam', 'asraful', 'sohida', '2003-06-10', '01701535780', '01701535780', '23303105@iubat.edu', 'shafiul', 123, 'HSC', 'Dinajpur', '', '2021', 'ccr', '5.00', 'Science', 'male', 'B+', 'Bangladeshi', 'Islam', 'Bamrar Tech, Chan Miah Vila', 'bamnartec', 'CSE', NULL, NULL, '2025-09-04 11:38:48'),
+(23303105, 'Md Shafiul', 'Islam', 'asraful', 'sohida', '2003-06-10', '01701535780', '01701535780', '23303105@iubat.edu', 'shafiulmondol', 123, 'HSC', 'Dinajpur', '', '2021', 'ccr', '5.00', 'Science', 'male', 'B+', 'Bangladeshi', 'Islam', 'Bamrar Tech, Chan Miah Vila', 'bamnartec', 'CSE', NULL, NULL, '2025-09-04 11:38:48'),
 (23303106, 'shafiul islam', 'mondol', 'Md.Mazid', 'Mina Islam', '2003-12-14', '01718520912', '01530811222', '23303106@iubat.edu', 'shafiul', 123, 'HSC', 'Dhaka', NULL, '2022', 'Uttara high school', '5.00', 'science', 'female', 'A+', 'Bangladeshi', 'Islam', 'Uttara', 'Uttara', 'Cse', NULL, NULL, '2025-07-26 17:17:40'),
 (23303137, 'sumaiya', 'haq', 'father', 'mother', '2003-09-17', '+8801712345678', '01701535780', '23303137@iubat.edu', 'sumaiya', 123, 'HSC', 'Dhaka', NULL, '2021', 'dhaka college', '3.75', 'science', 'female', 'O+', 'Bangladeshi', 'Islam', 'sdfg sdfg sdfg sdfg', 'sfg sdfgh fghj fghj', 'BCSE', NULL, NULL, '2025-08-29 04:51:27');
 
@@ -640,6 +714,7 @@ CREATE TABLE `student_result` (
 --
 
 INSERT INTO `student_result` (`st_id`, `semister`, `course`, `grade`, `marks`, `cgpa`, `sgpa`) VALUES
+(23303105, 1, 'EEE 100', NULL, 0, NULL, NULL),
 (23303106, 1, 'csc 112', '4', 40, 3.2, 3.98),
 (23303106, 2, 'csc 112', '3.7', 70, 3.2, 3.98);
 
@@ -780,13 +855,9 @@ CREATE TABLE `update_requests` (
 --
 
 INSERT INTO `update_requests` (`id`, `applicant_id`, `admin_email`, `category`, `update_type`, `current_value`, `new_value`, `comments`, `request_time`, `action`) VALUES
-(1, 0, '23303106@iubat.edu', '', 'password', 'shafiul', 'shafiulmondol', 'i think that i any one hack my id', '2025-08-31 20:39:28', 1),
-(2, 0, 'admin@university.edu', 'Student', 'password', 'shafiul', 'shafiulmondol', 'nothing', '2025-09-01 03:07:52', 0),
-(9, 23303106, '23303106@iubat.edu', 'Student', 'email', '23303106@iubat.edu', '23303106@iubat.edu', 'check', '2025-09-04 10:15:39', 1),
-(10, 23303106, '23303106@iubat.edu', 'Student', 'email', '23303106@iubat.edu', '23303106@iubat.edu', 'ok', '2025-09-04 12:38:09', 2),
-(11, 23303106, '23303106@iubat.edu', 'Student', 'password', 'shafiul', 'shafiulmondol', 'hjghjgiu', '2025-09-04 22:15:56', 1),
-(12, 23303106, '23303105@iubat.edu', 'Student', 'password', 'shafiul', '23303106@iubat.edu', 'sdsd', '2025-09-05 01:41:49', 0),
-(13, 23303106, '23303106@iubat.edu', 'Student', 'email', '23303106@iubat.edu', '23303106@iubat.edu', 'sdsds', '2025-09-05 01:42:13', 1);
+(15, 23303106, '23303106@iubat.edu', 'Student', 'password', 'shafiulmondol', 'shafiulmondol', 'sss | Old Value: shafiul | Old Value: shafiulmondol', '2025-09-05 22:14:59', 4),
+(16, 23303105, '23303106@iubat.edu', 'Student', 'password', 'shafiulmondol', 'shafiulmondol', 'sss | Old Value: shafiul', '2025-09-05 22:21:16', 4),
+(17, 23303106, '23303106@iubat.edu', 'Student', 'password', 'shafiul', 'shafiul', 'ssss | Old Value: shafiulmondol', '2025-09-05 23:16:43', 4);
 
 -- --------------------------------------------------------
 
@@ -817,7 +888,8 @@ INSERT INTO `users` (`user_id`, `library_card_number`, `user_type`, `id`, `max_b
 (1003, '333333333333', 'Faculty', 7654322, 5, '2025-08-15', '2025-08-15', 1, '2025-08-15 13:31:19', '2025-08-15 13:31:19'),
 (1005, '222222222', 'Faculty', 7654323, 5, '2025-08-15', '2025-08-15', 1, '2025-08-15 13:34:36', '2025-08-15 13:34:36'),
 (1006, '11111111111', 'Faculty', 10, 5, '2025-08-15', '2025-08-15', 1, '2025-08-15 13:38:14', '2025-08-15 13:38:14'),
-(1007, '333333', 'Faculty', 11, 5, '2025-08-15', '2025-08-15', 1, '2025-08-15 13:48:30', '2025-08-15 13:48:30');
+(1007, '333333', 'Faculty', 11, 5, '2025-08-15', '2025-08-15', 1, '2025-08-15 13:48:30', '2025-08-15 13:48:30'),
+(1008, '333333333333222', 'Student', 23303105, 5, '2025-09-05', '2025-09-19', 1, '2025-09-05 17:25:48', '2025-09-05 17:25:48');
 
 -- --------------------------------------------------------
 
@@ -900,6 +972,14 @@ ALTER TABLE `books`
   ADD UNIQUE KEY `isbn` (`isbn`);
 
 --
+-- Indexes for table `book_borrowings`
+--
+ALTER TABLE `book_borrowings`
+  ADD PRIMARY KEY (`borrow_id`),
+  ADD KEY `member_id` (`member_id`),
+  ADD KEY `book_id` (`book_id`);
+
+--
 -- Indexes for table `borrow_books`
 --
 ALTER TABLE `borrow_books`
@@ -945,6 +1025,15 @@ ALTER TABLE `enrollments`
   ADD KEY `fk_faculty` (`faculty_id`);
 
 --
+-- Indexes for table `exm_routine`
+--
+ALTER TABLE `exm_routine`
+  ADD PRIMARY KEY (`student_id`,`exam_date`,`time`),
+  ADD UNIQUE KEY `exam_date` (`exam_date`,`time`,`room_no`,`set_no`),
+  ADD KEY `course_id` (`course_id`),
+  ADD KEY `faculty_id` (`faculty_id`);
+
+--
 -- Indexes for table `faculty`
 --
 ALTER TABLE `faculty`
@@ -958,6 +1047,14 @@ ALTER TABLE `faculty_payments`
   ADD PRIMARY KEY (`payment_id`),
   ADD KEY `processed_by` (`processed_by`),
   ADD KEY `faculty_id` (`faculty_id`);
+
+--
+-- Indexes for table `library_members`
+--
+ALTER TABLE `library_members`
+  ADD PRIMARY KEY (`member_id`),
+  ADD UNIQUE KEY `unique_user_reference` (`user_type`,`user_id`),
+  ADD KEY `email` (`email`);
 
 --
 -- Indexes for table `scholarship_application`
@@ -978,7 +1075,8 @@ ALTER TABLE `staff_payments`
 -- Indexes for table `student_registration`
 --
 ALTER TABLE `student_registration`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `email` (`email`);
 
 --
 -- Indexes for table `student_result`
@@ -1075,6 +1173,12 @@ ALTER TABLE `books`
   MODIFY `book_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
+-- AUTO_INCREMENT for table `book_borrowings`
+--
+ALTER TABLE `book_borrowings`
+  MODIFY `borrow_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- AUTO_INCREMENT for table `borrow_books`
 --
 ALTER TABLE `borrow_books`
@@ -1084,13 +1188,13 @@ ALTER TABLE `borrow_books`
 -- AUTO_INCREMENT for table `course_materials`
 --
 ALTER TABLE `course_materials`
-  MODIFY `material_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `material_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `enrollments`
 --
 ALTER TABLE `enrollments`
-  MODIFY `enrollment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `enrollment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `faculty`
@@ -1103,6 +1207,12 @@ ALTER TABLE `faculty`
 --
 ALTER TABLE `faculty_payments`
   MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `library_members`
+--
+ALTER TABLE `library_members`
+  MODIFY `member_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `scholarship_application`
@@ -1144,13 +1254,13 @@ ALTER TABLE `university_bank_payments`
 -- AUTO_INCREMENT for table `update_requests`
 --
 ALTER TABLE `update_requests`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1008;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1009;
 
 --
 -- AUTO_INCREMENT for table `volunteers`
@@ -1190,6 +1300,14 @@ ALTER TABLE `enrollments`
   ADD CONSTRAINT `fk_course` FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`),
   ADD CONSTRAINT `fk_faculty` FOREIGN KEY (`faculty_id`) REFERENCES `faculty` (`faculty_id`),
   ADD CONSTRAINT `fk_student` FOREIGN KEY (`student_id`) REFERENCES `student_registration` (`id`);
+
+--
+-- Constraints for table `exm_routine`
+--
+ALTER TABLE `exm_routine`
+  ADD CONSTRAINT `exm_routine_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student_registration` (`id`),
+  ADD CONSTRAINT `exm_routine_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`),
+  ADD CONSTRAINT `exm_routine_ibfk_3` FOREIGN KEY (`faculty_id`) REFERENCES `faculty` (`faculty_id`);
 
 --
 -- Constraints for table `staff_payments`

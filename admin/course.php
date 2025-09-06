@@ -141,23 +141,33 @@ if (isset($_POST['show_enrollment_status'])) {
     $enrollment_result = $mysqli->query($enrollment_query);
 }
 
-// For suggested courses - MODIFIED: Show ALL courses for suggested semester (not filtering out enrolled ones)
+// For suggested courses
 if (isset($_POST['show_suggested_courses'])) {
-    $student_id = 23303106; // Example student ID - replace with logged in student ID
-    
-    // Get student's max semester from results
-    $max_semester_query = "SELECT MAX(semister) as max_semester FROM student_result WHERE st_id = $student_id";
-    $max_semester_result = $mysqli->query($max_semester_query);
-    $max_semester = $max_semester_result->fetch_assoc()['max_semester'] ?? 1;
-    $suggested_semester = $max_semester + 1;
-    
-    // MODIFIED: Get ALL courses for the suggested semester (removed the NOT IN clause)
-    $suggested_query = "SELECT c.course_id, c.course_code, c.course_name, c.department, c.semester
-                       FROM course c
-                       WHERE c.semester = $suggested_semester
-                       ORDER BY c.course_code";
-    
-    $suggested_result = $mysqli->query($suggested_query);
+    $student_search = $_POST['student_search'] ?? '';
+
+    $students_query = "SELECT st_id, MAX(semister) AS max_semester 
+                       FROM student_result 
+                       GROUP BY st_id";
+    if (!empty($student_search)) {
+        $students_query = "SELECT st_id, MAX(semister) AS max_semester 
+                           FROM student_result 
+                           WHERE st_id LIKE '%" . $mysqli->real_escape_string($student_search) . "%'
+                           GROUP BY st_id";
+    }
+    $students_result = $mysqli->query($students_query);
+}
+
+// For completed courses
+if (isset($_POST['show_completed_courses'])) {
+    $completed_student_search = $_POST['completed_student_search'] ?? '';
+
+    // Get all students who have completed courses
+    $completed_students_query = "SELECT DISTINCT st_id FROM student_result";
+    if (!empty($completed_student_search)) {
+        $completed_students_query = "SELECT DISTINCT st_id FROM student_result 
+                                     WHERE st_id LIKE '%" . $mysqli->real_escape_string($completed_student_search) . "%'";
+    }
+    $completed_students_result = $mysqli->query($completed_students_query);
 }
 
 // For editing enrollment
@@ -558,6 +568,32 @@ if (isset($_POST['edit_enrollment'])) {
             color: #721c24;
         }
         
+        .student-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .info-label {
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
         @media (max-width: 768px) {
             .header {
                 flex-direction: column;
@@ -636,6 +672,10 @@ if (isset($_POST['edit_enrollment'])) {
             <form method="post" style="display: inline;">
                 <input type="hidden" name="search_code" value="<?php echo htmlspecialchars($search_code); ?>">
                 <button type="submit" name="show_suggested_courses" class="btn btn-primary"><i class="fas fa-lightbulb"></i> Suggested Courses</button>
+            </form>
+            <form method="post" style="display: inline;">
+                <input type="hidden" name="search_code" value="<?php echo htmlspecialchars($search_code); ?>">
+                <button type="submit" name="show_completed_courses" class="btn btn-success"><i class="fas fa-check-circle"></i> Completed Courses</button>
             </form>
             <?php if (!isset($_POST['show_add_course_form'])): ?>
             <form method="post" style="display: inline;">
@@ -936,55 +976,181 @@ if (isset($_POST['edit_enrollment'])) {
                 <span><i class="fas fa-lightbulb"></i> Suggested Courses</span>
             </div>
             <div class="card-body">
-                <?php 
-                // Get student info
-                $student_id = 23303106;
-                $student_query = "SELECT first_name, last_name FROM student_registration WHERE id = $student_id";
-                $student_result = $mysqli->query($student_query);
-                $student = $student_result->fetch_assoc();
-                ?>
-                
+                <!-- Search Bar for Student -->
                 <div class="search-container">
-                    <div>
-                        <p><strong>Student:</strong> <?php echo $student['first_name'] . ' ' . $student['last_name']; ?> (ID: <?php echo $student_id; ?>)</p>
-                        <?php 
-                        // Get max semester
-                        $max_semester_query = "SELECT MAX(semister) as max_semester FROM student_result WHERE st_id = $student_id";
-                        $max_semester_result = $mysqli->query($max_semester_query);
-                        $max_semester = $max_semester_result->fetch_assoc()['max_semester'] ?? 1;
-                        $suggested_semester = $max_semester + 1;
-                        ?>
-                        <p><strong>Current Progress:</strong> Completed up to Semester <?php echo $max_semester; ?></p>
-                        <p><strong>Suggested Semester:</strong> Semester <?php echo $suggested_semester; ?></p>
-                    </div>
+                    <form method="post" class="search-box">
+                        <input type="hidden" name="show_suggested_courses" value="1">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" name="student_search" placeholder="Search by Student ID" class="search-input" value="<?php echo htmlspecialchars($_POST['student_search'] ?? ''); ?>">
+                        <button type="submit" class="btn btn-primary">Search</button>
+                    </form>
                 </div>
-                
-                <?php if ($suggested_result && $suggested_result->num_rows > 0): ?>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Course Code</th>
-                            <th>Course Name</th>
-                            <th>Department</th>
-                            <th>Semester</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php while ($course = $suggested_result->fetch_assoc()): ?>
-                        <tr>
-                            <td><?php echo $course['course_code']; ?></td>
-                            <td><?php echo $course['course_name']; ?></td>
-                            <td><?php echo $course['department']; ?></td>
-                            <td><?php echo $course['semester']; ?></td>
-                        </tr>
-                        <?php endwhile; ?>
-                    </tbody>
-                </table>
+
+                <?php if ($students_result && $students_result->num_rows > 0): ?>
+                    <?php while ($stud = $students_result->fetch_assoc()): 
+                        $student_id = $stud['st_id'];
+                        $max_semester = $stud['max_semester'] ?? 1;
+                        $suggested_semester = $max_semester + 1;
+
+                        // Student info
+                        $student_query = "SELECT first_name, last_name FROM student_registration WHERE id = $student_id";
+                        $student_result = $mysqli->query($student_query);
+                        $student = $student_result->fetch_assoc();
+
+                        // Suggested courses
+                        $suggested_query = "SELECT c.course_code, c.course_name, c.department, c.semester
+                                            FROM course c
+                                            WHERE c.semester = $suggested_semester
+                                            ORDER BY c.course_code";
+                        $suggested_result = $mysqli->query($suggested_query);
+                    ?>
+                    <div class="card" style="margin-top:20px;">
+                        <div class="card-header">
+                            <strong>Student:</strong> <?php echo $student['first_name'] . ' ' . $student['last_name']; ?> (ID: <?php echo $student_id; ?>)
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Current Progress:</strong> Completed up to Semester <?php echo $max_semester; ?></p>
+                            <p><strong>Suggested Semester:</strong> Semester <?php echo $suggested_semester; ?></p>
+
+                            <?php if ($suggested_result && $suggested_result->num_rows > 0): ?>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Course Code</th>
+                                        <th>Course Name</th>
+                                        <th>Department</th>
+                                        <th>Semester</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php while ($course = $suggested_result->fetch_assoc()): ?>
+                                    <tr>
+                                        <td><?php echo $course['course_code']; ?></td>
+                                        <td><?php echo $course['course_name']; ?></td>
+                                        <td><?php echo $course['department']; ?></td>
+                                        <td><?php echo $course['semester']; ?></td>
+                                    </tr>
+                                    <?php endwhile; ?>
+                                </tbody>
+                            </table>
+                            <?php else: ?>
+                            <div class="empty-state">
+                                <i class="fas fa-lightbulb"></i>
+                                <h3>No Suggested Courses</h3>
+                                <p>No courses suggested for Semester <?php echo $suggested_semester; ?>.</p>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <?php endwhile; ?>
                 <?php else: ?>
                 <div class="empty-state">
-                    <i class="fas fa-lightbulb"></i>
-                    <h3>No Suggested Courses</h3>
-                    <p>There are no courses suggested for your next semester (Semester <?php echo $suggested_semester; ?>).</p>
+                    <i class="fas fa-user-graduate"></i>
+                    <h3>No Students Found</h3>
+                    <p>No student records available in student_result table.</p>
+                </div>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <?php if (isset($_POST['show_completed_courses'])): ?>
+        <div class="card">
+            <div class="card-header">
+                <span><i class="fas fa-check-circle"></i> Completed Courses</span>
+            </div>
+            <div class="card-body">
+                <!-- Search Bar for Student -->
+                <div class="search-container">
+                    <form method="post" class="search-box">
+                        <input type="hidden" name="show_completed_courses" value="1">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" name="completed_student_search" placeholder="Search by Student ID" class="search-input" value="<?php echo htmlspecialchars($_POST['completed_student_search'] ?? ''); ?>">
+                        <button type="submit" class="btn btn-primary">Search</button>
+                    </form>
+                </div>
+
+                <?php if ($completed_students_result && $completed_students_result->num_rows > 0): ?>
+                    <?php while ($student_row = $completed_students_result->fetch_assoc()): 
+                        $student_id = $student_row['st_id'];
+                        
+                        // Student info
+                        $student_query = "SELECT first_name, last_name, department FROM student_registration WHERE id = $student_id";
+                        $student_result = $mysqli->query($student_query);
+                        $student = $student_result->fetch_assoc();
+                        
+                        // Completed courses
+                        $completed_query = "SELECT sr.course, c.course_name, c.credit_hours, sr.grade, sr.marks, sr.semister 
+                                           FROM student_result sr
+                                           JOIN course c ON sr.course = c.course_code
+                                           WHERE sr.st_id = $student_id
+                                           ORDER BY sr.semister";
+                        $completed_result = $mysqli->query($completed_query);
+                        
+                        // Calculate CGPA
+                        $cgpa_query = "SELECT AVG(marks) as avg_marks FROM student_result WHERE st_id = $student_id";
+                        $cgpa_result = $mysqli->query($cgpa_query);
+                        $cgpa_data = $cgpa_result->fetch_assoc();
+                        $cgpa = number_format(($cgpa_data['avg_marks'] / 25), 2); // Simple conversion from marks to CGPA
+                    ?>
+                    <div class="card" style="margin-top:20px;">
+                        <div class="card-header">
+                            <strong>Student:</strong> <?php echo $student['first_name'] . ' ' . $student['last_name']; ?> (ID: <?php echo $student_id; ?>)
+                        </div>
+                        <div class="card-body">
+                            <div class="student-info">
+                                <div class="info-item">
+                                    <span class="info-label">DEPARTMENT</span>
+                                    <span class="info-value"><?php echo $student['department']; ?></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">CGPA</span>
+                                    <span class="info-value"><?php echo $cgpa; ?></span>
+                                </div>
+                            </div>
+
+                            <?php if ($completed_result && $completed_result->num_rows > 0): ?>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Course Code</th>
+                                        <th>Course Name</th>
+                                        <th>Credit Hours</th>
+                                        <th>Grade</th>
+                                        <th>Marks</th>
+                                        <th>Semester</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php while ($course = $completed_result->fetch_assoc()): ?>
+                                    <tr>
+                                        <td><?php echo $course['course']; ?></td>
+                                        <td><?php echo $course['course_name']; ?></td>
+                                        <td><?php echo $course['credit_hours']; ?></td>
+                                        <td><?php echo $course['grade']; ?></td>
+                                        <td><?php echo $course['marks']; ?></td>
+                                        <td><?php echo $course['semister']; ?></td>
+                                        <td><span class="status-badge status-completed">Completed</span></td>
+                                    </tr>
+                                    <?php endwhile; ?>
+                                </tbody>
+                            </table>
+                            <?php else: ?>
+                            <div class="empty-state">
+                                <i class="fas fa-book"></i>
+                                <h3>No Completed Courses</h3>
+                                <p>This student hasn't completed any courses yet.</p>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <?php endwhile; ?>
+                <?php else: ?>
+                <div class="empty-state">
+                    <i class="fas fa-user-graduate"></i>
+                    <h3>No Students Found</h3>
+                    <p>No student records available with completed courses.</p>
                 </div>
                 <?php endif; ?>
             </div>
