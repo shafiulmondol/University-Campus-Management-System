@@ -847,6 +847,8 @@ $mysqli->close();
                 </div>
                 
                 <button type="submit" class="login-btn">Login to Dashboard</button>
+                                <button class= "login-btn" onclick="location.href='alumni.html'"> Sign Out</button>                
+
                 
                 <?php if (!empty($error)): ?>
                     <div class="error-msg"><?php echo $error; ?></div>
@@ -859,7 +861,7 @@ $mysqli->close();
     <div class="navbar">
         <div class="logo">
             <img src="../picture/SKST.png" alt="Logo" style="width: 50px; height: 50px; border-radius: 50%;">
-            <h1>SKST University Alumni</h1>
+            <h1 style="color: white;">SKST University Alumni</h1>
         </div>
         
         
@@ -874,48 +876,11 @@ $mysqli->close();
         </div>
     </div>
     
-    <div class="main-layout">
-        <div class="sidebar">
-            <ul class="sidebar-menu">
-                <li>
-                    <a href="#" class="active">
-                        <i class="fas fa-user"></i> Profile
-                    </a>
-                </li>
-                <li>
-                    <a href="../student/transaction.php">
-                        <i class="fas fa-book"></i> Courses
-                    </a>
-                </li>
-                <li>
-                    <a href="#">
-                        <i class="fas fa-bullhorn"></i> Notices
-                    </a>
-                </li>
-                <li>
-                    <a href="#">
-                        <i class="fas fa-graduation-cap"></i> Degree
-                    </a>
-                </li>
-                <li>
-                    <a href="#">
-                        <i class="fas fa-briefcase"></i> Internship
-                    </a>
-                </li>
-                <li>
-                    <button onclick="location.href='?logout=1'">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </button>
-                </li>
-            </ul>
-        </div>
         
         <div class="content-area">
             <div class="page-header">
                 <h1 class="page-title"><i class="fas fa-user-graduate"></i> Alumni Dashboard</h1>
-                <button class="btn-edit">
-                    <i class="fas fa-edit"></i> Edit Profile
-                </button>
+                
             </div>
 
             <!-- Profile Card with Picture Upload -->
