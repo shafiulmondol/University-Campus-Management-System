@@ -19,6 +19,7 @@ $stmt->close();
 $selected_course = null;
 $students = [];
 $results = [];
+$view_type = isset($_GET['view']) ? $_GET['view'] : 'subject'; // 'subject' or 'all'
 
 // If a course is selected, get the enrolled students and their results
 if (isset($_GET['course_id']) && !empty($_GET['course_id'])) {
@@ -72,8 +73,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_results'])) {
     foreach ($_POST['student_id'] as $index => $student_id) {
         $marks = $_POST['marks'][$index];
         $grade = $_POST['grade'][$index];
-        $cgpa = $_POST['cgpa'][$index];
-        $sgpa = $_POST['sgpa'][$index];
         
         // Check if result already exists for this student, course, and semester
         $check_sql = "SELECT * FROM student_result WHERE st_id = ? AND course = ? AND semister = ?";
@@ -86,19 +85,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_results'])) {
         if ($exists) {
             // Update existing result
             $update_sql = "UPDATE student_result 
-                           SET grade = ?, marks = ?, cgpa = ?, sgpa = ?
+                           SET grade = ?, marks = ?
                            WHERE st_id = ? AND course = ? AND semister = ?";
             $stmt = $mysqli->prepare($update_sql);
-            $stmt->bind_param("sdddiss", $grade, $marks, $cgpa, $sgpa, $student_id, $course_code, $semester);
+            $stmt->bind_param("sdisi", $grade, $marks, $student_id, $course_code, $semester);
         } else {
             // Insert new result
-            $insert_sql = "INSERT INTO student_result (st_id, semister, course, grade, marks, cgpa, sgpa)
-                           VALUES (?, ?, ?, ?, ?, ?, ?)";
+            $insert_sql = "INSERT INTO student_result (st_id, semister, course, grade, marks)
+                           VALUES (?, ?, ?, ?, ?)";
             $stmt = $mysqli->prepare($insert_sql);
-            $stmt->bind_param("iissddd", $student_id, $semester, $course_code, $grade, $marks, $cgpa, $sgpa);
+            $stmt->bind_param("iissd", $student_id, $semester, $course_code, $grade, $marks);
         }
         
         if ($stmt->execute()) {
+            // Update SGPA and CGPA for this student
+            updateStudentGPA($student_id, $semester);
             $success_message = "Results saved successfully!";
         } else {
             $error = "Failed to save results: " . $stmt->error;
@@ -108,8 +109,95 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_results'])) {
     }
     
     // Refresh the page to show updated results
-    header("Location: result.php?course_id=" . $course_id);
+    header("Location: result.php?course_id=" . $course_id . "&view=" . $view_type);
     exit();
+}
+
+// Function to calculate grade point based on marks
+function calculateGradePoint($marks) {
+    if ($marks >= 80) return 4.00;
+    if ($marks >= 75) return 3.75;
+    if ($marks >= 70) return 3.50;
+    if ($marks >= 65) return 3.25;
+    if ($marks >= 60) return 3.00;
+    if ($marks >= 55) return 2.75;
+    if ($marks >= 50) return 2.50;
+    if ($marks >= 45) return 2.25;
+    if ($marks >= 40) return 2.00;
+    return 0.00;
+}
+
+// Function to update student's SGPA and CGPA
+function updateStudentGPA($student_id, $semester) {
+    global $mysqli;
+    
+    // Calculate SGPA for the semester
+    $sgpa_sql = "SELECT marks FROM student_result WHERE st_id = ? AND semister = ?";
+    $stmt = $mysqli->prepare($sgpa_sql);
+    $stmt->bind_param("ii", $student_id, $semester);
+    $stmt->execute();
+    $sgpa_result = $stmt->get_result();
+    
+    $total_grade_points = 0;
+    $count = 0;
+    
+    while ($row = $sgpa_result->fetch_assoc()) {
+        $grade_point = calculateGradePoint($row['marks']);
+        $total_grade_points += $grade_point;
+        $count++;
+    }
+    
+    $sgpa = $count > 0 ? $total_grade_points / $count : 0;
+    $stmt->close();
+    
+    // Calculate CGPA for the student
+    $cgpa_sql = "SELECT marks FROM student_result WHERE st_id = ?";
+    $stmt = $mysqli->prepare($cgpa_sql);
+    $stmt->bind_param("i", $student_id);
+    $stmt->execute();
+    $cgpa_result = $stmt->get_result();
+    
+    $total_grade_points_all = 0;
+    $count_all = 0;
+    
+    while ($row = $cgpa_result->fetch_assoc()) {
+        $grade_point = calculateGradePoint($row['marks']);
+        $total_grade_points_all += $grade_point;
+        $count_all++;
+    }
+    
+    $cgpa = $count_all > 0 ? $total_grade_points_all / $count_all : 0;
+    $stmt->close();
+    
+    // Update all records for this student with the new SGPA and CGPA
+    $update_sql = "UPDATE student_result 
+                   SET sgpa = ?, cgpa = ?
+                   WHERE st_id = ?";
+    $stmt = $mysqli->prepare($update_sql);
+    $stmt->bind_param("ddi", $sgpa, $cgpa, $student_id);
+    $stmt->execute();
+    $stmt->close();
+}
+
+// Get all results for a student (for the "View All Results" option)
+$all_student_results = [];
+if ($view_type == 'all' && isset($_GET['student_id'])) {
+    $student_id = $_GET['student_id'];
+    $all_results_sql = "SELECT sr.semister, sr.course, sr.grade, sr.marks, sr.sgpa, sr.cgpa, c.course_name
+                        FROM student_result sr
+                        JOIN course c ON sr.course = c.course_code
+                        WHERE sr.st_id = ?
+                        ORDER BY sr.semister, sr.course";
+    $stmt = $mysqli->prepare($all_results_sql);
+    $stmt->bind_param("i", $student_id);
+    $stmt->execute();
+    $all_results_result = $stmt->get_result();
+    
+    // Organize results by semester
+    while ($row = $all_results_result->fetch_assoc()) {
+        $all_student_results[$row['semister']][] = $row;
+    }
+    $stmt->close();
 }
 
 $mysqli->close();
@@ -378,6 +466,30 @@ $mysqli->close();
             box-shadow: 0 6px 15px rgba(67, 97, 238, 0.3);
         }
         
+        /* View Toggle Buttons */
+        .view-toggle {
+            display: flex;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: var(--light);
+        }
+        
+        .view-toggle button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .view-toggle button.active {
+            background: var(--primary);
+            color: white;
+        }
+        
         /* Results Table */
         .results-table {
             width: 100%;
@@ -437,6 +549,72 @@ $mysqli->close();
             border-left: 4px solid var(--danger);
         }
         
+        /* Student Selector for All Results */
+        .student-selector {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .student-selector select {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+        }
+        
+        /* Semester Results */
+        .semester-results {
+            margin-bottom: 30px;
+        }
+        
+        .semester-header {
+            background: var(--primary);
+            color: white;
+            padding: 12px 15px;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 0;
+        }
+        
+        .semester-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .semester-table th, .semester-table td {
+            padding: 12px 15px;
+            border: 1px solid var(--light-gray);
+        }
+        
+        .semester-table th {
+            background: var(--light);
+        }
+        
+        .gpa-summary {
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--light);
+            border-radius: 8px;
+            display: flex;
+            gap: 20px;
+        }
+        
+        .gpa-item {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .gpa-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
         /* Responsive */
         @media (max-width: 992px) {
             .sidebar {
@@ -473,9 +651,13 @@ $mysqli->close();
                 padding: 20px;
             }
             
-            .results-table {
+            .results-table, .semester-table {
                 display: block;
                 overflow-x: auto;
+            }
+            
+            .gpa-summary {
+                flex-direction: column;
             }
         }
     </style>
@@ -552,77 +734,194 @@ $mysqli->close();
             </div>
             
             <?php if ($selected_course): ?>
-            <!-- Results Management Card -->
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title"><i class="fas fa-chart-bar"></i> Results for <?php echo $selected_course['course_code'] . ' - ' . $selected_course['course_name']; ?></h2>
-                    <p>Total Students: <span class="badge"><?php echo count($students); ?></span></p>
+            <!-- View Toggle Buttons -->
+            <div class="view-toggle">
+                <button class="<?php echo $view_type == 'subject' ? 'active' : ''; ?>" 
+                        onclick="changeView('subject')">
+                    <i class="fas fa-book"></i> Subject Results
+                </button>
+                <button class="<?php echo $view_type == 'all' ? 'active' : ''; ?>" 
+                        onclick="changeView('all')">
+                    <i class="fas fa-graduation-cap"></i> All Results
+                </button>
+            </div>
+            
+            <!-- Subject Results View -->
+            <div id="subjectView" style="display: <?php echo $view_type == 'subject' ? 'block' : 'none'; ?>;">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-chart-bar"></i> Results for <?php echo $selected_course['course_code'] . ' - ' . $selected_course['course_name']; ?></h2>
+                        <p>Total Students: <span class="badge"><?php echo count($students); ?></span></p>
+                    </div>
+                    
+                    <?php if (count($students) > 0): ?>
+                    <form method="POST" action="">
+                        <input type="hidden" name="course_id" value="<?php echo $selected_course['course_id']; ?>">
+                        <input type="hidden" name="course_code" value="<?php echo $selected_course['course_code']; ?>">
+                        
+                        <div class="form-group">
+                            <label for="semester">Semester:</label>
+                            <input type="number" name="semester" id="semester" required min="1" max="12" 
+                                   value="<?php echo isset($results[key($results)]['semister']) ? $results[key($results)]['semister'] : ''; ?>">
+                        </div>
+                        
+                        <table class="results-table">
+                            <thead>
+                                <tr>
+                                    <th>Student ID</th>
+                                    <th>Name</th>
+                                    <th>Marks</th>
+                                    <th>Grade</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($students as $student): 
+                                    $student_id = $student['id'];
+                                    $result = isset($results[$student_id]) ? $results[$student_id] : [];
+                                ?>
+                                <tr>
+                                    <td><?php echo $student_id; ?>
+                                        <input type="hidden" name="student_id[]" value="<?php echo $student_id; ?>">
+                                    </td>
+                                    <td><?php echo $student['first_name'] . ' ' . $student['last_name']; ?></td>
+                                    <td>
+                                        <input type="number" name="marks[]" step="0.01" min="0" max="100" 
+                                               value="<?php echo isset($result['marks']) ? $result['marks'] : ''; ?>" required
+                                               onchange="calculateGrade(this)">
+                                    </td>
+                                    <td>
+                                        <input type="text" name="grade[]" readonly
+                                               value="<?php echo isset($result['grade']) ? $result['grade'] : ''; ?>" required>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn-primary" 
+                                                onclick="viewAllResults(<?php echo $student_id; ?>)">
+                                            <i class="fas fa-eye"></i> View All
+                                        </button>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                        
+                        <button type="submit" name="submit_results" class="btn-primary" style="margin-top: 20px;">
+                            <i class="fas fa-save"></i> Save Results
+                        </button>
+                    </form>
+                    <?php else: ?>
+                        <div class="empty-state">
+                            <i class="fas fa-user-graduate"></i>
+                            <h3>No Students Enrolled</h3>
+                            <p>There are no students enrolled in this course yet.</p>
+                        </div>
+                    <?php endif; ?>
                 </div>
-                
-                <?php if (count($students) > 0): ?>
-                <form method="POST" action="">
-                    <input type="hidden" name="course_id" value="<?php echo $selected_course['course_id']; ?>">
-                    <input type="hidden" name="course_code" value="<?php echo $selected_course['course_code']; ?>">
-                    
-                    <div class="form-group">
-                        <label for="semester">Semester:</label>
-                        <input type="number" name="semester" id="semester" required min="1" max="12" 
-                               value="<?php echo isset($results[key($results)]['semister']) ? $results[key($results)]['semister'] : ''; ?>">
+            </div>
+            
+            <!-- All Results View -->
+            <div id="allView" style="display: <?php echo $view_type == 'all' ? 'block' : 'none'; ?>;">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-graduation-cap"></i> All Results</h2>
                     </div>
                     
-                    <table class="results-table">
-                        <thead>
-                            <tr>
-                                <th>Student ID</th>
-                                <th>Name</th>
-                                <th>Marks</th>
-                                <th>Grade</th>
-                                <th>CGPA</th>
-                                <th>SGPA</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($students as $student): 
-                                $student_id = $student['id'];
-                                $result = isset($results[$student_id]) ? $results[$student_id] : [];
-                            ?>
-                            <tr>
-                                <td><?php echo $student_id; ?>
-                                    <input type="hidden" name="student_id[]" value="<?php echo $student_id; ?>">
-                                </td>
-                                <td><?php echo $student['first_name'] . ' ' . $student['last_name']; ?></td>
-                                <td>
-                                    <input type="number" name="marks[]" step="0.01" min="0" max="100" 
-                                           value="<?php echo isset($result['marks']) ? $result['marks'] : ''; ?>" required>
-                                </td>
-                                <td>
-                                    <input type="text" name="grade[]" 
-                                           value="<?php echo isset($result['grade']) ? $result['grade'] : ''; ?>" required>
-                                </td>
-                                <td>
-                                    <input type="number" name="cgpa[]" step="0.01" min="0" max="4.00" 
-                                           value="<?php echo isset($result['cgpa']) ? $result['cgpa'] : ''; ?>" required>
-                                </td>
-                                <td>
-                                    <input type="number" name="sgpa[]" step="0.01" min="0" max="4.00" 
-                                           value="<?php echo isset($result['sgpa']) ? $result['sgpa'] : ''; ?>" required>
-                                </td>
-                            </tr>
+                    <div class="student-selector">
+                        <label for="studentSelect">Select Student:</label>
+                        <select id="studentSelect" onchange="changeStudent(this.value)">
+                            <option value="">-- Select Student --</option>
+                            <?php foreach ($students as $student): ?>
+                                <option value="<?php echo $student['id']; ?>" 
+                                    <?php if (isset($_GET['student_id']) && $_GET['student_id'] == $student['id']) echo 'selected'; ?>>
+                                    <?php echo $student['id'] . ' - ' . $student['first_name'] . ' ' . $student['last_name']; ?>
+                                </option>
                             <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                    
-                    <button type="submit" name="submit_results" class="btn-primary" style="margin-top: 20px;">
-                        <i class="fas fa-save"></i> Save Results
-                    </button>
-                </form>
-                <?php else: ?>
-                    <div class="empty-state">
-                        <i class="fas fa-user-graduate"></i>
-                        <h3>No Students Enrolled</h3>
-                        <p>There are no students enrolled in this course yet.</p>
+                        </select>
                     </div>
-                <?php endif; ?>
+                    
+                    <?php if (!empty($all_student_results) && isset($_GET['student_id'])): 
+                        $student_id = $_GET['student_id'];
+                        $student_name = '';
+                        foreach ($students as $s) {
+                            if ($s['id'] == $student_id) {
+                                $student_name = $s['first_name'] . ' ' . $s['last_name'];
+                                break;
+                            }
+                        }
+                    ?>
+                        <h3>Results for: <?php echo $student_name . ' (' . $student_id . ')'; ?></h3>
+                        
+                        <?php 
+                        $overall_cgpa = 0;
+                        $semester_count = 0;
+                        ?>
+                        
+                        <?php foreach ($all_student_results as $semester => $courses): 
+                            $semester_gpa = 0;
+                            $total_credits = 0;
+                        ?>
+                            <div class="semester-results">
+                                <h4 class="semester-header">Semester <?php echo $semester; ?></h4>
+                                <table class="semester-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Course Code</th>
+                                            <th>Course Name</th>
+                                            <th>Marks</th>
+                                            <th>Grade</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($courses as $course): 
+                                            // For demonstration, we'll use a simple GPA calculation
+                                            // In a real system, you would use credit hours and proper GPA calculation
+                                            $course_gpa = calculateGradePoint($course['marks']);
+                                            $semester_gpa += $course_gpa;
+                                            $total_credits += 1; // Assuming each course has 1 credit for simplicity
+                                        ?>
+                                            <tr>
+                                                <td><?php echo $course['course']; ?></td>
+                                                <td><?php echo $course['course_name']; ?></td>
+                                                <td><?php echo $course['marks']; ?></td>
+                                                <td><?php echo $course['grade']; ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                                
+                                <?php 
+                                $semester_gpa = $total_credits > 0 ? $semester_gpa / $total_credits : 0;
+                                $overall_cgpa += $semester_gpa;
+                                $semester_count++;
+                                ?>
+                                
+                                <div class="gpa-summary">
+                                    <div class="gpa-item">
+                                        <div>Semester GPA</div>
+                                        <div class="gpa-value"><?php echo number_format($semester_gpa, 2); ?></div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                        
+                        <?php 
+                        $overall_cgpa = $semester_count > 0 ? $overall_cgpa / $semester_count : 0;
+                        ?>
+                        
+                        <div class="gpa-summary">
+                            <div class="gpa-item">
+                                <div>Overall CGPA</div>
+                                <div class="gpa-value"><?php echo number_format($overall_cgpa, 2); ?></div>
+                            </div>
+                        </div>
+                    <?php else: ?>
+                        <div class="empty-state">
+                            <i class="fas fa-user-graduate"></i>
+                            <h3>No Student Selected</h3>
+                            <p>Please select a student to view their complete results.</p>
+                        </div>
+                    <?php endif; ?>
+                </div>
             </div>
             <?php endif; ?>
         </div>
@@ -630,26 +929,45 @@ $mysqli->close();
 
     <script>
         // Auto-calculate grade based on marks
-        document.addEventListener('input', function(e) {
-            if (e.target.name === 'marks[]') {
-                const marks = parseFloat(e.target.value);
-                const gradeInput = e.target.parentElement.nextElementSibling.querySelector('input[name="grade[]"]');
-                
-                if (!isNaN(marks)) {
-                    if (marks >= 80) gradeInput.value = 'A+';
-                    else if (marks >= 75) gradeInput.value = 'A';
-                    else if (marks >= 70) gradeInput.value = 'A-';
-                    else if (marks >= 65) gradeInput.value = 'B+';
-                    else if (marks >= 60) gradeInput.value = 'B';
-                    else if (marks >= 55) gradeInput.value = 'B-';
-                    else if (marks >= 50) gradeInput.value = 'C+';
-                    else if (marks >= 45) gradeInput.value = 'C';
-                    else if (marks >= 40) gradeInput.value = 'D';
-                    else gradeInput.value = 'F';
-                }
+        function calculateGrade(input) {
+            const marks = parseFloat(input.value);
+            const gradeInput = input.parentElement.nextElementSibling.querySelector('input[name="grade[]"]');
+            
+            if (!isNaN(marks)) {
+                if (marks >= 80) gradeInput.value = 'A+';
+                else if (marks >= 75) gradeInput.value = 'A';
+                else if (marks >= 70) gradeInput.value = 'A-';
+                else if (marks >= 65) gradeInput.value = 'B+';
+                else if (marks >= 60) gradeInput.value = 'B';
+                else if (marks >= 55) gradeInput.value = 'B-';
+                else if (marks >= 50) gradeInput.value = 'C+';
+                else if (marks >= 45) gradeInput.value = 'C';
+                else if (marks >= 40) gradeInput.value = 'D';
+                else gradeInput.value = 'F';
             }
-        });
+        }
         
+        // Change view between subject and all results
+        function changeView(viewType) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('view', viewType);
+            window.location.href = url.toString();
+        }
+        
+        // View all results for a specific student
+        function viewAllResults(studentId) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('view', 'all');
+            url.searchParams.set('student_id', studentId);
+            window.location.href = url.toString();
+        }
+        
+        // Change student in all results view
+        function changeStudent(studentId) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('student_id', studentId);
+            window.location.href = url.toString();
+        }
     </script>
 
 </body>
