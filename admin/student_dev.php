@@ -385,6 +385,9 @@ if ($action === 'edit' && $student_id) {
         <!-- Trigger button -->
         <button id="toggleFormBtn" class="btn btn-success" style="margin-bottom: 10px;">+ Add New Student</button>
         <button class="btn btn-secondary" onclick="history.back()">⬅ Back</button>
+<button class="btn btn-secondary" onclick="window.location.href='http://localhost:8080/University-Campus-Management-System/admission/admission_officer.php'">
+  Dashboard
+</button>
         
         <!-- Hidden Student Form -->
         <div id="studentForm" class="card" style="display: none;">

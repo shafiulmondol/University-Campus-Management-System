@@ -328,14 +328,13 @@ if (isset($_SESSION['student_id'])) {
                 </div>
                 
                 <button type="submit" class="login-btn">Login to Payment Portal</button>
+                <button class= "login-btn" onclick="location.href='../index.html'"> Sign Out</button>                
+
+
                 
                 <?php if (!empty($error)): ?>
                     <div class="error-msg"><?php echo $error; ?></div>
                 <?php endif; ?>
-                
-                <div class="mt-3 text-center">
-                    <p class="text-muted">Use your student email and password to login</p>
-                </div>
             </form>
         </div>
     </div>

@@ -119,6 +119,7 @@ if (isset($_GET['view_profile']) && $_GET['view_profile']) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="../picture/SKST.png" type="image/png" />
     <title>Faculty Management System - Developer View</title>
     <style>
         * {

@@ -1725,7 +1725,7 @@ if (mysqli_num_rows($check_column) == 0) {
     <div class="navbar">
         <div class="logo">
             <img src="../picture/logo.gif" alt="SKST Logo">
-            <h1><i class="fas fa-university"></i> SKST University || Student Portal</h1>
+            <h1 style="color: white;"><i class="fas fa-university"></i> SKST University || Student Portal</h1>
         </div>
 
         <div class="nav-buttons">
