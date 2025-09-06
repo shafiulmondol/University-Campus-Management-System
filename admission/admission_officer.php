@@ -1265,7 +1265,7 @@ $mysqli->close();
             <div class="page-header">
                 <h1 class="page-title"><i class="fas fa-user-tie"></i> Admission Officer Dashboard</h1>
                 <button class="btn-edit" id="editProfileBtn">
-                    <i class="fas fa-edit"></i> Edit Profile
+                  <a style="text-decoration: none;color:#f0f5ff" href="edit_pp.php">  <i class="fas fa-edit"></i> Edit Profile</a>
                 </button>
             </div>
 
