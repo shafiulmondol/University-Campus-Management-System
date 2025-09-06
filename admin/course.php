@@ -64,6 +64,34 @@ if (isset($_POST['add_instructor'])) {
     $check->close();
 }
 
+// Handle Enrolment Actions
+if (isset($_POST['enrol_action'])) {
+    $action = $_POST['action'];
+    $enrollment_id = $_POST['enrollment_id'];
+    
+    if ($action == 'edit') {
+        // Update enrolment details
+        $stmt = $mysqli->prepare("UPDATE enrollments SET student_id=?, course_id=?, faculty_id=?, status=? WHERE enrollment_id=?");
+        $stmt->bind_param("iiisi", $_POST['student_id'], $_POST['course_id'], $_POST['faculty_id'], $_POST['status'], $enrollment_id);
+        if ($stmt->execute()) {
+            $success_msg = "Enrollment updated successfully!";
+        } else {
+            $error_msg = "Failed to update enrollment: " . $mysqli->error;
+        }
+        $stmt->close();
+    } elseif ($action == 'drop') {
+        // Drop enrolment
+        $stmt = $mysqli->prepare("UPDATE enrollments SET status='dropped' WHERE enrollment_id=?");
+        $stmt->bind_param("i", $enrollment_id);
+        if ($stmt->execute()) {
+            $success_msg = "Enrollment dropped successfully!";
+        } else {
+            $error_msg = "Failed to drop enrollment: " . $mysqli->error;
+        }
+        $stmt->close();
+    }
+}
+
 // Display Courses
 $query = "SELECT course_id, course_code, course_name, credit_hours, department, semester, created_at, updated_at FROM course WHERE 1";
 if (!empty($search_code)) {
@@ -86,6 +114,67 @@ if (isset($_POST['show_instructors'])) {
 if (isset($_POST['show_add_instructor_form'])) {
     $faculty_result = $mysqli->query("SELECT faculty_id, name FROM faculty");
     $course_result = $mysqli->query("SELECT course_id, course_name FROM course");
+}
+
+// For enrolment status
+if (isset($_POST['show_enrollment_status'])) {
+    // Build enrollment query with search filters
+    $enrollment_search = $_POST['enrollment_search'] ?? '';
+    $enrollment_query = "SELECT e.enrollment_id, e.student_id, s.first_name, s.last_name, 
+                        e.course_id, c.course_name, c.course_code, f.name as faculty_name,
+                        e.enrollment_date, e.status
+                        FROM enrollments e
+                        JOIN student_registration s ON e.student_id = s.id
+                        JOIN course c ON e.course_id = c.course_id
+                        LEFT JOIN faculty f ON e.faculty_id = f.faculty_id
+                        WHERE 1";
+    
+    if (!empty($enrollment_search)) {
+        $enrollment_query .= " AND (c.course_name LIKE '%" . $mysqli->real_escape_string($enrollment_search) . "%' 
+                            OR c.course_code LIKE '%" . $mysqli->real_escape_string($enrollment_search) . "%'
+                            OR e.student_id LIKE '%" . $mysqli->real_escape_string($enrollment_search) . "%'
+                            OR s.first_name LIKE '%" . $mysqli->real_escape_string($enrollment_search) . "%'
+                            OR s.last_name LIKE '%" . $mysqli->real_escape_string($enrollment_search) . "%')";
+    }
+    
+    $enrollment_query .= " ORDER BY e.enrollment_date DESC";
+    $enrollment_result = $mysqli->query($enrollment_query);
+}
+
+// For suggested courses - MODIFIED: Show ALL courses for suggested semester (not filtering out enrolled ones)
+if (isset($_POST['show_suggested_courses'])) {
+    $student_id = 23303106; // Example student ID - replace with logged in student ID
+    
+    // Get student's max semester from results
+    $max_semester_query = "SELECT MAX(semister) as max_semester FROM student_result WHERE st_id = $student_id";
+    $max_semester_result = $mysqli->query($max_semester_query);
+    $max_semester = $max_semester_result->fetch_assoc()['max_semester'] ?? 1;
+    $suggested_semester = $max_semester + 1;
+    
+    // MODIFIED: Get ALL courses for the suggested semester (removed the NOT IN clause)
+    $suggested_query = "SELECT c.course_id, c.course_code, c.course_name, c.department, c.semester
+                       FROM course c
+                       WHERE c.semester = $suggested_semester
+                       ORDER BY c.course_code";
+    
+    $suggested_result = $mysqli->query($suggested_query);
+}
+
+// For editing enrollment
+if (isset($_POST['edit_enrollment'])) {
+    $enrollment_id = $_POST['enrollment_id'];
+    $edit_enrollment_query = "SELECT e.*, s.first_name, s.last_name, c.course_name, c.course_code
+                            FROM enrollments e
+                            JOIN student_registration s ON e.student_id = s.id
+                            JOIN course c ON e.course_id = c.course_id
+                            WHERE e.enrollment_id = $enrollment_id";
+    $edit_enrollment_result = $mysqli->query($edit_enrollment_query);
+    $edit_enrollment = $edit_enrollment_result->fetch_assoc();
+    
+    // Get all courses for dropdown
+    $all_courses = $mysqli->query("SELECT course_id, course_code, course_name FROM course");
+    // Get all faculty for dropdown
+    $all_faculty = $mysqli->query("SELECT faculty_id, name FROM faculty");
 }
 ?>
 <!DOCTYPE html>
@@ -206,6 +295,17 @@ if (isset($_POST['show_add_instructor_form'])) {
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: #e67e22;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
         .btn-outline {
             background: transparent;
             border: 2px solid var(--light);
@@ -214,6 +314,11 @@ if (isset($_POST['show_add_instructor_form'])) {
         
         .btn-outline:hover {
             background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 14px;
         }
         
         .content {
@@ -404,6 +509,55 @@ if (isset($_POST['show_add_instructor_form'])) {
             color: #ddd;
         }
         
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-enrolled {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-dropped {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-completed {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .action-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .action-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .action-accepted {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .action-rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
         @media (max-width: 768px) {
             .header {
                 flex-direction: column;
@@ -421,6 +575,15 @@ if (isset($_POST['show_add_instructor_form'])) {
             
             .action-buttons {
                 flex-direction: column;
+            }
+            
+            .data-table {
+                font-size: 14px;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
             }
         }
     </style>
@@ -465,6 +628,14 @@ if (isset($_POST['show_add_instructor_form'])) {
             <form method="post" style="display: inline;">
                 <input type="hidden" name="search_code" value="<?php echo htmlspecialchars($search_code); ?>">
                 <button type="submit" name="show_add_instructor_form" class="btn btn-primary"><i class="fas fa-user-plus"></i> Add Instructor</button>
+            </form>
+            <form method="post" style="display: inline;">
+                <input type="hidden" name="search_code" value="<?php echo htmlspecialchars($search_code); ?>">
+                <button type="submit" name="show_enrollment_status" class="btn btn-warning"><i class="fas fa-user-graduate"></i> Enrollment Status</button>
+            </form>
+            <form method="post" style="display: inline;">
+                <input type="hidden" name="search_code" value="<?php echo htmlspecialchars($search_code); ?>">
+                <button type="submit" name="show_suggested_courses" class="btn btn-primary"><i class="fas fa-lightbulb"></i> Suggested Courses</button>
             </form>
             <?php if (!isset($_POST['show_add_course_form'])): ?>
             <form method="post" style="display: inline;">
@@ -634,6 +805,189 @@ if (isset($_POST['show_add_instructor_form'])) {
                     <button type="submit" name="show_instructors" class="btn btn-danger"><i class="fas fa-times"></i> Cancel</button>
                 </div>
             </form>
+        </div>
+        <?php endif; ?>
+
+        <?php if (isset($_POST['show_enrollment_status'])): ?>
+        <div class="card">
+            <div class="card-header">
+                <span><i class="fas fa-user-graduate"></i> Enrollment Status</span>
+            </div>
+            <div class="card-body">
+                <div class="search-container">
+                    <form method="post" class="search-box">
+                        <input type="hidden" name="show_enrollment_status" value="1">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" name="enrollment_search" placeholder="Search by Course Name, Course ID, Student ID, or Semester" class="search-input" value="<?php echo htmlspecialchars($_POST['enrollment_search'] ?? ''); ?>">
+                        <button type="submit" class="btn btn-primary">Search</button>
+                    </form>
+                </div>
+                
+                <?php if ($enrollment_result && $enrollment_result->num_rows > 0): ?>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Enrollment ID</th>
+                            <th>Student</th>
+                            <th>Course</th>
+                            <th>Faculty</th>
+                            <th>Enrollment Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php while ($enrol = $enrollment_result->fetch_assoc()): 
+                            $status_class = 'status-' . $enrol['status'];
+                        ?>
+                        <tr>
+                            <td><?php echo $enrol['enrollment_id']; ?></td>
+                            <td><?php echo $enrol['first_name'] . ' ' . $enrol['last_name'] . ' (ID: ' . $enrol['student_id'] . ')'; ?></td>
+                            <td><?php echo $enrol['course_name'] . ' (' . $enrol['course_code'] . ')'; ?></td>
+                            <td><?php echo $enrol['faculty_name'] ?? 'Not assigned'; ?></td>
+                            <td><?php echo $enrol['enrollment_date']; ?></td>
+                            <td><span class="status-badge <?php echo $status_class; ?>"><?php echo ucfirst($enrol['status']); ?></span></td>
+                            <td>
+                                <form method="post" style="display: inline-block;">
+                                    <input type="hidden" name="enrollment_id" value="<?php echo $enrol['enrollment_id']; ?>">
+                                    <input type="hidden" name="search_code" value="<?php echo htmlspecialchars($search_code); ?>">
+                                    <button type="submit" name="edit_enrollment" class="btn btn-success btn-sm"><i class="fas fa-edit"></i> Edit</button>
+                                </form>
+                                <form method="post" style="display: inline-block;">
+                                    <input type="hidden" name="enrollment_id" value="<?php echo $enrol['enrollment_id']; ?>">
+                                    <input type="hidden" name="search_code" value="<?php echo htmlspecialchars($search_code); ?>">
+                                    <input type="hidden" name="action" value="drop">
+                                    <button type="submit" name="enrol_action" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to drop this enrollment?')"><i class="fas fa-trash"></i> Drop</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <?php endwhile; ?>
+                    </tbody>
+                </table>
+                <?php else: ?>
+                <div class="empty-state">
+                    <i class="fas fa-user-graduate"></i>
+                    <h3>No Enrollments Found</h3>
+                    <p>There are no enrollments to display at this time.</p>
+                </div>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <?php if (isset($edit_enrollment)): ?>
+        <div class="form-container">
+            <h3 class="form-title"><i class="fas fa-edit"></i> Edit Enrollment</h3>
+            <form method="post">
+                <input type="hidden" name="enrollment_id" value="<?php echo $edit_enrollment['enrollment_id']; ?>">
+                <input type="hidden" name="search_code" value="<?php echo htmlspecialchars($search_code); ?>">
+                <input type="hidden" name="action" value="edit">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Student</label>
+                        <input type="text" class="form-input" value="<?php echo $edit_enrollment['first_name'] . ' ' . $edit_enrollment['last_name'] . ' (ID: ' . $edit_enrollment['student_id'] . ')'; ?>" disabled>
+                        <input type="hidden" name="student_id" value="<?php echo $edit_enrollment['student_id']; ?>">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Course *</label>
+                        <select name="course_id" class="form-select" required>
+                            <?php while ($course = $all_courses->fetch_assoc()): 
+                                $selected = ($course['course_id'] == $edit_enrollment['course_id']) ? 'selected' : '';
+                            ?>
+                            <option value="<?php echo $course['course_id']; ?>" <?php echo $selected; ?>>
+                                <?php echo $course['course_name'] . ' (' . $course['course_code'] . ')'; ?>
+                            </option>
+                            <?php endwhile; ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Faculty *</label>
+                        <select name="faculty_id" class="form-select" required>
+                            <option value="">Select Faculty</option>
+                            <?php while ($faculty = $all_faculty->fetch_assoc()): 
+                                $selected = ($faculty['faculty_id'] == $edit_enrollment['faculty_id']) ? 'selected' : '';
+                            ?>
+                            <option value="<?php echo $faculty['faculty_id']; ?>" <?php echo $selected; ?>>
+                                <?php echo $faculty['name']; ?>
+                            </option>
+                            <?php endwhile; ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Status *</label>
+                        <select name="status" class="form-select" required>
+                            <option value="enrolled" <?php echo ($edit_enrollment['status'] == 'enrolled') ? 'selected' : ''; ?>>Enrolled</option>
+                            <option value="completed" <?php echo ($edit_enrollment['status'] == 'completed') ? 'selected' : ''; ?>>Completed</option>
+                            <option value="dropped" <?php echo ($edit_enrollment['status'] == 'dropped') ? 'selected' : ''; ?>>Dropped</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" name="enrol_action" class="btn btn-success"><i class="fas fa-save"></i> Update Enrollment</button>
+                    <button type="submit" name="show_enrollment_status" class="btn btn-danger"><i class="fas fa-times"></i> Cancel</button>
+                </div>
+            </form>
+        </div>
+        <?php endif; ?>
+
+        <?php if (isset($_POST['show_suggested_courses'])): ?>
+        <div class="card">
+            <div class="card-header">
+                <span><i class="fas fa-lightbulb"></i> Suggested Courses</span>
+            </div>
+            <div class="card-body">
+                <?php 
+                // Get student info
+                $student_id = 23303106;
+                $student_query = "SELECT first_name, last_name FROM student_registration WHERE id = $student_id";
+                $student_result = $mysqli->query($student_query);
+                $student = $student_result->fetch_assoc();
+                ?>
+                
+                <div class="search-container">
+                    <div>
+                        <p><strong>Student:</strong> <?php echo $student['first_name'] . ' ' . $student['last_name']; ?> (ID: <?php echo $student_id; ?>)</p>
+                        <?php 
+                        // Get max semester
+                        $max_semester_query = "SELECT MAX(semister) as max_semester FROM student_result WHERE st_id = $student_id";
+                        $max_semester_result = $mysqli->query($max_semester_query);
+                        $max_semester = $max_semester_result->fetch_assoc()['max_semester'] ?? 1;
+                        $suggested_semester = $max_semester + 1;
+                        ?>
+                        <p><strong>Current Progress:</strong> Completed up to Semester <?php echo $max_semester; ?></p>
+                        <p><strong>Suggested Semester:</strong> Semester <?php echo $suggested_semester; ?></p>
+                    </div>
+                </div>
+                
+                <?php if ($suggested_result && $suggested_result->num_rows > 0): ?>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Course Code</th>
+                            <th>Course Name</th>
+                            <th>Department</th>
+                            <th>Semester</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php while ($course = $suggested_result->fetch_assoc()): ?>
+                        <tr>
+                            <td><?php echo $course['course_code']; ?></td>
+                            <td><?php echo $course['course_name']; ?></td>
+                            <td><?php echo $course['department']; ?></td>
+                            <td><?php echo $course['semester']; ?></td>
+                        </tr>
+                        <?php endwhile; ?>
+                    </tbody>
+                </table>
+                <?php else: ?>
+                <div class="empty-state">
+                    <i class="fas fa-lightbulb"></i>
+                    <h3>No Suggested Courses</h3>
+                    <p>There are no courses suggested for your next semester (Semester <?php echo $suggested_semester; ?>).</p>
+                </div>
+                <?php endif; ?>
+            </div>
         </div>
         <?php endif; ?>
     </div>

@@ -1747,7 +1747,7 @@ if (mysqli_num_rows($check_column) == 0) {
                     <li><button type="submit" name="course"><i class="fas fa-book-open"></i> Courses</button></li>
                     <li><button type="submit" name="enrolment"><i class="fas fa-user-plus"></i> Enrollment</button></li>
                     <li><button type="submit" name="routine"><i class="fas fa-calendar-alt"></i> Routine</button></li>
-                    <li><button type="submit" name="account"><i class="fas fa-exchange-alt"></i> Transaction</button></li>
+                    <li><a href="transaction.php"><i class="fas fa-exchange-alt"></i> Transaction</a></li>
     <div class="notification-bell">
       <li>  <button type="submit" name="notice" class="bell-btn">
             <i class="fas fa-bell"></i>Notification
@@ -2051,6 +2051,7 @@ if (mysqli_num_rows($check_column) == 0) {
                             <tr>
                                 <th>Course Code</th>
                                 <th>Course Name</th>
+                                <th>Marks</th>
                                 <th>Grade</th>
                                 <th>Grade Value</th>
                                 <th>Credit Hours</th>
@@ -2159,6 +2160,7 @@ if (mysqli_num_rows($check_column) == 0) {
                                 <tr>
                                     <td><?= htmlspecialchars($result['course']) ?></td>
                                     <td><?= htmlspecialchars($result['course_name'] ?? $result['course'] . ' Name') ?></td>
+                                    <td><?= htmlspecialchars($result['marks'] ?? 'N/A') ?></td>
                                     <td class="<?= $grade_class ?>"><?= htmlspecialchars($letter_grade) ?></td>
                                     <td><?= $grade_value ?></td>
                                     <td><?= htmlspecialchars($result['credit_hours'] ?? '3') ?></td>
@@ -2200,9 +2202,7 @@ if (mysqli_num_rows($check_column) == 0) {
                 </div>
             <?php endif; ?>
         </div>
-    </div>
-
-<?php
+    </div><?php
 // Default: fetch all semeste
 
 // Get all available semesters from course table
@@ -2534,6 +2534,7 @@ if (isset($_POST['search_course']) && !empty($selected_semester)) {
     <div class="content-area">
         <div class="page-header">
             <h2 class="page-title"><i class="fas fa-calendar-alt"></i> My Class Routine</h2>
+            <h2 class="page-title"><i class="fas fa-calendar-alt"></i><a href="routine.php"> Exam Routine</a></h2>
             <form method="post">
                 <button type="submit" name="enrolment" class="btn-back">
                     <i class="fas fa-arrow-left"></i> Back to Enrollment
@@ -2632,7 +2633,7 @@ if (isset($_POST['search_course']) && !empty($selected_semester)) {
                             <div class="info-label">Last Login</div>
                             <div class="info-value"><?= htmlspecialchars($login_time) ?></div>
                         </div>
-                        <div class="info-group">
+                        <div class="info-group">Notification
                             <div class="info-label">Account Status</div>
                             <div class="info-value"><span style="color: #28a745;">Active</span></div>
                         </div>
