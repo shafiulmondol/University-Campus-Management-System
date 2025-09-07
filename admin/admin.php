@@ -1357,13 +1357,41 @@ $mysqli->close();
             <div class="page-header">
                 <h2 class="page-title"><i class="fas fa-chart-line"></i> System Statistics</h2>
             </div>
-            
+            <?php
+$mysqli = new mysqli("localhost", "root", "", "skst_university");
+
+// Check connection
+if ($mysqli->connect_error) {
+    die("Connection failed: " . $mysqli->connect_error);
+}
+
+// Count courses
+$result = $mysqli->query("SELECT COUNT(*) AS total FROM course");
+$row = $result->fetch_assoc();
+$course_count = $row['total'];
+
+// Count students
+$result = $mysqli->query("SELECT COUNT(*) AS total FROM student_registration");
+$row = $result->fetch_assoc();
+$student_count = $row['total'];
+
+// Count staff
+$result = $mysqli->query("SELECT COUNT(*) AS total FROM stuf");
+$row = $result->fetch_assoc();
+$staff_count = $row['total'];
+$result = $mysqli->query("SELECT COUNT(*) AS total FROM admin_users");
+$row = $result->fetch_assoc();
+$admin_count = $row['total'];
+
+// Total count (courses + students + staff)
+$total_count = $course_count + $student_count + $staff_count+$admin_count;
+?>
             <div class="stats">
                 <div class="stat-card">
                     <div class="stat-icon">
                         <i class="fas fa-users"></i>
                     </div>
-                    <div class="stat-number">1,254</div>
+                    <div class="stat-number"><?php echo $total_count; ?></div>
                     <div class="stat-label">Total Users</div>
                 </div>
                 
@@ -1371,7 +1399,7 @@ $mysqli->close();
                     <div class="stat-icon">
                         <i class="fas fa-book"></i>
                     </div>
-                    <div class="stat-number">78</div>
+                    <div class="stat-number"><?php echo $course_count; ?></div>
                     <div class="stat-label">Courses</div>
                 </div>
                 
@@ -1379,7 +1407,7 @@ $mysqli->close();
                     <div class="stat-icon">
                         <i class="fas fa-graduation-cap"></i>
                     </div>
-                    <div class="stat-number">542</div>
+                    <div class="stat-number"><?php echo $student_count; ?></div>
                     <div class="stat-label">Students</div>
                 </div>
                 

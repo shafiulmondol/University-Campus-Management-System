@@ -686,7 +686,7 @@ $events = ['Sports Day', 'Cultural Festival', 'Seminar', 'Workshop', 'Conference
         <label for="section">Section:</label>
         <select name="section" id="section" onchange="this.form.submit()">
             <?php
-            $sections = ['Student', 'Faculty', 'Staff', 'Admin', 'AO', 'Bank', 'Department', 'Event', 'update_request'];
+            $sections = ['Student', 'Faculty', 'Staff', 'Admin', 'AO', 'Bank', 'Department', 'Library', 'Event', 'update_request'];
             foreach ($sections as $sec) {
                 $sel = ($sec === $selected_section) ? 'selected' : '';
                 if ($sec === 'update_request') {

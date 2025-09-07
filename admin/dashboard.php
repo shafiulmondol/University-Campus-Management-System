@@ -143,7 +143,7 @@ if(isset($_POST['dashboard'])) { ?>
                     <div class="stat-icon">
                         <i class="fas fa-book"></i>
                     </div>
-                    <div class="stat-number">78</div>
+                    <div class="stat-number"> </div>
                     <div class="stat-label">Courses</div>
                 </div>
                 

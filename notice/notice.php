@@ -14,10 +14,7 @@ if ($con->connect_error) {
 }
 
 // Check if user is logged in
-if (!isset($_SESSION['admin_email'])) {
-    header("Location: login.php");
-    exit();
-}
+
 
 // Get the logged-in admin's email
 $admin_email = $_SESSION['admin_email'] ?? '';
