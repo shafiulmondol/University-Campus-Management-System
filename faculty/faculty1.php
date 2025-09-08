@@ -117,7 +117,15 @@ $is_logged_in = isset($_SESSION['faculty_id']);
 // Get faculty data if logged in
 if ($is_logged_in) {
     $faculty_id = $_SESSION['faculty_id'];
-    $faculty = getFacultyInfo($faculty_id, $mysqli);
+    
+    // Get faculty info
+    $faculty_sql = "SELECT * FROM faculty WHERE faculty_id = ?";
+    $stmt = $mysqli->prepare($faculty_sql);
+    $stmt->bind_param("i", $faculty_id);
+    $stmt->execute();
+    $faculty_result = $stmt->get_result();
+    $faculty = $faculty_result->fetch_assoc();
+    $stmt->close();
 }
 
 // Get course count for stats
@@ -139,6 +147,28 @@ if ($is_logged_in) {
     $student_count_result = $stmt->get_result();
     $student_count = $student_count_result->fetch_assoc()['student_count'];
     $stmt->close();
+    
+    // Get unread notification count - Filtering by section instead of faculty_id
+    $notification_count_sql = "SELECT COUNT(*) as notification_count FROM notice 
+                              WHERE section = 'Faculty' AND viewed = 0 ";
+    $stmt = $mysqli->prepare($notification_count_sql);
+    $stmt->execute();
+    $notification_count_result = $stmt->get_result();
+    $notification_count = $notification_count_result->fetch_assoc()['notification_count'];
+    $stmt->close();
+}
+
+// Handle notification view
+if (isset($_GET['view_notifications']) && $is_logged_in) {
+    // Mark all faculty notifications as viewed
+    $update_sql = "UPDATE notice SET viewed = 1 
+                  WHERE section = 'Faculty' AND viewed = 0 AND id=$faculty_id";
+    $stmt = $mysqli->prepare($update_sql);
+    $stmt->execute();
+    $stmt->close();
+    
+    // Reset notification count
+    $notification_count = 0;
 }
 
 $mysqli->close();
@@ -152,272 +182,243 @@ $mysqli->close();
     <title>Faculty Portal - SKST University</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* CSS from the original faculty1.php file */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
+
         body {
             background-color: #f5f7fa;
             color: #333;
         }
-        
-        /* ================ Navbar Styles ============ */
-        .navbar {
-            background: linear-gradient(135deg, #2b5876, #4e4376);
+
+        /* Login Styles */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            padding: 20px;
+        }
+
+        .login-box {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            overflow: hidden;
+        }
+
+        .login-header {
+            background: #1a2a6c;
             color: white;
-            padding: 15px 30px;
+            text-align: center;
+            padding: 30px 20px;
+        }
+
+        .login-header h1 {
+            margin: 15px 0 5px;
+            font-size: 24px;
+        }
+
+        .login-header p {
+            opacity: 0.8;
+        }
+
+        .login-form {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: #1a2a6c;
+            outline: none;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: #1a2a6c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-bottom: 10px;
+        }
+
+        .login-btn:hover {
+            background: #2a3a8c;
+        }
+
+        .error-msg {
+            background: #ffebee;
+            color: #c62828;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .success-msg {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        /* Dashboard Styles */
+        .navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background: #1a2a6c;
+            padding: 15px 30px;
+            color: white;
         }
-                .logo {
+
+        .logo {
             display: flex;
             align-items: center;
             gap: 15px;
         }
-        
-        .logo img {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            object-fit: cover;
-            background: white;
-            padding: 5px;
-        }
-        
+
         .logo h1 {
             font-size: 22px;
-            font-weight: 600;
         }
-        
+
         .nav-buttons {
             display: flex;
             gap: 15px;
         }
-        
-        .nav-buttons button {
+
+        .nav-buttons button, .nav-buttons a {
             background: rgba(255, 255, 255, 0.2);
             border: none;
             color: white;
-            padding: 8px 15px;
+            padding: 10px 15px;
             border-radius: 5px;
             cursor: pointer;
-            transition: background 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .nav-buttons button:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-        
-        .welcome {
             display: flex;
             align-items: center;
             gap: 8px;
-            font-weight: 500;
+            font-size: 14px;
+            transition: background 0.3s;
+            text-decoration: none;
         }
-        
-        /* ================ Main Layout ============ */
+
+        .nav-buttons button:hover, .nav-buttons a:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .notification-badge {
+            background: #ff4757;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+
         .main-layout {
             display: flex;
-            min-height: calc(100vh - 80px);
+            min-height: calc(100vh - 70px);
         }
-        
-        /* ================ Sidebar Styles ============ */
-        .container {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-            width: 100%;
-            max-width: 500px;
-            text-align: center;
-        }
-        
-        h1 {
-            color: #2b5876;
-            margin-bottom: 20px;
-            font-size: 28px;
-        }
-        
-        .description {
-            color: #666;
-            margin-bottom: 30px;
-            line-height: 1.6;
-        }
-        
-        /* Statistics Button */
-        .stats-button {
-            display: inline-flex;
-            align-items: center;
-            background: linear-gradient(135deg, #2b5876, #4e4376);
-            color: white;
-            border: none;
-            padding: 15px 25px;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(43, 88, 118, 0.2);
-        }
-        
-        .stats-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(43, 88, 118, 0.3);
-        }
-        
-        .stats-button:active {
-            transform: translateY(0);
-        }
-        
-        .stats-button i {
-            margin-right: 10px;
-            font-size: 20px;
-        }
-        
-        /* Stats Panel (initially hidden) */
-        .stats-panel {
-            background: #f8faff;
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 25px;
-            text-align: left;
-            display: none;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            border-left: 4px solid #4e4376;
-        }
-        
-        .stats-panel.visible {
-            display: block;
-            animation: fadeIn 0.5s ease;
-        }
-        
-        .stat-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .stat-item:last-child {
-            border-bottom: none;
-        }
-        
-        .stat-label {
-            color: #4e4376;
-            font-weight: 500;
-        }
-        
-        .stat-value {
-            color: #2b5876;
-            font-weight: 700;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .instructions {
-            margin-top: 25px;
-            padding: 15px;
-            background: #f0f5ff;
-            border-radius: 8px;
-            font-size: 14px;
-            color: #4e4376;
-        }
-        
+
         .sidebar {
             width: 250px;
-            background: white;
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
-            position: sticky;
-            top: 80px;
-            height: calc(100vh - 80px);
-            overflow-y: auto;
-            z-index: 90;
-            padding: 25px 0;
+            background: #2c3e50;
+            color: white;
+            padding: 20px 0;
         }
-        
+
         .sidebar-menu {
             list-style: none;
-            width: 100%;
         }
-        
+
         .sidebar-menu li {
             margin-bottom: 5px;
-            width: 100%;
-            margin-bottom: 8px;
         }
-        
+
         .sidebar-menu a, .sidebar-menu button {
             display: flex;
             align-items: center;
-            color: #4e4376;
+            gap: 15px;
+            padding: 15px 20px;
+            color: white;
             text-decoration: none;
-            padding: 12px 25px;
-            transition: all 0.3s ease;
+            background: none;
+            border: none;
             width: 100%;
             text-align: left;
-            border: none;
-            background: none;
             cursor: pointer;
+            transition: background 0.3s;
             font-size: 16px;
         }
-        
-        .sidebar-menu a:hover, 
-        .sidebar-menu a.active, 
-        .sidebar-menu button:hover {
-            background-color: #f0f5ff;
-            color: #2b5876;
-            border-right: 4px solid #2b5876;
+
+        .sidebar-menu a:hover, .sidebar-menu button:hover {
+            background: #34495e;
         }
-        
-        .sidebar-menu i {
-            margin-right: 12px;
-            font-size: 18px;
-            width: 24px;
-            text-align: center;
+
+        .sidebar-menu a.active {
+            background: #1a2a6c;
+            border-left: 4px solid #fdbb2d;
         }
-        
-        /* ================ Content Area ============ */
+
         .content-area {
             flex: 1;
-            padding: 25px;
+            padding: 30px;
             overflow-y: auto;
-            height: calc(100vh - 80px);
         }
-        
+
         .page-header {
-            background: linear-gradient(to right, #f0f5ff, #f8faff);
-            padding: 20px 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
-            border-radius: 10px;
+            margin-bottom: 30px;
         }
-        
+
         .page-title {
-            color: #2b5876;
-            font-size: 30px;
-            font-weight: 600;
-            margin: 0;
+            color: #1a2a6c;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        
+
         .btn-edit {
-            background: linear-gradient(135deg, #2b5876, #4e4376);
+            background: #1a2a6c;
             color: white;
             border: none;
             padding: 10px 20px;
@@ -426,347 +427,165 @@ $mysqli->close();
             display: flex;
             align-items: center;
             gap: 8px;
-            transition: opacity 0.3s;
+            font-size: 14px;
+            transition: background 0.3s;
         }
-        
+
         .btn-edit:hover {
-            opacity: 0.9;
+            background: #2a3a8c;
         }
-        
-        /* ================ Profile Section ============ */
+
         .profile-card {
-            background: linear-gradient(to right, #f0f5ff, #f8faff);
-            border-radius: 12px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             padding: 30px;
-            margin-bottom: 30px;
             display: flex;
             align-items: center;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            gap: 30px;
+            margin-bottom: 30px;
         }
-        
+
         .profile-img-container {
             position: relative;
-            margin-right: 30px;
-        }
-        
-        .profile-img {
             width: 120px;
             height: 120px;
+        }
+
+        .profile-img {
+            width: 100%;
+            height: 100%;
             border-radius: 50%;
             object-fit: cover;
-            border: 5px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
-        
+
         .profile-placeholder {
-            width: 120px;
-            height: 120px;
+            width: 100%;
+            height: 100%;
             border-radius: 50%;
-            background: #2b5876;
+            background: #ddd;
             display: flex;
-            align-items: center;
             justify-content: center;
-            color: white;
+            align-items: center;
             font-size: 40px;
-            border: 5px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            color: #777;
         }
-        
+
         .edit-overlay {
             position: absolute;
-            bottom: 5px;
-            right: 5px;
-            background: #4e4376;
+            bottom: 0;
+            right: 0;
+            background: #1a2a6c;
+            color: white;
             width: 36px;
             height: 36px;
             border-radius: 50%;
             display: flex;
-            align-items: center;
             justify-content: center;
-            color: white;
+            align-items: center;
             cursor: pointer;
-            transition: all 0.3s;
-            border: 2px solid white;
+            transition: background 0.3s;
         }
-        
+
         .edit-overlay:hover {
-            background: #2b5876;
-            transform: scale(1.1);
+            background: #2a3a8c;
         }
-        
+
         #file-input {
             display: none;
         }
-        
+
         .profile-info h2 {
-            color: #2b5876;
+            color: #1a2a6c;
             margin-bottom: 10px;
-            font-size: 28px;
         }
-        
+
         .profile-info p {
-            color: #666;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            color: #555;
             display: flex;
             align-items: center;
+            gap: 10px;
         }
-        
-        .profile-info i {
-            margin-right: 10px;
-            color: #4e4376;
-        }
-        
-        /* ================ Info Cards ============ */
+
         .info-cards {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
             margin-bottom: 30px;
         }
-        
+
         .detail-card {
             background: white;
             border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
         }
-        
+
         .detail-card h3 {
-            color: #2b5876;
+            color: #1a2a6c;
             margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #f0f5ff;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
             display: flex;
             align-items: center;
+            gap: 10px;
         }
-        
-        .detail-card h3 i {
-            margin-right: 10px;
-            background: #f0f5ff;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-            color: #4e4376;
-        }
-        
+
         .info-group {
-            margin-bottom: 18px;
-        }
-        
-        .info-label {
-            font-size: 14px;
-            color: #888;
-            margin-bottom: 5px;
-        }
-        
-        .info-value {
-            font-size: 18px;
-            color: #444;
-            font-weight: 500;
-        }
-        
-        /* ================ Stats Section ============ */
-        .stats {
             display: flex;
-            flex-wrap: wrap;
             justify-content: space-between;
-            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .info-value {
+            color: #333;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
         }
 
         .stat-card {
             background: white;
             border-radius: 10px;
-            padding: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
             text-align: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            flex: 1;
-            margin: 10px;
-            min-width: 180px;
-            transition: all 0.3s ease;
-            border-top: 3px solid;
-            height: 150px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-        }
-
-        .stat-card:nth-child(1) {
-            border-color: #4e4376;
-        }
-
-        .stat-card:nth-child(2) {
-            border-color: #2b5876;
-        }
-
-        .stat-card:nth-child(3) {
-            border-color: #4a90e2;
-        }
-
-        .stat-card:nth-child(4) {
-            border-color: #f39c12;
         }
 
         .stat-icon {
-            width: 40px;
-            height: 40px;
-            margin: 0 auto 8px;
+            width: 50px;
+            height: 50px;
+            background: #f0f7ff;
             border-radius: 50%;
             display: flex;
-            align-items: center;
             justify-content: center;
-            font-size: 18px;
-            color: white;
-        }
-
-        .stat-card:nth-child(1) .stat-icon {
-            background: linear-gradient(135deg, #4e4376, #826ab4);
-        }
-
-        .stat-card:nth-child(2) .stat-icon {
-            background: linear-gradient(135deg, #2b5876, #4e8fa8);
-        }
-
-        .stat-card:nth-child(3) .stat-icon {
-            background: linear-gradient(135deg, #4a90e2, #6bb9ff);
-        }
-
-        .stat-card:nth-child(4) .stat-icon {
-            background: linear-gradient(135deg, #f39c12, #f1c40f);
+            align-items: center;
+            margin: 0 auto 15px;
+            font-size: 20px;
+            color: #1a2a6c;
         }
 
         .stat-number {
-            font-size: 22px;
-            font-weight: 800;
-            margin-bottom: 3px;
-            background: linear-gradient(135deg, #2b5876, #4e4376);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a2a6c;
+            margin-bottom: 5px;
         }
 
         .stat-label {
-            color: #666;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            color: #777;
         }
-        
-        /* ================ Login Form Styles ============ */
-        .login-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        }
-        
-        .login-box {
-            background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 450px;
-            overflow: hidden;
-        }
-        
-        .login-header {
-            background: linear-gradient(135deg, #2b5876, #4e4376);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-        
-        .login-header h1 {
-            font-size: 28px;
-            margin-bottom: 10px;
-            color: white;
-        }
-        
-        .login-header p {
-            font-size: 16px;
-            opacity: 0.9;
-        }
-        
-        .login-form {
-            padding: 30px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #2b5876;
-        }
-        
-        .form-group input {
-            width: 100%;
-            padding: 14px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-        
-        .form-group input:focus {
-            border-color: #2b5876;
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(43, 88, 118, 0.2);
-        }
-        
-        .login-btn {
-            background: linear-gradient(135deg, #2b5876, #4e4376);
-            color: white;
-            border: none;
-            padding: 15px;
-            width: 100%;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 10px;
-        }
-        
-        .login-btn:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-        }
-        
-        .error-msg {
-            color: #e74c3c;
-            text-align: center;
-            margin-top: 20px;
-            padding: 10px;
-            background: #ffecec;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        
-        .demo-credentials {
-            margin-top: 25px;
-            padding: 15px;
-            background: #f0f5ff;
-            border-radius: 8px;
-            font-size: 14px;
-            color: #4e4376;
-            text-align: center;
-        }
-        
-        /* ================ Modal Styles ============ */
+
+        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -775,126 +594,174 @@ $mysqli->close();
             top: 0;
             width: 100%;
             height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.5);
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
         }
-        
+
         .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            background-color: white;
+            border-radius: 10px;
             width: 90%;
             max-width: 500px;
-            position: relative;
-            animation: modalFadeIn 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
         }
-        
-        @keyframes modalFadeIn {
-            from {opacity: 0; transform: translateY(-50px);}
-            to {opacity: 1; transform: translateY(0);}
-        }
-        
-        .close-modal {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            position: absolute;
-            right: 20px;
-            top: 15px;
-        }
-        
-        .close-modal:hover {
-            color: #000;
-        }
-        
+
         .modal-title {
-            color: #2b5876;
-            margin-bottom: 20px;
-            font-size: 24px;
+            background: #1a2a6c;
+            color: white;
+            padding: 20px;
             display: flex;
             align-items: center;
             gap: 10px;
         }
-        
-        .modal-form .form-group {
-            margin-bottom: 20px;
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
         }
-        
-        .modal-form label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #2b5876;
+
+        .modal-form {
+            padding: 20px;
         }
-        
-        .modal-form input, .modal-form textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-        
-        .modal-form input:focus, .modal-form textarea:focus {
-            border-color: #2b5876;
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(43, 88, 118, 0.2);
-        }
-        
+
         .modal-btn {
-            background: linear-gradient(135deg, #2b5876, #4e4376);
+            background: #1a2a6c;
             color: white;
             border: none;
             padding: 12px 20px;
-            border-radius: 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
             font-size: 16px;
             font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            width: 100%;
-            margin-top: 10px;
+            transition: background 0.3s;
         }
-        
+
         .modal-btn:hover {
-            opacity: 0.9;
+            background: #2a3a8c;
         }
-        
-        .success-msg {
-            color: #2e7d32;
-            text-align: center;
+
+        /* Notices Styles */
+        .notices-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .notices-heading {
+            color: #1a2a6c;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notice-card {
+            border-left: 4px solid #1a2a6c;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #f9f9f9;
+            border-radius: 0 5px 5px 0;
+        }
+
+        .notice-card.unread {
+            background: #e3f2fd;
+            border-left-color: #2196f3;
+        }
+
+        .notice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .notice-title {
+            color: #1a2a6c;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .notice-section {
+            background: #1a2a6c;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .notice-content {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .notice-footer {
+            display: flex;
+            justify-content: space-between;
+            color: #777;
+            font-size: 14px;
+        }
+
+        .notice-author, .notice-date {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .back-button-container {
             margin-top: 20px;
-            padding: 10px;
-            background: #e8f5e9;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #1a2a6c;
+            color: white;
+            padding: 10px 15px;
             border-radius: 5px;
-            font-size: 16px;
+            text-decoration: none;
+            transition: background 0.3s;
         }
-        
-        /* ================ Responsive Design ============ */
-        @media (max-width: 1024px) {
-            .info-cards {
-                grid-template-columns: 1fr;
-            }
+
+        .back-button:hover {
+            background: #2a3a8c;
         }
-        
-        @media (max-width: 900px) {
+
+        .no-notices {
+            text-align: center;
+            padding: 40px 20px;
+            color: #777;
+        }
+
+        .no-notices i {
+            font-size: 50px;
+            margin-bottom: 15px;
+            color: #ddd;
+        }
+
+        @media (max-width: 768px) {
             .main-layout {
                 flex-direction: column;
             }
             
             .sidebar {
                 width: 100%;
-                height: auto;
-                position: static;
-                top: 0;
             }
             
-            .content-area {
-                height: auto;
+            .info-cards, .stats {
+                grid-template-columns: 1fr;
             }
             
             .profile-card {
@@ -902,59 +769,8 @@ $mysqli->close();
                 text-align: center;
             }
             
-            .profile-img-container {
-                margin-right: 0;
-                margin-bottom: 20px;
-            }
-            
-            .modal-content {
-                width: 95%;
-                margin: 10% auto;
-            }
-        }
-        
-        @media (max-width: 600px) {
-            .navbar {
-                flex-direction: column;
-                gap: 15px;
-                padding: 15px;
-            }
-            
             .nav-buttons {
                 flex-wrap: wrap;
-                justify-content: center;
-            }
-            
-            .info-cards {
-                grid-template-columns: 1fr;
-            }
-            
-            .stats {
-                grid-template-columns: 1fr 1fr;
-            }
-            
-            .stat-card {
-                min-width: auto;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .stats {
-                grid-template-columns: 1fr;
-            }
-            
-            .page-header {
-                flex-direction: column;
-                gap: 15px;
-                align-items: flex-start;
-            }
-            
-            .login-form {
-                padding: 20px;
-            }
-            
-            .modal-content {
-                padding: 20px;
             }
         }
     </style>
@@ -1002,9 +818,12 @@ $mysqli->close();
             <button onclick="location.href='../index.html'">
                 <i class="fas fa-home"></i> Home
             </button>
-            <button onclick="location.href='?logout=1'">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </button>
+            <a href="?view_notifications=1" class="notification-link">
+                <i class="fas fa-bell"></i> Notifications
+                <?php if ($notification_count > 0): ?>
+                    <span class="notification-badge"><?php echo $notification_count; ?></span>
+                <?php endif; ?>
+            </a>
         </div>
     </div>
     
@@ -1055,151 +874,203 @@ $mysqli->close();
         </div>
         
         <div class="content-area">
-            <div class="page-header">
-                <h1 class="page-title"><i class="fas fa-chalkboard-teacher"></i> Faculty Dashboard</h1>
-                <button class="btn-edit" onclick="openEditModal()">
-                    <i class="fas fa-edit"></i> Edit Profile
-                </button>
-            </div>
+            <?php if (isset($_GET['view_notifications'])): ?>
+                <!-- Notifications Page -->
+                <div class="page-header">
+                    <h1 class="page-title"><i class="fas fa-bell"></i> Notifications</h1>
+                    <button class="btn-edit" onclick="location.href='faculty1.php'">
+                        <i class="fas fa-arrow-left"></i> Back to Profile
+                    </button>
+                </div>
 
-            <?php if (!empty($error)): ?>
-                <div class="error-msg"><?php echo $error; ?></div>
-            <?php endif; ?>
-            
-            <?php if (!empty($success)): ?>
-                <div class="success-msg"><?php echo $success; ?></div>
-            <?php endif; ?>
+                <div class="notices-container">
+                    <h2 class="notices-heading"><i class="fas fa-bullhorn"></i> Latest Notices</h2>
+                    
+                    <?php
+                    // Reconnect to database for notifications
+                    $mysqli = new mysqli('localhost','root','','skst_university');
+                    
+                    // Get all faculty notices
+                      $query = "SELECT * FROM notice 
+                              WHERE section = 'Faculty'
+                              ORDER BY created_at DESC";
+                    $stmt = $mysqli->prepare($query);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
 
-            <!-- Profile Card with Picture Upload -->
-            <div class="profile-card">
-                <div class="profile-img-container">
-                    <?php if (!empty($faculty['profile_picture'])): ?>
-                        <img id="profile-image" class="profile-img" src="<?php echo htmlspecialchars($faculty['profile_picture']); ?>" alt="Profile Image">
-                    <?php else: ?>
-                        <div id="profile-placeholder" class="profile-placeholder">
-                            <i class="fas fa-user-tie"></i>
+                    if ($result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) {
+                            $cardClass = $row['viewed'] == 0 ? "notice-card unread" : "notice-card read";
+                            echo "<div class='$cardClass'>";
+                            echo "<div class='notice-header'>";
+                            echo "<h3 class='notice-title'><i class='fas fa-chevron-circle-right'></i> " . htmlspecialchars($row['title']) . "</h3>";
+                            echo "<span class='notice-section'>" . htmlspecialchars($row['section']) . "</span>";
+                            echo "</div>";
+                            echo "<div class='notice-content'>" . nl2br(htmlspecialchars($row['content'])) . "</div>";
+                            echo "<div class='notice-footer'>";
+                            echo "<span class='notice-author'><i class='fas fa-user'></i> " . htmlspecialchars($row['author']) . "</span>";
+                            echo "<span class='notice-date'><i class='far fa-calendar-alt'></i> " . date('F j, Y h:i A', strtotime($row['created_at'])) . "</span>";
+                            echo "</div>";
+                            echo "</div>";
+                        }
+                    } else {
+                        echo "<div class='no-notices'>";
+                        echo "<i class='far fa-folder-open'></i>";
+                        echo "<p>No notices found at this time</p>";
+                        echo "</div>";
+                    }
+                    $stmt->close();
+                    $mysqli->close();
+                    ?>
+                </div>
+            <?php else: ?>
+                <!-- Profile Page -->
+                <div class="page-header">
+                    <h1 class="page-title"><i class="fas fa-chalkboard-teacher"></i> Faculty Dashboard</h1>
+                    <button class="btn-edit" onclick="openEditModal()">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </button>
+                </div>
+
+                <?php if (!empty($error)): ?>
+                    <div class="error-msg"><?php echo $error; ?></div>
+                <?php endif; ?>
+                
+                <?php if (!empty($success)): ?>
+                    <div class="success-msg"><?php echo $success; ?></div>
+                <?php endif; ?>
+
+                <!-- Profile Card with Picture Upload -->
+                <div class="profile-card">
+                    <div class="profile-img-container">
+                        <?php if (!empty($faculty['profile_picture'])): ?>
+                            <img id="profile-image" class="profile-img" src="<?php echo htmlspecialchars($faculty['profile_picture']); ?>" alt="Profile Image">
+                        <?php else: ?>
+                            <div id="profile-placeholder" class="profile-placeholder">
+                                <i class="fas fa-user-tie"></i>
+                            </div>
+                        <?php endif; ?>
+                        <div class="edit-overlay" onclick="document.getElementById('file-input').click()">
+                            <i class="fas fa-camera"></i>
                         </div>
-                    <?php endif; ?>
-                    <div class="edit-overlay" onclick="document.getElementById('file-input').click()">
-                        <i class="fas fa-camera"></i>
+                        <form id="upload-form" method="post" enctype="multipart/form-data">
+                            <input type="file" id="file-input" name="profile_picture" accept="image/*">
+                        </form>
                     </div>
-                    <form id="upload-form" method="post" enctype="multipart/form-data">
-                        <input type="file" id="file-input" name="profile_picture" accept="image/*">
-                    </form>
-                </div>
 
-                <div class="profile-info">
-                    <h2><?php echo htmlspecialchars($faculty['name']); ?></h2>
-                    <p><i class="fas fa-envelope"></i> <?php echo htmlspecialchars($faculty['email']); ?></p>
-                    <p><i class="fas fa-phone"></i> <?php echo htmlspecialchars($faculty['phone'] ?? 'Not provided'); ?></p>
-                    <p><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($faculty['address'] ?? 'Not provided'); ?></p>
-                </div>
-            </div>
-            
-            <div class="info-cards">
-                <div class="detail-card">
-                    <h3><i class="fas fa-building"></i> Department Information</h3>
-                    <div class="info-group">
-                        <div class="info-label">Faculty ID</div>
-                        <div class="info-value"><?php echo htmlspecialchars($faculty['faculty_id']); ?></div>
-                    </div>
-                    <div class="info-group">
-                        <div class="info-label">Department</div>
-                        <div class="info-value"><?php echo htmlspecialchars($faculty['department'] ?? 'Not provided'); ?></div>
-                    </div>
-                    <div class="info-group">
-                        <div class="info-label">Room Number</div>
-                        <div class="info-value"><?php echo htmlspecialchars($faculty['room_number'] ?? 'Not provided'); ?></div>
+                    <div class="profile-info">
+                        <h2><?php echo htmlspecialchars($faculty['name']); ?></h2>
+                        <p><i class="fas fa-envelope"></i> <?php echo htmlspecialchars($faculty['email']); ?></p>
+                        <p><i class="fas fa-phone"></i> <?php echo htmlspecialchars($faculty['phone'] ?? 'Not provided'); ?></p>
+                        <p><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($faculty['address'] ?? 'Not provided'); ?></p>
                     </div>
                 </div>
                 
-                <div class="detail-card">
-                    <h3><i class="fas fa-money-check-alt"></i> Salary Information</h3>
-                    <div class="info-group">
-                        <div class="info-label">Salary</div>
-                        <div class="info-value">$<?php echo isset($faculty['salary']) ? number_format($faculty['salary'], 2) : 'Not provided'; ?></div>
+                <div class="info-cards">
+                    <div class="detail-card">
+                        <h3><i class="fas fa-building"></i> Department Information</h3>
+                        <div class="info-group">
+                            <div class="info-label">Faculty ID</div>
+                            <div class="info-value"><?php echo htmlspecialchars($faculty['faculty_id']); ?></div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Department</div>
+                            <div class="info-value"><?php echo htmlspecialchars($faculty['department'] ?? 'Not provided'); ?></div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Room Number</div>
+                            <div class="info-value"><?php echo htmlspecialchars($faculty['room_number'] ?? 'Not provided'); ?></div>
+                        </div>
                     </div>
-                    <div class="info-group">
-                        <div class="info-label">Payment Method</div>
-                        <div class="info-value">Direct Deposit</div>
+                    
+                    <div class="detail-card">
+                        <h3><i class="fas fa-money-check-alt"></i> Salary Information</h3>
+                        <div class="info-group">
+                            <div class="info-label">Salary</div>
+                            <div class="info-value">$<?php echo isset($faculty['salary']) ? number_format($faculty['salary'], 2) : 'Not provided'; ?></div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Payment Method</div>
+                            <div class="info-value">Direct Deposit</div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Pay Schedule</div>
+                            <div class="info-value">Monthly</div>
+                        </div>
                     </div>
-                    <div class="info-group">
-                        <div class="info-label">Pay Schedule</div>
-                        <div class="info-value">Monthly</div>
+                    
+                    <div class="detail-card">
+                        <h3><i class="fas fa-address-card"></i> Contact Information</h3>
+                        <div class="info-group">
+                            <div class="info-label">Email</div>
+                            <div class="info-value"><?php echo htmlspecialchars($faculty['email']); ?></div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Phone</div>
+                            <div class="info-value"><?php echo htmlspecialchars($faculty['phone'] ?? 'Not provided'); ?></div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Address</div>
+                            <div class="info-value"><?php echo htmlspecialchars($faculty['address'] ?? 'Not provided'); ?></div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-card">
+                        <h3><i class="fas fa-info-circle"></i> Account Information</h3>
+                        <div class="info-group">
+                            <div class="info-label">Faculty Since</div>
+                            <div class="info-value"><?php echo date('M j, Y', strtotime($faculty['registration_date'] ?? 'now')); ?></div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Last Login</div>
+                            <div class="info-value"><?php echo $faculty['last_login'] ? date('M j, Y g:i A', strtotime($faculty['last_login'])) : 'First login'; ?></div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Status</div>
+                            <div class="info-value"><span style="color: #00a651;">Active</span></div>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="detail-card">
-                    <h3><i class="fas fa-address-card"></i> Contact Information</h3>
-                    <div class="info-group">
-                        <div class="info-label">Email</div>
-                        <div class="info-value"><?php echo htmlspecialchars($faculty['email']); ?></div>
-                    </div>
-                    <div class="info-group">
-                        <div class="info-label">Phone</div>
-                        <div class="info-value"><?php echo htmlspecialchars($faculty['phone'] ?? 'Not provided'); ?></div>
-                    </div>
-                    <div class="info-group">
-                        <div class="info-label">Address</div>
-                        <div class="info-value"><?php echo htmlspecialchars($faculty['address'] ?? 'Not provided'); ?></div>
-                    </div>
+                <!-- Stats Section -->
+                <div class="page-header">
+                    <h2 class="page-title"><i class="fas fa-chart-line"></i> Teaching Statistics</h2>
                 </div>
                 
-                <div class="detail-card">
-                    <h3><i class="fas fa-info-circle"></i> Account Information</h3>
-                    <div class="info-group">
-                        <div class="info-label">Faculty Since</div>
-                        <div class="info-value"><?php echo date('M j, Y', strtotime($faculty['registration_date'] ?? 'now')); ?></div>
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <div class="stat-number"><?php echo $course_count ?? 0; ?></div>
+                        <div class="stat-label">Courses</div>
                     </div>
-                    <div class="info-group">
-                        <div class="info-label">Last Login</div>
-                        <div class="info-value"><?php echo $faculty['last_login'] ? date('M j, Y g:i A', strtotime($faculty['last_login'])) : 'First login'; ?></div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-number"><?php echo $student_count ?? 0; ?></div>
+                        <div class="stat-label">Students</div>
                     </div>
-                    <div class="info-group">
-                        <div class="info-label">Status</div>
-                        <div class="info-value"><span style="color: #00a651;">Active</span></div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-number"><?php echo ($course_count ?? 0) * 3; // Assuming 3 hours per course ?></div>
+                        <div class="stat-label">Hours/Week</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="stat-number">4.8</div>
+                        <div class="stat-label">Rating</div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Stats Section -->
-            <div class="page-header">
-                <h2 class="page-title"><i class="fas fa-chart-line"></i> Teaching Statistics</h2>
-            </div>
-            
-            <div class="stats">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-book"></i>
-                    </div>
-                    <div class="stat-number"><?php echo $course_count ?? 0; ?></div>
-                    <div class="stat-label">Courses</div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="stat-number"><?php echo $student_count ?? 0; ?></div>
-                    <div class="stat-label">Students</div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <div class="stat-number"><?php echo ($course_count ?? 0) * 3; // Assuming 3 hours per course ?></div>
-                    <div class="stat-label">Hours/Week</div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <div class="stat-number">4.8</div>
-                    <div class="stat-label">Rating</div>
-                </div>
-            </div>
+            <?php endif; ?>
         </div>
     </div>
     
@@ -1248,7 +1119,7 @@ $mysqli->close();
         
         // Modal functions
         function openEditModal() {
-            document.getElementById('editProfileModal').style.display = 'block';
+            document.getElementById('editProfileModal').style.display = 'flex';
         }
         
         function closeEditModal() {
@@ -1263,7 +1134,5 @@ $mysqli->close();
             }
         };
     </script>
-
 </body>
-
 </html>

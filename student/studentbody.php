@@ -313,7 +313,6 @@ $has_academic_year = mysqli_num_rows($check_academic_year) > 0;
 $check_class_days = mysqli_query($conn, "SHOW COLUMNS FROM course_instructor LIKE 'class_days'");
 $has_class_days = mysqli_num_rows($check_class_days) > 0;
 
-// Build query based on database structure
 if ($has_academic_year) {
     $query = "SELECT c.*, f.faculty_id, f.name as instructor_name, 
                      ci.class_time, ci.room_number";
@@ -323,7 +322,7 @@ if ($has_academic_year) {
     }
     
     $query .= " FROM course as c 
-              LEFT JOIN course_instructor ci ON c.course_id = ci.course_id 
+              INNER JOIN course_instructor ci ON c.course_id = ci.course_id 
               LEFT JOIN faculty as f ON ci.faculty_id = f.faculty_id
               WHERE c.semester = '$current_semester' 
               AND ci.academic_year = '$current_year'
@@ -337,7 +336,7 @@ if ($has_academic_year) {
     }
     
     $query .= " FROM course as c 
-              LEFT JOIN course_instructor ci ON c.course_id = ci.course_id 
+              INNER JOIN course_instructor ci ON c.course_id = ci.course_id 
               LEFT JOIN faculty as f ON ci.faculty_id = f.faculty_id
               WHERE c.semester = '$current_semester' 
               ORDER BY c.course_code";
@@ -2384,7 +2383,7 @@ if (isset($_POST['search_course']) && !empty($selected_semester)) {
                                         </span>
                                     </p>
                                 </div>
-                                
+                                        
                                 <div class="enrollment-actions">
                                     <?php if ($course['is_enrolled']): ?>
                                         <form method="post">

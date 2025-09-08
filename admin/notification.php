@@ -184,6 +184,61 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_POST['accept_update']) || 
     exit();
 }
 
+// ---------- Handle Edit Notice ----------
+$edit_mode = false;
+$edit_id = '';
+$edit_title = '';
+$edit_section_notice = '';
+$edit_sub_section = '';
+$edit_content = '';
+$edit_author = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_notice'])) {
+    $notice_id = intval($_POST['notice_id']);
+    
+    // Fetch the notice to edit
+    if ($stmt = $con->prepare("SELECT * FROM notice WHERE id = ?")) {
+        $stmt->bind_param("i", $notice_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($row = $result->fetch_assoc()) {
+            $edit_mode = true;
+            $edit_id = $row['id'];
+            $edit_title = $row['title'];
+            $edit_section_notice = $row['section'];
+            $edit_sub_section = $row['sub_section'];
+            $edit_content = $row['content'];
+            $edit_author = $row['author'];
+            $show_add_notice_form = true;
+        }
+        $stmt->close();
+    }
+}
+
+// ---------- Handle Update Notice ----------
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_notice'])) {
+    $id = intval($_POST['id']);
+    $title = trim($_POST['title']);
+    $section_notice = trim($_POST['section_notice']);
+    $sub_section = trim($_POST['sub_section'] ?? '');
+    $content = trim($_POST['content']);
+    $author = trim($_POST['author']);
+
+    $stmt = $con->prepare("UPDATE notice SET title=?, section=?, sub_section=?, content=?, author=? WHERE id=?");
+    $stmt->bind_param("sssssi", $title, $section_notice, $sub_section, $content, $author, $id);
+    
+    if ($stmt->execute()) {
+        $flash_message = "<div class='success-msg'>✅ Notice updated successfully!</div>";
+        
+        // Refresh unread counts after updating notice
+        $unreadCounts = getUnreadCounts($con, $admin_email);
+    } else {
+        $flash_message = "<div class='error-msg'>❌ Failed to update notice. Error: " . htmlspecialchars($con->error) . "</div>";
+    }
+    $stmt->close();
+}
+
 // ---------- Handle Insert Notice ----------
 $flash_message = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_notice'])) {
@@ -253,7 +308,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_notices'])) {
     $stmt->close();
 }
 
-$show_add_notice_form = isset($_POST['show_add_notice_form']);
+$show_add_notice_form = isset($_POST['show_add_notice_form']) || $edit_mode;
 $selected_section = $_POST['section'] ?? 'Admin';
 $selected_sub_section = $_POST['sub_section'] ?? '';
 $search_applicant = $_POST['search_applicant'] ?? '';
@@ -400,8 +455,7 @@ $events = ['Sports Day', 'Cultural Festival', 'Seminar', 'Workshop', 'Conference
             margin-top: 20px;
         }
         
-        .delete-btn {
-            background: var(--danger);
+        .delete-btn, .edit-btn {
             color: white;
             border: none;
             border-radius: 5px;
@@ -412,6 +466,14 @@ $events = ['Sports Day', 'Cultural Festival', 'Seminar', 'Workshop', 'Conference
             display: inline-flex;
             align-items: center;
             justify-content: center;
+        }
+        
+        .delete-btn {
+            background: var(--danger);
+        }
+        
+        .edit-btn {
+            background: var(--success);
         }
         
         .date-delete-container {
@@ -437,7 +499,7 @@ $events = ['Sports Day', 'Cultural Festival', 'Seminar', 'Workshop', 'Conference
                 align-items: flex-start;
                 gap: 5px;
             }
-            .delete-btn {
+            .delete-btn, .edit-btn {
                 margin-left: 0;
             }
         }
@@ -472,16 +534,16 @@ $events = ['Sports Day', 'Cultural Festival', 'Seminar', 'Workshop', 'Conference
 
 <?php if ($show_add_notice_form): ?>
     <div class="panel">
-        <h3 style="margin:0 0 12px 0;"><i class="fas fa-plus-circle"></i> Add Notice</h3>
+        <h3 style="margin:0 0 12px 0;"><i class="fas fa-plus-circle"></i> <?php echo $edit_mode ? 'Edit Notice' : 'Add Notice'; ?></h3>
         <form method="post">
             <div class="add-form-grid">
                 <div>
                     <label>Title *</label>
-                    <input type="text" name="title" required>
+                    <input type="text" name="title" value="<?php echo htmlspecialchars($edit_title); ?>" required>
                 </div>
                 <div>
                     <label>ID (Optional)</label>
-                    <input type="text" name="id" placeholder="Leave empty for auto ID">
+                    <input type="text" name="id" value="<?php echo htmlspecialchars($edit_id); ?>" placeholder="Leave empty for auto ID" <?php echo $edit_mode ? 'readonly' : ''; ?>>
                 </div>
                 <div>
                     <label>Section *</label>
@@ -491,30 +553,49 @@ $events = ['Sports Day', 'Cultural Festival', 'Seminar', 'Workshop', 'Conference
                         foreach ($sections_notice as $sec) {
                             $count = $unreadCounts[$sec] ?? 0;
                             $badge = $count > 0 ? " <span class='badge'>$count</span>" : "";
-                            echo "<option value=\"".htmlspecialchars($sec)."\">".htmlspecialchars($sec).$badge."</option>";
+                            $selected = ($sec === $edit_section_notice) ? 'selected' : '';
+                            echo "<option value=\"".htmlspecialchars($sec)."\" $selected>".htmlspecialchars($sec).$badge."</option>";
                         }
                         ?>
                     </select>
                 </div>
-                <div id="sub_section_container" style="display: none;">
+                <div id="sub_section_container" style="display: <?php echo ($edit_section_notice === 'Department' || $edit_section_notice === 'Event') ? 'block' : 'none'; ?>;">
                     <label id="sub_section_label">Sub Category</label>
                     <select name="sub_section" id="sub_section">
                         <option value="">-- Select --</option>
+                        <?php if ($edit_section_notice === 'Department'): ?>
+                            <?php foreach ($departments as $dept): ?>
+                                <?php $selected = ($dept === $edit_sub_section) ? 'selected' : ''; ?>
+                                <option value="<?= $dept ?>" <?= $selected ?>><?= $dept ?></option>
+                            <?php endforeach; ?>
+                        <?php elseif ($edit_section_notice === 'Event'): ?>
+                            <?php foreach ($events as $event): ?>
+                                <?php $selected = ($event === $edit_sub_section) ? 'selected' : ''; ?>
+                                <option value="<?= $event ?>" <?= $selected ?>><?= $event ?></option>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </select>
                 </div>
                 <div>
                     <label>Author *</label>
-                    <input type="text" name="author" required>
+                    <input type="text" name="author" value="<?php echo htmlspecialchars($edit_author); ?>" required>
                 </div>
                 <div class="full">
                     <label>Content *</label>
-                    <textarea name="content" rows="5" required></textarea>
+                    <textarea name="content" rows="5" required><?php echo htmlspecialchars($edit_content); ?></textarea>
                 </div>
             </div>
             <div style="margin-top:12px; display:flex; gap:10px;">
-                <button type="submit" name="submit_notice" class="btn-success"><i class="fa-solid fa-check"></i> Add Notice</button>
+                <?php if ($edit_mode): ?>
+                    <input type="hidden" name="id" value="<?php echo $edit_id; ?>">
+                    <button type="submit" name="update_notice" class="btn-success"><i class="fa-solid fa-check"></i> Update Notice</button>
+                <?php else: ?>
+                    <button type="submit" name="submit_notice" class="btn-success"><i class="fa-solid fa-check"></i> Add Notice</button>
+                <?php endif; ?>
                 <button type="submit" name="notification" class="btn-danger"><i class="fa-solid fa-xmark"></i> Cancel</button>
             </div>
+            <input type="hidden" name="section" value="<?php echo htmlspecialchars($selected_section); ?>">
+            <input type="hidden" name="sub_section" value="<?php echo htmlspecialchars($selected_sub_section); ?>">
         </form>
     </div>
     
@@ -588,6 +669,9 @@ $events = ['Sports Day', 'Cultural Festival', 'Seminar', 'Workshop', 'Conference
                             <span><i class="fa-regular fa-clock"></i> <?php echo date('F j, Y h:i A', strtotime($row['created_at'])); ?></span>
                             <form method="post" style="display: inline;">
                                 <input type="hidden" name="notice_id" value="<?php echo $row['id']; ?>">
+                                <button type="submit" name="edit_notice" class="edit-btn">
+                                    <i class="fa-solid fa-edit"></i> Edit
+                                </button>
                                 <button type="submit" name="delete_notice" class="delete-btn" onclick="return confirm('Are you sure you want to delete this notice?');">
                                     <i class="fa-solid fa-trash"></i> Delete
                                 </button>
@@ -853,6 +937,9 @@ $events = ['Sports Day', 'Cultural Festival', 'Seminar', 'Workshop', 'Conference
                             <span><i class="fa-regular fa-clock"></i> <?php echo date('F j, Y h:i A', strtotime($row['created_at'])); ?></span>
                             <form method="post" style="display: inline;">
                                 <input type="hidden" name="notice_id" value="<?php echo $row['id']; ?>">
+                                <button type="submit" name="edit_notice" class="edit-btn">
+                                    <i class="fa-solid fa-edit"></i> Edit
+                                </button>
                                 <button type="submit" name="delete_notice" class="delete-btn" onclick="return confirm('Are you sure you want to delete this notice?');">
                                     <i class="fa-solid fa-trash"></i> Delete
                                 </button>
