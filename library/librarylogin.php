@@ -1,7 +1,8 @@
 <?php
 session_start();
-$error = '';
+ob_start(); // Start output buffering
 
+$error = '';
 // Database configuration
 define('DB_SERVER', 'localhost');
 define('DB_USERNAME', 'root');
@@ -16,7 +17,7 @@ if ($mysqli->connect_error) {
     die("Connection failed: " . $mysqli->connect_error);
 }
 
-// Handle login
+// Handle login first (before any output)
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
     $email = trim($_POST['email']);
     $password = $_POST['password'];
@@ -38,7 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
                     $_SESSION['stuf_email'] = $email;
                     $_SESSION['stuf_position'] = $position;
                     
-                    // Update last login time (we'll need to add this column to the table)
+                    // Update last login time
                     $update_sql = "UPDATE stuf SET last_login = NOW() WHERE id = ?";
                     if ($update_stmt = $mysqli->prepare($update_sql)) {
                         $update_stmt->bind_param("i", $id);
@@ -65,6 +66,18 @@ if (isset($_GET['logout'])) {
     session_destroy();
     header("Location: " . $_SERVER['PHP_SELF']);
     exit();
+}
+
+// Now include notice.php after handling redirects
+require_once 'notice.php';
+
+// Check if user is logged in
+$is_logged_in = isset($_SESSION['stuf_id']);
+
+if ($is_logged_in) {
+    $unread_count = get_unread_notification_count();
+} else {
+    $unread_count = 0;
 }
 
 // Handle profile picture upload
@@ -105,9 +118,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['profile_picture']) &&
     }
 }
 
-// Check if user is logged in
-$is_logged_in = isset($_SESSION['stuf_id']);
-
 // Get stuf data if logged in
 if ($is_logged_in) {
     $stuf_id = $_SESSION['stuf_id'];
@@ -121,6 +131,13 @@ if ($is_logged_in) {
 }
 
 $mysqli->close();
+
+// Check if notifications should be shown
+$show_notifications = isset($_GET['notice']) && $_GET['notice'] == 1;
+
+// Check if profile should be shown (default if nothing else is specified)
+$show_profile = !$show_notifications;
+ob_end_flush(); // Send the output buffer and turn off output buffering
 ?>
 
 <!DOCTYPE html>
@@ -128,7 +145,7 @@ $mysqli->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="icon" href="../picture/SKST.png" type="image/png" />
+    <link rel="icon" href="../picture/SKST.png" type="image/png" />
     <title>Library Staff Portal - SKST University</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -183,7 +200,7 @@ $mysqli->close();
             gap: 15px;
         }
         
-        .nav-buttons button {
+        .nav-buttons button, .nav-buttons a {
             background: rgba(255, 255, 255, 0.2);
             border: none;
             color: white;
@@ -194,9 +211,10 @@ $mysqli->close();
             display: flex;
             align-items: center;
             gap: 5px;
+            text-decoration: none;
         }
         
-        .nav-buttons button:hover {
+        .nav-buttons button:hover, .nav-buttons a:hover {
             background: rgba(255, 255, 255, 0.3);
         }
         
@@ -642,6 +660,105 @@ $mysqli->close();
             text-align: center;
         }
         
+        /* ================ Notification Styles ============ */
+        .notification-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f5ff;
+        }
+        
+        .notification-title {
+            color: #2b5876;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .notification-title i {
+            margin-right: 10px;
+            background: #f0f5ff;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            color: #4e4376;
+        }
+        
+        .notification-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .notification-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+        
+        .notification-item.unread {
+            background-color: #f0f8ff;
+            border-left: 4px solid #4e4376;
+        }
+        
+        .notification-icon {
+            margin-right: 15px;
+            color: #4e4376;
+            font-size: 18px;
+        }
+        
+        .notification-content {
+            flex: 1;
+        }
+        
+        .notification-message {
+            margin-bottom: 5px;
+            line-height: 1.5;
+        }
+        
+        .notification-time {
+            font-size: 12px;
+            color: #888;
+        }
+        
+        .notification-actions {
+            margin-top: 20px;
+            text-align: right;
+        }
+        
+        .btn-mark-all {
+            background: linear-gradient(135deg, #2b5876, #4e4376);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-mark-all:hover {
+            opacity: 0.9;
+        }
+        
         /* ================ Responsive Design ============ */
         @media (max-width: 1024px) {
             .info-cards {
@@ -716,9 +833,26 @@ $mysqli->close();
                 padding: 20px;
             }
         }
+
+        /* Hide profile content when notifications are shown */
+        .profile-content {
+            display: block;
+        }
+        
+        .show-notifications .profile-content {
+            display: none;
+        }
+        
+        .show-notifications .notification-container {
+            display: block;
+        }
+        
+        .notification-container {
+            display: none;
+        }
     </style>
 </head>
-<body>
+<body <?php if ($show_notifications) echo 'class="show-notifications"'; ?>>
     <?php if (!$is_logged_in): ?>
     <!-- Login Page -->
     <div class="login-container">
@@ -726,7 +860,7 @@ $mysqli->close();
             <div class="login-header">
                 <img src="../picture/SKST.png" alt="Logo" style="width: 50px; height: 50px; border-radius: 50%;">
                 <h1>Library Staff Portal</h1>
-                <p>SKST University - Sign in to your account</p>
+                
             </div>
             
             <form class="login-form" method="post">
@@ -742,8 +876,9 @@ $mysqli->close();
                 </div>
                 
                 <button type="submit" class="login-btn">Login to Dashboard</button>
-                <button class= "login-btn" onclick="location.href='../index.html'"> Sign Out</button>
                 
+                <!-- Fixed the button closing tag and added proper spacing -->
+                <button type="button" class="login-btn" onclick="location.href='../index.html'">Sign Out</button>
                 
                 <?php if (!empty($error)): ?>
                     <div class="error-msg"><?php echo $error; ?></div>
@@ -764,17 +899,24 @@ $mysqli->close();
             <button onclick="location.href='../index.html'">
                 <i class="fas fa-home"></i> Home
             </button>
-            <button onclick="location.href='../working.html'">
+            <!-- Fixed notification button to use a link instead of form -->
+            <a href="?notice=1" id="notification-link">
                 <i class="fas fa-bell"></i> Notifications
-            </button>
+                <?php if ($unread_count > 0): ?>
+                    <span style="background:red; color:white; border-radius:50%; padding:2px 6px; font-size:12px;">
+                        <?php echo $unread_count; ?>
+                    </span>
+                <?php endif; ?>
+            </a>
         </div>
     </div>
     
+
     <div class="main-layout">
         <div class="sidebar">
             <ul class="sidebar-menu">
                 <li>
-                    <a href="#" class="active">
+                    <a href="?" class="<?php echo $show_profile ? 'active' : ''; ?>" id="profile-link">
                         <i class="fas fa-user"></i> Profile
                     </a>
                 </li>
@@ -807,122 +949,154 @@ $mysqli->close();
         </div>
         
         <div class="content-area">
-            <div class="page-header">
-                <h1 class="page-title"><i class="fas fa-book-reader"></i> Library Staff Dashboard</h1>
-            </div>
-
-          <!-- Profile Card with Picture Upload -->
-          <div class="profile-card">
-            <div class="profile-img-container">
-                <?php if (!empty($stuf['photo_path'])): ?>
-                <img id="profile-image" class="profile-img" src="<?php echo htmlspecialchars((string) $stuf['photo_path']); ?>" alt="Profile Image">
-              <?php else: ?>
-                <div id="profile-placeholder" class="profile-placeholder">
-                  <i class="fas fa-user-tie"></i>
+            <?php if ($show_notifications): ?>
+            <!-- Notifications Section -->
+            <div class="notification-container">
+                <div class="notification-header">
+                    <h2 class="notification-title"><i class="fas fa-bell"></i> Notifications</h2>
+                    <div class="notification-actions">
+                        <button class="btn-mark-all">
+                            <i class="fas fa-check-double"></i> Mark All as Read
+                        </button>
+                    </div>
                 </div>
-              <?php endif; ?>
-              <div class="edit-overlay" onclick="document.getElementById('file-input').click()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" 
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                </svg>
-              </div>
-              <form id="upload-form" method="post" enctype="multipart/form-data">
-                <input type="file" id="file-input" name="profile_picture" accept="image/*">
-              </form>
-            </div>
-
-                <div class="profile-info">
-                    <h2><?php echo htmlspecialchars($stuf['first_name'] . ' ' . $stuf['last_name']); ?></h2>
-                    <p><i class="fas fa-envelope"></i> <?php echo htmlspecialchars($stuf['email']); ?></p>
-                    <p><i class="fas fa-phone"></i> <?php echo htmlspecialchars($stuf['stuff_phone'] ?? 'Not provided'); ?></p>
-                    <p><i class="fas fa-briefcase"></i> <?php echo htmlspecialchars($stuf['position']); ?></p>
+                
+                <div class="notification-list">
+                    <?php
+                    // Display notifications using the function from notice.php
+                    if (function_exists('see_staff_notice')) {
+                        echo see_staff_notice();
+                    } else {
+                        echo '<div class="notification-item">
+                                <div class="notification-icon"><i class="fas fa-info-circle"></i></div>
+                                <div class="notification-content">
+                                    <div class="notification-message">No notifications available at this time.</div>
+                                </div>
+                              </div>';
+                    }
+                    ?>
                 </div>
             </div>
-            
-            <?php if (!empty($error)): ?>
-                <div class="error-msg"><?php echo $error; ?></div>
             <?php endif; ?>
             
-            <div class="info-cards">
-                <div class="detail-card">
-                    <h3><i class="fas fa-user-circle"></i> Personal Information</h3>
-                    <div class="info-group">
-                        <div class="info-label">Full Name</div>
-                        <div class="info-value"><?php echo htmlspecialchars($stuf['first_name'] . ' ' . $stuf['last_name']); ?></div>
+            <div class="profile-content">
+                <div class="page-header">
+                    <h1 class="page-title"><i class="fas fa-book-reader"></i> Library Staff Dashboard</h1>
+                </div>
+
+                <!-- Profile Card with Picture Upload -->
+                <div class="profile-card">
+                    <div class="profile-img-container">
+                        <?php if (!empty($stuf['photo_path'])): ?>
+                        <img id="profile-image" class="profile-img" src="<?php echo htmlspecialchars((string) $stuf['photo_path']); ?>" alt="Profile Image">
+                      <?php else: ?>
+                        <div id="profile-placeholder" class="profile-placeholder">
+                          <i class="fas fa-user-tie"></i>
+                        </div>
+                      <?php endif; ?>
+                      <div class="edit-overlay" onclick="document.getElementById('file-input').click()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" 
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                      </div>
+                      <form id="upload-form" method="post" enctype="multipart/form-data">
+                        <input type="file" id="file-input" name="profile_picture" accept="image/*">
+                      </form>
                     </div>
-                    <div class="info-group">
-                        <div class="info-label">Father's Name</div>
-                        <div class="info-value"><?php echo htmlspecialchars($stuf['father_name'] ?? 'Not provided'); ?></div>
-                    </div>
-                    <div class="info-group">
-                        <div class="info-label">Mother's Name</div>
-                        <div class="info-value"><?php echo htmlspecialchars($stuf['mother_name'] ?? 'Not provided'); ?></div>
-                    </div>
-                    <div class="info-group">
-                        <div class="info-label">Date of Birth</div>
-                        <div class="info-value"><?php echo !empty($stuf['date_of_birth']) ? date('M j, Y', strtotime($stuf['date_of_birth'])) : 'Not provided'; ?></div>
+
+                    <div class="profile-info">
+                        <h2><?php echo htmlspecialchars($stuf['first_name'] . ' ' . $stuf['last_name']); ?></h2>
+                        <p><i class="fas fa-envelope"></i> <?php echo htmlspecialchars($stuf['email']); ?></p>
+                        <p><i class="fas fa-phone"></i> <?php echo htmlspecialchars($stuf['stuff_phone'] ?? 'Not provided'); ?></p>
+                        <p><i class="fas fa-briefcase"></i> <?php echo htmlspecialchars($stuf['position']); ?></p>
                     </div>
                 </div>
                 
-                <div class="detail-card">
-                    <h3><i class="fas fa-graduation-cap"></i> Educational Information</h3>
-                    <div class="info-group">
-                        <div class="info-label">Last Exam</div>
-                        <div class="info-value"><?php echo htmlspecialchars($stuf['last_exam'] ?? 'Not provided'); ?></div>
-                    </div>
-                    <div class="info-group">
-                        <div class="info-label">Board</div>
-                        <div class="info-value"><?php echo htmlspecialchars($stuf['board'] ?? 'Not provided'); ?></div>
-                    </div>
-                    <div class="info-group">
-                        <div class="info-label">Year of Passing</div>
-                        <div class="info-value"><?php echo htmlspecialchars($stuf['year_of_passing'] ?? 'Not provided'); ?></div>
-                    </div>
-                    <div class="info-group">
-                        <div class="info-label">Result</div>
-                        <div class="info-value"><?php echo htmlspecialchars($stuf['result'] ?? 'Not provided'); ?></div>
-                    </div>
-                </div>
+                <?php if (!empty($error)): ?>
+                    <div class="error-msg"><?php echo $error; ?></div>
+                <?php endif; ?>
                 
-                <div class="detail-card">
-                    <h3><i class="fas fa-address-card"></i> Contact Information</h3>
-                    <div class="info-group">
-                        <div class="info-label">Email</div>
-                        <div class="info-value"><?php echo htmlspecialchars($stuf['email']); ?></div>
+                <div class="info-cards">
+                    <div class="detail-card">
+                        <h3><i class="fas fa-user-circle"></i> Personal Information</h3>
+                        <div class="info-group">
+                            <div class="info-label">Full Name</div>
+                            <div class="info-value"><?php echo htmlspecialchars($stuf['first_name'] . ' ' . $stuf['last_name']); ?></div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Father's Name</div>
+                            <div class="info-value"><?php echo htmlspecialchars($stuf['father_name'] ?? 'Not provided'); ?></div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Mother's Name</div>
+                            <div class="info-value"><?php echo htmlspecialchars($stuf['mother_name'] ?? 'Not provided'); ?></div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Date of Birth</div>
+                            <div class="info-value"><?php echo !empty($stuf['date_of_birth']) ? date('M j, Y', strtotime($stuf['date_of_birth'])) : 'Not provided'; ?></div>
+                        </div>
                     </div>
-                    <div class="info-group">
-                        <div class="info-label">Phone</div>
-                        <div class="info-value"><?php echo htmlspecialchars($stuf['stuff_phone'] ?? 'Not provided'); ?></div>
+                    
+                    <div class="detail-card">
+                        <h3><i class="fas fa-graduation-cap"></i> Educational Information</h3>
+                        <div class="info-group">
+                            <div class="info-label">Last Exam</div>
+                            <div class="info-value"><?php echo htmlspecialchars($stuf['last_exam'] ?? 'Not provided'); ?></div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Board</div>
+                            <div class="info-value"><?php echo htmlspecialchars($stuf['board'] ?? 'Not provided'); ?></div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Year of Passing</div>
+                            <div class="info-value"><?php echo htmlspecialchars($stuf['year_of_passing'] ?? 'Not provided'); ?></div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Result</div>
+                            <div class="info-value"><?php echo htmlspecialchars($stuf['result'] ?? 'Not provided'); ?></div>
+                        </div>
                     </div>
-                    <div class="info-group">
-                        <div class="info-label">Guardian Phone</div>
-                        <div class="info-value"><?php echo htmlspecialchars($stuf['guardian_phone'] ?? 'Not provided'); ?></div>
+                    
+                    <div class="detail-card">
+                        <h3><i class="fas fa-address-card"></i> Contact Information</h3>
+                        <div class="info-group">
+                            <div class="info-label">Email</div>
+                            <div class="info-value"><?php echo htmlspecialchars($stuf['email']); ?></div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Phone</div>
+                            <div class="info-value"><?php echo htmlspecialchars($stuf['stuff_phone'] ?? 'Not provided'); ?></div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Guardian Phone</div>
+                            <div class="info-value"><?php echo htmlspecialchars($stuf['guardian_phone'] ?? 'Not provided'); ?></div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Present Address</div>
+                            <div class="info-value"><?php echo htmlspecialchars($stuf['present_address'] ?? 'Not provided'); ?></div>
+                        </div>
                     </div>
-                    <div class="info-group">
-                        <div class="info-label">Present Address</div>
-                        <div class="info-value"><?php echo htmlspecialchars($stuf['present_address'] ?? 'Not provided'); ?></div>
-                    </div>
-                </div>
-                
-                <div class="detail-card">
-                    <h3><i class="fas fa-info-circle"></i> Additional Information</h3>
-                    <div class="info-group">
-                        <div class="info-label">Gender</div>
-                        <div class="info-value"><?php echo htmlspecialchars($stuf['gender'] ?? 'Not provided'); ?></div>
-                    </div>
-                    <div class="info-group">
-                        <div class="info-label">Blood Group</div>
-                        <div class="info-value"><?php echo htmlspecialchars($stuf['blood_group'] ?? 'Not provided'); ?></div>
-                    </div>
-                    <div class="info-group">
-                        <div class="info-label">Nationality</div>
-                        <div class="info-value"><?php echo htmlspecialchars($stuf['nationality'] ?? 'Not provided'); ?></div>
-                    </div>
-                    <div class="info-group">
-                        <div class="info-label">Religion</div>
-                        <div class="info-value"><?php echo htmlspecialchars($stuf['religion'] ?? 'Not provided'); ?></div>
+                    
+                    <div class="detail-card">
+                        <h3><i class="fas fa-info-circle"></i> Additional Information</h3>
+                        <div class="info-group">
+                            <div class="info-label">Gender</div>
+                            <div class="info-value"><?php echo htmlspecialchars($stuf['gender'] ?? 'Not provided'); ?></div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Blood Group</div>
+                            <div class="info-value"><?php echo htmlspecialchars($stuf['blood_group'] ?? 'Not provided'); ?></div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Nationality</div>
+                            <div class="info-value"><?php echo htmlspecialchars($stuf['nationality'] ?? 'Not provided'); ?></div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Religion</div>
+                            <div class="info-value"><?php echo htmlspecialchars($stuf['religion'] ?? 'Not provided'); ?></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -950,6 +1124,24 @@ $mysqli->close();
                     if (this.files && this.files[0]) {
                         document.getElementById('upload-form').submit();
                     }
+                });
+            }
+            
+            // Mark all notifications as read
+            const markAllButton = document.querySelector('.btn-mark-all');
+            if (markAllButton) {
+                markAllButton.addEventListener('click', function() {
+                    // This would typically make an AJAX request to mark all notifications as read
+                    alert('This would mark all notifications as read. Implementation would require server-side processing.');
+                });
+            }
+
+            // Handle profile link click
+            const profileLink = document.getElementById('profile-link');
+            if (profileLink) {
+                profileLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    window.location.href = '?';
                 });
             }
         });

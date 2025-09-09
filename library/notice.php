@@ -806,7 +806,7 @@ function get_unread_notification_count() {
 function see_staff_notice(){
     global $con;
           $query ="SELECT * FROM notice 
-WHERE section='Staff' AND viewed=0 ORDER BY created_at DESC";
+WHERE section='Staff'  ORDER BY created_at DESC";
           $result = mysqli_query($con, $query);
           
           if (mysqli_num_rows($result) > 0) {
