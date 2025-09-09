@@ -733,7 +733,7 @@ $mysqli->close();
             <li><a href="students.php"><i class="fas fa-users"></i> <span>Students</span></a></li>
             <li><a href="attendance.php"><i class="fas fa-user-check"></i> <span>Attendance</span></a></li>
             <li><a href="materials.php" class="active"><i class="fas fa-file-alt"></i> <span>Materials</span></a></li>
-            <li><button onclick="location.href='logout.php'"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></button></li>
+            
         </ul>
     </div>
     
