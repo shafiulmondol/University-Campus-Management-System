@@ -16,13 +16,56 @@ if ($mysqli->connect_error) {
     die("Connection failed: " . $mysqli->connect_error);
 }
 
+// Handle profile picture upload
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['profile_picture'])) {
+    $volunteer_sl = $_SESSION['volunteer_sl'];
+    
+    $target_dir = "uploads/";
+    if (!file_exists($target_dir)) {
+        mkdir($target_dir, 0777, true);
+    }
+    
+    $imageFileType = strtolower(pathinfo($_FILES["profile_picture"]["name"], PATHINFO_EXTENSION));
+    $target_file = $target_dir . "volunteer_" . $volunteer_sl . "." . $imageFileType;
+    
+    // Check if image file is an actual image
+    $check = getimagesize($_FILES["profile_picture"]["tmp_name"]);
+    if ($check === false) {
+        $error = "File is not an image.";
+    } 
+    // Check file size (max 2MB)
+    elseif ($_FILES["profile_picture"]["size"] > 2000000) {
+        $error = "Sorry, your file is too large. Max size is 2MB.";
+    }
+    // Allow certain file formats
+    elseif (!in_array($imageFileType, ["jpg", "png", "jpeg", "gif"])) {
+        $error = "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
+    }
+    // Upload file if no errors
+    elseif (move_uploaded_file($_FILES["profile_picture"]["tmp_name"], $target_file)) {
+        // Update database with profile picture path
+        $sql = "UPDATE volunteers SET profile_picture = ? WHERE sl = ?";
+        if ($stmt = $mysqli->prepare($sql)) {
+            $stmt->bind_param("si", $target_file, $volunteer_sl);
+            $stmt->execute();
+            $stmt->close();
+            
+            // Refresh page to show new image
+            header("Location: " . $_SERVER['PHP_SELF']);
+            exit();
+        }
+    } else {
+        $error = "Sorry, there was an error uploading your file.";
+    }
+}
+
 // Handle login
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
     $email = trim($_POST['email']);
     $password = $_POST['password'];
     
     // For demo purposes - in real application, use password_verify with hashed passwords
-    $sql = "SELECT sl, student_id, student_name, email FROM volunteers WHERE email = ? AND password = ?";
+    $sql = "SELECT sl, student_id, student_name, email, profile_picture FROM volunteers WHERE email = ? AND password = ?";
     
     if ($stmt = $mysqli->prepare($sql)) {
         $stmt->bind_param("ss", $email, $password);
@@ -31,12 +74,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
             $stmt->store_result();
             
             if ($stmt->num_rows == 1) {
-                $stmt->bind_result($sl, $student_id, $student_name, $email);
+                $stmt->bind_result($sl, $student_id, $student_name, $email, $profile_picture);
                 if ($stmt->fetch()) {
                     $_SESSION['volunteer_sl'] = $sl;
                     $_SESSION['volunteer_id'] = $student_id;
                     $_SESSION['volunteer_name'] = $student_name;
                     $_SESSION['volunteer_email'] = $email;
+                    $_SESSION['profile_picture'] = $profile_picture;
                     
                     header("Location: " . $_SERVER['PHP_SELF']);
                     exit();
@@ -332,6 +376,27 @@ $mysqli->close();
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
         
+        .edit-overlay {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: #2b5876;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .edit-overlay:hover {
+            background: #4e4376;
+            transform: scale(1.1);
+        }
+        
         .profile-info h2 {
             color: #2b5876;
             margin-bottom: 10px;
@@ -608,6 +673,65 @@ $mysqli->close();
             text-align: center;
         }
         
+        /* Modal Styles for Image Upload */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-header h2 {
+            color: #2b5876;
+            font-size: 22px;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .upload-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .upload-btn {
+            background: linear-gradient(135deg, #2b5876, #4e4376);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
         /* ================ Responsive Design ============ */
         @media (max-width: 900px) {
             .main-layout {
@@ -688,8 +812,6 @@ $mysqli->close();
                 </div>
                 
                 <button type="submit" class="login-btn">Login to Dashboard</button>
-                <button class= "login-btn" onclick="location.href='http://localhost:8080/University-Campus-Management-System/volunteer/volunteer.html'"> Sign Out</button>                
-
                 
                 <?php if (!empty($error)): ?>
                     <div class="error-msg"><?php echo $error; ?></div>
@@ -705,7 +827,7 @@ $mysqli->close();
         </div>
         
         <div class="nav-buttons">
-            <button type="button" class="btn btn-reset" onclick="history.back();"><i class="fas fa-arrow-left"></i> Back</button>
+            <button type="button" onclick="history.back();"><i class="fas fa-arrow-left"></i> Back</button>
             <button onclick="location.href='../index.html'"><i class="fas fa-home"></i> Home</button>
         </div>
     </div>
@@ -719,20 +841,15 @@ $mysqli->close();
                     </a>
                 </li>
                 <li>
-                    <a href="../working.html">
+                    <a href="upcoming_event.php">
                         <i class="fas fa-calendar"></i> Upcoming Events
                     </a>
                 </li>
-                <li>
-                    <a href="#Table1">
-                        <i class="fas fa-chart-line"></i> Statistics
-                    </a>
-                </li>
+                
                 <li>
                     <button onclick="location.href='?logout=1'">
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </button>
-
                 </li>
             </ul>
         </div>
@@ -742,11 +859,18 @@ $mysqli->close();
                 <h1 class="page-title"><i class="fas fa-hands-helping"></i> Volunteer Dashboard</h1>
             </div>
 
-            <!-- Profile Card -->
+            <!-- Profile Card with Picture Upload -->
             <div class="profile-card">
                 <div class="profile-img-container">
-                    <div class="profile-placeholder">
-                        <i class="fas fa-user"></i>
+                    <?php if (!empty($volunteer['profile_picture']) && file_exists($volunteer['profile_picture'])): ?>
+                        <img id="profile-image" class="profile-img" src="<?php echo htmlspecialchars($volunteer['profile_picture']); ?>" alt="Profile Image">
+                    <?php else: ?>
+                        <div id="profile-placeholder" class="profile-placeholder">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    <?php endif; ?>
+                    <div class="edit-overlay" onclick="openModal()">
+                        <i class="fas fa-camera"></i>
                     </div>
                 </div>
 
@@ -764,7 +888,6 @@ $mysqli->close();
             <?php endif; ?>
             
             <!-- Statistics Section -->
-            <section id="Table1">
             <div class="stats">
                 <div class="stat-card">
                     <div class="stat-icon">
@@ -798,8 +921,6 @@ $mysqli->close();
                     <div class="stat-label">Latest Activity</div>
                 </div>
             </div>
-            </section>
-            
             
             <!-- Activities Table -->
             <div class="activities-card">
@@ -836,6 +957,20 @@ $mysqli->close();
             </div>
         </div>
     </div>
+    
+    <!-- Modal for Image Upload -->
+    <div id="uploadModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Upload Profile Picture</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <form class="upload-form" method="post" enctype="multipart/form-data">
+                <input type="file" name="profile_picture" accept="image/*" required>
+                <button type="submit" class="upload-btn">Upload Picture</button>
+            </form>
+        </div>
+    </div>
     <?php endif; ?>
 
     <script>
@@ -850,6 +985,23 @@ $mysqli->close();
                 });
             });
         });
+        
+        // Modal functions
+        function openModal() {
+            document.getElementById('uploadModal').style.display = 'flex';
+        }
+        
+        function closeModal() {
+            document.getElementById('uploadModal').style.display = 'none';
+        }
+        
+        // Close modal if clicked outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('uploadModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
     </script>
 </body>
 </html>
