@@ -59,36 +59,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['profile_picture'])) {
     }
 }
 
-// Handle login - FIXED: Use password_verify() instead of direct comparison
+// Handle login
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
     $email = trim($_POST['email']);
     $password = $_POST['password'];
     
-    // Correct way: Get the hashed password from database and verify it
-    $sql = "SELECT sl, student_id, student_name, email, password, profile_picture FROM volunteers WHERE email = ?";
+    // For demo purposes - in real application, use password_verify with hashed passwords
+    $sql = "SELECT sl, student_id, student_name, email, profile_picture FROM volunteers WHERE email = ? AND password = ?";
     
     if ($stmt = $mysqli->prepare($sql)) {
-        $stmt->bind_param("s", $email);
+        $stmt->bind_param("ss", $email, $password);
         
         if ($stmt->execute()) {
             $stmt->store_result();
             
             if ($stmt->num_rows == 1) {
-                $stmt->bind_result($sl, $student_id, $student_name, $email, $hashed_password, $profile_picture);
+                $stmt->bind_result($sl, $student_id, $student_name, $email, $profile_picture);
                 if ($stmt->fetch()) {
-                    // Verify the password against the hash
-                    if (password_verify($password, $hashed_password)) {
-                        $_SESSION['volunteer_sl'] = $sl;
-                        $_SESSION['volunteer_id'] = $student_id;
-                        $_SESSION['volunteer_name'] = $student_name;
-                        $_SESSION['volunteer_email'] = $email;
-                        $_SESSION['profile_picture'] = $profile_picture;
-                        
-                        header("Location: " . $_SERVER['PHP_SELF']);
-                        exit();
-                    } else {
-                        $error = "Invalid email or password.";
-                    }
+                    $_SESSION['volunteer_sl'] = $sl;
+                    $_SESSION['volunteer_id'] = $student_id;
+                    $_SESSION['volunteer_name'] = $student_name;
+                    $_SESSION['volunteer_email'] = $email;
+                    $_SESSION['profile_picture'] = $profile_picture;
+                    
+                    header("Location: " . $_SERVER['PHP_SELF']);
+                    exit();
                 }
             } else {
                 $error = "Invalid email or password.";
@@ -860,8 +855,6 @@ $mysqli->close();
                 </div>
                 
                 <button type="submit" class="login-btn">Login to Dashboard</button>
-                <button class= "login-btn" onclick="location.href='../index.html'"> Sign Out</button>                
-
                 
                 <?php if (!empty($error)): ?>
                     <div class="error-msg"><?php echo $error; ?></div>
