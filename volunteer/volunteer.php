@@ -59,31 +59,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['profile_picture'])) {
     }
 }
 
-// Handle login
+// Handle login - FIXED: Use password_verify() instead of direct comparison
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
     $email = trim($_POST['email']);
     $password = $_POST['password'];
     
-    // For demo purposes - in real application, use password_verify with hashed passwords
-    $sql = "SELECT sl, student_id, student_name, email, profile_picture FROM volunteers WHERE email = ? AND password = ?";
+    // Correct way: Get the hashed password from database and verify it
+    $sql = "SELECT sl, student_id, student_name, email, password, profile_picture FROM volunteers WHERE email = ?";
     
     if ($stmt = $mysqli->prepare($sql)) {
-        $stmt->bind_param("ss", $email, $password);
+        $stmt->bind_param("s", $email);
         
         if ($stmt->execute()) {
             $stmt->store_result();
             
             if ($stmt->num_rows == 1) {
-                $stmt->bind_result($sl, $student_id, $student_name, $email, $profile_picture);
+                $stmt->bind_result($sl, $student_id, $student_name, $email, $hashed_password, $profile_picture);
                 if ($stmt->fetch()) {
-                    $_SESSION['volunteer_sl'] = $sl;
-                    $_SESSION['volunteer_id'] = $student_id;
-                    $_SESSION['volunteer_name'] = $student_name;
-                    $_SESSION['volunteer_email'] = $email;
-                    $_SESSION['profile_picture'] = $profile_picture;
-                    
-                    header("Location: " . $_SERVER['PHP_SELF']);
-                    exit();
+                    // Verify the password against the hash
+                    if (password_verify($password, $hashed_password)) {
+                        $_SESSION['volunteer_sl'] = $sl;
+                        $_SESSION['volunteer_id'] = $student_id;
+                        $_SESSION['volunteer_name'] = $student_name;
+                        $_SESSION['volunteer_email'] = $email;
+                        $_SESSION['profile_picture'] = $profile_picture;
+                        
+                        header("Location: " . $_SERVER['PHP_SELF']);
+                        exit();
+                    } else {
+                        $error = "Invalid email or password.";
+                    }
                 }
             } else {
                 $error = "Invalid email or password.";
@@ -653,6 +658,25 @@ $mysqli->close();
             transform: translateY(-2px);
         }
         
+        .signup-btn {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            padding: 15px;
+            width: 100%;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 15px;
+        }
+        
+        .signup-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
         .error-msg {
             color: #e74c3c;
             text-align: center;
@@ -671,6 +695,30 @@ $mysqli->close();
             font-size: 14px;
             color: #4e4376;
             text-align: center;
+        }
+        
+        .signup-prompt {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .signup-prompt p {
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .signup-link {
+            color: #2b5876;
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .signup-link:hover {
+            color: #4e4376;
+            text-decoration: underline;
         }
         
         /* Modal Styles for Image Upload */
@@ -816,6 +864,15 @@ $mysqli->close();
                 <?php if (!empty($error)): ?>
                     <div class="error-msg"><?php echo $error; ?></div>
                 <?php endif; ?>
+                
+                <button type="button" class="signup-btn" onclick="window.location.href='volunteer_form.php'">
+                    <i class="fas fa-user-plus"></i> Sign Up for New Account
+                </button>
+                
+                <div class="signup-prompt">
+                    <p>Don't have an account yet?</p>
+                    <a href="volunteer_form.php" class="signup-link">Create a new volunteer account</a>
+                </div>
             </form>
         </div>
     </div>

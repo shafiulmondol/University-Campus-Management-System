@@ -25,6 +25,7 @@
 
         .container {
             width: 100%;
+            max-width: 900px;
             background: white;
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
@@ -154,6 +155,53 @@
             color: #3498db;
         }
         
+        .password-strength {
+            margin-top: 5px;
+            font-size: 0.85rem;
+        }
+        
+        .strength-weak { color: #e74c3c; }
+        .strength-medium { color: #f39c12; }
+        .strength-strong { color: #27ae60; }
+        
+        .password-match {
+            margin-top: 5px;
+            font-size: 0.85rem;
+            color: #27ae60;
+        }
+        
+        .password-mismatch {
+            margin-top: 5px;
+            font-size: 0.85rem;
+            color: #e74c3c;
+        }
+        
+        .file-upload {
+            border: 2px dashed #ddd;
+            padding: 20px;
+            text-align: center;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .file-upload:hover {
+            border-color: #3498db;
+            background-color: #f8f9fa;
+        }
+        
+        .file-upload i {
+            font-size: 2rem;
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+        
+        .file-name {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
         @media (max-width: 768px) {
             .form-group {
                 flex: 1 0 calc(100% - 20px);
@@ -179,10 +227,25 @@
             text-align: center;
         }
         
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
         .success-message i {
             font-size: 3rem;
             color: #28a745;
             margin-bottom: 15px;
+        }
+        
+        .error-message i {
+            font-size: 2rem;
+            color: #dc3545;
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -196,17 +259,133 @@
         <div class="form-container">
             <h2 class="form-title"><i class="fas fa-hand-holding-heart icon"></i>Volunteer Registration Form</h2>
             
+            <?php
+            // Database connection and form processing
+            $servername = "127.0.0.1";
+            $username = "root"; // Change if needed
+            $password = ""; // Change if needed
+            $dbname = "skst_university";
             
-            <form id="volunteerForm">
+            // Initialize variables
+            $success_message = "";
+            $error_message = "";
+            
+            // Check if form is submitted
+            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                // Create connection
+                $conn = new mysqli($servername, $username, $password, $dbname);
+                
+                // Check connection
+                if ($conn->connect_error) {
+                    $error_message = "Connection failed: " . $conn->connect_error;
+                } else {
+                    // Check if student ID already exists
+                    $check_stmt = $conn->prepare("SELECT * FROM volunteers WHERE student_id = ?");
+                    $student_id = !empty($_POST['student_id']) ? intval($_POST['student_id']) : NULL;
+                    
+                    if ($student_id) {
+                        $check_stmt->bind_param("i", $student_id);
+                        $check_stmt->execute();
+                        $result = $check_stmt->get_result();
+                        
+                        if ($result->num_rows > 0) {
+                            $error_message = "This Student ID is already registered!";
+                            $check_stmt->close();
+                        } else {
+                            $check_stmt->close();
+                            
+                            // Validate password
+                            $user_password = $_POST['password'];
+                            $confirm_password = $_POST['confirm_password'];
+                            
+                            if (strlen($user_password) < 6) {
+                                $error_message = "Password must be at least 6 characters long!";
+                            } elseif ($user_password !== $confirm_password) {
+                                $error_message = "Passwords do not match!";
+                            } else {
+                                // Prepare and bind parameters for insertion
+                                $stmt = $conn->prepare("INSERT INTO volunteers (student_id, student_name, department, email, phone, activity_name, activity_date, role, hours, remarks, stratus, password, profile_picture) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '1', ?, ?)");
+                                
+                                if ($stmt) {
+                                    // Sanitize and validate input
+                                    $student_name = htmlspecialchars($_POST['student_name']);
+                                    $department = htmlspecialchars($_POST['department']);
+                                    $email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
+                                    $phone = htmlspecialchars($_POST['phone']);
+                                    $activity_name = htmlspecialchars($_POST['activity_name']);
+                                    $activity_date = $_POST['activity_date'];
+                                    $role = htmlspecialchars($_POST['role']);
+                                    $hours = !empty($_POST['hours']) ? intval($_POST['hours']) : 0;
+                                    $remarks = htmlspecialchars($_POST['remarks']);
+                                    
+                                    // Handle profile picture upload
+                                    $profile_picture = NULL;
+                                    if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] == 0) {
+                                        $upload_dir = "uploads/";
+                                        if (!is_dir($upload_dir)) {
+                                            mkdir($upload_dir, 0777, true);
+                                        }
+                                        
+                                        $file_name = time() . '_' . basename($_FILES['profile_picture']['name']);
+                                        $target_file = $upload_dir . $file_name;
+                                        
+                                        // Check file type
+                                        $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+                                        $allowed_types = array('jpg', 'jpeg', 'png', 'gif');
+                                        
+                                        if (in_array($imageFileType, $allowed_types)) {
+                                            if (move_uploaded_file($_FILES['profile_picture']['tmp_name'], $target_file)) {
+                                                $profile_picture = $target_file;
+                                            }
+                                        }
+                                    }
+                                    
+                                    // Hash the password for security
+                                    $hashed_password = password_hash($user_password, PASSWORD_DEFAULT);
+                                    
+                                    // Bind parameters
+                                    $stmt->bind_param("isssssssisss", $student_id, $student_name, $department, $email, $phone, $activity_name, $activity_date, $role, $hours, $remarks, $hashed_password, $profile_picture);
+                                    
+                                    // Execute statement
+                                    if ($stmt->execute()) {
+                                        $success_message = "Volunteer registration submitted successfully!";
+                                    } else {
+                                        $error_message = "Error: " . $stmt->error;
+                                    }
+                                    
+                                    $stmt->close();
+                                } else {
+                                    $error_message = "Error preparing statement: " . $conn->error;
+                                }
+                            }
+                        }
+                    } else {
+                        $error_message = "Student ID is required!";
+                    }
+                    
+                    $conn->close();
+                }
+            }
+            ?>
+            
+            <?php if ($error_message): ?>
+                <div class="error-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Registration Error</h3>
+                    <p><?php echo $error_message; ?></p>
+                </div>
+            <?php endif; ?>
+            
+            <form id="volunteerForm" method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" enctype="multipart/form-data">
                 <div class="form-row">
                     <div class="form-group">
                         <label for="student_id" class="required">Student ID</label>
-                        <input type="text" id="student_id" name="student_id" required placeholder="Enter your student ID">
+                        <input type="text" id="student_id" name="student_id" required placeholder="Enter your student ID" value="<?php echo isset($_POST['student_id']) ? htmlspecialchars($_POST['student_id']) : ''; ?>">
                     </div>
                     
                     <div class="form-group">
                         <label for="student_name" class="required">Full Name</label>
-                        <input type="text" id="student_name" name="student_name" required placeholder="Enter your full name">
+                        <input type="text" id="student_name" name="student_name" required placeholder="Enter your full name" value="<?php echo isset($_POST['student_name']) ? htmlspecialchars($_POST['student_name']) : ''; ?>">
                     </div>
                 </div>
                 
@@ -215,51 +394,50 @@
                         <label for="department" class="required">Department</label>
                         <select id="department" name="department" required>
                             <option value="">Select a program</option>
-                                <option value="BBA in Accounting">BBA in Accounting</option>
-                                <option value="BBA in Finance">BBA in Finance</option>
-                                <option value="BBA in Human Resource Management">BBA in Human Resource Management</option>
-                                <option value="BBA in Management">BBA in Management</option>
-                                <option value="BBA in Marketing">BBA in Marketing</option>
-                                <option value="BSc in Computer Science and Engineering">BSc in Computer Science and Engineering</option>
-                                <option value="BSc in Civil Engineering">BSc in Civil Engineering</option>
-                                <option value="BSc in Electrical and Electronic Engineering">BSc in Electrical and Electronic Engineering</option>
-                                <option value="BSc in Mechanical Engineering">BSc in Mechanical Engineering</option>
-                                <option value="BSEEE in Electrical and Electronic Engineering">BSEEE in Electrical and Electronic Engineering</option>
-                                <option value="BSAg in Agriculture">BSAg in Agriculture</option>
-                                <option value="BSN in Nursing (Basic)">BSN in Nursing (Basic)</option>
-                                <option value="BSN in Nursing (Post Basic)">BSN in Nursing (Post Basic)</option>
-                                <option value="BATHM in Tourism and Hospitality Management">BATHM in Tourism and Hospitality Management</option>
-                                <option value="BSECO in Economics">BSECO in Economics</option>
-                                <option value="BA in English">BA in English</option>
-                                <option value="LLB (Honours)">LLB (Honours)</option>
+                            <option value="BBA in Accounting" <?php echo (isset($_POST['department']) && $_POST['department'] == 'BBA in Accounting') ? 'selected' : ''; ?>>BBA in Accounting</option>
+                            <option value="BBA in Finance" <?php echo (isset($_POST['department']) && $_POST['department'] == 'BBA in Finance') ? 'selected' : ''; ?>>BBA in Finance</option>
+                            <option value="BBA in Human Resource Management" <?php echo (isset($_POST['department']) && $_POST['department'] == 'BBA in Human Resource Management') ? 'selected' : ''; ?>>BBA in Human Resource Management</option>
+                            <option value="BBA in Management" <?php echo (isset($_POST['department']) && $_POST['department'] == 'BBA in Management') ? 'selected' : ''; ?>>BBA in Management</option>
+                            <option value="BBA in Marketing" <?php echo (isset($_POST['department']) && $_POST['department'] == 'BBA in Marketing') ? 'selected' : ''; ?>>BBA in Marketing</option>
+                            <option value="BSc in Computer Science and Engineering" <?php echo (isset($_POST['department']) && $_POST['department'] == 'BSc in Computer Science and Engineering') ? 'selected' : ''; ?>>BSc in Computer Science and Engineering</option>
+                            <option value="BSc in Civil Engineering" <?php echo (isset($_POST['department']) && $_POST['department'] == 'BSc in Civil Engineering') ? 'selected' : ''; ?>>BSc in Civil Engineering</option>
+                            <option value="BSc in Electrical and Electronic Engineering" <?php echo (isset($_POST['department']) && $_POST['department'] == 'BSc in Electrical and Electronic Engineering') ? 'selected' : ''; ?>>BSc in Electrical and Electronic Engineering</option>
+                            <option value="BSc in Mechanical Engineering" <?php echo (isset($_POST['department']) && $_POST['department'] == 'BSc in Mechanical Engineering') ? 'selected' : ''; ?>>BSc in Mechanical Engineering</option>
+                            <option value="BSEEE in Electrical and Electronic Engineering" <?php echo (isset($_POST['department']) && $_POST['department'] == 'BSEEE in Electrical and Electronic Engineering') ? 'selected' : ''; ?>>BSEEE in Electrical and Electronic Engineering</option>
+                            <option value="BSAg in Agriculture" <?php echo (isset($_POST['department']) && $_POST['department'] == 'BSAg in Agriculture') ? 'selected' : ''; ?>>BSAg in Agriculture</option>
+                            <option value="BSN in Nursing (Basic)" <?php echo (isset($_POST['department']) && $_POST['department'] == 'BSN in Nursing (Basic)') ? 'selected' : ''; ?>>BSN in Nursing (Basic)</option>
+                            <option value="BSN in Nursing (Post Basic)" <?php echo (isset($_POST['department']) && $_POST['department'] == 'BSN in Nursing (Post Basic)') ? 'selected' : ''; ?>>BSN in Nursing (Post Basic)</option>
+                            <option value="BATHM in Tourism and Hospitality Management" <?php echo (isset($_POST['department']) && $_POST['department'] == 'BATHM in Tourism and Hospitality Management') ? 'selected' : ''; ?>>BATHM in Tourism and Hospitality Management</option>
+                            <option value="BSECO in Economics" <?php echo (isset($_POST['department']) && $_POST['department'] == 'BSECO in Economics') ? 'selected' : ''; ?>>BSECO in Economics</option>
+                            <option value="BA in English" <?php echo (isset($_POST['department']) && $_POST['department'] == 'BA in English') ? 'selected' : ''; ?>>BA in English</option>
+                            <option value="LLB (Honours)" <?php echo (isset($_POST['department']) && $_POST['department'] == 'LLB (Honours)') ? 'selected' : ''; ?>>LLB (Honours)</option>
                         </select>
                     </div>
                     
                     <div class="form-group">
                         <label for="email" class="required">Email Address</label>
-                        <input type="email" id="email" name="email" required placeholder="Enter your email address">
+                        <input type="email" id="email" name="email" required placeholder="Enter your email address" value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>">
                     </div>
                 </div>
                 
                 <div class="form-row">
                     <div class="form-group">
                         <label for="phone" class="required">Phone Number</label>
-                        <input type="tel" id="phone" name="phone" required placeholder="Enter your phone number">
+                        <input type="tel" id="phone" name="phone" required placeholder="Enter your phone number" value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone']) : ''; ?>">
                     </div>
                     
                     <div class="form-group">
                         <label for="activity_name" class="required">Activity Name</label>
                         <select id="activity_name" name="activity_name" required>
                             <option value="">Select Activity</option>
-                            <option value="Blood Donation Camp">Blood Donation Camp</option>
-                            <option value="Tree Plantation Drive">Tree Plantation Drive</option>
-                            <option value="Campus Clean-up">Campus Clean-up</option>
-                            <option value="Fundraising Event">Fundraising Event</option>
-                            <option value="Cultural Festival">Cultural Festival</option>
-                            <option value="Student Mentorship">Student Mentorship</option>
-                            <option value="Community Outreach">Community Outreach</option>
-                            <option value="Health Awareness Campaign">Health Awareness Campaign</option>
-
+                            <option value="Blood Donation Camp" <?php echo (isset($_POST['activity_name']) && $_POST['activity_name'] == 'Blood Donation Camp') ? 'selected' : ''; ?>>Blood Donation Camp</option>
+                            <option value="Tree Plantation Drive" <?php echo (isset($_POST['activity_name']) && $_POST['activity_name'] == 'Tree Plantation Drive') ? 'selected' : ''; ?>>Tree Plantation Drive</option>
+                            <option value="Campus Clean-up" <?php echo (isset($_POST['activity_name']) && $_POST['activity_name'] == 'Campus Clean-up') ? 'selected' : ''; ?>>Campus Clean-up</option>
+                            <option value="Fundraising Event" <?php echo (isset($_POST['activity_name']) && $_POST['activity_name'] == 'Fundraising Event') ? 'selected' : ''; ?>>Fundraising Event</option>
+                            <option value="Cultural Festival" <?php echo (isset($_POST['activity_name']) && $_POST['activity_name'] == 'Cultural Festival') ? 'selected' : ''; ?>>Cultural Festival</option>
+                            <option value="Student Mentorship" <?php echo (isset($_POST['activity_name']) && $_POST['activity_name'] == 'Student Mentorship') ? 'selected' : ''; ?>>Student Mentorship</option>
+                            <option value="Community Outreach" <?php echo (isset($_POST['activity_name']) && $_POST['activity_name'] == 'Community Outreach') ? 'selected' : ''; ?>>Community Outreach</option>
+                            <option value="Health Awareness Campaign" <?php echo (isset($_POST['activity_name']) && $_POST['activity_name'] == 'Health Awareness Campaign') ? 'selected' : ''; ?>>Health Awareness Campaign</option>
                         </select>
                     </div>
                 </div>
@@ -267,18 +445,18 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="activity_date" class="required">Activity Date</label>
-                        <input type="date" id="activity_date" name="activity_date" required>
+                        <input type="date" id="activity_date" name="activity_date" required value="<?php echo isset($_POST['activity_date']) ? htmlspecialchars($_POST['activity_date']) : ''; ?>">
                     </div>
                     
                     <div class="form-group">
                         <label for="role" class="required">Preferred Role</label>
                         <select id="role" name="role" required>
                             <option value="">Select Role</option>
-                            <option value="Volunteer">Volunteer</option>
-                            <option value="Organizer">Organizer</option>
-                            <option value="Leader">Leader</option>
-                            <option value="Coordinator">Coordinator</option>
-                            <option value="Support Staff">Support Staff</option>
+                            <option value="Volunteer" <?php echo (isset($_POST['role']) && $_POST['role'] == 'Volunteer') ? 'selected' : ''; ?>>Volunteer</option>
+                            <option value="Organizer" <?php echo (isset($_POST['role']) && $_POST['role'] == 'Organizer') ? 'selected' : ''; ?>>Organizer</option>
+                            <option value="Leader" <?php echo (isset($_POST['role']) && $_POST['role'] == 'Leader') ? 'selected' : ''; ?>>Leader</option>
+                            <option value="Coordinator" <?php echo (isset($_POST['role']) && $_POST['role'] == 'Coordinator') ? 'selected' : ''; ?>>Coordinator</option>
+                            <option value="Support Staff" <?php echo (isset($_POST['role']) && $_POST['role'] == 'Support Staff') ? 'selected' : ''; ?>>Support Staff</option>
                         </select>
                     </div>
                 </div>
@@ -286,25 +464,54 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="hours">Expected Hours</label>
-                        <input type="number" id="hours" name="hours" min="1" max="50" placeholder="How many hours can you contribute?">
+                        <input type="number" id="hours" name="hours" min="1" max="50" placeholder="How many hours can you contribute?" value="<?php echo isset($_POST['hours']) ? htmlspecialchars($_POST['hours']) : ''; ?>">
                     </div>
                     
                     <div class="form-group">
                         <label for="experience">Previous Experience</label>
                         <select id="experience" name="experience">
                             <option value="">Select Experience Level</option>
-                            <option value="None">None</option>
-                            <option value="Beginner">Beginner (1-4 events)</option>
-                            <option value="Intermediate">Intermediate (5-10 events)</option>
-                            <option value="Experienced">Experienced (10+ events)</option>
+                            <option value="None" <?php echo (isset($_POST['experience']) && $_POST['experience'] == 'None') ? 'selected' : ''; ?>>None</option>
+                            <option value="Beginner" <?php echo (isset($_POST['experience']) && $_POST['experience'] == 'Beginner') ? 'selected' : ''; ?>>Beginner (1-4 events)</option>
+                            <option value="Intermediate" <?php echo (isset($_POST['experience']) && $_POST['experience'] == 'Intermediate') ? 'selected' : ''; ?>>Intermediate (5-10 events)</option>
+                            <option value="Experienced" <?php echo (isset($_POST['experience']) && $_POST['experience'] == 'Experienced') ? 'selected' : ''; ?>>Experienced (10+ events)</option>
                         </select>
+                    </div>
+                </div>
+                
+                <!-- Password Fields -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="password" class="required">Password</label>
+                        <input type="password" id="password" name="password" required placeholder="Create a password">
+                        <div class="password-strength" id="passwordStrength"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirm_password" class="required">Confirm Password</label>
+                        <input type="password" id="confirm_password" name="confirm_password" required placeholder="Confirm your password">
+                        <div class="password-match" id="passwordMatch"></div>
+                    </div>
+                </div>
+                
+                <!-- Profile Picture Upload -->
+                <div class="form-row">
+                    <div class="form-group form-group-full">
+                        <label for="profile_picture">Profile Picture</label>
+                        <div class="file-upload" onclick="document.getElementById('profile_picture').click()">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Click to upload profile picture</p>
+                            <p style="font-size: 0.8rem; color: #666;">(JPG, PNG, GIF - Max 5MB)</p>
+                            <div class="file-name" id="fileName">No file selected</div>
+                        </div>
+                        <input type="file" id="profile_picture" name="profile_picture" accept="image/*" style="display: none;" onchange="updateFileName()">
                     </div>
                 </div>
                 
                 <div class="form-row">
                     <div class="form-group form-group-full">
                         <label for="remarks">Remarks / Special Skills</label>
-                        <textarea id="remarks" name="remarks" placeholder="Please share any special skills, comments, or preferences..."></textarea>
+                        <textarea id="remarks" name="remarks" placeholder="Please share any special skills, comments, or preferences..."><?php echo isset($_POST['remarks']) ? htmlspecialchars($_POST['remarks']) : ''; ?></textarea>
                     </div>
                 </div>
                 
@@ -313,54 +520,126 @@
                     <button type="reset" class="btn btn-reset"><i class="fas fa-redo"></i> Reset Form</button>
                     <button type="button" class="btn btn-reset" onclick="history.back();"><i class="fas fa-arrow-left"></i> Back</button>
                     <button type="button" class="btn btn-reset" onclick="window.location.href='index.php';"><i class="fas fa-home"></i> Home</button>
-
                 </div>
             </form>
             
-            <div class="success-message" id="successMessage">
+            <div class="success-message" id="successMessage" style="<?php echo $success_message ? 'display: block;' : 'display: none;'; ?>">
                 <i class="fas fa-check-circle"></i>
                 <h3>Thank You for Registering!</h3>
-                <p>Your volunteer application has been submitted successfully. We will contact you shortly with more details.</p>
+                <p><?php echo $success_message; ?></p>
             </div>
         </div>
     </div>
 
     <script>
-        document.getElementById('volunteerForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Simple form validation
-            const requiredFields = document.querySelectorAll('[required]');
-            let valid = true;
-            
-            requiredFields.forEach(field => {
-                if (!field.value) {
-                    valid = false;
-                    field.style.borderColor = '#e74c3c';
-                } else {
-                    field.style.borderColor = '#ddd';
-                }
-            });
-            
-            if (valid) {
-                // In a real application, you would submit to a server here
-                // For demonstration, we'll show a success message
-                document.getElementById('successMessage').style.display = 'block';
-                document.getElementById('volunteerForm').reset();
-                
-                // Scroll to success message
-                document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
-                
-                // Hide success message after 5 seconds
-                setTimeout(() => {
-                    document.getElementById('successMessage').style.display = 'none';
-                }, 5000);
-            }
-        });
-        
         // Set minimum date to today
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('activity_date').setAttribute('min', today);
+        
+        // Password strength checker
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const strengthElement = document.getElementById('passwordStrength');
+            
+            if (password.length === 0) {
+                strengthElement.textContent = '';
+                strengthElement.className = 'password-strength';
+                return;
+            }
+            
+            let strength = 0;
+            if (password.length >= 6) strength++;
+            if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
+            if (password.match(/\d/)) strength++;
+            if (password.match(/[^a-zA-Z\d]/)) strength++;
+            
+            let strengthText = '';
+            let strengthClass = '';
+            
+            switch(strength) {
+                case 0:
+                case 1:
+                    strengthText = 'Weak';
+                    strengthClass = 'strength-weak';
+                    break;
+                case 2:
+                case 3:
+                    strengthText = 'Medium';
+                    strengthClass = 'strength-medium';
+                    break;
+                case 4:
+                    strengthText = 'Strong';
+                    strengthClass = 'strength-strong';
+                    break;
+            }
+            
+            strengthElement.textContent = `Password strength: ${strengthText}`;
+            strengthElement.className = `password-strength ${strengthClass}`;
+        });
+        
+        // Password confirmation checker
+        document.getElementById('confirm_password').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = this.value;
+            const matchElement = document.getElementById('passwordMatch');
+            
+            if (confirmPassword.length === 0) {
+                matchElement.textContent = '';
+                matchElement.className = 'password-match';
+                return;
+            }
+            
+            if (password === confirmPassword) {
+                matchElement.textContent = '✓ Passwords match';
+                matchElement.className = 'password-match';
+            } else {
+                matchElement.textContent = '✗ Passwords do not match';
+                matchElement.className = 'password-mismatch';
+            }
+        });
+        
+        // Update file name display
+        function updateFileName() {
+            const fileInput = document.getElementById('profile_picture');
+            const fileNameDisplay = document.getElementById('fileName');
+            
+            if (fileInput.files.length > 0) {
+                fileNameDisplay.textContent = fileInput.files[0].name;
+            } else {
+                fileNameDisplay.textContent = 'No file selected';
+            }
+        }
+        
+        // Form validation
+        document.getElementById('volunteerForm').addEventListener('submit', function(e) {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            
+            if (password.length < 6) {
+                e.preventDefault();
+                alert('Password must be at least 6 characters long!');
+                document.getElementById('password').focus();
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                alert('Passwords do not match!');
+                document.getElementById('confirm_password').focus();
+                return;
+            }
+            
+            // Validate file size (client-side)
+            const fileInput = document.getElementById('profile_picture');
+            if (fileInput.files.length > 0) {
+                const fileSize = fileInput.files[0].size / 1024 / 1024; // in MB
+                if (fileSize > 5) {
+                    e.preventDefault();
+                    alert('File size must be less than 5MB!');
+                    return;
+                }
+            }
+        });
         
         // Add input event listeners to remove error styles when typing
         const inputs = document.querySelectorAll('input, select, textarea');
@@ -368,6 +647,22 @@
             input.addEventListener('input', function() {
                 this.style.borderColor = '#ddd';
             });
+        });
+
+        // If there was a success message, scroll to it
+        <?php if ($success_message): ?>
+            document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
+            setTimeout(() => {
+                document.getElementById('successMessage').style.display = 'none';
+            }, 5000);
+        <?php endif; ?>
+        
+        // Client-side validation for student ID
+        document.getElementById('student_id').addEventListener('blur', function() {
+            if (this.value && !/^\d+$/.test(this.value)) {
+                this.style.borderColor = '#e74c3c';
+                alert('Student ID should contain only numbers.');
+            }
         });
     </script>
 </body>
