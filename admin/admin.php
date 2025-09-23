@@ -1225,7 +1225,13 @@ $mysqli->close();
                         <i class="fas fa-briefcase"></i> Employee
                     </a>
                 </li>
-                
+
+                <li>
+                    <a href="../volunteer/dev_volunteer.php">
+                        <i class="fas fa-users"></i> Volunteer
+                    </a>
+                </li>
+
                 <li>
                     <a href="course.php">
                         <i class="fas fa-book"></i> Course
