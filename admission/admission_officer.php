@@ -1222,6 +1222,13 @@ $mysqli->close();
                         <i class="fas fa-user"></i> Students
                     </a>
                 </li>
+
+                <li>
+                    <a href="../scholarship/dev_scholarship.php">
+                        <i class="fas fa-certificate"></i> Scholarship
+                    </a>
+                </li>
+
                 <li>
                     <a href="../admin/course.php">
                         <i class="fas fa-tasks"></i> Course Menagement

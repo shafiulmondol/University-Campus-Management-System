@@ -551,7 +551,7 @@ if (isset($_GET['view_profile']) && $_GET['view_profile']) {
                                 <td><?php echo htmlspecialchars($f['email']); ?></td>
                                 <td><?php echo htmlspecialchars($f['department']); ?></td>
                                 <td><?php echo htmlspecialchars($f['room_number']); ?></td>
-                                <td>$<?php echo number_format($f['salary'], 2); ?></td>
+                                <td>৳<?php echo number_format($f['salary'], 2); ?></td>
                                 <td class="actions-cell">
                                     <form method="POST">
                                         <input type="hidden" name="faculty_id" value="<?php echo $f['faculty_id']; ?>">
