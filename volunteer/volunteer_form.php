@@ -135,7 +135,6 @@ $mysqli->close();
 
         .container {
             width: 100%;
-            max-width: 900px;
             background: white;
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
@@ -609,7 +608,6 @@ $mysqli->close();
                 <div class="action-buttons">
                     <button type="submit" class="btn btn-submit"><i class="fas fa-paper-plane"></i> Submit Application</button>
                     <button type="reset" class="btn btn-reset"><i class="fas fa-redo"></i> Reset Form</button>
-                    <button type="button" class="btn btn-reset" onclick="history.back();"><i class="fas fa-arrow-left"></i> Back</button>
                     <button type="button" class="btn btn-reset" onclick="window.location.href='../index.html';"><i class="fas fa-home"></i> Home</button>
                 </div>
             </form>

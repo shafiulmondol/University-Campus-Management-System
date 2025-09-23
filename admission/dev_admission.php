@@ -417,9 +417,8 @@ function getSortLink($column, $label) {
             <button id="toggleFormBtn" class="btn btn-success">
                 <i class="fas fa-plus"></i> Add New Student
             </button>
-            <button class="btn btn-secondary" onclick="window.location.href='admission_officer.php'">
-                <i class="fas fa-tachometer-alt"></i> Dashboard
-            </button>
+            <button class="btn btn-secondary" onclick="window.location.href='http://localhost:8080/University-Campus-Management-System/admin/admin.php'">⬅ Back</button>
+
         </div>
         
         <!-- Student Form -->

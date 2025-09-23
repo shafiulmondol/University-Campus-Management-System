@@ -325,7 +325,7 @@ if ($action === 'edit' && $sl) {
         
         <!-- Trigger button -->
 <button id="toggleFormBtn" class="btn btn-primary" style="margin-bottom: 10px; background:#2ecc71">+ Add New Volunteer</button>
-<button class="btn btn-secondary" onclick="history.back()">⬅ Back</button>
+<button class="btn btn-secondary" onclick="window.location.href='http://localhost:8080/University-Campus-Management-System/admin/admin.php'">⬅ Back</button>
 <!-- Hidden Volunteer Form -->
 <div id="volunteerForm" class="card" style="display: none;">
     <h2 class="card-title">
@@ -364,9 +364,19 @@ if ($action === 'edit' && $sl) {
             </div>
             
             <div class="form-group">
-                <label for="activity_name">Activity Name *</label>
-                <input type="text" id="activity_name" name="activity_name" value="<?php echo $edit_volunteer ? $edit_volunteer['activity_name'] : ''; ?>" required>
-            </div>
+                        <label for="activity_name" class="required">Activity Name</label>
+                        <select id="activity_name" name="activity_name" required>
+                            <option value="">Select Activity</option>
+                            <option value="Blood Donation Camp" <?php echo (isset($_POST['activity_name']) && $_POST['activity_name'] == 'Blood Donation Camp') ? 'selected' : ''; ?>>Blood Donation Camp</option>
+                            <option value="Tree Plantation Drive" <?php echo (isset($_POST['activity_name']) && $_POST['activity_name'] == 'Tree Plantation Drive') ? 'selected' : ''; ?>>Tree Plantation Drive</option>
+                            <option value="Campus Clean-up" <?php echo (isset($_POST['activity_name']) && $_POST['activity_name'] == 'Campus Clean-up') ? 'selected' : ''; ?>>Campus Clean-up</option>
+                            <option value="Fundraising Event" <?php echo (isset($_POST['activity_name']) && $_POST['activity_name'] == 'Fundraising Event') ? 'selected' : ''; ?>>Fundraising Event</option>
+                            <option value="Cultural Festival" <?php echo (isset($_POST['activity_name']) && $_POST['activity_name'] == 'Cultural Festival') ? 'selected' : ''; ?>>Cultural Festival</option>
+                            <option value="Student Mentorship" <?php echo (isset($_POST['activity_name']) && $_POST['activity_name'] == 'Student Mentorship') ? 'selected' : ''; ?>>Student Mentorship</option>
+                            <option value="Community Outreach" <?php echo (isset($_POST['activity_name']) && $_POST['activity_name'] == 'Community Outreach') ? 'selected' : ''; ?>>Community Outreach</option>
+                            <option value="Health Awareness Campaign" <?php echo (isset($_POST['activity_name']) && $_POST['activity_name'] == 'Health Awareness Campaign') ? 'selected' : ''; ?>>Health Awareness Campaign</option>
+                        </select>
+                    </div>
         </div>
         
         <div class="form-row">
@@ -376,9 +386,16 @@ if ($action === 'edit' && $sl) {
             </div>
             
             <div class="form-group">
-                <label for="role">Role</label>
-                <input type="text" id="role" name="role" value="<?php echo $edit_volunteer ? $edit_volunteer['role'] : ''; ?>">
-            </div>
+                        <label for="role" class="required">Preferred Role</label>
+                        <select id="role" name="role" required>
+                            <option value="">Select Role</option>
+                            <option value="Volunteer" <?php echo (isset($_POST['role']) && $_POST['role'] == 'Volunteer') ? 'selected' : ''; ?>>Volunteer</option>
+                            <option value="Organizer" <?php echo (isset($_POST['role']) && $_POST['role'] == 'Organizer') ? 'selected' : ''; ?>>Organizer</option>
+                            <option value="Leader" <?php echo (isset($_POST['role']) && $_POST['role'] == 'Leader') ? 'selected' : ''; ?>>Leader</option>
+                            <option value="Coordinator" <?php echo (isset($_POST['role']) && $_POST['role'] == 'Coordinator') ? 'selected' : ''; ?>>Coordinator</option>
+                            <option value="Support Staff" <?php echo (isset($_POST['role']) && $_POST['role'] == 'Support Staff') ? 'selected' : ''; ?>>Support Staff</option>
+                        </select>
+                    </div>
             
             <div class="form-group">
                 <label for="hours">Hours</label>

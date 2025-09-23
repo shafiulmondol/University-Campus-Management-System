@@ -855,14 +855,14 @@ $mysqli->close();
                 </div>
                 
                 <button type="submit" class="login-btn">Login to Dashboard</button>
+                <button class= "login-btn" onclick="location.href='volunteer.html'"> Sign Out</button>                
+
                 
                 <?php if (!empty($error)): ?>
                     <div class="error-msg"><?php echo $error; ?></div>
                 <?php endif; ?>
                 
-                <button type="button" class="signup-btn" onclick="window.location.href='volunteer_form.php'">
-                    <i class="fas fa-user-plus"></i> Sign Up for New Account
-                </button>
+
                 
                 <div class="signup-prompt">
                     <p>Don't have an account yet?</p>
