@@ -7,6 +7,7 @@
   <link rel="icon" href="picture/SKST.png" type="image/png" />
   <!-- <link rel="stylesheet" href="Design/buttom_bar.css"> -->
   <link rel="stylesheet" href="Design/buttom_bar.css">
+  <link rel="stylesheet" href="index.css">
   <style>
 
     * {
@@ -30,6 +31,7 @@
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
+      
     }
 
     .logo {
@@ -192,6 +194,11 @@
   </style>
 </head>
 <body>
+    <div id="loader">
+    <img src="picture/logo.gif" alt="SKST University Logo">
+    <p>Loading...</p>
+  </div>
+
   <div class="navbar">
     <div class="navbar-top">
       <div class="logo">
@@ -229,5 +236,23 @@
       <p>Phone: (88 02) 55091801-5, Mobile : +88 01714 014 933, 01810030041-9, 01325080581-9</p>
       <p>Fax: (880-2) 5895 2625, Email : info@skst.edu</p>
     </div>
+
+       <script>
+  window.addEventListener("load", () => {
+    const loader = document.getElementById("loader");
+
+    // wait 3 seconds (3000ms)
+    setTimeout(() => {
+      loader.style.transition = "opacity 0.6s ease";
+      loader.style.opacity = "0";
+
+      setTimeout(() => {
+        loader.style.display = "none";
+      }, 600);
+
+    }, 1300); // ⬅ 3 seconds delay
+  });
+</script>
+
 </body>
 </html>

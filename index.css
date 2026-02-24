@@ -1,0 +1,29 @@
+#loader {
+      position: fixed;
+      inset: 0;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 9999;
+    }
+
+    #loader img {
+      width: 140px;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    #loader p {
+      margin-top: 16px;
+      font-family: Arial, sans-serif;
+      color: #0b3a5c;
+      font-size: 16px;
+      letter-spacing: 1px;
+    }
+
+    @keyframes pulse {
+      0%   { transform: scale(1);   opacity: 1; }
+      50%  { transform: scale(1.08); opacity: 0.85; }
+      100% { transform: scale(1);   opacity: 1; }
+    }
